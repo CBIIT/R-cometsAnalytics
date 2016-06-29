@@ -1,9 +1,20 @@
 Package: CometsAnalyticsPackage
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Type: Package
+Title: Comets Analytics R Package
+Version: 0.1
+Author: Ella Temprosa, Ewy Mathe
+Maintainer: Ewy Mathe <ewy.mathe@osumc.edu>, Ella Temprosa <ella@bsc.gwu.edu>
+Description: This R package support all cohort-specific analyses of
+	the COMETS consortium. Data are not saved in the system but
+	output must be downloaded and submitted for meta-analyses. 
 Depends: R (>= 3.3.0)
-License: What license is it under?
-Encoding: UTF-8
-LazyData: true
+Imports:
+	readxl,
+	dplyr,
+	plyr
+Suggests: knitr
+VignetteBuilder: knitr
+License: GPL-3
+LazyData: TRUE
+RoxygenNote: 5.0.1
+NeedsCompilation: no
