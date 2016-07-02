@@ -5,6 +5,6 @@
 #'        the COMETS consortium. Data are not saved in the system but
 #'        output must be downloaded and submitted for meta-analyses.
 #' @importFrom readxl read_excel
-#' @importFrom dplyr inner_join filter
 #' @importFrom plyr mapvalues
+#' @import dplyr
 NULL

@@ -133,16 +133,24 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap) {
 
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
 #' @param dtalist results of reading a CSV data sheet (with read_excel)
-#' @param matermetid processed uid.csv file
 
-HarmonizeNew<-function(dtalist,mastermetid){
+Harmonize<-function(dtalist){
+  mastermetid=metabolite_name=metlower=uid_01=NULL
+  # Load processed UIDs file:
+  dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
+  masterfile <- file.path(dir, "compileduids.RData")
+  load(masterfile)
+ 
   # join by metabolite_id only keep those with a match
   harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c("metabid"="metid"))
   
   # join by metabolite_name only keep those with a match
-  harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,by=c("metabid"="metid"))%>%dplyr::mutate(metlower=tolower(metabolite_name)),mastermetid,by=c("metlower"="metid"))%>%select(-metlower)
+  harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
+	by=c("metabid"="metid")) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
+	mastermetid,by=c("metlower"="metid")) %>% dplyr::select(-metlower)
   
-  dtalist$metab<-rbind(harmlistg,harmlistc)%>%mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
+  dtalist$metab<-rbind(harmlistg,harmlistc) %>% dplyr::mutate(multrows=grepl("#",uid_01),
+	harmflag=!is.na(uid_01))
   
   return(dtalist)
   

@@ -79,8 +79,8 @@ readCSV <- function(csvfilePath,modelspec="NoBATCH") {
       integritymessage = integritymessage # message for integrity check
     )
 
-    # mastermetid needs to be read in
-    # dtalist<-HarmonizeNew(dtalist,mastermetid)
+    # Harmonize metabolites
+    dtalist<-Harmonize(dtalist)
   
     # add summary statistics
     mymets=dtalist$metab[[dtalist$metabId]]	
