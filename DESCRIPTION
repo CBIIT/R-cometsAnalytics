@@ -1,20 +1,25 @@
 Package: CometsAnalyticsPackage
 Type: Package
 Title: Comets Analytics R Package
-Version: 0.1
+Version: 0.0.0.8001
 Author: Ella Temprosa, Ewy Mathe
 Maintainer: Ewy Mathe <ewy.mathe@osumc.edu>, Ella Temprosa <ella@bsc.gwu.edu>
 Description: This R package support all cohort-specific analyses of
 	the COMETS consortium. Data are not saved in the system but
-	output must be downloaded and submitted for meta-analyses. 
+	output must be downloaded and submitted for meta-analyses. This package can be used
+	in several ways: supports the CBIIT implementation of comets-analytics,
+	local shiny based add-in called shinycomets, or console based analysis. See example vignette.
 Depends: R (>= 3.3.0)
 Imports:
 	readxl,
 	dplyr,
-	plyr
+	plyr,
+	psych
 Suggests: knitr
 VignetteBuilder: knitr
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
 NeedsCompilation: no
+URL: http://comets-analytics.org/
+BugReports: https://github.com/CBIIT/nci-webtools-comets-analytics/issues
