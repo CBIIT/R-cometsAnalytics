@@ -2,6 +2,7 @@
 
 export(getCorr)
 export(getModelData)
+export(makeOutputCSV)
 export(readCOMETSinput)
 import(dplyr)
 importFrom(plyr,mapvalues)
