@@ -9,4 +9,6 @@
 #' @importFrom plyr mapvalues
 #' @import dplyr
 #' @importFrom psych partial.r
+#' @import plotly
+#' @import tidyr gather
 NULL

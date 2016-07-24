@@ -14,7 +14,9 @@ Imports:
 	readxl,
 	dplyr,
 	plyr,
-	psych
+	psych,
+	plotly,
+	tidyr
 Suggests: knitr
 VignetteBuilder: knitr
 License: GPL-3

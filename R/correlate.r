@@ -92,3 +92,65 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   ccorrmat <- dplyr::select(inner_join(corr,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
 }
+
+
+
+
+
+
+
+
+#---------------------------------------------------------
+# showHeatmap -----------------------------------------
+#---------------------------------------------------------
+#' Show interactive heatmap using plot_ly
+#'
+#' @param ccorrmat correlation matrix
+#' @param rowsortby How row labels are sorted
+#'
+#' @return a heatmap with outcomes as rows and exposures in columns.
+#'
+#' @examples
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' modeldata <- getModelData(readCSV(csvfile))
+#' corrmatrix <-getCorr(modeldata)
+#' @export
+
+showHeatmap <- function (ccorrmat, rowsortby = "metasc",plothgt=700) {
+  # order the rows according to sort by
+  if (rowsortby == "metasc") {
+    ccorrmat$metabolite_name <-
+      factor(ccorrmat$metabolite_name, levels =
+               ccorrmat$metabolite_name[rev(order(unlist(ccorrmat["metabolite_name"])))])
+  } else {
+    ccorrmat$metabolite_name <-
+      factor(ccorrmat$metabolite_name, levels = ccorrmat$metabolite_name[order(unlist(ccorrmat[rowsortby]))])
+  }
+
+  # stack the correlations together
+  ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
+  # Number of columns identified by suffix of .n
+
+tidyr::gather(ccorrmat,"covariate","corr",1:length(grep("\\.n$",names(ccorrmat))))%>%
+  plotly::plot_ly(z = corr,
+          x = covariate, y = metabolite_name,
+          type = "heatmap",
+          colorbar = list(title = "Correlation")) %>%
+  plotly::layout(height=plothgt,
+         margin = list(l = 200),
+         title = " ",      # layout's title: /r/reference/#layout-title
+         xaxis = list(           # layout's xaxis is a named list.
+           title = " ",       # xaxis's title: /r/reference/#layout-xaxis-title
+           showgrid = F          # xaxis's showgrid: /r/reference/#layout-xaxis
+         ),
+         yaxis = list(           # layout's yaxis is a named list.
+           title = " "        # yaxis's title: /r/reference/#layout-yaxis-title
+         )
+         ,
+         legend = list(           # layout's yaxis is a named list.
+           title = "Correlation"        # yaxis's title: /r/reference/#layout-yaxis-title
+         )
+         ,
+         autosize = TRUE)
+}
