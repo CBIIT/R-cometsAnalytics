@@ -146,7 +146,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap) {
 Harmonize<-function(dtalist){
   mastermetid=metabolite_name=metlower=uid_01=NULL
   # Load processed UIDs file:
-  dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
+  dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
   masterfile <- file.path(dir, "compileduids.RData")
   load(masterfile)
 

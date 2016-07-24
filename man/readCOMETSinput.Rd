@@ -4,7 +4,7 @@
 \alias{readCOMETSinput}
 \title{Read in CSV file that contains metabolite abundances and metab data}
 \usage{
-readCOMETSinput(csvfilePath, modelspec = "NoBATCH")
+readCOMETSinput(csvfilePath, modelspec = "Interactive")
 }
 \arguments{
 \item{csvfilePath}{path of CSV file to be read in}
@@ -18,7 +18,7 @@ a list comprising:
 Read in CSV file that contains metabolite abundances and metab data
 }
 \examples{
-dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
+dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
 metabdata <- readCOMETSinput(csvfile)
 

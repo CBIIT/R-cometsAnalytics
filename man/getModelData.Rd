@@ -4,17 +4,21 @@
 \alias{getModelData}
 \title{Get data ready for the model runs in interactive or batch mode as specified in the input}
 \usage{
-getModelData(readData, rowvars = "All metabolites", colvars = "",
-  adjvars = NULL)
+getModelData(readData, modelspec = "Batch", modbatch = "",
+  rowvars = "All metabolites", colvars = "", adjvars = NULL)
 }
 \arguments{
 \item{readData}{list from readComets}
 
-\item{rowvars}{Outcome variables (usually metabolites and rendered in rows default in All metabolites)}
+\item{modelspec}{How model is specified (Interactive or Batch)}
 
-\item{colvars}{Exposure variables (usually covariates rendered in columns)}
+\item{modbatch}{if batch, chosen model specified by batch mode}
 
-\item{adjvars}{Adjustment covariates}
+\item{rowvars}{if Interactive, outcome variables (usually metabolites and rendered in rows default in All metabolites)}
+
+\item{colvars}{if Interactive, exposure variables (usually covariates rendered in columns)}
+
+\item{adjvars}{If Interactive, adjustment covariates}
 }
 \value{
 a list comprising:
@@ -32,7 +36,7 @@ Get data ready for the model runs in interactive or batch mode as specified in t
 }
 \examples{
 
-modeldata <- getModelData(readData(),modbatch="Interactive",colvars="age")
+modeldata <- getModelData(readData(),modelspec="Batch",colvars="age")
 
 }
 
