@@ -9,14 +9,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# Introduction
+## Introduction
 
 COMETS Analytics support all cohort-specific analyses of the COMETS consortium.
 
 This collaborative work is done via the COMETS harmonization group activities. For more information, see the [COMETS website] (http://epi.grants.cancer.gov/comets/).
 
 
-# Data Input Format
+## Data Input Format
 The required input file shoudl be in excel format with the following 5 sheets: 
 
   1. Metabolites - from harmonized metabolites output
@@ -27,9 +27,9 @@ The required input file shoudl be in excel format with the following 5 sheets:
 
 An example input file is available **HERE**.
 
-# Analysis Workflow for correlation analysis
+## Analysis Workflow for correlation analysis
 
-*1. Load Data*
+###1. Load Data
 The first step of the analysis is to load in the data with the *getModelData()* function.  Input for this function is an Excel spreadsheet, per the description above.  
 
 ```{r, fig.show='hold'}
@@ -40,14 +40,14 @@ csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 ```
 
-*2. Get Model Data*
+###2. Get Model Data
 Next the model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
 ```{r, fig.show='hold'}
 exmodeldata <- getModelData(exmetabdata,colvars="age")
 ```
 
-*3. Run Correlation Analysis*
+###3. Run Correlation Analysis
 The correlation analysis is run by calling the function *getCorr()*.  This function runs the model(s) that is(are) defined in the input data (Models tab).  
 
 ```{r, fig.show='hold'}
