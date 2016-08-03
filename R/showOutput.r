@@ -8,7 +8,7 @@
 #' @param cohort cohort name
 #'
 #'
-#' @return a CSV file with results named with cohort
+#' @return the filename of the CSV file with results named with cohort
 #'
 #' @examples
 #' dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
@@ -20,4 +20,5 @@ makeOutputCSV <- function (file,dataf,cohort=""){
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
   fname <- paste(fname,file,Sys.Date(),'.csv',sep = '')
   write.csv(dataf, fname,quote=TRUE)
+  fname
 }
