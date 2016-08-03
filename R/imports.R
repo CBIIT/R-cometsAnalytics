@@ -10,5 +10,5 @@
 #' @import dplyr
 #' @importFrom psych partial.r
 #' @import plotly
-#' @import tidyr gather
+#' @importFrom tidyr gather
 NULL
