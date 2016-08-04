@@ -34,8 +34,8 @@ The first step of the analysis is to load in the data with the *getModelData()* 
 
 ```{r, fig.show='hold'}
 # Retrieve the full path of the input data
-dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInput.xlsx")
+csvfile <- system.file("extdata", "cometsInput.xslx", package="COMETS", mustWork=TRUE)
+
 # Read in and process the input data
 exmetabdata <- readCOMETSinput(csvfile)
 ```
