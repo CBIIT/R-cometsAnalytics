@@ -16,11 +16,11 @@
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
-#' makeOutputCSV(type_output="CSVfile",filename="corr",dataf=corrmatrix,cohort="DPP")
+#' OutputCorrResults(type_output="CSVfile",filename="corr",dataf=corrmatrix,cohort="DPP")
 #' @export
 
 
-makeOutputCSV <- function (type_output="display",filename,dataf,cohort=""){
+OutputCorrResults <- function (type_output="display",filename,dataf,cohort=""){
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
   fname <- paste(fname,filename,Sys.Date(),'.csv',sep = '')
   if (type_output == "display") {
