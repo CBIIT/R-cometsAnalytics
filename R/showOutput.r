@@ -32,4 +32,5 @@ OutputCorrResults <- function (type_output="display",filename,dataf,cohort=""){
   else {
 	stop("type_output variable needs to be 'CSVfile' or 'display'")
   }
+  fname
 }
