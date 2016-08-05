@@ -32,32 +32,32 @@ An example input file is available **HERE**.
 ###1. Load Data
 The first step of the analysis is to load in the data with the *getModelData()* function.  Input for this function is an Excel spreadsheet, per the description above.  
 
-```{r, fig.show='hold'}
+```{r}
 # Retrieve the full path of the input data
-dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
+dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
 # Read in and process the input data
-exmetabdata <- readCOMETSinput(csvfile)
+exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
 
 ###2. Get Model Data
 Next the model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
-```{r, fig.show='hold'}
-exmodeldata <- getModelData(exmetabdata,colvars="age")
+```{r}
+exmodeldata <- COMETS::getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 ```
 
 ###3. Run Correlation Analysis
 The correlation analysis is run by calling the function *getCorr()*.  This function runs the model(s) that is(are) defined in the input data (Models tab).  
 
-```{r, fig.show='hold'}
-excorrdata  <- getCorr(exmodeldata,exmetabdata,"DPP")
+```{r}
+excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 ```
 
 The output of the correlation analysis can then be compiled and viewed with the following function:
 
-```{r, fig.show='hold'}
-makeOutputCSV("corr",excorrdata,"DPP")
+```{r}
+COMETS::OutputCorrResults(type_output="CSVfile",filename="corr",dataf=excorrdata,cohort="DPP")
 ```
 
 
