@@ -20,7 +20,9 @@ Show interactive heatmap using plot_ly
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
-modeldata <- getModelData(readCSV(csvfile))
-corrmatrix <-getCorr(modeldata)
+exmetabdata <- readCOMETSinput(csvfile)
+modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+showHeatmap(corrmatrix)
 }
 
