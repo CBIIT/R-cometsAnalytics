@@ -4,12 +4,14 @@
 \alias{makeOutputCSV}
 \title{Create output CSV file}
 \usage{
-makeOutputCSV(file, dataf, cohort = "")
+makeOutputCSV(type_output = "display", filename, dataf, cohort = "")
 }
 \arguments{
-\item{file}{filename}
+\item{type_output}{"display" or "CSVfile"}
 
-\item{dataf}{dataframe}
+\item{filename}{if type_output is "CSVfile", name of file}
+
+\item{dataf}{correlation output (from function getCorr()) data frame}
 
 \item{cohort}{cohort name}
 }
@@ -25,6 +27,6 @@ csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
-makeOutputCSV("corr",corrmatrix,"DPP")
+makeOutputCSV(type_output="CSVfile",filename="corr",dataf=corrmatrix,cohort="DPP")
 }
 
