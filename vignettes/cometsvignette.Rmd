@@ -57,7 +57,7 @@ excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 The output of the correlation analysis can then be compiled and viewed with the following function:
 
 ```{r}
-COMETS::makeOutputCSV("corr",excorrdata,"DPP")
+COMETS::OutputCorrResults(type_output="CSVfile",filename="corr",dataf=excorrdata,cohort="DPP")
 ```
 
 
