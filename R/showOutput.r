@@ -24,7 +24,7 @@ OutputCorrResults <- function (type_output="display",filename,dataf,cohort=""){
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
   fname <- paste(fname,filename,Sys.Date(),'.csv',sep = '')
   if (type_output == "display") {
-	return(dataf)
+	return(dataf[1:50,])
   }
   else if (type_output == "CSVfile") {
 	write.csv(dataf, fname,quote=TRUE)
