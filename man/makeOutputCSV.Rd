@@ -14,7 +14,7 @@ makeOutputCSV(file, dataf, cohort = "")
 \item{cohort}{cohort name}
 }
 \value{
-a CSV file with results named with cohort
+the filename of the CSV file with results named with cohort
 }
 \description{
 Create output CSV file
@@ -22,7 +22,9 @@ Create output CSV file
 \examples{
 dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
-modeldata <- getModelData(readCSV(csvfile))
-corrmatrix <-getCorr(modeldata)
+exmetabdata <- readCOMETSinput(csvfile)
+modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+makeOutputCSV("corr",corrmatrix,"DPP")
 }
 

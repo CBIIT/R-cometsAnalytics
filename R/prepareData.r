@@ -24,12 +24,14 @@
 #'
 #' @examples
 #'
-#' modeldata <- getModelData(readData(),modelspec="Batch",colvars="age")
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 #'
 #' @export
 
-getModelData <-
-  function(readData,
+getModelData <-  function(readData,
            modelspec = "Batch",
            modbatch  = "",
            rowvars   = "All metabolites",

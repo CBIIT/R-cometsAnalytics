@@ -13,8 +13,10 @@
 #' @examples
 #' dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInput.xlsx")
-#' modeldata <- getModelData(readCSV(csvfile))
-#' corrmatrix <-getCorr(modeldata)
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' makeOutputCSV("corr",corrmatrix,"DPP")
 #' @export
 makeOutputCSV <- function (file,dataf,cohort=""){
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
