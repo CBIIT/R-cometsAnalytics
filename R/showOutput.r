@@ -27,7 +27,7 @@ OutputCorrResults <- function (type_output="display",filename,dataf,cohort=""){
 	return(dataf[1:50,])
   }
   else if (type_output == "CSVfile") {
-	write.csv(dataf, fname,quote=TRUE)
+	utils::write.csv(dataf, fname,quote=TRUE)
   }
   else {
 	stop("type_output variable needs to be 'CSVfile' or 'display'")

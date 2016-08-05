@@ -27,13 +27,16 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   # column indices of adj-var
   col.adj <- match(modeldata[[4]],names(modeldata[[1]]))
 
+  # Defining global variable to remove R check warnings
+  corr=c()
+
   if (length(col.adj)==0) {
     print("running unadjusted")
     data<-modeldata[[1]][,c(col.rcovar,col.ccovar)]
     # calculate unadjusted spearman correlation matrix
     #       names(data)<-paste0("v",1:length(names(data)))
     #    assign('gdata',data,envir=.GlobalEnv)
-    corr<-cor(data,method = "spearman",use="pairwise.complete.obs")
+    corr<-stats::cor(data,method = "spearman",use="pairwise.complete.obs")
 
     corr <- data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
     # calculate complete cases matrix
@@ -41,7 +44,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       matrix(NA,nrow = length(col.rcovar),ncol = length(col.ccovar))
     for (i in 1:length(col.rcovar)) {
       for (j in 1:length(col.ccovar)) {
-        n[i,j] <- sum(complete.cases(data[,c(col.rcovar[i],col.ccovar[j])]))
+        n[i,j] <- sum(stats::complete.cases(data[,c(col.rcovar[i],col.ccovar[j])]))
       }
     }
   }
@@ -69,7 +72,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       matrix(NA,nrow = length(col.rcovar),ncol = length(col.ccovar))
     for (i in 1:length(col.rcovar)) {
       for (j in 1:length(col.ccovar)) {
-        n[i,j] <- sum(complete.cases(dtarank[,c(col.rcovar[i],col.ccovar[j],col.adj)]))
+        n[i,j] <- sum(stats::complete.cases(dtarank[,c(col.rcovar[i],col.ccovar[j],col.adj)]))
       }
     }
 
@@ -77,10 +80,11 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   colnames(corr) <- as.character(modeldata[[2]])
   colnames(n) <- paste(as.character(modeldata[[2]]),".n",sep = "")
   ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
-  pval<-pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
+  pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
   colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
 
-
+  # Adding this as a quick fix to define the variable globally (so it doesn't throw warning in R check
+  metabolite_id=c()
   # combine the two matrices together as data frame
   corr <- fixData(data.frame(round(corr,digits=3),
                              n,
@@ -106,8 +110,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #---------------------------------------------------------
 #' Show interactive heatmap using plot_ly
 #'
-#' @param ccorrmat correlation matrix
+#' @param ccorrmat correlation matrix (output of getCorr())
 #' @param rowsortby How row labels are sorted
+#' @param plothgt height of plot for display (default: 700)
 #'
 #' @return a heatmap with outcomes as rows and exposures in columns.
 #'
@@ -134,6 +139,9 @@ showHeatmap <- function (ccorrmat, rowsortby = "metasc",plothgt=700) {
   # stack the correlations together
   ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
   # Number of columns identified by suffix of .n
+
+  # Defining variables to remove R check warnings:
+  covariate=metabolite_name=corr=c()
 
 tidyr::gather(ccorrmat,"covariate","corr",1:length(grep("\\.n$",names(ccorrmat))))%>%
   plotly::plot_ly(z = corr,

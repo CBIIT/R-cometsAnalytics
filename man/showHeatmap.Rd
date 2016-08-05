@@ -7,9 +7,11 @@
 showHeatmap(ccorrmat, rowsortby = "metasc", plothgt = 700)
 }
 \arguments{
-\item{ccorrmat}{correlation matrix}
+\item{ccorrmat}{correlation matrix (output of getCorr())}
 
 \item{rowsortby}{How row labels are sorted}
+
+\item{plothgt}{height of plot for display (default: 700)}
 }
 \value{
 a heatmap with outcomes as rows and exposures in columns.
