@@ -61,7 +61,8 @@ getModelData <-  function(readData,
       # here we need to get the covariates defined from the excel sheet
       # step 1. get the chosen model first
 
-
+      # defining global variable to remove Rcheck warnings
+      model=c()
       mods<-dplyr::filter(as.data.frame(readData[["mods"]]),model==modbatch)
       if (length(mods)>0 & mods$outcomes=="All metabolites")
         rcovs<-c(readData[[2]])
