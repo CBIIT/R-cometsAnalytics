@@ -11,7 +11,7 @@
 #' @return the filename of the CSV file with results named with cohort
 #'
 #' @examples
-#' dir <- system.file("extdata", package="CometsAnalyticsPackage", mustWork=TRUE)
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInput.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")

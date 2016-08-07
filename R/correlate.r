@@ -80,18 +80,30 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   pval<-pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
   colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
 
-
+  corrlong <-
+    fixData(data.frame(
+      tidyr::gather(cbind(corr, metabolite_id = rownames(corr)),
+                    "exposure","corr",1:length(col.ccovar)
+      ),
+      tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
+      tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
+      cohort = cohort,
+      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
+    select(-exposuren, -exposurep)
+  
+  print(corrlong)
+  
   # combine the two matrices together as data frame
-  corr <- fixData(data.frame(round(corr,digits=3),
-                             n,
-                             pval,
-                             metabolite_id=rownames(ttval),
-                             cohort=cohort,
-                             adjvars=ifelse(length(col.adj)==0,"None",paste(modeldata[[4]],collapse = " "))))
+#  corr <- fixData(data.frame(round(corr,digits=3),
+#                             n,
+#                             pval,
+#                             metabolite_id=rownames(ttval),
+#                             cohort=cohort,
+#                             adjvars=ifelse(length(col.adj)==0,"None",paste(modeldata[[4]],collapse = " #"))))
 
 
 
-  ccorrmat <- dplyr::select(inner_join(corr,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
+  ccorrmat <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
 }
 
 
@@ -108,21 +120,27 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #'
 #' @param ccorrmat correlation matrix
 #' @param rowsortby How row labels are sorted
+#' @param plothgt Plot height default 700
+#' @param plotwid Plot width 
+#' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
 #'
 #' @return a heatmap with outcomes as rows and exposures in columns.
+#'
+#' @references For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInput.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' @export
 
-showHeatmap <- function (ccorrmat, rowsortby = "metasc",plothgt=700) {
+showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,colscale="RdYlBu") {
   # order the rows according to sort by
-  if (rowsortby == "metasc") {
+  if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+
     ccorrmat$metabolite_name <-
       factor(ccorrmat$metabolite_name, levels =
                ccorrmat$metabolite_name[rev(order(unlist(ccorrmat["metabolite_name"])))])
@@ -135,20 +153,24 @@ showHeatmap <- function (ccorrmat, rowsortby = "metasc",plothgt=700) {
   ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
   # Number of columns identified by suffix of .n
 
-tidyr::gather(ccorrmat,"covariate","corr",1:length(grep("\\.n$",names(ccorrmat))))%>%
-  plotly::plot_ly(z = corr,
-          x = covariate, y = metabolite_name,
+  ccorrmat%>%
+  plotly::plot_ly(z = signif(corr),
+          x = exposure, y = metabolite_name,
           type = "heatmap",
+          colorscale=colscale,
           colorbar = list(title = "Correlation")) %>%
   plotly::layout(height=plothgt,
+         width=plotwid,         
          margin = list(l = 200),
          title = " ",      # layout's title: /r/reference/#layout-title
          xaxis = list(           # layout's xaxis is a named list.
            title = " ",       # xaxis's title: /r/reference/#layout-xaxis-title
-           showgrid = F          # xaxis's showgrid: /r/reference/#layout-xaxis
+           showgrid = F,          # xaxis's showgrid: /r/reference/#layout-xaxis
+           ticks=""
          ),
          yaxis = list(           # layout's yaxis is a named list.
-           title = " "        # yaxis's title: /r/reference/#layout-yaxis-title
+           title = " ",        # yaxis's title: /r/reference/#layout-yaxis-title,
+           ticks=""
          )
          ,
          legend = list(           # layout's yaxis is a named list.

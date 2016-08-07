@@ -4,12 +4,19 @@
 \alias{showHeatmap}
 \title{Show interactive heatmap using plot_ly}
 \usage{
-showHeatmap(ccorrmat, rowsortby = "metasc", plothgt = 700)
+showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700, plotwid = 800,
+  colscale = "RdYlBu")
 }
 \arguments{
 \item{ccorrmat}{correlation matrix}
 
 \item{rowsortby}{How row labels are sorted}
+
+\item{plothgt}{Plot height default 700}
+
+\item{plotwid}{Plot width}
+
+\item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}}
 }
 \value{
 a heatmap with outcomes as rows and exposures in columns.
@@ -21,8 +28,11 @@ Show interactive heatmap using plot_ly
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 showHeatmap(corrmatrix)
+}
+\references{
+For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
 }
 
