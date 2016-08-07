@@ -48,19 +48,21 @@ getModelData <-  function(readData,
       else
         rcovs <- rowvars
 
-
+      
       if (!is.na(match("All metabolites",colvars)))
         ccovs <-
           unique(c(colvars[colvars != "All metabolites"],c(readData[[2]])))
       else
-        ccovs <- colvars
-
-      acovs <- adjvars
+        ccovs <- unlist(strsplit(colvars," "))
+      
+      if (!is.null(adjvars))
+        acovs <- unlist(strsplit(adjvars," "))
+      else 
+        acovs<-adjvars
     }
     else if (modelspec == "Batch") {
       # here we need to get the covariates defined from the excel sheet
       # step 1. get the chosen model first
-
 
       mods<-dplyr::filter(as.data.frame(readData[["mods"]]),model==modbatch)
       if (length(mods)>0 & mods$outcomes=="All metabolites")
@@ -79,15 +81,13 @@ getModelData <-  function(readData,
 
     }
 
-
-    # Keep only needed variables for the data
-    if (length(acovs) == 0) {
-      gdta <-
-        subset(as.data.frame(readData[[1]]), select = c(ccovs, rcovs))
+  # Keep only needed variables for the data
+    if (is.null(acovs)) {
+      gdta <-dplyr::select(readData[[1]], one_of(c(ccovs, rcovs)))
     }
     else {
       gdta <-
-        subset(as.data.frame(readData[[1]]), select = c(acovs, ccovs, rcovs))
+        dplyr::select(readData[[1]], one_of(c(acovs,ccovs, rcovs)))
     }
 
     # list for subset data
