@@ -17,6 +17,9 @@
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
+  # Defining global variables to pass Rcheck()
+  exposuren=exposurep=metabolite_id=c()
+
   # get correlation matrix
   col.rcovar <- match(modeldata[[3]],names(modeldata[[1]]))
 
@@ -142,6 +145,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
 showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,colscale="RdYlBu") {
   # order the rows according to sort by
+
+  exmetabdata=corr=exposure=metabolite_name=c()
+
   if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 
     ccorrmat$metabolite_name <-
@@ -191,6 +197,9 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
 #---------------------------------------------------------
 #' Show interactive heatmap using d3heatmap with hierarchical clustering
 #'
+#' @description
+#' This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
+#' 
 #' @param ccorrmat correlation matrix
 #' @param clust Show hierarchical clustering
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
@@ -203,19 +212,21 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInput.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
 showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
+ metabolite_name=exposure=corr=c()
+
   excorr <-
     ccorrmat %>% dplyr::select(metabolite_name, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
   
   ncols <- ncol(excorr)
-  d3heatmap(excorr[, 2:ncols],
+  d3heatmap::d3heatmap(excorr[, 2:ncols],
             colors = colscale,
             dendrogram = if (clust)
               "both"

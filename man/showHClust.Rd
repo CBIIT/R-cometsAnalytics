@@ -17,13 +17,13 @@ showHClust(ccorrmat, clust = TRUE, colscale = "RdYlBu")
 a heatmap with outcomes as rows and exposures in columns.
 }
 \description{
-Show interactive heatmap using d3heatmap with hierarchical clustering
+This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
 corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 showHClust(corrmatrix)
 }
