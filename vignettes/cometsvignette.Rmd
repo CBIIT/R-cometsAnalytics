@@ -70,6 +70,10 @@ To display the heatmap of the resulting correlation matix, use the showheatmap f
 ```{r}
 COMETS::showHeatmap(excorrdata)
 ```
+To display the hierarchical clustering of the resulting correlation matix, use the showHClust function.
+```{r}
+COMETS::showHClust(excorrdata)
+```
 
 ```{r}
 sessionInfo()

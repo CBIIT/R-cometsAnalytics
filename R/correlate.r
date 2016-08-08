@@ -179,3 +179,40 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
          ,
          autosize = TRUE)
 }
+
+
+
+
+
+#---------------------------------------------------------
+# showHClust -----------------------------------------
+#---------------------------------------------------------
+#' Show interactive heatmap using d3heatmap with hierarchical clustering
+#'
+#' @param ccorrmat correlation matrix
+#' @param clust Show hierarchical clustering
+#' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
+#'
+#' @return a heatmap with outcomes as rows and exposures in columns.
+#'
+#' @references For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
+#'
+#' @examples
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' showHClust(corrmatrix)
+#' @export
+showHClust <- function (ccorrmat, clust=TRUE,colscale="RdYlBu") {
+  excorr<-ccorrmat %>% dplyr::select(metabolite_name,exposure,corr) %>% tidyr::spread(exposure,corr)
+  rownames(excorr)<-excorr[,1]
+
+  ncols<-ncol(excorr)
+d3heatmap(
+  excorr[,2:ncols],
+  colors = colscale,
+  dendrogram = if (clust) "both" else "none"
+)
+}

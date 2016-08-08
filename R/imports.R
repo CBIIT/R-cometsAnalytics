@@ -11,4 +11,5 @@
 #' @importFrom psych partial.r
 #' @import plotly
 #' @importFrom tidyr gather
+#' @importFrom d3heatmap d3heatmap
 NULL

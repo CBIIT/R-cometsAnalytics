@@ -21,5 +21,8 @@ COMETS::OutputCorrResults(type_output="CSVfile",filename="corr",dataf=excorrdata
 COMETS::showHeatmap(excorrdata)
 
 ## ------------------------------------------------------------------------
+COMETS::showHClust(excorrdata)
+
+## ------------------------------------------------------------------------
 sessionInfo()
 
