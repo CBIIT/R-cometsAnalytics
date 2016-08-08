@@ -207,14 +207,18 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
-showHClust <- function (ccorrmat, clust=TRUE,colscale="RdYlBu") {
-  excorr<-ccorrmat %>% dplyr::select(metabolite_name,exposure,corr) %>% tidyr::spread(exposure,corr)
-  rownames(excorr)<-excorr[,1]
-
-  ncols<-ncol(excorr)
-d3heatmap(
-  excorr[,2:ncols],
-  colors = colscale,
-  dendrogram = if (clust) "both" else "none"
-)
+showHClust <- function (ccorrmat,
+                        clust = TRUE,
+                        colscale = "RdYlBu") {
+  excorr <-
+    ccorrmat %>% dplyr::select(metabolite_name, exposure, corr) %>% tidyr::spread(exposure, corr)
+  rownames(excorr) <- excorr[, 1]
+  
+  ncols <- ncol(excorr)
+  d3heatmap(excorr[, 2:ncols],
+            colors = colscale,
+            dendrogram = if (clust)
+              "both"
+            else
+              "none")
 }
