@@ -46,7 +46,7 @@ getModelData <-  function(readData,
         rcovs <-
           unique(c(rowvars[rowvars != "All metabolites"],c(readData[[2]])))
       else
-        rcovs <- rowvars
+        rcovs <- unlist(strsplit(rowvars," "))
 
       
       if (!is.na(match("All metabolites",colvars)))
@@ -64,11 +64,8 @@ getModelData <-  function(readData,
       # here we need to get the covariates defined from the excel sheet
       # step 1. get the chosen model first
 
-<<<<<<< HEAD
-=======
       # defining global variable to remove Rcheck warnings
       model=c()
->>>>>>> 39b72e7d59b78e7abdccd4f339947b902d82c05b
       mods<-dplyr::filter(as.data.frame(readData[["mods"]]),model==modbatch)
       if (length(mods)>0 & mods$outcomes=="All metabolites")
         rcovs<-c(readData[[2]])

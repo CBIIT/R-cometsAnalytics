@@ -21,6 +21,8 @@ COMETS::OutputCorrResults(type_output="CSVfile",filename="corr",dataf=excorrdata
 COMETS::showHeatmap(excorrdata)
 
 ## ------------------------------------------------------------------------
+exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = "age bmi")
+excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 
 ## ------------------------------------------------------------------------

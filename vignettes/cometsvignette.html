@@ -122,81 +122,7 @@ exmetabdata &lt;-<span class="st"> </span>COMETS::<span class="kw">readCOMETSinp
 <h3>3. Run Correlation Analysis</h3>
 <p>The correlation analysis is run by calling the function <em>getCorr()</em>. This function runs the model(s) that is(are) defined in the input data (Models tab).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">excorrdata  &lt;-<span class="st"> </span>COMETS::<span class="kw">getCorr</span>(exmodeldata,exmetabdata,<span class="st">&quot;DPP&quot;</span>)</code></pre></div>
-<pre><code>## [1] &quot;running unadjusted&quot;
-##                  metabolite_id exposure        corr  n      pvalue cohort
-## 1                acetylcholine      age  0.24461181 19 0.312834267    DPP
-## 2                acetylglycine      age  0.02199746 19 0.928775577    DPP
-## 3                    aconitate      age  0.25253089 19 0.296922721    DPP
-## 4                      adenine      age  0.39088810 19 0.097970474    DPP
-## 5                    adenosine      age  0.07391148 19 0.763634080    DPP
-## 6                      adipate      age  0.24901130 19 0.303932694    DPP
-## 7                         adma      age  0.33260167 19 0.164121381    DPP
-## 8                          adp      age  0.22613394 19 0.351897514    DPP
-## 9                      alanine      age  0.14518327 19 0.553159345    DPP
-## 10                   allantoin      age  0.22877363 19 0.346152290    DPP
-## 11      alpha_glycerophosphate      age  0.32116298 19 0.180010692    DPP
-## 12 alpha_glycerophosphocholine      age  0.27892785 19 0.247513222    DPP
-## 13       alpha_hydroxybutyrate      age  0.27804795 19 0.249070141    DPP
-## 14         alpha_ketoglutarate      age  0.33348156 19 0.162940292    DPP
-## 15        aminoisobutyric_acid      age  0.24901130 19 0.303932694    DPP
-## 16                         amp      age  0.20853596 19 0.391580833    DPP
-## 17                    anserine      age  0.04872638 19 0.842973794    DPP
-## 18            anthranilic_acid      age -0.10561211 19 0.666972633    DPP
-## 19               acetylcholine      bmi  0.39877066 19 0.090801313    DPP
-## 20               acetylglycine      bmi -0.08080815 19 0.742261472    DPP
-## 21                   aconitate      bmi  0.35046144 19 0.141278726    DPP
-## 22                     adenine      bmi  0.57895723 19 0.009394608    DPP
-## 23                   adenosine      bmi  0.45762007 19 0.048826768    DPP
-## 24                     adipate      bmi  0.35133979 19 0.140215908    DPP
-## 25                        adma      bmi  0.43039124 19 0.065854387    DPP
-## 26                         adp      bmi  0.30127387 19 0.210045031    DPP
-## 27                     alanine      bmi  0.42072939 19 0.072854818    DPP
-## 28                   allantoin      bmi  0.28019348 19 0.245284659    DPP
-## 29      alpha_glycerophosphate      bmi  0.40667580 19 0.084004127    DPP
-## 30 alpha_glycerophosphocholine      bmi  0.28722028 19 0.233144742    DPP
-## 31       alpha_hydroxybutyrate      bmi  0.38735211 19 0.101316389    DPP
-## 32         alpha_ketoglutarate      bmi  0.41633765 19 0.076213448    DPP
-## 33        aminoisobutyric_acid      bmi  0.40052736 19 0.089257256    DPP
-## 34                         amp      bmi  0.36012328 19 0.129893660    DPP
-## 35                    anserine      bmi  0.23149321 19 0.340290376    DPP
-## 36            anthranilic_acid      bmi  0.19188446 19 0.431295224    DPP
-##    adjvars
-## 1     None
-## 2     None
-## 3     None
-## 4     None
-## 5     None
-## 6     None
-## 7     None
-## 8     None
-## 9     None
-## 10    None
-## 11    None
-## 12    None
-## 13    None
-## 14    None
-## 15    None
-## 16    None
-## 17    None
-## 18    None
-## 19    None
-## 20    None
-## 21    None
-## 22    None
-## 23    None
-## 24    None
-## 25    None
-## 26    None
-## 27    None
-## 28    None
-## 29    None
-## 30    None
-## 31    None
-## 32    None
-## 33    None
-## 34    None
-## 35    None
-## 36    None</code></pre>
+<pre><code>## [1] &quot;running unadjusted&quot;</code></pre>
 <p>The output of the correlation analysis can then be compiled and viewed with the following function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">COMETS::<span class="kw">OutputCorrResults</span>(<span class="dt">type_output=</span><span class="st">&quot;CSVfile&quot;</span>,<span class="dt">filename=</span><span class="st">&quot;corr&quot;</span>,<span class="dt">dataf=</span>excorrdata,<span class="dt">cohort=</span><span class="st">&quot;DPP&quot;</span>)</code></pre></div>
 <pre><code>## [1] &quot;dppcorr2016-08-07.csv&quot;</code></pre>
@@ -204,10 +130,13 @@ exmetabdata &lt;-<span class="st"> </span>COMETS::<span class="kw">readCOMETSinp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">COMETS::<span class="kw">showHeatmap</span>(excorrdata)</code></pre></div>
 <pre><code>## Warning in `levels&lt;-`(`*tmp*`, value = if (nl == nL) as.character(labels)
 ## else paste0(labels, : duplicated levels in factors are deprecated</code></pre>
-<p>To display the hierarchical clustering of the resulting correlation matix, use the showHClust function.</p>
+<p>To display the hierarchical clustering of the resulting correlation matix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">exmodeldata&lt;-COMETS::<span class="kw">getModelData</span>(exmetabdata,<span class="dt">modelspec =</span> <span class="st">&quot;Interactive&quot;</span>,<span class="dt">colvars =</span> <span class="st">&quot;age bmi&quot;</span>)
+excorrdata  &lt;-<span class="st"> </span>COMETS::<span class="kw">getCorr</span>(exmodeldata,exmetabdata,<span class="st">&quot;DPP&quot;</span>)</code></pre></div>
+<pre><code>## [1] &quot;running unadjusted&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">COMETS::<span class="kw">showHClust</span>(excorrdata)</code></pre></div>
-<div id="htmlwidget-7192" style="width:288px;height:288px;" class="d3heatmap html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7192">{"x":{"rows":{"members":18,"height":0.755890640662795,"edgePar":{"col":""},"children":[{"members":15,"height":0.33991304751087,"edgePar":{"col":""},"children":[{"members":14,"height":0.26658545117821,"edgePar":{"col":""},"children":[{"members":12,"height":0.182591421492733,"edgePar":{"col":""},"children":[{"members":9,"height":0.122023789180323,"edgePar":{"col":""},"children":[{"members":6,"height":0.074654711037592,"edgePar":{"col":""},"children":[{"members":3,"height":0.0353321242081177,"edgePar":{"col":""},"children":[{"members":2,"height":0.0047372491120628,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"aminoisobutyric acid","edgePar":{"col":""}},{"members":1,"height":0,"label":"acetylcholine","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"alpha-hydroxybutyrate","edgePar":{"col":""}}]},{"members":3,"height":0.0450433683546802,"edgePar":{"col":""},"children":[{"members":2,"height":0.00362753940157558,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"aconitate","edgePar":{"col":""}},{"members":1,"height":0,"label":"adipate","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"AMP","edgePar":{"col":""}}]}]},{"members":3,"height":0.0546324162572562,"edgePar":{"col":""},"children":[{"members":2,"height":0.0212450163168667,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"ADP","edgePar":{"col":""}},{"members":1,"height":0,"label":"allantoin","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"alpha-glycerophosphocholine","edgePar":{"col":""}}]}]},{"members":3,"height":0.0263299320692888,"edgePar":{"col":""},"children":[{"members":2,"height":0.014081109852757,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"ADMA","edgePar":{"col":""}},{"members":1,"height":0,"label":"alpha-ketoglutarate","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"alpha-glycerophosphate","edgePar":{"col":""}}]}]},{"members":2,"height":0.0802532833508292,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"alanine","edgePar":{"col":""}},{"members":1,"height":0,"label":"adenosine","edgePar":{"col":""}}]}]},{"members":1,"height":0,"label":"adenine","edgePar":{"col":""}}]},{"members":3,"height":0.313443093167362,"edgePar":{"col":""},"children":[{"members":2,"height":0.159339961753373,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"anserine","edgePar":{"col":""}},{"members":1,"height":0,"label":"anthranilic acid","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"acetylglycine","edgePar":{"col":""}}]}]},"cols":{"members":2,"height":0.724440270108781,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"age","edgePar":{"col":""}},{"members":1,"height":0,"label":"bmi","edgePar":{"col":""}}]},"matrix":{"data":["0.249","0.401","0.245","0.399","0.278","0.387","0.253","0.35","0.249","0.351","0.209","0.36","0.226","0.301","0.229","0.28","0.279","0.287","0.333","0.43","0.333","0.416","0.321","0.407","0.145","0.421","0.074","0.458","0.391","0.579","0.049","0.231","-0.106","0.192","0.022","-0.081"],"dim":[18,2],"rows":["aminoisobutyric acid","acetylcholine","alpha-hydroxybutyrate","aconitate","adipate","AMP","ADP","allantoin","alpha-glycerophosphocholine","ADMA","alpha-ketoglutarate","alpha-glycerophosphate","alanine","adenosine","adenine","anserine","anthranilic acid","acetylglycine"],"cols":["age","bmi"]},"image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAACCAYAAABVGIzMAAAAnUlEQVQImQGSAG3/APr9yf+Wx+D//P7G/5fJ4P/u+OL/oNDk//n8zP+94u7/+v3J/73h7v//8qz/tt7s///6uP/i9PX///u6/+335P/t9+L/6fbp/wLR7CkA6O31AM7qLADy9PoA5vUSAPHz+QAG07QAydjqAACajACtv9wAntw3AHtYqQD4hZIAHQnGAKYFbAAS9LwAA29dAM4gPgAntGIH5FoDFwAAAABJRU5ErkJggg==","theme":null,"options":{"xaxis_height":80,"yaxis_width":120,"xaxis_font_size":null,"yaxis_font_size":null,"brush_color":"#0000FF","show_grid":true,"anim_duration":500}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9436" style="width:288px;height:288px;" class="d3heatmap html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9436">{"x":{"rows":{"members":18,"height":0.755890640662795,"edgePar":{"col":""},"children":[{"members":15,"height":0.33991304751087,"edgePar":{"col":""},"children":[{"members":14,"height":0.26658545117821,"edgePar":{"col":""},"children":[{"members":12,"height":0.182591421492733,"edgePar":{"col":""},"children":[{"members":9,"height":0.122023789180323,"edgePar":{"col":""},"children":[{"members":6,"height":0.074654711037592,"edgePar":{"col":""},"children":[{"members":3,"height":0.0353321242081177,"edgePar":{"col":""},"children":[{"members":2,"height":0.0047372491120628,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"aminoisobutyric acid","edgePar":{"col":""}},{"members":1,"height":0,"label":"acetylcholine","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"alpha-hydroxybutyrate","edgePar":{"col":""}}]},{"members":3,"height":0.0450433683546802,"edgePar":{"col":""},"children":[{"members":2,"height":0.00362753940157558,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"aconitate","edgePar":{"col":""}},{"members":1,"height":0,"label":"adipate","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"AMP","edgePar":{"col":""}}]}]},{"members":3,"height":0.0546324162572562,"edgePar":{"col":""},"children":[{"members":2,"height":0.0212450163168667,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"ADP","edgePar":{"col":""}},{"members":1,"height":0,"label":"allantoin","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"alpha-glycerophosphocholine","edgePar":{"col":""}}]}]},{"members":3,"height":0.0263299320692888,"edgePar":{"col":""},"children":[{"members":2,"height":0.014081109852757,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"ADMA","edgePar":{"col":""}},{"members":1,"height":0,"label":"alpha-ketoglutarate","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"alpha-glycerophosphate","edgePar":{"col":""}}]}]},{"members":2,"height":0.0802532833508292,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"alanine","edgePar":{"col":""}},{"members":1,"height":0,"label":"adenosine","edgePar":{"col":""}}]}]},{"members":1,"height":0,"label":"adenine","edgePar":{"col":""}}]},{"members":3,"height":0.313443093167362,"edgePar":{"col":""},"children":[{"members":2,"height":0.159339961753373,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"anserine","edgePar":{"col":""}},{"members":1,"height":0,"label":"anthranilic acid","edgePar":{"col":""}}]},{"members":1,"height":0,"label":"acetylglycine","edgePar":{"col":""}}]}]},"cols":{"members":2,"height":0.724440270108781,"edgePar":{"col":""},"children":[{"members":1,"height":0,"label":"age","edgePar":{"col":""}},{"members":1,"height":0,"label":"bmi","edgePar":{"col":""}}]},"matrix":{"data":["0.249","0.401","0.245","0.399","0.278","0.387","0.253","0.35","0.249","0.351","0.209","0.36","0.226","0.301","0.229","0.28","0.279","0.287","0.333","0.43","0.333","0.416","0.321","0.407","0.145","0.421","0.074","0.458","0.391","0.579","0.049","0.231","-0.106","0.192","0.022","-0.081"],"dim":[18,2],"rows":["aminoisobutyric acid","acetylcholine","alpha-hydroxybutyrate","aconitate","adipate","AMP","ADP","allantoin","alpha-glycerophosphocholine","ADMA","alpha-ketoglutarate","alpha-glycerophosphate","alanine","adenosine","adenine","anserine","anthranilic acid","acetylglycine"],"cols":["age","bmi"]},"image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAACCAYAAABVGIzMAAAAnUlEQVQImQGSAG3/APr9yf+Wx+D//P7G/5fJ4P/u+OL/oNDk//n8zP+94u7/+v3J/73h7v//8qz/tt7s///6uP/i9PX///u6/+335P/t9+L/6fbp/wLR7CkA6O31AM7qLADy9PoA5vUSAPHz+QAG07QAydjqAACajACtv9wAntw3AHtYqQD4hZIAHQnGAKYFbAAS9LwAA29dAM4gPgAntGIH5FoDFwAAAABJRU5ErkJggg==","theme":null,"options":{"xaxis_height":80,"yaxis_width":120,"xaxis_font_size":null,"yaxis_font_size":null,"brush_color":"#0000FF","show_grid":true,"anim_duration":500}},"evals":[],"jsHooks":[]}</script>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
 <pre><code>## R version 3.3.0 (2016-05-03)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)

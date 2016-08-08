@@ -83,7 +83,6 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
   colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
 
-<<<<<<< HEAD
   corrlong <-
     fixData(data.frame(
       tidyr::gather(cbind(corr, metabolite_id = rownames(corr)),
@@ -95,12 +94,8 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
     select(-exposuren, -exposurep)
   
-  print(corrlong)
-  
-=======
   # Adding this as a quick fix to define the variable globally (so it doesn't throw warning in R check
-  metabolite_id=c()
->>>>>>> 39b72e7d59b78e7abdccd4f339947b902d82c05b
+  #metabolite_id=c()
   # combine the two matrices together as data frame
 #  corr <- fixData(data.frame(round(corr,digits=3),
 #                             n,
@@ -128,13 +123,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #'
 #' @param ccorrmat correlation matrix (output of getCorr())
 #' @param rowsortby How row labels are sorted
-<<<<<<< HEAD
 #' @param plothgt Plot height default 700
 #' @param plotwid Plot width 
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
-=======
-#' @param plothgt height of plot for display (default: 700)
->>>>>>> 39b72e7d59b78e7abdccd4f339947b902d82c05b
 #'
 #' @return a heatmap with outcomes as rows and exposures in columns.
 #'
@@ -165,18 +156,8 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
   ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
   # Number of columns identified by suffix of .n
 
-<<<<<<< HEAD
   ccorrmat%>%
-  plotly::plot_ly(z = signif(corr),
-          x = exposure, y = metabolite_name,
-=======
-  # Defining variables to remove R check warnings:
-  covariate=metabolite_name=corr=c()
-
-tidyr::gather(ccorrmat,"covariate","corr",1:length(grep("\\.n$",names(ccorrmat))))%>%
-  plotly::plot_ly(z = corr,
-          x = covariate, y = metabolite_name,
->>>>>>> 39b72e7d59b78e7abdccd4f339947b902d82c05b
+  plotly::plot_ly(z = signif(corr),x = exposure, y = metabolite_name,
           type = "heatmap",
           colorscale=colscale,
           colorbar = list(title = "Correlation")) %>%

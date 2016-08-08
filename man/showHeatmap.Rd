@@ -12,15 +12,11 @@ showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700, plotwid = 800,
 
 \item{rowsortby}{How row labels are sorted}
 
-<<<<<<< HEAD
 \item{plothgt}{Plot height default 700}
 
 \item{plotwid}{Plot width}
 
 \item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}}
-=======
-\item{plothgt}{height of plot for display (default: 700)}
->>>>>>> 39b72e7d59b78e7abdccd4f339947b902d82c05b
 }
 \value{
 a heatmap with outcomes as rows and exposures in columns.
