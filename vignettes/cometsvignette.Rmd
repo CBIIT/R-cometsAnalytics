@@ -60,13 +60,17 @@ The correlation analysis is run by calling the function *getCorr()*.  This funct
 excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 ```
 
-The output of the correlation analysis can then be compiled and viewed with the following function:
-
+The output of the correlation analysis can then be compiled and output to a CSV file with the following function:
 ```{r}
-COMETS::OutputCorrResults(type_output="CSVfile",filename="corr",dataf=excorrdata,cohort="DPP")
+COMETS::OutputCorrResults(filename="corr",dataf=excorrdata,cohort="DPP")
 ```
 
-To display the heatmap of the resulting correlation matix, use the showheatmap function.
+To view the top 50 lines of the correlation analysis output, simply type:
+```{r}
+summary(excorrdata)
+```
+
+To display the heatmap of the resulting correlation matrix, use the showheatmap function.
 ```{r}
 COMETS::showHeatmap(excorrdata)
 ```
