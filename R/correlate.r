@@ -26,7 +26,6 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   # column indices of column covariates
   col.ccovar <- match(modeldata[[2]],names(modeldata[[1]]))
 
-
   # column indices of adj-var
   col.adj <- match(modeldata[[4]],names(modeldata[[1]]))
 
@@ -79,7 +78,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       }
     }
 
-  }
+  } # End else (length(col.adj) is not zero)
   colnames(corr) <- as.character(modeldata[[2]])
   colnames(n) <- paste(as.character(modeldata[[2]]),".n",sep = "")
   ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
@@ -88,7 +87,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   corrlong <-
     fixData(data.frame(
-      tidyr::gather(cbind(corr, metabolite_id = rownames(corr)),
+      tidyr::gather(cbind(corr, metabolite_name = rownames(corr)),
                     "exposure","corr",1:length(col.ccovar)
       ),
       tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
@@ -107,17 +106,27 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #                             cohort=cohort,
 #                             adjvars=ifelse(length(col.adj)==0,"None",paste(modeldata[[4]],collapse = " #"))))
 
+  class(corrlong)="COMETScorr"
 
-
-  ccorrmat <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
+  #ccorrmat <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
+return(corrlong)
 }
 
+#' Required internal function to create accessory function for COMETScorr
+#' @param x x
+#' @return which function to use
+summary <- function(x) UseMethod("summary")
 
 
-
-
-
-
+#---------------------------------------------------------
+# Accessor function for getCorr() output (S3 class COMETScorr) -----------------------------------------
+#---------------------------------------------------------
+#' Internal function that returns top 50 lines of correlation output
+#' @param x COMETScorr class (S3) from getCorr() output
+#' @return first 50 lines of output
+summary.COMETScorr <- function(x) {
+	return(utils::head(as.data.frame.list(x),3))
+}
 
 #---------------------------------------------------------
 # showHeatmap -----------------------------------------
@@ -144,18 +153,19 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #' @export
 
 showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,colscale="RdYlBu") {
-  # order the rows according to sort by
 
+  ccorrmat=as.data.frame.list(ccorrmat)
   exmetabdata=corr=exposure=metabolite_name=c()
 
+  # order the rows according to sort by
   if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 
-    ccorrmat$metabolite_name <-
+    ccorrmat$metabolite_name <- suppressWarnings(
       factor(ccorrmat$metabolite_name, levels =
-               ccorrmat$metabolite_name[rev(order(unlist(ccorrmat["metabolite_name"])))])
+               ccorrmat$metabolite_name[rev(order(unlist(ccorrmat["metabolite_name"])))]))
   } else {
-    ccorrmat$metabolite_name <-
-      factor(ccorrmat$metabolite_name, levels = ccorrmat$metabolite_name[order(unlist(ccorrmat[rowsortby]))])
+    ccorrmat$metabolite_name <- suppressWarnings(
+      factor(ccorrmat$metabolite_name, levels = ccorrmat$metabolite_name[order(unlist(ccorrmat[rowsortby]))]))
   }
 
   # stack the correlations together
@@ -220,7 +230,8 @@ showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
  metabolite_name=exposure=corr=c()
-
+ 
+  ccorrmat=as.data.frame.list(ccorrmat)
   excorr <-
     ccorrmat %>% dplyr::select(metabolite_name, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]

@@ -15,7 +15,10 @@ exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=
 excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 
 ## ------------------------------------------------------------------------
-COMETS::OutputCorrResults(type_output="CSVfile",filename="corr",dataf=excorrdata,cohort="DPP")
+COMETS::OutputCorrResults(filename="corr",dataf=excorrdata,cohort="DPP")
+
+## ------------------------------------------------------------------------
+summary(excorrdata)
 
 ## ------------------------------------------------------------------------
 COMETS::showHeatmap(excorrdata)
