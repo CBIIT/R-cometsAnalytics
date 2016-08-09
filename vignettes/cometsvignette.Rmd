@@ -71,10 +71,13 @@ summary(excorrdata)
 ```
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
-```{r}
-COMETS::showHeatmap(excorrdata)
+```{r,fig_width=1, fig_height=1}
+COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
 ```
+
+
 To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix
+
 ```{r}
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = "age bmi")
 excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
