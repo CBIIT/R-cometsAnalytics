@@ -65,16 +65,19 @@ The output of the correlation analysis can then be compiled and output to a CSV 
 COMETS::OutputCorrResults(filename="corr",dataf=excorrdata,cohort="DPP")
 ```
 
-To view the top 50 lines of the correlation analysis output, simply type:
+To view the first 3 lines of the correlation analysis output, simply type:
 ```{r}
-summary(excorrdata)
+COMETS::showCorr(excorrdata,nlines=3)
 ```
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
-```{r,fig_width=1, fig_height=1}
+```{r,fig_width=6, fig_height=6}
 COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
-```
 
+```
+   
+   
+   
 
 To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix
 

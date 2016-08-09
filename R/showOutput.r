@@ -20,7 +20,6 @@
 
 
 OutputCorrResults <- function (filename,dataf,cohort=""){
-  dataf=as.data.frame.list(dataf)
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
   fname <- paste(fname,filename,Sys.Date(),'.csv',sep = '')
   utils::write.csv(dataf, fname,quote=TRUE)

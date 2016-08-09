@@ -106,26 +106,27 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #                             cohort=cohort,
 #                             adjvars=ifelse(length(col.adj)==0,"None",paste(modeldata[[4]],collapse = " #"))))
 
-  class(corrlong)="COMETScorr"
-
   #ccorrmat <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
 return(corrlong)
 }
 
-#' Required internal function to create accessory function for COMETScorr
-#' @param x x
-#' @return which function to use
-summary <- function(x) UseMethod("summary")
-
-
 #---------------------------------------------------------
-# Accessor function for getCorr() output (S3 class COMETScorr) -----------------------------------------
+# showCorr
 #---------------------------------------------------------
-#' Internal function that returns top 50 lines of correlation output
-#' @param x COMETScorr class (S3) from getCorr() output
+#' Function that returns top N lines of the getCorr() output
+#' @param corr COMETScorr class (S3) from getCorr() output
+#' @param nlines number of lines to return (default 50)
 #' @return first 50 lines of output
-summary.COMETScorr <- function(x) {
-	return(utils::head(as.data.frame.list(x),3))
+#' @examples
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' showCorr(corrmatrix)
+#' @export 
+showCorr <- function(corr, nlines=50) {
+	return(utils::head(as.data.frame(corr),nlines))
 }
 
 #---------------------------------------------------------
@@ -154,7 +155,6 @@ summary.COMETScorr <- function(x) {
 
 showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,colscale="RdYlBu") {
 
-  ccorrmat=as.data.frame.list(ccorrmat)
   exmetabdata=corr=exposure=metabolite_name=c()
 
   # order the rows according to sort by
@@ -231,7 +231,6 @@ showHClust <- function (ccorrmat,
                         colscale = "RdYlBu") {
  metabolite_name=exposure=corr=c()
  
-  ccorrmat=as.data.frame.list(ccorrmat)
   excorr <-
     ccorrmat %>% dplyr::select(metabolite_name, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]

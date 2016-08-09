@@ -18,10 +18,11 @@ excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::OutputCorrResults(filename="corr",dataf=excorrdata,cohort="DPP")
 
 ## ------------------------------------------------------------------------
-summary(excorrdata)
+showCorr(excorrdata,nlines=3)
 
-## ----fig_width=1, fig_height=1-------------------------------------------
+## ----fig_width=6, fig_height=6-------------------------------------------
 COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
+
 
 ## ------------------------------------------------------------------------
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = "age bmi")
