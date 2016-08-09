@@ -87,7 +87,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   corrlong <-
     fixData(data.frame(
-      tidyr::gather(cbind(corr, metabolite_name = rownames(corr)),
+      tidyr::gather(cbind(corr, metabolite_id = rownames(corr)),
                     "exposure","corr",1:length(col.ccovar)
       ),
       tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
@@ -95,20 +95,12 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       cohort = cohort,
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
     select(-exposuren, -exposurep)
-  
-  # Adding this as a quick fix to define the variable globally (so it doesn't throw warning in R check
-  #metabolite_id=c()
-  # combine the two matrices together as data frame
-#  corr <- fixData(data.frame(round(corr,digits=3),
-#                             n,
-#                             pval,
-#                             metabolite_id=rownames(ttval),
-#                             cohort=cohort,
-#                             adjvars=ifelse(length(col.adj)==0,"None",paste(modeldata[[4]],collapse = " #"))))
 
-  class(corrlong)="COMETScorr"
 
-  #ccorrmat <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
+
+  corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
+
+
 return(corrlong)
 }
 
@@ -178,7 +170,7 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
           colorscale=colscale,
           colorbar = list(title = "Correlation")) %>%
   plotly::layout(height=plothgt,
-         width=plotwid,         
+         width=plotwid,
          margin = list(l = 200),
          title = " ",      # layout's title: /r/reference/#layout-title
          xaxis = list(           # layout's xaxis is a named list.
@@ -209,7 +201,7 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
 #'
 #' @description
 #' This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
-#' 
+#'
 #' @param ccorrmat correlation matrix
 #' @param clust Show hierarchical clustering
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
@@ -230,12 +222,12 @@ showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
  metabolite_name=exposure=corr=c()
- 
+
   ccorrmat=as.data.frame.list(ccorrmat)
   excorr <-
     ccorrmat %>% dplyr::select(metabolite_name, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
-  
+
   ncols <- ncol(excorr)
   d3heatmap::d3heatmap(excorr[, 2:ncols],
             colors = colscale,
