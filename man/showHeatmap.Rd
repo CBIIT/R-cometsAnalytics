@@ -14,7 +14,7 @@ showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700, plotwid = 800,
 
 \item{plothgt}{Plot height default 700}
 
-\item{plotwid}{Plot width}
+\item{plotwid}{Plot width default 800}
 
 \item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}}
 }

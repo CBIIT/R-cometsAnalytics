@@ -136,7 +136,7 @@ summary.COMETScorr <- function(x) {
 #' @param ccorrmat correlation matrix (output of getCorr())
 #' @param rowsortby How row labels are sorted
 #' @param plothgt Plot height default 700
-#' @param plotwid Plot width 
+#' @param plotwid Plot width default 800
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
 #'
 #' @return a heatmap with outcomes as rows and exposures in columns.
