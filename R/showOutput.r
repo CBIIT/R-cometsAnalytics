@@ -24,7 +24,7 @@
 
 OutputCSVResults <- function (filename,dataf,cohort=""){
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
-  fname <- paste(fname,filename,Sys.Date(),'.csv',sep = '')
+  fname <- paste0(fname,filename,Sys.Date(),'.csv')
   utils::write.csv(dataf, fname,quote=TRUE)
   return(fname)
 }
