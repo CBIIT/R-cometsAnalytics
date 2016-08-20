@@ -38,6 +38,10 @@ getModelData <-  function(readData,
            colvars   = "",
            adjvars   = NULL) {
 
+    if(modelspec == "Interactive" && modbatch != "") {
+	print("Warning: Interactive mode is set yet modbatch is also assigned.  modbatch is ignored and model is assumed to be in Interactive mode")
+    }
+
     # figure out the model specification based on type (Interactive or Batch)
     if (modelspec == "Interactive") {
       # adjust the variable names
@@ -48,7 +52,6 @@ getModelData <-  function(readData,
       else
         rcovs <- unlist(strsplit(rowvars," "))
 
-      
       if (!is.na(match("All metabolites",colvars)))
         ccovs <-
           unique(c(colvars[colvars != "All metabolites"],c(readData[[2]])))
@@ -64,9 +67,16 @@ getModelData <-  function(readData,
       # here we need to get the covariates defined from the excel sheet
       # step 1. get the chosen model first
 
+      if(modbatch=="") {
+	stop("modelspec is set to 'Batch' yet model batch (modbatch) is empty.  Please set modbatch.")
+      }
+
       # defining global variable to remove Rcheck warnings
       model=c()
       mods<-dplyr::filter(as.data.frame(readData[["mods"]]),model==modbatch)
+      if(nrow(mods)==0) {
+	stop("The model batch (modbatch) provided does not exist in the input Excell file")
+      }
       if (length(mods)>0 & mods$outcomes=="All metabolites")
         rcovs<-c(readData[[2]])
       else
@@ -81,11 +91,11 @@ getModelData <-  function(readData,
         acovs<-as.vector(strsplit(mods$adjustment," ")[[1]])
       else acovs<-NULL
 
-    }
+    } # end if modelspec == "Batch"
 
   # Keep only needed variables for the data
     if (is.null(acovs)) {
-      gdta <-dplyr::select(readData[[1]], one_of(c(ccovs, rcovs)))
+      gdta <-dplyr::select(readData[[1]], dplyr::one_of(c(ccovs, rcovs)))
     }
     else {
       gdta <-
