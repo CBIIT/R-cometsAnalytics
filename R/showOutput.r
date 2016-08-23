@@ -16,7 +16,7 @@
 #' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' # Get correlation results
-#' OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP") 
+#' OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
 #' # Get harmonization results
 #' OutputCSVResults(filename="harmonization",dataf=exmetabdata$metab,cohort="DPP")
 #' @export
@@ -24,7 +24,7 @@
 
 OutputCSVResults <- function (filename,dataf,cohort=""){
   fname <- gsub('.','_',tolower(cohort), fixed = TRUE)
-  fname <- paste(fname,filename,Sys.Date(),'.csv',sep = '')
+  fname <- paste(filename,fname,Sys.Date(),'.csv',sep = '')
   utils::write.csv(dataf, fname,quote=TRUE)
   return(fname)
 }

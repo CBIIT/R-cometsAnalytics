@@ -26,7 +26,7 @@ exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 # Get correlation results
-OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP") 
+OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
 # Get harmonization results
 OutputCSVResults(filename="harmonization",dataf=exmetabdata$metab,cohort="DPP")
 }
