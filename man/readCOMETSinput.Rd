@@ -20,7 +20,7 @@ Read in CSV file that contains metabolite abundances and metab data
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInput.xlsx")
-metabdata <- readCOMETSinput(csvfile)
+exmetabdata <- readCOMETSinput(csvfile)
 
 }
 
