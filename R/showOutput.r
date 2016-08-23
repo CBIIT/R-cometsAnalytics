@@ -3,7 +3,7 @@
 #---------------------------------------------------------
 #' Create output CSV file
 #'
-#' @param filename if type_output is "CSVfile", name of file
+#' @param filename if type_output is "CSVfile", name of file and can include path
 #' @param dataf correlation output (from function getCorr())
 #' @param cohort cohort name
 #'
