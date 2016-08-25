@@ -57,10 +57,10 @@ getModelData <-  function(readData,
           unique(c(colvars[colvars != "All metabolites"],c(readData[[2]])))
       else
         ccovs <- unlist(strsplit(colvars," "))
-      
+
       if (!is.null(adjvars))
         acovs <- unlist(strsplit(adjvars," "))
-      else 
+      else
         acovs<-adjvars
     }
     else if (modelspec == "Batch") {
@@ -95,7 +95,7 @@ getModelData <-  function(readData,
 
   # Keep only needed variables for the data
     if (is.null(acovs)) {
-      gdta <-dplyr::select(readData[[1]], dplyr::one_of(c(ccovs, rcovs)))
+      gdta <-dplyr::select(readData[[1]], one_of(c(ccovs, rcovs)))
     }
     else {
       gdta <-
