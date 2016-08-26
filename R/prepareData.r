@@ -67,7 +67,13 @@ getModelData <-  function(readData,
         acovs <- unlist(strsplit(adjvars," "))
       else
         acovs<-adjvars
-    }
+
+      if (!is.na(match(colvars,adjvars))) {
+	stop("ERROR: one of the adjusted covariates is also an exposure!!
+		Please make sure adjusted covariates are not exposures.")
+      }
+    } # end if modelspec is "Interactive"
+
     else if (modelspec == "Batch") {
       # here we need to get the covariates defined from the excel sheet
       # step 1. get the chosen model first
