@@ -9,29 +9,29 @@
 # uidsource.ind<-grep("_name",names(masteruids))
 # 
 # # get master cohortlist list
-# mastercname<-aggregate(uidsource~metid+uid_01+biochemical+super_pathway,masteruids %>%
-#                         gather("uidsource", "metid",c(min(uidsource.ind):max(uidsource.ind))) %>%
-#                         filter(metid!="") %>%
-#                         distinct(metid,uid_01,uidsource) %>%
-#                         mutate(metid=tolower(metid)) %>%
-#                         arrange(metid) %>%
+# mastercname<-aggregate(uidsource~metid+uid_01+biochemical+super_pathway,masteruids dplyr::`%>%`
+#                         gather("uidsource", "metid",c(min(uidsource.ind):max(uidsource.ind))) dplyr::`%>%`
+#                         filter(metid!="") dplyr::`%>%`
+#                         distinct(metid,uid_01,uidsource) dplyr::`%>%`
+#                         mutate(metid=tolower(metid)) dplyr::`%>%`
+#                         arrange(metid) dplyr::`%>%`
 #                         filter(uidsource != ""),paste,collapse=";",na.action=na.pass)
 # 
 # 
 # # get master HMDB list
-# masterhmdb<-aggregate(hmdb~metid+uid_01,masteruids %>%
-#                         gather("uidsource", "metid",c(min(uidsource.ind):max(uidsource.ind))) %>%
-#                         filter(metid!="") %>%
-#                         gather("hmdbsrc", "hmdb",hmdb_id1,hmdb_id2) %>%
-#                         select(metid,uid_01,hmdb) %>%
-#                         distinct(metid,uid_01,hmdb) %>%
-#                         mutate(metid=tolower(metid)) %>%
-#                         arrange(metid) %>%
+# masterhmdb<-aggregate(hmdb~metid+uid_01,masteruids dplyr::`%>%`
+#                         gather("uidsource", "metid",c(min(uidsource.ind):max(uidsource.ind))) dplyr::`%>%`
+#                         filter(metid!="") dplyr::`%>%`
+#                         gather("hmdbsrc", "hmdb",hmdb_id1,hmdb_id2) dplyr::`%>%`
+#                         select(metid,uid_01,hmdb) dplyr::`%>%`
+#                         distinct(metid,uid_01,hmdb) dplyr::`%>%`
+#                         mutate(metid=tolower(metid)) dplyr::`%>%`
+#                         arrange(metid) dplyr::`%>%`
 #                         filter(hmdb != ""),paste,collapse=";",na.action=na.pass)
 # 
 # 
 # #use this table for harmonization:
-# masteruidl<-full_join(mastercname,masterhmdb) %>% mutate(hmdb=ifelse(is.na(hmdb)," ",hmdb))%>% arrange(metid)
+# masteruidl<-full_join(mastercname,masterhmdb) %>% mutate(hmdb=ifelse(is.na(hmdb)," ",hmdb)) dplyr::`%>%` arrange(metid)
 # 
 # 
 # # make unique metid and concatenate rows
@@ -47,4 +47,4 @@
 #' # 
 #' # harmlistc<-left_join(anti_join(dtalist$metab,mastermetid,by=c("metabid"="metid")),mastermetid,by=c("metabolite_name"="metid"))
 #' # 
-#' # harmlist<-rbind(harmlistg,harmlistc)%>%mutate(multrows=grepl("#",uid_01))
+#' # harmlist<-rbind(harmlistg,harmlistc) dplyr::`%>%' mutate(multrows=grepl("#",uid_01))
