@@ -72,6 +72,12 @@ getModelData <-  function(readData,
 	stop("ERROR: one of the adjusted covariates is also an exposure!!
 		Please make sure adjusted covariates are not exposures.")
       }
+
+      if (!is.na(match(rowvars,adjvars))) {
+        stop("ERROR: one of the adjusted covariates is also an outcome!!
+                Please make sure adjusted covariates are not outcomes.")
+      }
+
     } # end if modelspec is "Interactive"
 
     else if (modelspec == "Batch") {
