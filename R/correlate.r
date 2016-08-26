@@ -93,8 +93,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
       cohort = cohort,
-      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
-    select(-exposuren, -exposurep)
+      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>% select(-exposuren, -exposurep)
 
   #corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
 
@@ -163,7 +162,7 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
   ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
   # Number of columns identified by suffix of .n
 
-  ccorrmat%>%
+  ccorrmat %>%
   plotly::plot_ly(z = signif(corr),x = exposure, y = metabolite_name,
           type = "heatmap",
           colorscale=colscale,
@@ -226,6 +225,8 @@ showHClust <- function (ccorrmat,
   rownames(excorr) <- excorr[, 1]
 
   ncols <- ncol(excorr)
+  if(ncols <= 2) 
+	stop("Cannot run heatmap because there is only one exposure variable")
   d3heatmap::d3heatmap(excorr[, 2:ncols],
             colors = colscale,
             dendrogram = if (clust)
