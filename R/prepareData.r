@@ -44,20 +44,25 @@ getModelData <-  function(readData,
 
     # figure out the model specification based on type (Interactive or Batch)
     if (modelspec == "Interactive") {
-      # adjust the variable names
-      # found all metabolites
-      if (!is.na(match("All metabolites",rowvars)))
+
+      # rename the variables (Assumed to be 'All metabolites' by default)
+      if (!is.na(match("All metabolites",rowvars))) {
+        print("Analysis will run on 'All metabolites'")
         rcovs <-
           unique(c(rowvars[rowvars != "All metabolites"],c(readData[[2]])))
-      else
+      }
+      else {
         rcovs <- unlist(strsplit(rowvars," "))
+      }
 
+      # rename the exposure variables
       if (!is.na(match("All metabolites",colvars)))
         ccovs <-
           unique(c(colvars[colvars != "All metabolites"],c(readData[[2]])))
       else
         ccovs <- unlist(strsplit(colvars," "))
 
+      # rename the covariables
       if (!is.null(adjvars))
         acovs <- unlist(strsplit(adjvars," "))
       else
