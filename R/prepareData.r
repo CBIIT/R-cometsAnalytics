@@ -38,6 +38,10 @@ getModelData <-  function(readData,
            colvars   = "",
            adjvars   = NULL) {
 
+    if(is.na(match(modelspec,c("Interactive","Batch")))) {
+	stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
+    }
+
     if(modelspec == "Interactive" && modbatch != "") {
 	print("Warning: Interactive mode is set yet modbatch is also assigned.  modbatch is ignored and model is assumed to be in Interactive mode")
     }
@@ -68,12 +72,12 @@ getModelData <-  function(readData,
       else
         acovs<-adjvars
 
-      if (!is.na(match(colvars,adjvars))) {
+      if (length(intersect(adjvars,colvars))>0) {
 	stop("ERROR: one of the adjusted covariates is also an exposure!!
 		Please make sure adjusted covariates are not exposures.")
       }
 
-      if (!is.na(match(rowvars,adjvars))) {
+      if (length(intersect(adjvars,rowvars))>0) {
         stop("ERROR: one of the adjusted covariates is also an outcome!!
                 Please make sure adjusted covariates are not outcomes.")
       }
