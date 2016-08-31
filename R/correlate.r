@@ -41,7 +41,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     corr<-stats::cor(data,method = "spearman",use="pairwise.complete.obs")
     corr <- data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
     # If there are more than one exposure, then need to transpose
-    if(length(col.ccovar)>1) {corr=as.data.frame(t(corr))}
+    if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
 
     # calculate complete cases matrix
     n  <-
@@ -68,7 +68,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     corr <-psych::partial.r(dtarank,c(col.rcovar,col.ccovar),col.adj)
     corr<-as.data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
     # If there are more than one exposure, then need to transpose
-    if(length(col.ccovar)>1) {corr=as.data.frame(t(corr))}
+    if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
 
     #corr <-corr.p(data,c(col.rcovar,col.ccovar), col.adj,method="spearman")
     #corr<-corr$estimate[1:length(col.rcovar),-(1:length(col.rcovar))]
