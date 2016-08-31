@@ -39,8 +39,10 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     #       names(data)<-paste0("v",1:length(names(data)))
     #    assign('gdata',data,envir=.GlobalEnv)
     corr<-stats::cor(data,method = "spearman",use="pairwise.complete.obs")
-
     corr <- data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
+    # If there are more than one exposure, then need to transpose
+    if(length(col.ccovar)>1) {corr=as.data.frame(t(corr))}
+
     # calculate complete cases matrix
     n  <-
       matrix(NA,nrow = length(col.rcovar),ncol = length(col.ccovar))
@@ -65,6 +67,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
     corr <-psych::partial.r(dtarank,c(col.rcovar,col.ccovar),col.adj)
     corr<-as.data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
+    # If there are more than one exposure, then need to transpose
+    if(length(col.ccovar)>1) {corr=as.data.frame(t(corr))}
+
     #corr <-corr.p(data,c(col.rcovar,col.ccovar), col.adj,method="spearman")
     #corr<-corr$estimate[1:length(col.rcovar),-(1:length(col.rcovar))]
     # calculate complete cases matrix
@@ -82,7 +87,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   # need to explicitely get rownmames if there's only one row
   if(nrow(corr)==1) {rownames(corr)=as.character(modeldata[[3]])}
+
   colnames(corr) <- as.character(modeldata[[2]])
+  rownames(corr) <- as.character(modeldata[[3]])
   colnames(n) <- paste(as.character(modeldata[[2]]),".n",sep = "")
   ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
   pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2

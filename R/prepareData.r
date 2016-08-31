@@ -80,9 +80,9 @@ getModelData <-  function(readData,
                 Please make sure adjusted covariates are not outcomes.")
       }
       # Throw error if there is more than one exposure
-      if (length(colvars)>1) {
-	stop("ERROR: Only one exposure is allowable at a time!")
-      }
+      #if (length(colvars)>1) {
+#	stop("ERROR: Only one exposure is allowable at a time!")
+ #     }
 
     } # end if modelspec is "Interactive"
 
