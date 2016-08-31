@@ -78,7 +78,10 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       }
     }
 
-  } # End else (length(col.adj) is not zero)
+  } # End else adjusted mode (length(col.adj) is not zero)
+
+  # need to explicitely get rownmames if there's only one row
+  if(nrow(corr)==1) {rownames(corr)=as.character(modeldata[[3]])}
   colnames(corr) <- as.character(modeldata[[2]])
   colnames(n) <- paste(as.character(modeldata[[2]]),".n",sep = "")
   ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
@@ -143,7 +146,11 @@ showCorr <- function(corr, nlines=50) {
 #' showHeatmap(corrmatrix)
 #' @export
 
-showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,colscale="RdYlBu") {
+showHeatmap <- function (ccorrmat, 
+       rowsortby = "corr",
+       plothgt=700,
+       plotwid=800,
+       colscale="RdYlBu") {
 
   exmetabdata=corr=exposure=metabolite_name=c()
 
@@ -161,6 +168,11 @@ showHeatmap <- function (ccorrmat, rowsortby = "corr",plothgt=700,plotwid=800,co
   # stack the correlations together
   ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
   # Number of columns identified by suffix of .n
+
+  # plotly will not plot if there is only one row (so quick fix is to duplicate data)
+  if(nrow(ccorrmat)==1) {
+	ccorrmat=rbind(ccorrmat,ccorrmat)
+  }
 
   ccorrmat %>%
   plotly::plot_ly(z = signif(corr),x = exposure, y = metabolite_name,

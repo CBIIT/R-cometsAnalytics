@@ -1,5 +1,3 @@
-
-
 #---------------------------------------------------------
 # Get Model data and model components --------------------
 #---------------------------------------------------------
@@ -71,15 +69,19 @@ getModelData <-  function(readData,
         acovs <- unlist(strsplit(adjvars," "))
       else
         acovs<-adjvars
-
+      # Throw error if an ajdusted covariate is also an exposure
       if (length(intersect(adjvars,colvars))>0) {
 	stop("ERROR: one of the adjusted covariates is also an exposure!!
 		Please make sure adjusted covariates are not exposures.")
       }
-
+      # Throw error if an adjusted covariate is also an outcome
       if (length(intersect(adjvars,rowvars))>0) {
         stop("ERROR: one of the adjusted covariates is also an outcome!!
                 Please make sure adjusted covariates are not outcomes.")
+      }
+      # Throw error if there is more than one exposure
+      if (length(colvars)>1) {
+	stop("ERROR: Only one exposure is allowable at a time!")
       }
 
     } # end if modelspec is "Interactive"
