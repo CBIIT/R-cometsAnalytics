@@ -50,7 +50,7 @@ exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 In Interactive mode, models are specified as parameters. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
 ```{r}
-exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars="age bmi")
+exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi"))
 ```
 
 ###3. Run Correlation Analysis

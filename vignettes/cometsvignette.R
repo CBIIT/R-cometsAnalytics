@@ -11,12 +11,3 @@ exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 ## ------------------------------------------------------------------------
 exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars="age bmi")
 
-## ------------------------------------------------------------------------
-excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
-
-## ------------------------------------------------------------------------
-COMETS::OutputCSVResults(filename="corr",dataf=excorrdata,cohort="DPP")
-
-## ------------------------------------------------------------------------
-COMETS::showCorr(excorrdata,nlines=3)
-
