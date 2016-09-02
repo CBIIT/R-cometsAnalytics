@@ -105,7 +105,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap) {
             length(intersect(as.character(unlist(dta.sdata[,subjid])),dta.smetab[[subjid]])) ==
             numsamples) {
           outmessage = c(
-            outmessage,"Passsed all integrity checks, analyses can proceed. If you are part of COMETS, please download metabolite list below and submit to the COMETS harmonization group."
+            outmessage,"Passed all integrity checks, analyses can proceed. If you are part of COMETS, please download metabolite list below and submit to the COMETS harmonization group."
           )
         }
         else {
