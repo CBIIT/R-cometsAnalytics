@@ -40,6 +40,16 @@ csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
 
+To plot some the distribution of variances for each metabolite:
+```{r}
+COMETS::plotVar(exmetabdata)
+```
+
+To plot the distribution of minimum/missing values:
+```{r}
+COMETS::plotMinvalues(exmetabdata)
+```
+
 ###2. Get Model Data
 There are 2 ways to specify your model, batch or interactive.
 In Batch mode, models are specified in your input file. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
