@@ -1,9 +1,11 @@
 #' Plot the variance distribution of transformed metabolite abundances
 #'
 #' @param cometsdata output of readCOMETSinput function
-#' @param title main title for the plot (default is "Distribution of Variance for Each Metabolite")
+#' @param title main title for the plot (default is "Distribution of Variance")
 #' @param xlabel x-axis label (default is "Variance of transformed metabolite abundances")
 #' @param ylabel y-axis label (default is "Frequency")
+#' @param titlesize size of title (default, 20)
+#' @param xylabelsize size of x and y labels (default=8)
 #'
 #' @return a distribution plot
 #'
@@ -16,20 +18,25 @@
 #' @export
 
 plotVar <- function(cometsdata,
-                    title = "Distribution of Variance for Each Metabolite",
+                    title = "Distribution of Variance",
+                    titlesize=16,
                     xlabel = "Variance of transformed metabolite abundances",
-                    ylabel = "Frequency") {
+                    ylabel = "Frequency",
+                    xylabelsize = 12) {
    if(is.null(cometsdata$metab$var)) {
 	stop("The input data is not in the correct format.  Make sure it is the output of the 
             readCOMETSinput function")
    }
 
    toplot <- cometsdata$metab$var
+   font1 <- list(size=4,color="red")
+
    p <- plot_ly(
      x=toplot,
      type="histogram") %>%
-   layout(title=title,
-     xaxis = list(title=xlabel),yaxis = list(title=ylabel),
+   layout(title=title,titlefont=list(size=titlesize),
+     xaxis = list(title=xlabel,titlefont=list(size=xylabelsize)),
+     yaxis = list(title=ylabel,titlefont=list(size=xylabelsize)),
      bargap=0.3)
    return(p)
 } 
@@ -37,9 +44,11 @@ plotVar <- function(cometsdata,
 #' Plot the distribution of the number of missing values for each metabolite
 #'
 #' @param cometsdata output of readCOMETSinput function
-#' @param title main title for the plot (default is "Distribution of the Number/Missing Values for each Metabolite")
+#' @param title main title for the plot (default is "Distribution of the Number/Missing Values")
 #' @param xlabel x-axis label (default is "Number of minimum/missing values")
 #' @param ylabel y-axis label (default is "Frequency")
+#' @param titlesize size of title (default, 20)
+#' @param xylabelsize size of x and y labels (default=8)
 #'
 #' @return a distribution plot
 #'
@@ -52,9 +61,11 @@ plotVar <- function(cometsdata,
 #' @export
 
 plotMinvalues <- function(cometsdata,
-                    title = "Distribution of the Number/Missing Values for each Metabolite",
+                    title = "Distribution of the Number/Missing Values",
                     xlabel = "Number of minimum/missing values",
-                    ylabel = "Frequency") {
+                    ylabel = "Frequency",
+                    xylabelsize = 12,
+                    titlesize=16) {
 
    if(is.null(cometsdata$metab$num.min)) {
         stop("The input data is not in the correct format.  Make sure it is the output of the
@@ -65,8 +76,9 @@ plotMinvalues <- function(cometsdata,
    p <- plot_ly(
      x=toplot,
      type="histogram") %>%
-   layout(title=title,
-     xaxis = list(title=xlabel),yaxis = list(title=ylabel),
+   layout(title=title,titlefont=list(size=titlesize),
+     xaxis = list(title=xlabel,titlefont=list(size=xylabelsize)),
+     yaxis = list(title=ylabel,titlefont=list(size=xylabelsize)),
      bargap=0.3)
    return(p)
 }

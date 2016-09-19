@@ -42,12 +42,12 @@ exmetabdata <- COMETS::readCOMETSinput(csvfile)
 
 To plot some the distribution of variances for each metabolite:
 ```{r}
-COMETS::plotVar(exmetabdata)
+COMETS::plotVar(exmetabdata,titlesize=12)
 ```
 
 To plot the distribution of minimum/missing values:
 ```{r}
-COMETS::plotMinvalues(exmetabdata)
+COMETS::plotMinvalues(exmetabdata,titlesize=12)
 ```
 
 ###2. Get Model Data
@@ -81,15 +81,13 @@ COMETS::showCorr(excorrdata,nlines=3)
 ```
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
-```{r,fig_width=6, fig_height=6}
+```{r in-text-fig}
 COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
-
 ```
-   
-   
-   
-
-To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix
+\
+\
+\
+To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r}
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = "age bmi")
