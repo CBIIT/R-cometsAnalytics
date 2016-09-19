@@ -3,6 +3,8 @@
 export(OutputCSVResults)
 export(getCorr)
 export(getModelData)
+export(plotMinvalues)
+export(plotVar)
 export(readCOMETSinput)
 export(showCorr)
 export(showHClust)
