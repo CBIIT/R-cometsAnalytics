@@ -95,7 +95,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       else return(length(which(dtalist$subjdata[[x]]==min(dtalist$subjdata[[x]],na.rm=TRUE))))
     }))
 
-    dtalist$metab$log2var=log2metvar
+    dtalist$metab$var=log2metvar
     dtalist$metab$num.min=num.min
 
 #    print(paste("end of readdata",Sys.time()))
