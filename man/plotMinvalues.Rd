@@ -4,18 +4,22 @@
 \alias{plotMinvalues}
 \title{Plot the distribution of the number of missing values for each metabolite}
 \usage{
-plotMinvalues(cometsdata,
-  title = "Distribution of the Number/Missing Values for each Metabolite",
-  xlabel = "Number of minimum/missing values", ylabel = "Frequency")
+plotMinvalues(cometsdata, title = "Distribution of the Number/Missing Values",
+  xlabel = "Number of minimum/missing values", ylabel = "Frequency",
+  xylabelsize = 12, titlesize = 16)
 }
 \arguments{
 \item{cometsdata}{output of readCOMETSinput function}
 
-\item{title}{main title for the plot (default is "Distribution of the Number/Missing Values for each Metabolite")}
+\item{title}{main title for the plot (default is "Distribution of the Number/Missing Values")}
 
 \item{xlabel}{x-axis label (default is "Number of minimum/missing values")}
 
 \item{ylabel}{y-axis label (default is "Frequency")}
+
+\item{xylabelsize}{size of x and y labels (default=8)}
+
+\item{titlesize}{size of title (default, 20)}
 }
 \value{
 a distribution plot
