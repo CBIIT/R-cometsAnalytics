@@ -67,7 +67,6 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     }
 
     # run through all vmap specifications to create variables
-
     dtalist <- list(subjdata = dta, # metabolite abundances
       allMetabolites = names(dta.smetab)[-1], # metabolite names
       allSubjectMetaData = names(dta.sdata)[-1], # subject meta data
@@ -82,12 +81,20 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     # Harmonize metabolites
     dtalist<-Harmonize(dtalist)
 
-    # add summary statistics
+    # Determine whether data is already transformed:
     mymets=dtalist$metab[[dtalist$metabId]]
+    if(min(dtalist$subjdata[,mymets],na.rm=T)<0) {transformation=TRUE} 
+    else {transformation=FALSE}
+    dtalist$transformation=transformation
+
+    # add summary statistics
     log2metvar=as.numeric(lapply(mymets, function(x) {
       temp=which(colnames(dtalist$subjdata)==x)
       if(length(temp)==0) {return(NA)}
-      else return(stats::var(log2(dtalist$subjdata[[x]]),na.rm=TRUE))
+      else {
+          if(transformation==TRUE) return(stats::var(dtalist$subjdata[[x]],na.rm=TRUE))
+          else return(stats::var(log2(dtalist$subjdata[[x]]),na.rm=TRUE))
+      }
     }))
     num.min=as.numeric(lapply(mymets, function(x) {
       temp=which(colnames(dtalist$subjdata)==x)
