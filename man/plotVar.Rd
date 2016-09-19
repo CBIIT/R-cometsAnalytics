@@ -4,18 +4,22 @@
 \alias{plotVar}
 \title{Plot the variance distribution of transformed metabolite abundances}
 \usage{
-plotVar(cometsdata, title = "Distribution of Variance for Each Metabolite",
+plotVar(cometsdata, title = "Distribution of Variance", titlesize = 16,
   xlabel = "Variance of transformed metabolite abundances",
-  ylabel = "Frequency")
+  ylabel = "Frequency", xylabelsize = 12)
 }
 \arguments{
 \item{cometsdata}{output of readCOMETSinput function}
 
-\item{title}{main title for the plot (default is "Distribution of Variance for Each Metabolite")}
+\item{title}{main title for the plot (default is "Distribution of Variance")}
+
+\item{titlesize}{size of title (default, 20)}
 
 \item{xlabel}{x-axis label (default is "Variance of transformed metabolite abundances")}
 
 \item{ylabel}{y-axis label (default is "Frequency")}
+
+\item{xylabelsize}{size of x and y labels (default=8)}
 }
 \value{
 a distribution plot
