@@ -4,7 +4,7 @@
 \alias{checkIntegrity}
 \title{Checks integrity of sheets in the user input CSV file}
 \usage{
-checkIntegrity(dta.metab, dta.smetab, dta.sdata, dta.vmap)
+checkIntegrity(dta.metab, dta.smetab, dta.sdata, dta.vmap, dta.models)
 }
 \arguments{
 \item{dta.metab}{dta.metab}
@@ -14,6 +14,8 @@ checkIntegrity(dta.metab, dta.smetab, dta.sdata, dta.vmap)
 \item{dta.sdata}{dta.sdata}
 
 \item{dta.vmap}{dta.vmap}
+
+\item{dta.models}{dta.models}
 }
 \description{
 Checks integrity of sheets in the user input CSV file
