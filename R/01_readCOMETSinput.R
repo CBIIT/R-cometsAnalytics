@@ -63,7 +63,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       names(dta) <- newnames
 
        #rename cohort metabid to metabolite id
-       names(dta.metab)<-plyr::mapvalues(names(dta.metab),from=metabvar,to="metabolite_id")
+#       names(dta.metab)<-plyr::mapvalues(names(dta.metab),from=metabvar,to="metabolite_id")
     }
 
     # run through all vmap specifications to create variables
