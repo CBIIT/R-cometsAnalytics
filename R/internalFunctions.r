@@ -55,7 +55,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     }
     else if (length(intersect(allmodelparams,
          c("All metabolites", colnames(dta.smetab), colnames(dta.sdata))))!=length(allmodelparams)) {
-         stop("Parameters in model data ('VarMap' sheet in input file) do not exist!  Check the naming!")
+         stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")
     }
     else if (length(subjid) == 0) {
         stop("id (for subject id) is not found as a parameter in VarMap sheet!  Specify which column should be used for subject id")
