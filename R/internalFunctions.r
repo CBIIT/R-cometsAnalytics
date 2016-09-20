@@ -48,13 +48,13 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
-    allmodelparams=unique(allmodelparams[!is.na(allmodelparams)])
+    allmodelparams=tolower(unique(allmodelparams[!is.na(allmodelparams)]))
     outmessage = c()
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
     else if (length(intersect(allmodelparams,
-         c("All metabolites", colnames(dta.smetab), colnames(dta.sdata))))!=length(allmodelparams)) {
+         tolower(c("All metabolites", colnames(dta.smetab), colnames(dta.sdata)))))!=length(allmodelparams)) {
          stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")
     }
     else if (length(subjid) == 0) {
