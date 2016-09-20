@@ -151,13 +151,16 @@ Harmonize<-function(dtalist){
   masterfile <- file.path(dir, "compileduids.RData")
   load(masterfile)
 
+  colnames(mastermetid)[which(colnames(mastermetid)=="metid")]=dtalist$metabId
   # join by metabolite_id only keep those with a match
-  harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c("metabid"="metid"))
+  harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId))
 
   # join by metabolite_name only keep those with a match
   harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
-	by=c("metabid"="metid")) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
-	mastermetid,by=c("metlower"="metid")) %>% dplyr::select(-metlower)
+        by=c(dtalist$metabId)) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
+#	by=c("metabid"="metid")) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
+#	mastermetid,by=c("metlower"="metid")) %>% dplyr::select(-metlower)
+        mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
 
   dtalist$metab<-rbind(harmlistg,harmlistc) %>% dplyr::mutate(multrows=grepl("#",uid_01),
 	harmflag=!is.na(uid_01))
