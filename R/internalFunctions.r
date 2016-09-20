@@ -40,40 +40,45 @@ fixData <- function(dta) {
 #' @param dta.smetab dta.smetab
 #' @param dta.sdata dta.sdata
 #' @param dta.vmap dta.vmap
+#' @param dta.models dta.models
+checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models) {
 
-checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap) {
-    # dta.metab = metabolite meta data (sheet 1)
-    # dta.smetab = abundance data (sheet 2)
-    # dta.sdata = subject meta data (sheet 3)
-    # dta.vmap = variable mapping data (sheet 4)
-
+    print("Running Integrity Check...")
     # get the cohort equivalent of metabolite_id and subject id
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
-    subjid = dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id']
- #   print(paste("metabid",metabid))
- #    print(paste("subjid",subjid))
+    subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
+    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
+    allmodelparams=unique(allmodelparams[!is.na(allmodelparams)])
     outmessage = c()
     if (length(metabid) == 0) {
-      outmessage = "Error: metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id"
+      stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
+    }
+    else if (length(intersect(allmodelparams,
+         c("All metabolites", colnames(dta.smetab), colnames(dta.sdata))))!=length(allmodelparams)) {
+         stop("Parameters in model data ('VarMap' sheet in input file) do not exist!  Check the naming!")
     }
     else if (length(subjid) == 0) {
-      outmessage = c(
-        outmessage,"Error: id (for subject id) is not found as a parameter in VarMap sheet!  Specify which column should be used for subject id"
-      )
+        stop("id (for subject id) is not found as a parameter in VarMap sheet!  Specify which column should be used for subject id")
+    }
+    else if (length(intersect(subjid,colnames(dta.sdata))) != 1) {
+        stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectData' sheet. Check the input file.")
+    }
+    else if (length(intersect(subjid,colnames(dta.smetab))) != 1) {
+        stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectMetabolites' sheet. Check the input file.")
+    }
+    else if (length(intersect(metabid,colnames(dta.metab))) != 1) {
+        stop("The user input metabolite_id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'Metabolites' sheet. Check the input file.")
     }
     else {
+      print("Passed the checks")
       dta.metab[[metabid]] = tolower(dta.metab[[metabid]])
       dta.sdata[[subjid]] = tolower(dta.sdata[[subjid]])
       dta.smetab[[subjid]] = tolower(dta.smetab[[subjid]])
       if (length(grep(metabid,colnames(dta.metab))) == 0) {
-        outmessage = c(
-          outmessage,"Error: Metabolite ID from 'VarMap Sheet' (",metabid,") does not match column name from 'Metabolites Sheet'"
-        )
+          stop("Error: Metabolite ID from 'VarMap Sheet' (",metabid,") does not match column name from 'Metabolites Sheet'")
       }
       else if (length(grep(subjid,colnames(dta.sdata))) == 0) {
-        outmessage = c(
-          outmessage,"Error: Sample ID from 'VarMap Sheet' (",subjid,") does not match a column name in 'SubjectData Sheet'"
-        )
+          stop("Error: Sample ID from 'VarMap Sheet' (",subjid,") does not match a column name in 'SubjectData Sheet'")
       }
       else if (length(unique(dta.sdata[,subjid])) != length(unique(dta.smetab[,subjid]))) {
         outmessage = c(
@@ -111,15 +116,11 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap) {
         else {
           if (length(intersect(tolower(dta.metab[[metabid]]),tolower(colnames(dta.smetab)))) !=
               nummetab) {
-            outmessage = c(
-              outmessage,"Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet"
-            )
+              stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
           }
           if (length(intersect(dta.sdata[[subjid]],dta.smetab[[subjid]])) !=
               numsamples) {
-            outmessage = c(
-              outmessage,"Error: Sample ids in SubjectMetabolites DO NOT ALL match subject ids in SubjectData sheet"
-            )
+              stop("Error: Sample ids in SubjectMetabolites DO NOT ALL match subject ids in SubjectData sheet")
           }
         }
       }

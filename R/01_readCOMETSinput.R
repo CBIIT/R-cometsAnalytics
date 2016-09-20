@@ -31,7 +31,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
 
   # Check file integrity:
     ckintegrity=checkIntegrity(dta.metab=dta.metab,dta.smetab=dta.smetab,
-	dta.sdata=dta.sdata,dta.vmap=dta.vmap)
+	dta.sdata=dta.sdata,dta.vmap=dta.vmap,dta.models=dta.models)
     integritymessage=ckintegrity$outmessage
     dta.metab=ckintegrity$dta.metab
     dta.smetab=ckintegrity$dta.smetab
@@ -48,7 +48,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
   else {
 	dta <- dplyr::inner_join(dta.sdata, dta.smetab)
 
-      idvar<-dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id']
+      idvar<-tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
       metabvar<-tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
 
      #rename variables if batch mode so we can run models
