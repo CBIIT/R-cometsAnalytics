@@ -42,17 +42,17 @@ createCOMETSinput <- function(metabfile=NULL,
 
   else {
 	# Write the Metabolite sheet
-        metab=read.csv(metabfile)
+        metab=utils::read.csv(metabfile)
 	xlsx::write.xlsx(metab,outputfile,sheetName="Metabolite",
 		row.names=FALSE,showNA=FALSE)
 
         # Write the SubjectMetabolites sheet
-	abund=read.csv(abundancesfile)
+	abund=utils::read.csv(abundancesfile)
         xlsx::write.xlsx(abund,outputfile,sheetName="SubjectMetabolites",
 		row.names=FALSE,append=TRUE,showNA=FALSE)
 
 	# Write the SubjectData sheet
-	subj=read.csv(subjfile)
+	subj=utils::read.csv(subjfile)
         xlsx::write.xlsx(subj,outputfile,sheetName="SubjectData",row.names=FALSE,
 		append=TRUE,showNA=FALSE)
 
