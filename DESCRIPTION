@@ -17,7 +17,8 @@ Imports:
 	psych,
 	plotly,
 	tidyr,
-	d3heatmap
+	d3heatmap,
+	xlsx
 Suggests: knitr
 VignetteBuilder: knitr
 License: GPL-3
