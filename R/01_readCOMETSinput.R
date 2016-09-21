@@ -36,8 +36,6 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     dta.metab=ckintegrity$dta.metab
     dta.smetab=ckintegrity$dta.smetab
     dta.sdata=ckintegrity$dta.sdata
-    print("Printing Integrity Message:")
-    print(integritymessage)
 
 
 # If an error was found during integrity check (e.g. not all metabolites or subjects
@@ -108,5 +106,11 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
 #    print(paste("end of readdata",Sys.time()))
     } # end else integritycheck doesn't contain error
 
+    # Check that all exposure variables are mode numeric:
+    modes=unique(sapply(dtalist$subjdata[,dtalist$allSubjectMetaData],class))
+    if(length(modes)>1 || modes != "numeric") {
+       stop("One of the variables used in the analysis (defined in the SubjectData sheet) includes non-numeric values.  These variables should include only numeric values.")
+    }
+    print(integritymessage)
     return(dtalist)
 }
