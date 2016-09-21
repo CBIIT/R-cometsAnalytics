@@ -70,7 +70,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
         stop("The user input metabolite_id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'Metabolites' sheet. Check the input file.")
     }
     else {
-      print("Passed the checks")
+      #print("Passed the checks")
       dta.metab[[metabid]] = tolower(dta.metab[[metabid]])
       dta.sdata[[subjid]] = tolower(dta.sdata[[subjid]])
       dta.smetab[[subjid]] = tolower(dta.smetab[[subjid]])
@@ -100,7 +100,6 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
           outmessage,"Warning: Metabolite Information sheet (Metabolites) contains duplicate metabolite ids"
         )
       }
-
       else {
         nummetab = length(unique(colnames(dta.smetab)[-c(which(colnames(dta.smetab) ==
                                                                  subjid))]))
