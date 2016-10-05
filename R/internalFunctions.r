@@ -2,14 +2,21 @@
 # fixData function ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
+#' @keywords internal
 #' @param dta results of reading a CSV data sheet (with read_excel)
 
 fixData <- function(dta) {
+  dta<-as.data.frame(dta) # have to convert to dataframe from local dataframe from readxl
   # run through the data
-  colnames(dta) <- tolower(colnames(dta))
+  colnames(dta) <- tolower(trimws(colnames(dta)))
 
   # remove rows that have all NAs (EM)
   countnas=as.numeric(apply(data.frame(dta),1,function(x) length(which(is.na(x)))))
+
+  #trim white space
+  #dta<-data.frame(lapply(dta,trimws))
+
+
   if (length(which(countnas==ncol(dta)))>0) {
   	dta=dta[-c(which(countnas==ncol(dta))),]
   }
@@ -24,8 +31,17 @@ fixData <- function(dta) {
 
   if (length(which(cls == "factor")) > 0) {
     for (ind in which(cls == "factor"))
-      dta[,ind] <- as.character(dta[,ind])
+      dta[,ind] <- trimws(as.character(dta[,ind])) # trim and convert to character
   }
+  if (length(which(cls == "character")) > 0) {
+    for (indc in names(dta)) {
+      if(class(dta[, indc]) %in% c("factor", "character")){
+        dta[, indc] <- trimws(dta[, indc])
+      }
+    }
+
+  }
+
   return(dta)
 } # end fixData function
 
@@ -36,6 +52,7 @@ fixData <- function(dta) {
 # checkIntegrity function ---------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Checks integrity of sheets in the user input CSV file
+#' @keywords internal
 #' @param dta.metab dta.metab
 #' @param dta.smetab dta.smetab
 #' @param dta.sdata dta.sdata
@@ -141,6 +158,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
 # Harmonize ---------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
+#' @keywords internal
 #' @param dtalist results of reading a CSV data sheet (with read_excel)
 
 Harmonize<-function(dtalist){
@@ -150,13 +168,17 @@ Harmonize<-function(dtalist){
   masterfile <- file.path(dir, "compileduids.RData")
   load(masterfile)
 
+  # rename metid to be the same as metabid
   colnames(mastermetid)[which(colnames(mastermetid)=="metid")]=dtalist$metabId
+
+
   # join by metabolite_id only keep those with a match
   harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId))
 
   # join by metabolite_name only keep those with a match
   harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
-        by=c(dtalist$metabId)) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
+        by=c(dtalist$metabId)) %>%
+          dplyr::mutate(metlower=gsub("\\*$","",tolower(metabolite_name))), # take out * in metabolite name
 #	by=c("metabid"="metid")) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
 #	mastermetid,by=c("metlower"="metid")) %>% dplyr::select(-metlower)
         mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
@@ -175,6 +197,7 @@ Harmonize<-function(dtalist){
 # prdebug ---------------------------------------------------
 # ---------------------------------------------------------------------------
 #' debug by printing object with time time
+#' @keywords internal
 #' @param lab label of object
 #' @param x object
 #
