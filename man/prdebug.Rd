@@ -14,4 +14,5 @@ prdebug(lab, x)
 \description{
 debug by printing object with time time
 }
+\keyword{internal}
 

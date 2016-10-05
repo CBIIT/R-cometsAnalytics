@@ -75,42 +75,59 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       mods = dta.models, # model specification information
       integritymessage = integritymessage # message for integrity check
     )
-
+  print(names(dtalist))
     # Harmonize metabolites
     dtalist<-Harmonize(dtalist)
 
-    # Determine whether data is already transformed:
-    mymets=dtalist$metab[[dtalist$metabId]]
-    if(min(dtalist$subjdata[,mymets],na.rm=T)<0) {transformation=TRUE} 
-    else {transformation=FALSE}
-    dtalist$transformation=transformation
+    # check to see which columns have non-missing values
+    havedata<-apply(dtalist$subjdata,2, function(x)all(is.na(x)))
 
-    # add summary statistics
-    log2metvar=as.numeric(lapply(mymets, function(x) {
-      temp=which(colnames(dtalist$subjdata)==x)
-      if(length(temp)==0) {return(NA)}
-      else {
-          if(transformation==TRUE) return(stats::var(dtalist$subjdata[[x]],na.rm=TRUE))
-          else return(stats::var(log2(dtalist$subjdata[[x]]),na.rm=TRUE))
-      }
-    }))
-    num.min=as.numeric(lapply(mymets, function(x) {
-      temp=which(colnames(dtalist$subjdata)==x)
-      if(length(temp)==0) {return(NA)}
-      else return(length(which(dtalist$subjdata[[x]]==min(dtalist$subjdata[[x]],na.rm=TRUE))))
-    }))
+    # keep only columns with non-missing values
+    mymets=dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
+    mymets=mymets[mymets %in% names(havedata[havedata==FALSE])]
 
-    dtalist$metab$var=log2metvar
-    dtalist$metab$num.min=num.min
+    if (length(mymets)>0) {
+      # Determine whether data is already transformed:
+        tst<-min(dtalist$subjdata[,c(mymets)],na.rm=T)
+        if(tst<0) {transformation=TRUE}
+        else {transformation=FALSE}
 
-#    print(paste("end of readdata",Sys.time()))
-    } # end else integritycheck doesn't contain error
+      # ?? et 10/4/16 in the future, we might need to check whether each metabolite is transformed for now any negative value applies to all
 
-    # Check that all exposure variables are mode numeric:
-    modes=unique(sapply(dtalist$subjdata[,dtalist$allSubjectMetaData],class))
-    if(length(modes)>1 || modes != "numeric") {
-       stop("One of the variables used in the analysis (defined in the SubjectData sheet) includes non-numeric values.  These variables should include only numeric values.")
+        # add summary statistics
+        log2metvar=as.numeric(lapply(mymets, function(x) {
+          temp=which(colnames(dtalist$subjdata)==x)
+          if(length(temp)==0) {return(NA)}
+          else {
+            if(transformation==TRUE) return(stats::var(dtalist$subjdata[[x]],na.rm=TRUE))
+            else return(stats::var(log2(dtalist$subjdata[[x]]),na.rm=TRUE))
+          }
+        }))
+
+        # number of observations at minimum value
+        num.min=as.numeric(lapply(mymets, function(x) {
+          temp=which(colnames(dtalist$subjdata)==x)
+          if(length(temp)==0) {return(NA)}
+          else return(length(which(dtalist$subjdata[[x]]==min(dtalist$subjdata[[x]],na.rm=TRUE))))
+        }))
+        dtalist$transformation=transformation
+        dtalist$metab$var[dtalist$metab$metabid %in% mymets]=log2metvar
+        dtalist$metab$num.min[dtalist$metab$metabid %in% mymets]=num.min
     }
+    else { # if all subject metabolite data is missing
+      dtalist$transformation=NA
+      dtalist$metab$var = NA
+      dtalist$metab$num.min = NA
+    }
+
+
+
+
+    # et it is possible that we can have non-numeric subject data for example, sex etc. 10/5/16
+    # Check that all exposure variables are mode numeric:
+#    modes=unique(sapply(dtalist$subjdata[,dtalist$allSubjectMetaData],class))
+#    if(length(modes)>1 || modes != "numeric") {
+#       stop("One of the variables used in the analysis (defined in the SubjectData sheet) includes non-numeric value.  These variables should include only numeric values.")
     print(integritymessage)
     return(dtalist)
-}
+}}

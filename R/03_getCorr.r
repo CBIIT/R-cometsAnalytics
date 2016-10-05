@@ -7,7 +7,7 @@
 #' @param metabdata metabolite data list
 #' @param cohort cohort label (e.g DPP, NCI, Shanghai)
 #'
-#' @return a correlation matrix with outcomes as rows and exposures in columns with additional columns for n, pvalue, metabolite_id, method of model specification (Interactive or Batch), name of the cohort and adjustment variables.
+#' @return data frame with each row representing the correlation for each combination of outcomes and exposures with additional columns for n, pvalue, metabolite_id, method of model specification (Interactive or Batch), name of the cohort and adjustment variables. Attribute of dataframe includes ptime for processing time of model run.
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
@@ -18,6 +18,7 @@
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
   # Defining global variables to pass Rcheck()
+  ptm <- proc.time() # start processing time
   exposuren=exposurep=metabolite_id=c()
 
   # get correlation matrix
@@ -106,6 +107,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>% select(-exposuren, -exposurep)
 
   #corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
+  # Stop the clock
+  ptm <- proc.time() - ptm
+  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
 return(corrlong)
 }
