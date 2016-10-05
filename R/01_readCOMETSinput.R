@@ -75,7 +75,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       mods = dta.models, # model specification information
       integritymessage = integritymessage # message for integrity check
     )
-  print(names(dtalist))
+
     # Harmonize metabolites
     dtalist<-Harmonize(dtalist)
 
