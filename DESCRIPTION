@@ -18,7 +18,9 @@ Imports:
 	plotly,
 	tidyr,
 	d3heatmap,
-	xlsx
+	xlsx,
+        shiny,
+        shinyFiles
 Suggests: knitr
 VignetteBuilder: knitr
 License: GPL-3
