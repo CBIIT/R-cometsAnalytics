@@ -1,9 +1,8 @@
 #' Read in CSV files and create an Excell file that's formatted for input into Comets Analytics
 #' Once the output Excell file is created, users will need to go in and complete
 #' the sheets 'VarMap' and 'Models'
-#' @param metabfile CSV file name, including path, of metabolite meta data
-#' @param subjfile CSV file name, includingpath, of subject meta data
-#' @param abundancesfile CSV file name, including path, of metabolite abundances
+#' @param filenames names of CSV files, including path, of metabolite meta data,
+#'      metabolite abundances, and subject meta data (in that order)
 #' @param outputfile name, including path,  of output .xlsx file
 #'
 #' @return NULL
@@ -13,31 +12,32 @@
 #' metabfile <- file.path(dir, "testmetab.csv")
 #' subjfile <- file.path(dir, "testsubject.csv")
 #' abundancesfile <- file.path(dir, "testabundances.csv")
-#' createCOMETSinput(metabfile=metabfile, 
-#'       subjfile=subjfile,
-#'       abundancesfile=abundancesfile,
+#' createCOMETSinput(filenames=c(metabfile,abundancesfile,subjfile), 
 #'       outputfile="MyData.xlsx")
 #'
 #' @export
 
-createCOMETSinput <- function(metabfile=NULL,
-                  subjfile=NULL,
-                  abundancesfile=NULL,
+createCOMETSinput <- function(filenames=NULL,
                   outputfile=NULL){
 
-  if (is.null(metabfile) || is.null(subjfile) ||
-       is.null(abundancesfile) || is.null(outputfile)) {
+  if (is.null(filenames) || is.null(outputfile)) {
       stop("Be sure that all input files and outputfile are passed onto the function")
   }
+  if (length(filenames) != 3) {
+     stop("Be sure that the input parameter 'filenames' has 3 CSV names, including path")
+  }
+  metabfile=filenames[1]
+  abundancesfile=filenames[2]
+  subjfile=filenames[3]
 
   if (!file.exists(metabfile)) {
      stop("metabfile does not exist, please check name")
   }
-  else if (!file.exists(subjfile)) {
-     stop("subjfile does not exist, please check name")
-  }
   else if (!file.exists(abundancesfile)) {
        stop("abundancesfile does not exist, please check name")
+  }
+  else if (!file.exists(subjfile)) {
+     stop("subjfile does not exist, please check name")
   }
 
   else {
@@ -69,7 +69,7 @@ createCOMETSinput <- function(metabfile=NULL,
 	models=data.frame(MODEL=c("1.1 Unadjusted","1.2 BMI adjusted"),
 		OUTCOMES=c("All metabolites","All metabolites"),
 		EXPOSURE=c("age","age"),
-		ADJUSTMENT=c("",""))
+		ADJUSTMENT=c("","bmi"))
         xlsx::write.xlsx(models,outputfile,sheetName="Models",row.names=FALSE,
 		append=TRUE,showNA=FALSE)
   }
