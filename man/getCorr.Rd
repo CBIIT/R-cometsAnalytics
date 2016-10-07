@@ -14,7 +14,7 @@ getCorr(modeldata, metabdata, cohort = "")
 \item{cohort}{cohort label (e.g DPP, NCI, Shanghai)}
 }
 \value{
-a correlation matrix with outcomes as rows and exposures in columns with additional columns for n, pvalue, metabolite_id, method of model specification (Interactive or Batch), name of the cohort and adjustment variables.
+data frame with each row representing the correlation for each combination of outcomes and exposures with additional columns for n, pvalue, metabolite_id, method of model specification (Interactive or Batch), name of the cohort and adjustment variables. Attribute of dataframe includes ptime for processing time of model run.
 }
 \description{
 Calculate correlation matrix
