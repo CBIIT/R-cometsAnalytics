@@ -69,7 +69,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     modelvar=tolower(setdiff(unique(modelvar[!is.na(modelvar)]),"All metabolites"))
 
     for (i in modelvar) {
-	newmodelvar=dta.vmap$cohortvariable[which(dta.vmap$varreference==i)]
+	newmodelvar=tolower(dta.vmap$cohortvariable[which(dta.vmap$varreference==i)])
         dta.models$outcomes[which(dta.models$outcomes==i)]=newmodelvar
         dta.models$exposure[which(dta.models$exposure==i)]=newmodelvar
         dta.models$adjustment[which(dta.models$adjustment==i)]=newmodelvar
