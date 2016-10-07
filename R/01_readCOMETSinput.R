@@ -64,6 +64,17 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
 #       names(dta.metab)<-plyr::mapvalues(names(dta.metab),from=metabvar,to="metabolite_id")
     }
 
+# Change Models so that they grab the correct cohortvariable name
+    modelvar=unique(c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment))
+    modelvar=tolower(setdiff(unique(modelvar[!is.na(modelvar)]),"All metabolites"))
+
+    for (i in modelvar) {
+	newmodelvar=dta.vmap$cohortvariable[which(dta.vmap$varreference==i)]
+        dta.models$outcomes[which(dta.models$outcomes==i)]=newmodelvar
+        dta.models$exposure[which(dta.models$exposure==i)]=newmodelvar
+        dta.models$adjustment[which(dta.models$adjustment==i)]=newmodelvar
+    }
+    
     # run through all vmap specifications to create variables
     dtalist <- list(subjdata = dta, # metabolite abundances
       allMetabolites = names(dta.smetab)[-1], # metabolite names
@@ -97,10 +108,10 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
         # add summary statistics
         log2metvar=as.numeric(lapply(mymets, function(x) {
           temp=which(colnames(dtalist$subjdata)==x)
-          if(length(temp)==0) {return(NA)}
-          else {
-            if(transformation==TRUE) return(stats::var(dtalist$subjdata[[x]],na.rm=TRUE))
-            else return(stats::var(log2(dtalist$subjdata[[x]]),na.rm=TRUE))
+          if(length(temp)==0) {return(NA)} else {
+            if(transformation==TRUE) {
+		return(stats::var(dtalist$subjdata[[x]],na.rm=TRUE))} else {
+		return(stats::var(log2(dtalist$subjdata[[x]]),na.rm=TRUE))}
           }
         }))
 
@@ -111,8 +122,8 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
           else return(length(which(dtalist$subjdata[[x]]==min(dtalist$subjdata[[x]],na.rm=TRUE))))
         }))
         dtalist$transformation=transformation
-        dtalist$metab$var[dtalist$metab$metabid %in% mymets]=log2metvar
-        dtalist$metab$num.min[dtalist$metab$metabid %in% mymets]=num.min
+        dtalist$metab$var[dtalist$metab[,dtalist$metabId] %in% mymets]=log2metvar
+        dtalist$metab$num.min[dtalist$metab[,dtalist$metabId] %in% mymets]=num.min
     }
     else { # if all subject metabolite data is missing
       dtalist$transformation=NA
