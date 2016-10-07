@@ -6,15 +6,11 @@
 Once the output Excell file is created, users will need to go in and complete
 the sheets 'VarMap' and 'Models'}
 \usage{
-createCOMETSinput(metabfile = NULL, subjfile = NULL,
-  abundancesfile = NULL, outputfile = NULL)
+createCOMETSinput(filenames = NULL, outputfile = NULL)
 }
 \arguments{
-\item{metabfile}{CSV file name, including path, of metabolite meta data}
-
-\item{subjfile}{CSV file name, includingpath, of subject meta data}
-
-\item{abundancesfile}{CSV file name, including path, of metabolite abundances}
+\item{filenames}{names of CSV files, including path, of metabolite meta data,
+metabolite abundances, and subject meta data (in that order)}
 
 \item{outputfile}{name, including path,  of output .xlsx file}
 }
@@ -28,9 +24,7 @@ dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 metabfile <- file.path(dir, "testmetab.csv")
 subjfile <- file.path(dir, "testsubject.csv")
 abundancesfile <- file.path(dir, "testabundances.csv")
-createCOMETSinput(metabfile=metabfile, 
-      subjfile=subjfile,
-      abundancesfile=abundancesfile,
+createCOMETSinput(filenames=c(metabfile,abundancesfile,subjfile), 
       outputfile="MyData.xlsx")
 
 }
