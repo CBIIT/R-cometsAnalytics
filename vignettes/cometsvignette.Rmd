@@ -82,7 +82,7 @@ COMETS::showCorr(excorrdata,nlines=3)
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
 ```{r in-text-fig}
-COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
+#COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
 ```
 \
 \
