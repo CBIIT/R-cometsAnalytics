@@ -116,12 +116,14 @@ showCorr <- function(corr, nlines=50) {
 #' @references For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
 #'
 #' @examples
+#' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInput.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
+#' }
 #' @export
 
 showHeatmap <- function (ccorrmat,
@@ -153,7 +155,7 @@ showHeatmap <- function (ccorrmat,
   }
 
   ccorrmat %>%
-  plotly::plot_ly(z = signif(corr),x = exposure, y = metabolite_name,
+  plotly::plot_ly(z = signif(as.numeric(corr)),x = exposure, y = metabolite_name,
           type = "heatmap",
           colorscale=colscale,
           colorbar = list(title = "Correlation")) %>%

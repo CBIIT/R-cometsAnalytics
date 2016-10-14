@@ -46,8 +46,8 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
   else {
 	dta <- dplyr::inner_join(dta.sdata, dta.smetab)
 
-      idvar<-tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
-      metabvar<-tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
+      idvar<-base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
+      metabvar<-base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
 
      #rename variables if batch mode so we can run models
     if (modelspec == 'Batch') {
@@ -55,8 +55,8 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       tst<-dplyr::filter(dta.vmap,!is.na(dta.vmap[["cohortvariable"]]) & dta.vmap[["varreference"]] != "metabolite_id")
 
       newnames <- plyr::mapvalues(names(dta),
-                            from = c(tolower(tst$cohortvariable)),
-                            to = c(tolower(tst$varreference)))
+                            from = c(base::tolower(tst$cohortvariable)),
+                            to = c(base::tolower(tst$varreference)))
 
       names(dta) <- newnames
 
@@ -66,10 +66,11 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
 
 # Change Models so that they grab the correct cohortvariable name
     modelvar=unique(c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment))
-    modelvar=tolower(setdiff(unique(modelvar[!is.na(modelvar)]),"All metabolites"))
+    modelvar=base::tolower(base::setdiff(unique(modelvar[!is.na(modelvar)]),
+	"All metabolites"))
 
     for (i in modelvar) {
-	newmodelvar=tolower(dta.vmap$cohortvariable[which(dta.vmap$varreference==i)])
+	newmodelvar=base::tolower(dta.vmap$cohortvariable[which(dta.vmap$varreference==i)])
         dta.models$outcomes[which(dta.models$outcomes==i)]=newmodelvar
         dta.models$exposure[which(dta.models$exposure==i)]=newmodelvar
         dta.models$adjustment[which(dta.models$adjustment==i)]=newmodelvar
@@ -91,7 +92,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     dtalist<-Harmonize(dtalist)
 
     # check to see which columns have non-missing values
-    havedata<-apply(dtalist$subjdata,2, function(x)all(is.na(x)))
+    havedata<-base::apply(dtalist$subjdata,2, function(x)all(is.na(x)))
 
     # keep only columns with non-missing values
     mymets=dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
@@ -106,7 +107,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       # ?? et 10/4/16 in the future, we might need to check whether each metabolite is transformed for now any negative value applies to all
 
         # add summary statistics
-        log2metvar=as.numeric(lapply(mymets, function(x) {
+        log2metvar=as.numeric(base::lapply(mymets, function(x) {
           temp=which(colnames(dtalist$subjdata)==x)
           if(length(temp)==0) {return(NA)} else {
             if(transformation==TRUE) {
