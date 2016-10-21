@@ -21,14 +21,14 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   ptm <- proc.time() # start processing time
   exposuren=exposurep=metabolite_id=c()
 
-  # get correlation matrix
-  col.rcovar <- match(modeldata[[3]],names(modeldata[[1]]))
+  # column indices of row covariates
+  col.rcovar <- match(modeldata$rcovs,names(modeldata$gdta))
 
   # column indices of column covariates
-  col.ccovar <- match(modeldata[[2]],names(modeldata[[1]]))
+  col.ccovar <- match(modeldata$ccovs,names(modeldata$gdta))
 
   # column indices of adj-var
-  col.adj <- match(modeldata[[4]],names(modeldata[[1]]))
+  col.adj <- match(modeldata$acovs,names(modeldata$gdta))
 
   # Defining global variable to remove R check warnings
   corr=c()
@@ -59,7 +59,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     #      corr <-devtools::load_all(".")
 
     #        pcor.test(data[,col.rcovar],data[,col.ccovar], data[,col.adj],method="spearman")
-    dtarank<-as.data.frame(apply(modeldata[[1]],2,rank))
+    dtarank<-as.data.frame(apply(modeldata$gdta,2,rank))
 
     #filter columns with 0 variance
     # take out indices with - variance

@@ -1,8 +1,11 @@
 #' Read in CSV files and create an Excell file that's formatted for input into Comets Analytics
 #' Once the output Excell file is created, users will need to go in and complete
 #' the sheets 'VarMap' and 'Models'
-#' @param filenames names of CSV files, including path, of metabolite meta data,
-#'      metabolite abundances, and subject meta data (in that order)
+#' @param filenames names of CSV files, including path, of 
+#'	1) metabolite meta data (metabolite names in first column, then meta information in other columns),
+#'      2) metabolite abundances (sample_id as first column, then metabolites as other columns), 
+#'      3) subject meta data (sample_id as first column, then meta information)
+#' 	The filenames MUST BE IN THE ORDER SPECIFIED ABOVE
 #' @param outputfile name, including path,  of output .xlsx file
 #'
 #' @return NULL
