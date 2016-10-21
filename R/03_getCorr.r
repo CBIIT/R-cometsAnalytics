@@ -106,6 +106,11 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       cohort = cohort,
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>% select(-exposuren, -exposurep)
 
+  # Add in pathway information:
+  colstokeep=c(which(colnames(metabdata$metab)==metabdata$metabId),grep("pathway",colnames(metabdata$metab),ignore.case=T))
+  corrlong=dplyr::select(inner_join(corrlong,metabdata$metab[,colstokeep],
+	by=c("metabolite_name"=metabdata$metabId)),-metabolite_name)
+
   #corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
   # Stop the clock
   ptm <- proc.time() - ptm
