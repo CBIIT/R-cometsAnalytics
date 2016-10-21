@@ -74,7 +74,7 @@ getModelData <-  function(readData,
      }
 
       # Throw a warning if an ajdusted covariate is also an exposure and there is more than 1 exposure
-      if (length(intersect(adjvars,ccovs))>0 && length(ccovs)>1) {
+      if (length(intersect(adjvars,ccovs))>0 && length(ccovs)>length(adjvars)) {
 	vartoremove=intersect(adjvars,ccovs)
         print(paste0("WARNING: one of the adjusted covariates is also an exposure!!\n",
 		"The variable ",vartoremove," will be dropped from the list of exposures"))
@@ -88,7 +88,7 @@ getModelData <-  function(readData,
       }
 
       # Throw a warning if an adjusted covariate is also an outcome amd there is more than 1 outcome
-      if (length(intersect(adjvars,rcovs))>0 && length(rcovs)>1) {
+      if (length(intersect(adjvars,rcovs))>0 && length(rcovs)>length(adjvars)) {
 	vartoremove=intersect(adjvars,rcovs)
         print(paste0("WARNING: one of the adjusted covariates is also an outcome!!\n",
                 "The variable(s) ",vartoremove," will be dropped from the list of outcomes"))
