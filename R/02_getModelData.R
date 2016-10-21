@@ -6,7 +6,7 @@
 #' @param readData list from readComets
 #' @param modelspec How model is specified (Interactive or Batch)
 #' @param modbatch  if batch, chosen model specified by batch mode
-#' @param rowvars   if Interactive, outcome variables (usually metabolites and rendered in rows default in All metabolites)
+#' @param rowvars   if Interactive, outcome variables (usually metabolites rendered in rows, default is All metabolites)
 #' @param colvars   if Interactive, exposure variables (usually covariates rendered in columns)
 #' @param adjvars   If Interactive, adjustment covariates
 #'
@@ -51,34 +51,50 @@ getModelData <-  function(readData,
       if (!is.na(match("All metabolites",rowvars))) {
         print("Analysis will run on 'All metabolites'")
         rcovs <-
-          unique(c(rowvars[rowvars != "All metabolites"],c(readData[[2]])))
-      }
-      else {
+          unique(c(rowvars[rowvars != "All metabolites"],c(readData$allMetabolites)))
+      }  else {
         rcovs <- unlist(strsplit(rowvars," "))
       }
 
       # rename the exposure variables
-      if (!is.na(match("All metabolites",colvars)))
+      if (!is.na(match("All metabolites",colvars))) {
         ccovs <-
-          unique(c(colvars[colvars != "All metabolites"],c(readData[[2]])))
-      else
-        ccovs <- unlist(strsplit(colvars," "))
+          unique(c(colvars[colvars != "All metabolites"],c(readData$allMetabolites))) } else {
+        ccovs <- unlist(strsplit(colvars," ")) }
 
       # rename the covariables
-      if (!is.null(adjvars))
-        acovs <- unlist(strsplit(adjvars," "))
-      else
-        acovs<-adjvars
-      # Throw error if an ajdusted covariate is also an exposure
-      if (length(intersect(adjvars,colvars))>0) {
+      if (!is.null(adjvars)) {
+        acovs <- unlist(strsplit(adjvars," ")) } else {
+        acovs<-adjvars }
+
+      # Throw error if an ajdusted covariate is also an exposure and there is only 1 exposure
+      if (length(intersect(adjvars,ccovs))>0 && length(ccovs)==1) {
 	stop("ERROR: one of the adjusted covariates is also an exposure!!
 		Please make sure adjusted covariates are not exposures.")
-      }
-      # Throw error if an adjusted covariate is also an outcome
-      if (length(intersect(adjvars,rowvars))>0) {
+     }
+
+      # Throw a warning if an ajdusted covariate is also an exposure and there is more than 1 exposure
+      if (length(intersect(adjvars,ccovs))>0 && length(ccovs)>1) {
+	vartoremove=intersect(adjvars,ccovs)
+        print(paste0("WARNING: one of the adjusted covariates is also an exposure!!\n",
+		"The variable ",vartoremove," will be dropped from the list of exposures"))
+	ccovs=setdiff(ccovs,adjvars)
+     }
+
+      # Throw error if an adjusted covariate is also an outcome and there is only 1 outcome
+      if (length(intersect(adjvars,rcovs))>0 && length(rcovs)==1) {
         stop("ERROR: one of the adjusted covariates is also an outcome!!
                 Please make sure adjusted covariates are not outcomes.")
       }
+
+      # Throw a warning if an adjusted covariate is also an outcome amd there is more than 1 outcome
+      if (length(intersect(adjvars,rcovs))>0 && length(rcovs)>1) {
+	vartoremove=intersect(adjvars,rcovs)
+        print(paste0("WARNING: one of the adjusted covariates is also an outcome!!\n",
+                "The variable(s) ",vartoremove," will be dropped from the list of outcomes"))
+	rcovs=setdiff(rcovs,adjvars)
+      }
+
       # Throw error if there is more than one exposure
       #if (length(colvars)>1) {
 #	stop("ERROR: Only one exposure is allowable at a time!")
