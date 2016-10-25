@@ -109,7 +109,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   # Add in pathway information:
   colstokeep=c(which(colnames(metabdata$metab)==metabdata$metabId),grep("pathway",colnames(metabdata$metab),ignore.case=T))
   corrlong=dplyr::select(inner_join(corrlong,metabdata$metab[,colstokeep],
-	by=c("metabolite_name"=metabdata$metabId)),-metabolite_name)
+	by=c("metabolite_name"=metabdata$metabId)),-metabolite_name,metabolite_name)
 
   #corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
   # Stop the clock
