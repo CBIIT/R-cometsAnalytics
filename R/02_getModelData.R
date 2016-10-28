@@ -69,7 +69,7 @@ getModelData <-  function(readData,
 
       # Throw error if an ajdusted covariate is also an exposure and there is only 1 exposure
       if (length(intersect(adjvars,ccovs))>0 && length(ccovs)==1) {
-	stop("ERROR: one of the adjusted covariates is also an exposure!!
+	stop("ERROR: one of the adjusted covariates is also an exposure and there is only one exposure!!
 		Please make sure adjusted covariates are not exposures.")
      }
 
@@ -83,7 +83,7 @@ getModelData <-  function(readData,
 
       # Throw error if an adjusted covariate is also an outcome and there is only 1 outcome
       if (length(intersect(adjvars,rcovs))>0 && length(rcovs)==1) {
-        stop("ERROR: one of the adjusted covariates is also an outcome!!
+        stop("ERROR: one of the adjusted covariates is also an outcome and there is only 1 outcome!!
                 Please make sure adjusted covariates are not outcomes.")
       }
 
@@ -94,11 +94,6 @@ getModelData <-  function(readData,
                 "The variable(s) ",vartoremove," will be dropped from the list of outcomes"))
 	rcovs=setdiff(rcovs,adjvars)
       }
-
-      # Throw error if there is more than one exposure
-      #if (length(colvars)>1) {
-#	stop("ERROR: Only one exposure is allowable at a time!")
- #     }
 
     } # end if modelspec is "Interactive"
 
@@ -156,5 +151,4 @@ getModelData <-  function(readData,
     )
 
   }
-
 
