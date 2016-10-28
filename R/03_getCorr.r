@@ -40,7 +40,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     #       names(data)<-paste0("v",1:length(names(data)))
     #    assign('gdata',data,envir=.GlobalEnv)
     corr<-stats::cor(data,method = "spearman",use="pairwise.complete.obs")
+
     corr <- data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
+
     # If there are more than one exposure, then need to transpose
     if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
 
@@ -59,30 +61,43 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     #      corr <-devtools::load_all(".")
 
     #        pcor.test(data[,col.rcovar],data[,col.ccovar], data[,col.adj],method="spearman")
-    dtarank<-as.data.frame(apply(modeldata$gdta,2,rank))
+    #dtarank<-as.data.frame(apply(modeldata$gdta[-incommon,2,rank))
 
     #filter columns with 0 variance
     # take out indices with - variance
     #which(apply(dtarank,2,var)==0,arr.ind = T)
 
+    # Added the unique below so if exposure and outcome are equal, it's not run
+    # (partial.r actually throws an error in this case)
+    
+    data<-modeldata[[1]][,c(col.adj,col.rcovar,col.ccovar)]
+    spearcorr <- stats::cor(data,method = "spearman",use="pairwise.complete.obs")
+    # get coordinates for outcomes and exposures for input into partial.r:
+    myind=c(match(modeldata$rcovs,colnames(spearcorr)),
+	match(modeldata$ccovs,colnames(spearcorr)))
+    corr <-psych::partial.r(spearcorr,myind,col.adj)
+    # get coordinates of outcomes for output corr:
+    xcorr=match(modeldata$rcovs,colnames(corr))
+    ycorr=match(modeldata$ccovs,colnames(corr))
+    corr=as.data.frame(corr[xcorr,ycorr])
 
-    corr <-psych::partial.r(dtarank,c(col.rcovar,col.ccovar),col.adj)
-    corr<-as.data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
+#    corr<-as.data.frame(corr[1:length(col.rcovar),-(1:length(col.rcovar))])
     # If there are more than one exposure, then need to transpose
     if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
+
+#    colnames(corr)=names(dtarank)[col.rcovar]
 
     #corr <-corr.p(data,c(col.rcovar,col.ccovar), col.adj,method="spearman")
     #corr<-corr$estimate[1:length(col.rcovar),-(1:length(col.rcovar))]
     # calculate complete cases matrix
     n  <-
       matrix(NA,nrow = length(col.rcovar),ncol = length(col.ccovar))
-    n  <-
-      matrix(NA,nrow = length(col.rcovar),ncol = length(col.ccovar))
     for (i in 1:length(col.rcovar)) {
       for (j in 1:length(col.ccovar)) {
-        n[i,j] <- sum(stats::complete.cases(dtarank[,c(col.rcovar[i],col.ccovar[j],col.adj)]))
+        n[i,j] <- sum(stats::complete.cases(data[,c(col.rcovar[i],col.ccovar[j],col.adj)]))
       }
     }
+#   corr=cbind(corr,n)
 
   } # End else adjusted mode (length(col.adj) is not zero)
 
