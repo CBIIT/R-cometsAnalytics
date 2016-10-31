@@ -75,7 +75,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
         dta.models$exposure[which(dta.models$exposure==i)]=newmodelvar
         dta.models$adjustment[which(dta.models$adjustment==i)]=newmodelvar
     }
-    
+
     # run through all vmap specifications to create variables
     dtalist <- list(subjdata = dta, # metabolite abundances
       allMetabolites = names(dta.smetab)[-1], # metabolite names
@@ -131,6 +131,9 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       dtalist$metab$var = NA
       dtalist$metab$num.min = NA
     }
+
+    # vector of variables to display in table
+    dtalist$dispvars <- c("outcome_label","exposure_label","adjvars","corr","pvalue","n","cohort")
 
 
 
