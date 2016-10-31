@@ -14,7 +14,7 @@ getModelData(readData, modelspec = "Batch", modbatch = "",
 
 \item{modbatch}{if batch, chosen model specified by batch mode}
 
-\item{rowvars}{if Interactive, outcome variables (usually metabolites and rendered in rows default in All metabolites)}
+\item{rowvars}{if Interactive, outcome variables (usually metabolites rendered in rows, default is All metabolites)}
 
 \item{colvars}{if Interactive, exposure variables (usually covariates rendered in columns)}
 

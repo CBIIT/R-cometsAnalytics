@@ -69,7 +69,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
     # Added the unique below so if exposure and outcome are equal, it's not run
     # (partial.r actually throws an error in this case)
-    
+
     data<-modeldata[[1]][,c(col.adj,col.rcovar,col.ccovar)]
     spearcorr <- stats::cor(data,method = "spearman",use="pairwise.complete.obs")
     # get coordinates for outcomes and exposures for input into partial.r:
@@ -113,18 +113,30 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   corrlong <-
     fixData(data.frame(
-      tidyr::gather(cbind(corr, metabolite_name = rownames(corr)),
+      tidyr::gather(cbind(corr, outcome = rownames(corr)),
                     "exposure","corr",1:length(col.ccovar)
       ),
       tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
       cohort = cohort,
-      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>% select(-exposuren, -exposurep)
+      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
+    select(-exposuren, -exposurep)
 
-  # Add in pathway information:
-  colstokeep=c(which(colnames(metabdata$metab)==metabdata$metabId),grep("pathway",colnames(metabdata$metab),ignore.case=T))
-  corrlong=dplyr::select(inner_join(corrlong,metabdata$metab[,colstokeep],
-	by=c("metabolite_name"=metabdata$metabId)),-metabolite_name,metabolite_name)
+  # Add in metabolite information and outcome labels:
+  corrlong<-dplyr::left_join(corrlong,
+                             dplyr::select(metabdata$metab,metabid,outcome_uid=uid_01,outmetname=biochemical),
+                             by=c("outcome"=metabdata$metabId)) %>%
+           dplyr::mutate(outcome_label=ifelse(!is.na(outmetname),outmetname,outcome)) %>%
+           dplyr::select(-outmetname)
+
+  # Add in metabolite information and exposure labels:
+  corrlong<-dplyr::left_join(corrlong,
+                             dplyr::select(metabdata$metab,metabid,exposure_uid=uid_01,expmetname=metabolite_name),
+                             by=c("exposure"=metabdata$metabId)) %>%
+    dplyr::mutate(exposure_label=ifelse(!is.na(expmetname),expmetname,exposure)) %>%
+    dplyr::select(-expmetname)
+
+
 
   #corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
   # Stop the clock
