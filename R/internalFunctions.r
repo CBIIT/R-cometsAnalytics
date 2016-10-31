@@ -181,12 +181,11 @@ Harmonize<-function(dtalist){
   harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
         by=c(dtalist$metabId)) %>%
           dplyr::mutate(metlower=gsub("\\*$","",tolower(metabolite_name))), # take out * in metabolite name
-#	by=c("metabid"="metid")) %>% dplyr::mutate(metlower=tolower(metabolite_name)),
-#	mastermetid,by=c("metlower"="metid")) %>% dplyr::select(-metlower)
         mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
 
-  dtalist$metab<-rbind(harmlistg,harmlistc) %>% dplyr::mutate(multrows=grepl("#",uid_01),
-	harmflag=!is.na(uid_01))
+  # combine the 2 data frames
+  dtalist$metab<-rbind(harmlistg,harmlistc) %>%
+    dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
 
   return(dtalist)
 
