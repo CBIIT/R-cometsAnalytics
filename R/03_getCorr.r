@@ -113,27 +113,27 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   corrlong <-
     fixData(data.frame(
-      tidyr::gather(cbind(corr, outcome = rownames(corr)),
-                    "exposure","corr",1:length(col.ccovar)
+      tidyr::gather(cbind(corr, outcomespec = rownames(corr)),
+                    "exposurespec","corr",1:length(col.ccovar)
       ),
       tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
       cohort = cohort,
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
-    select(-exposuren, -exposurep)
+    dplyr::select(-exposuren, -exposurep)
 
   # Add in metabolite information and outcome labels:
   corrlong<-dplyr::left_join(corrlong,
                              dplyr::select(metabdata$metab,metabid,outcome_uid=uid_01,outmetname=biochemical),
-                             by=c("outcome"=metabdata$metabId)) %>%
-           dplyr::mutate(outcome_label=ifelse(!is.na(outmetname),outmetname,outcome)) %>%
+                             by=c("outcomespec"=metabdata$metabId)) %>%
+           dplyr::mutate(outcome=ifelse(!is.na(outmetname),outmetname,outcomespec)) %>%
            dplyr::select(-outmetname)
 
   # Add in metabolite information and exposure labels:
   corrlong<-dplyr::left_join(corrlong,
                              dplyr::select(metabdata$metab,metabid,exposure_uid=uid_01,expmetname=metabolite_name),
-                             by=c("exposure"=metabdata$metabId)) %>%
-    dplyr::mutate(exposure_label=ifelse(!is.na(expmetname),expmetname,exposure)) %>%
+                             by=c("exposurespec"=metabdata$metabId)) %>%
+    dplyr::mutate(exposure=ifelse(!is.na(expmetname),expmetname,exposurespec)) %>%
     dplyr::select(-expmetname)
 
 
