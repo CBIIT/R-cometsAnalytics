@@ -133,7 +133,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     }
 
     # vector of variables to display in table
-    dtalist$dispvars <- c("outcome_label","exposure_label","adjvars","corr","pvalue","n","cohort")
+    dtalist$dispvars <- c("outcome","exposure","adjvars","corr","pvalue","n","cohort")
 
 
 
