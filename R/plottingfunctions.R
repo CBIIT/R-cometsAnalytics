@@ -207,7 +207,7 @@ showHeatmap <- function (ccorrmat,
 showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
- metabolite_name=exposure=corr=c()
+ outcome=metabolite_name=exposure=corr=c()
   excorr <-
     ccorrmat %>% dplyr::select(outcome, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
