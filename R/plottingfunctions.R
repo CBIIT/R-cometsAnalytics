@@ -209,7 +209,7 @@ showHClust <- function (ccorrmat,
                         colscale = "RdYlBu") {
  metabolite_name=exposure=corr=c()
   excorr <-
-    ccorrmat %>% dplyr::select(metabolite_name, exposure, corr) %>% tidyr::spread(exposure, corr)
+    ccorrmat %>% dplyr::select(outcome, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
 
   ncols <- ncol(excorr)
