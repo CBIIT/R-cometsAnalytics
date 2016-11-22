@@ -19,7 +19,8 @@
 getCorr <- function (modeldata,metabdata,cohort=""){
   # Defining global variables to pass Rcheck()
   ptm <- proc.time() # start processing time
-  exposuren=exposurep=metabolite_id=c()
+  metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
+  metabolite_name=expmetname=exposurespec=c()
 
   # column indices of row covariates
   col.rcovar <- match(modeldata$rcovs,names(modeldata$gdta))
