@@ -6,6 +6,7 @@
 #'      2) metabolite abundances (sample_id as first column, then metabolites as other columns), 
 #'      3) subject meta data (sample_id as first column, then meta information)
 #' 	The filenames MUST BE IN THE ORDER SPECIFIED ABOVE
+#' @param varmap data.frame with the id names for subjects, metabolites, and other meta information
 #' @param outputfile name, including path,  of output .xlsx file
 #'
 #' @return NULL
@@ -15,19 +16,37 @@
 #' metabfile <- file.path(dir, "testmetab.csv")
 #' subjfile <- file.path(dir, "testsubject.csv")
 #' abundancesfile <- file.path(dir, "testabundances.csv")
+#' varmap=data.frame(metabid="METABID", id="ID",
+#'         age="AGE",bmi="BMI")
 #' createCOMETSinput(filenames=c(metabfile,abundancesfile,subjfile), 
 #'       outputfile="MyData.xlsx")
 #'
 #' @export
 
-createCOMETSinput <- function(filenames=NULL,
+createCOMETSinput <- function(filenames=NULL,varmap=NULL,
                   outputfile=NULL){
+
+  if(is.null(varmap)) {
+        varmap=data.frame(VARREFERENCE=c("id","age","bmi","metabolite_id"),
+                VARDEFINITION=c("cohort subject id","age measured","BMI in kg/m2",
+                "metabolite id"),
+                COHORTVARIABLE=rep("",4),
+                COHORTNOTES=rep("",4))
+	warning("no variable mapping is provided through the varmap parameter so that sheet will be left blank")
+}
+  else {
+	varmap=data.frame(VARREFERENCE=colnames(varmap),
+		VARDEFINITION=rep("",4),
+		COHORTVARIABLE=as.character(unlist(varmap)),
+		COHORTNOTES=rep("",4))
+}
 
   if (is.null(filenames) || is.null(outputfile)) {
       stop("Be sure that all input files and outputfile are passed onto the function")
   }
   if (length(filenames) != 3) {
-     stop("Be sure that the input parameter 'filenames' has 3 CSV names, including path")
+     stop(paste("Be sure that the input parameter 'filenames' has 3 CSV names, including path\n
+      Current 'filenames' content is",filenames))
   }
   metabfile=filenames[1]
   abundancesfile=filenames[2]
@@ -60,11 +79,6 @@ createCOMETSinput <- function(filenames=NULL,
 		append=TRUE,showNA=FALSE)
 
 	# Write the VarMap sheet
-	varmap=data.frame(VARREFERENCE=c("id","age","bmi","metabolite_id"),
-		VARDEFINITION=c("cohort subject id","age measured","BMI in kg/m2",
-		"metabolite id"),
-		COHORTVARIABLE=rep("",4),
-		COHORTNOTES=rep("",4))
         xlsx::write.xlsx(varmap,outputfile,sheetName="VarMap",row.names=FALSE,
 		append=TRUE,showNA=FALSE)
 
