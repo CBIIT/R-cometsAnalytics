@@ -6,7 +6,7 @@
 Once the output Excell file is created, users will need to go in and complete
 the sheets 'VarMap' and 'Models'}
 \usage{
-createCOMETSinput(filenames = NULL, outputfile = NULL)
+createCOMETSinput(filenames = NULL, varmap = NULL, outputfile = NULL)
 }
 \arguments{
 \item{filenames}{names of CSV files, including path, of 
@@ -14,6 +14,8 @@ createCOMETSinput(filenames = NULL, outputfile = NULL)
      2) metabolite abundances (sample_id as first column, then metabolites as other columns), 
      3) subject meta data (sample_id as first column, then meta information)
     The filenames MUST BE IN THE ORDER SPECIFIED ABOVE}
+
+\item{varmap}{data.frame with the id names for subjects, metabolites, and other meta information}
 
 \item{outputfile}{name, including path,  of output .xlsx file}
 }
@@ -27,6 +29,8 @@ dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 metabfile <- file.path(dir, "testmetab.csv")
 subjfile <- file.path(dir, "testsubject.csv")
 abundancesfile <- file.path(dir, "testabundances.csv")
+varmap=data.frame(metabid="METABID", id="ID",
+        age="BMI",bmi="BMI")
 createCOMETSinput(filenames=c(metabfile,abundancesfile,subjfile), 
       outputfile="MyData.xlsx")
 
