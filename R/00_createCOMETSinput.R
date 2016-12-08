@@ -35,6 +35,7 @@ createCOMETSinput <- function(filenames=NULL,varmap=NULL,
 	warning("no variable mapping is provided through the varmap parameter so that sheet will be left blank")
 }
   else {
+        print(varmap)
 	varmap=data.frame(VARREFERENCE=colnames(varmap),
 		VARDEFINITION=rep("",4),
 		COHORTVARIABLE=as.character(unlist(varmap)),
