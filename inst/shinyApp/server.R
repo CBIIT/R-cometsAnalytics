@@ -30,28 +30,40 @@ shinyServer(function(input, output,session) {
  output$downloadExcell <- downloadHandler(
  	filename = "MyData.xlsx",
          content = function(outputfile) {
+             myvarmap=c()
+             if(input$metabid != "Optional") {
+		myvarmap$metabid=input$metabid }
+             if(input$subjid != "Optional"){
+                myvarmap$id=input$subjid }
+             if(input$ageid != "Optional"){
+                myvarmap$age=input$ageid }
+             if(input$bmiid != "Optional"){
+                myvarmap$bmi=input$bmiid }
+          
+             if(!is.null(myvarmap)) {myvarmap=as.data.frame(myvarmap)}
+
               COMETS::createCOMETSinput(
-                 filenames= req(loadInputFiles()), outputfile=outputfile)
+                 filenames= req(loadInputFiles()), varmap=myvarmap,outputfile=outputfile)
          })
 
  output$selectMETABid <- renderUI({
-        mychoices=colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$metabfile)$datapath))))
-        selectInput("metabids","Select Metabolite Id",mychoices)
+        mychoices=c("Optional",colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$metabfile)$datapath)))))
+        selectInput("metabid","Select Metabolite Id",mychoices)
   })
 
  output$selectSUBJid <- renderUI({
-        mychoices=colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath))))
-        selectInput("metabids","Select Subject Id",mychoices)
+        mychoices=c("Optional",colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath)))))
+        selectInput("subjid","Select Subject Id",mychoices)
   })
 
  output$selectAGEid <- renderUI({
-        mychoices=colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath))))
-        selectInput("metabids","Select Age Id",mychoices)
+        mychoices=c("Optional",colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath)))))
+        selectInput("ageid","Select Age Id",mychoices)
   })
 
  output$selectBMIid <- renderUI({
-        mychoices=colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath))))
-        selectInput("metabids","Select BMI Id",mychoices)
+        mychoices=c("Optional",colnames(read.csv(req(as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath)))))
+        selectInput("bmiid","Select BMI Id",mychoices)
   })
 
 })
