@@ -16,11 +16,11 @@
 #' metabfile <- file.path(dir, "testmetab.csv")
 #' subjfile <- file.path(dir, "testsubject.csv")
 #' abundancesfile <- file.path(dir, "testabundances.csv")
+#' filenames <- list(metabfile=metabfile, abundancesfile=abundancesfile, subjfile=subjfile)
 #' varmap=data.frame(metabid="METABID", id="ID",
 #'         age="AGE",bmi="BMI")
-#' createCOMETSinput(filenames=c(metabfile,abundancesfile,subjfile), 
+#' createCOMETSinput(filenames=filenames, 
 #'       outputfile="MyData.xlsx")
-#'
 #' @export
 
 createCOMETSinput <- function(filenames=NULL,varmap=NULL,
@@ -48,9 +48,9 @@ createCOMETSinput <- function(filenames=NULL,varmap=NULL,
      stop(paste("Be sure that the input parameter 'filenames' has 3 CSV names, including path\n
       Current 'filenames' content is",filenames))
   }
-  metabfile=filenames[1]
-  abundancesfile=filenames[2]
-  subjfile=filenames[3]
+  metabfile=filenames$metabfile
+  abundancesfile=filenames$abundancesfile
+  subjfile=filenames$subjfile
 
   if (!file.exists(metabfile)) {
      stop("metabfile does not exist, please check name")
