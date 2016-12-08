@@ -29,10 +29,10 @@ dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 metabfile <- file.path(dir, "testmetab.csv")
 subjfile <- file.path(dir, "testsubject.csv")
 abundancesfile <- file.path(dir, "testabundances.csv")
+filenames <- list(metabfile=metabfile, abundancesfile=abundancesfile, subjfile=subjfile)
 varmap=data.frame(metabid="METABID", id="ID",
-        age="BMI",bmi="BMI")
-createCOMETSinput(filenames=c(metabfile,abundancesfile,subjfile), 
+        age="AGE",bmi="BMI")
+createCOMETSinput(filenames=filenames, 
       outputfile="MyData.xlsx")
-
 }
 
