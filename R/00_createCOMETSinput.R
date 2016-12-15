@@ -77,7 +77,11 @@ else {
         warning("no variable mapping is provided through the varmap parameter so that sheet will be left blank")
 }
   else {
-        print(varmap)
+        # Check that the input varmap file has all entries:
+        numvarmap=length(intersect(names(varmap),tomap$varreference))
+        if(numvarmap != length(tomap$varreference)) {
+           stop(cat("Be sure that the varmap input is correct.  It should include mapped ids for ",tomap$cohortvariable),"\n") }
+        # print(varmap)
         newvarmap=tomap
         newvarmap$cohortvariable=as.character(unlist(varmap[tomap$varreference]))
         varmap=newvarmap
