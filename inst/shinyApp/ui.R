@@ -5,6 +5,8 @@ shinyUI(fluidPage(
 
   sidebarLayout(
     sidebarPanel(
+                h4("Select Template"),
+                selectInput("template","Select Template",c("Age","Basic"),multiple=FALSE,selected="Age"),
                 h4("Select Input Files"),
                 p("Select Metabolite Meta-Data CSV File:"),
                 shinyFilesButton('metabfile',
@@ -23,15 +25,10 @@ shinyUI(fluidPage(
                                  multiple=FALSE),
 		h4("Map variable names to ids (optional):"),
                 p(""),
-                htmlOutput("selectMETABid"),
-                p(""),
-                htmlOutput("selectSUBJid"),
-                p(""),
-                htmlOutput("selectAGEid"),
-                p(""),
-                htmlOutput("selectBMIid")
+                uiOutput("OtherVarMaps")
     ),
     mainPanel(
+                textOutput("text1"),
                 downloadButton("downloadExcell",
                                  strong("Download Template Excell sheet")
                 )
