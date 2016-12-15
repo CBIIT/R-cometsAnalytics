@@ -29,7 +29,7 @@ Plot the distribution of the number of missing values for each metabolite
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInput.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 plotMinvalues(exmetabdata)
 
