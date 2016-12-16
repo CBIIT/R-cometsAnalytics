@@ -86,4 +86,22 @@ print(tomap)
                  filenames= req(loadInputFiles()), varmap=myvarmap,outputfile=outputfile)
    })
 
+   output$file1 <- renderText({
+             metabfile=as.character(parseFilePaths(rootVolumes,input$metabfile)$datapath)
+	     if(length(metabfile)==0) {return(NULL)}
+             else {return(paste("Loaded ",metabfile))}
+   })
+
+   output$file2 <- renderText({
+             abundfile=as.character(parseFilePaths(rootVolumes,input$abundfile)$datapath)
+             if(length(abundfile)==0) {return(NULL)}
+             else {return(paste("Loaded ",abundfile))}
+   })
+
+   output$file3 <- renderText({
+             subjfile=as.character(parseFilePaths(rootVolumes,input$subjfile)$datapath)
+             if(length(subjfile)==0) {return(NULL)}
+             else {return(paste("Loaded ",subjfile))}
+   })
+
 })
