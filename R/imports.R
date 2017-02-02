@@ -12,4 +12,5 @@
 #' @import plotly
 #' @importFrom tidyr gather
 #' @importFrom d3heatmap d3heatmap
+#' @importFrom Hmisc rcorr
 NULL
