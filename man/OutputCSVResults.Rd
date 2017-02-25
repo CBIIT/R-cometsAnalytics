@@ -30,4 +30,3 @@ OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
 # Get harmonization results
 OutputCSVResults(filename="harmonization",dataf=exmetabdata$metab,cohort="DPP")
 }
-
