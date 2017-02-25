@@ -13,4 +13,3 @@ Harmonize(dtalist)
 Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
 }
 \keyword{internal}
-

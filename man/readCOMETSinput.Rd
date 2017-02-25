@@ -23,4 +23,3 @@ csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 
 }
-
