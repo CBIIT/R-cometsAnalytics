@@ -21,7 +21,7 @@ This function outputs a heatmap with hierarchical clustering.  It thus requires 
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInput.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
 corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
@@ -30,4 +30,3 @@ showHClust(corrmatrix)
 \references{
 For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
 }
-
