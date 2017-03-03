@@ -6,16 +6,22 @@
 Once the output Excell file is created, users will need to go in and complete
 the sheets 'VarMap' and 'Models'}
 \usage{
-createCOMETSinput(filenames = NULL, varmap = NULL, outputfile = NULL)
+createCOMETSinput(template = "age", filenames = NULL, varmap = NULL,
+  outputfile = NULL)
 }
 \arguments{
+\item{template}{template file to be used with preset parameters (options: 'age' or 'basic')}
+
 \item{filenames}{names of CSV files, including path, of 
 1) metabolite meta data (metabolite names in first column, then meta information in other columns),
      2) metabolite abundances (sample_id as first column, then metabolites as other columns), 
      3) subject meta data (sample_id as first column, then meta information)
     The filenames MUST BE IN THE ORDER SPECIFIED ABOVE}
 
-\item{varmap}{data.frame with the id names for subjects, metabolites, and other meta information}
+\item{varmap}{data.frame with the id names for subjects, metabolites, and other meta information.
+If "age" is the template, then variable ids for 'id' (subject id), 'age', 'bmi', 'metabid' need
+to be defined.
+If "basic" is the template, then variable ids for 'id' (subject id) and 'metabid' need to be defined}
 
 \item{outputfile}{name, including path,  of output .xlsx file}
 }
@@ -30,9 +36,8 @@ metabfile <- file.path(dir, "testmetab.csv")
 subjfile <- file.path(dir, "testsubject.csv")
 abundancesfile <- file.path(dir, "testabundances.csv")
 filenames <- list(metabfile=metabfile, abundancesfile=abundancesfile, subjfile=subjfile)
-varmap=data.frame(metabid="METABID", id="ID",
+varmap=data.frame(metabolite_id="METABID", id="ID",
         age="AGE",bmi="BMI")
 createCOMETSinput(filenames=filenames, 
       outputfile="MyData.xlsx")
 }
-
