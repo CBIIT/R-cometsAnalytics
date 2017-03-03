@@ -9,6 +9,7 @@
 #' @param rowvars   if Interactive, outcome variables (usually metabolites rendered in rows, default is All metabolites)
 #' @param colvars   if Interactive, exposure variables (usually covariates rendered in columns)
 #' @param adjvars   If Interactive, adjustment covariates
+#' @param strvars   If Interactive, stratification covariates
 #'
 #' @return a list comprising:
 #'
@@ -19,6 +20,8 @@
 #' 3: row variables: rcovs
 #'
 #' 4: adjustment variables: acovs
+#'
+#' 5: stratification variable: scovs
 #'
 #' @examples
 #'
@@ -34,7 +37,8 @@ getModelData <-  function(readData,
            modbatch  = "",
            rowvars   = "All metabolites",
            colvars   = "",
-           adjvars   = NULL) {
+           adjvars   = NULL,
+           strvars   = NULL) {
 
     if(is.na(match(modelspec,c("Interactive","Batch")))) {
 	stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
@@ -62,10 +66,15 @@ getModelData <-  function(readData,
           unique(c(colvars[colvars != "All metabolites"],c(readData$allMetabolites))) } else {
         ccovs <- unlist(strsplit(colvars," ")) }
 
-      # rename the covariables
+      # rename the covariates
       if (!is.null(adjvars)) {
         acovs <- unlist(strsplit(adjvars," ")) } else {
         acovs<-adjvars }
+
+      # rename the covariates
+      if (!is.null(strvars)) {
+        scovs <- unlist(strsplit(strvars," ")) } else {
+          scovs<-strvars }
 
       # Throw error if an ajdusted covariate is also an exposure and there is only 1 exposure
       if (length(intersect(adjvars,ccovs))>0 && length(ccovs)==1) {
@@ -125,16 +134,22 @@ getModelData <-  function(readData,
         acovs<-as.vector(strsplit(mods$adjustment," ")[[1]])
       else acovs<-NULL
 
+      if (!is.na(mods$stratification))
+        scovs<-as.vector(strsplit(mods$stratification," ")[[1]])
+      else scovs<-NULL
+
     } # end if modelspec == "Batch"
 
   # Keep only needed variables for the data
-    if (is.null(acovs)) {
-      gdta <-dplyr::select(readData[[1]], one_of(c(ccovs, rcovs)))
+  # build list of variables
+  covlist<-c(ccovs, rcovs)
+    if (!is.null(acovs)) {
+      covlist<-c(covlist,acovs)
     }
-    else {
-      gdta <-
-        dplyr::select(readData[[1]], one_of(c(acovs,ccovs, rcovs)))
+    if (!is.null(scovs)) {
+      covlist<-c(covlist,scovs)
     }
+  gdta<-dplyr::select(readData[[1]], one_of(covlist))
 
     # list for subset data
     # 1: subset data: gdta
@@ -147,7 +162,8 @@ getModelData <-  function(readData,
       gdta = gdta,
       ccovs = ccovs,
       rcovs = rcovs,
-      acovs = acovs
+      acovs = acovs,
+      scovs = scovs
     )
 
   }

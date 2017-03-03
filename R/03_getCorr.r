@@ -1,5 +1,5 @@
 #---------------------------------------------------------
-# Get correlation matrix -----------------------------------------
+# getCorr: get correlation matrix ------------------------
 #---------------------------------------------------------
 #' Calculate correlation matrix
 #'
@@ -26,10 +26,10 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
   metabolite_name=expmetname=exposurespec=c()
 
-  # column indices of row covariates
+  # column indices of row/outcome covariates
   col.rcovar <- match(modeldata[["rcovs"]],names(modeldata[["gdta"]]))
 
-  # column indices of column covariates
+  # column indices of column/exposure covariates
   col.ccovar <- match(modeldata[["ccovs"]],names(modeldata[["gdta"]]))
 
   # column indices of adj-var
@@ -139,7 +139,6 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
 
 
-  #corrlong <- dplyr::select(inner_join(corrlong,metabdata$metab,by=c("metabolite_id"=metabdata$metabId)),-metabolite_id)
   # Stop the clock
   ptm <- proc.time() - ptm
   attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
@@ -149,5 +148,47 @@ return(corrlong)
 
 
 #---------------------------------------------------------
-# showHeatmap -----------------------------------------
+# stratCorr: stratified correlation analysis -------------
+#' Calculate correlation matrix for each strata specified if stratification is specified in the model tab or in interactive mode
+#'
+#' @param modeldata list from function getModelData
+#' @param metabdata metabolite data list
+#' @param cohort cohort label (e.g DPP, NCI, Shanghai)
+#'
+#' @return data frame with each row representing the correlation for each combination of outcomes and exposures represented as specified in the
+#' model (*spec), label (*lab), and universal id (*_uid)
+#' with additional columns for n, pvalue, method of model specification (Interactive or Batch), universal id for outcomes (outcome_uid) and exposures (exposure_uid)
+#' name of the cohort, adjustment (adjvars) and stratification (stratavar,strata)  variables. Attribute of dataframe includes ptime for processing time of model
+#' run.
+#'
+#' @examples
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
+#' @export
+stratCorr<- function(modeldata,metabdata,cohort=""){
+  # start the clock
+  ptm <- proc.time() # start processing time
+
+  # initialize to avoid globalv errors
+  stratlist=holdmod=holdcorr=scorr=NULL
+
+  stratlist <- unique(modeldata$gdta[modeldata$scovs])
+  for (i in seq(along=stratlist[,1])) {
+    holdmod <- modeldata
+    holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
+      select(-dplyr::one_of(modeldata$scovs))
+    holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
+    holdcorr$stratavar<-as.character(modeldata$scovs)
+    holdcorr$strata<-stratlist[i,1]
+    scorr<-dplyr::bind_rows(scorr,holdcorr)
+  }
+  # Stop the clock
+  ptm <- proc.time() - ptm
+  attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+
+  return(scorr)
+}
 
