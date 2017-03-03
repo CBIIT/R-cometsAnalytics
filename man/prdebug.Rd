@@ -15,4 +15,3 @@ prdebug(lab, x)
 debug by printing object with time time
 }
 \keyword{internal}
-
