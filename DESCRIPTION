@@ -1,7 +1,7 @@
 Package: COMETS
 Type: Package
 Title: Comets Analytics for consortium based metabolomic analyses
-Version: 0.0.0.8005
+Version: 0.0.0.8007
 Author: Ella Temprosa, Ewy Mathe
 Maintainer: Ewy Mathe <ewy.mathe@osumc.edu>, Ella Temprosa <ella@bsc.gwu.edu>
 Description: This R package support all cohort-specific analyses of
@@ -20,7 +20,8 @@ Imports:
 	d3heatmap,
 	xlsx,
         shiny,
-        shinyFiles
+        shinyFiles,
+        Hmisc
 Suggests: knitr
 VignetteBuilder: knitr
 License: GPL-3
