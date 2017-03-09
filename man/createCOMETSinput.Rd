@@ -35,4 +35,3 @@ varmap=data.frame(metabid="METABID", id="ID",
 createCOMETSinput(filenames=filenames, 
       outputfile="MyData.xlsx")
 }
-
