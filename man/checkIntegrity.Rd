@@ -21,3 +21,4 @@ checkIntegrity(dta.metab, dta.smetab, dta.sdata, dta.vmap, dta.models)
 Checks integrity of sheets in the user input CSV file
 }
 \keyword{internal}
+
