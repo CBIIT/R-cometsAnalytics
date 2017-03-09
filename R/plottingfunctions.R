@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotVar(exmetabdata)
 #'
@@ -54,7 +54,7 @@ plotVar <- function(cometsdata,
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotMinvalues(exmetabdata)
 #'
@@ -92,7 +92,7 @@ plotMinvalues <- function(cometsdata,
 #' @return first 50 lines of output
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
@@ -118,7 +118,7 @@ showCorr <- function(corr, nlines=50) {
 #' @examples
 #' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
@@ -198,7 +198,7 @@ showHeatmap <- function (ccorrmat,
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInput.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
