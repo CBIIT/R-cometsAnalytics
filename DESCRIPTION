@@ -12,6 +12,7 @@ Description: This R package support all cohort-specific analyses of the COMETS
 Depends:
     R (>= 3.3.0)
 Imports:
+    ClassComparison,
     readxl,
     dplyr,
     plyr,
