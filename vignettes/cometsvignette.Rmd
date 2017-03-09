@@ -105,7 +105,7 @@ COMETS::OutputCSVResults("Model1",excordata,cohort="")
 All models desginated in the input file can be run with one command, and individual output CSV files or correlation results will be written in the current directory by default. The function returns a list of resulting data frames.
 
 ```{r}
-allresults <- COMETS::runAllModels(exmetabdata)
+allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
 
 ```
 

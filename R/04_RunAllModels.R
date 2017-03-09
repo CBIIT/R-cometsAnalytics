@@ -23,7 +23,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 
   for (i in mymodels) {
         print(paste("Running",i))
-	mymod <- getModelData(exmetabdata,modbatch=i)
+	mymod <- getModelData(readData,modbatch=i)
         mycorr <- getCorr(mymod,readData,cohort)
 	results[[i]] <- mycorr  
         if (writeTofile) {
