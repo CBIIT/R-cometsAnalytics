@@ -24,6 +24,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   # Defining global variables to pass Rcheck()
   ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
+  cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
   metabolite_name=expmetname=exposurespec=c()
 
   # column indices of row/outcome covariates
