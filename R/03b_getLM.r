@@ -51,27 +51,28 @@ getLM <- function (modeldata,metabdata,cohort=""){
     coef <- data.frame(mlm@coefficients[colnames(exposure),])
     colnames(coef)=paste0(modeldata$ccovs,"_Beta")
     pval <- data.frame(mlm@p.values)
-    colnames(pval)=paste0(modeldata$ccovs,"_pval")
+    colnames(pval)="model_pval"
   }
   else {
     # calculate partial lmelation matrix
     print("running adjusted")
 
-    exposure <= data.frame(modeldata[['gdta']][,c(col.ccovar,col.adj)])
+    exposure <- data.frame(modeldata[['gdta']][,c(col.ccovar,col.adj)])
     mlm <- ClassComparison::MultiLinearModel(form = Y ~ .,
              clindata = exposure,
              arraydata = t(modeldata[['gdta']][,c(col.rcovar)]))
 
     coef <- data.frame(t(mlm@coefficients[-1,]))
+    colnames(coef) <- paste0(colnames(coef),"_Beta")
     pval <- data.frame(mlm@p.values)
-    colnames(pval)=paste0(modeldata$ccovs,"_pval")
+    colnames(pval)="model_pval"
   } # End else adjusted mode
 
   lmres <- cbind(coef,pval)
 
   # Stop the clock
   ptm <- proc.time() - ptm
-  attr(lmlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+  attr(lmres,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
 return(lmres)
 }
