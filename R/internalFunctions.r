@@ -64,7 +64,9 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     # get the cohort equivalent of metabolite_id and subject id
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
-    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
+#    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
+    allmodelparams=c(dta.models$outcomes,dta.models$exposure, 
+          unlist(lapply(dta.models$adjustment,function(x) strsplit(x,";"))))
     allmodelparams=tolower(unique(allmodelparams[!is.na(allmodelparams)]))
     outmessage = c()
     if (length(metabid) == 0) {
