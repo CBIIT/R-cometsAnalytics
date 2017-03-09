@@ -66,7 +66,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
 
 # Change Models so that they grab the correct cohortvariable name
     modelvar=unique(c(dta.models$outcomes,dta.models$exposure, 
-            unlist(strsplit(dta.models$adjustment,";"))))
+            unlist(strsplit(dta.models$adjustment," "))))
     modelvar=base::tolower(base::setdiff(unique(modelvar[!is.na(modelvar)]),
 	"All metabolites"))
     modelvar <- modelvar[!is.na(modelvar)]
