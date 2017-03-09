@@ -5,7 +5,8 @@
 \title{Get data ready for the model runs in interactive or batch mode as specified in the input}
 \usage{
 getModelData(readData, modelspec = "Batch", modbatch = "",
-  rowvars = "All metabolites", colvars = "", adjvars = NULL)
+  rowvars = "All metabolites", colvars = "", adjvars = NULL,
+  strvars = NULL)
 }
 \arguments{
 \item{readData}{list from readComets}
@@ -19,6 +20,8 @@ getModelData(readData, modelspec = "Batch", modbatch = "",
 \item{colvars}{if Interactive, exposure variables (usually covariates rendered in columns)}
 
 \item{adjvars}{If Interactive, adjustment covariates}
+
+\item{strvars}{If Interactive, stratification covariates}
 }
 \value{
 a list comprising:
@@ -30,6 +33,8 @@ a list comprising:
 3: row variables: rcovs
 
 4: adjustment variables: acovs
+
+5: stratification variable: scovs
 }
 \description{
 Get data ready for the model runs in interactive or batch mode as specified in the input
@@ -42,3 +47,4 @@ exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 
 }
+

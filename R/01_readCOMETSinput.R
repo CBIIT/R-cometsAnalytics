@@ -58,8 +58,7 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
                             from = c(base::tolower(tst$cohortvariable)),
                             to = c(base::tolower(tst$varreference)))
 
-      names(dta) <- newnames
-
+      dta.vmap<-tst
        #rename cohort metabid to metabolite id
 #       names(dta.metab)<-plyr::mapvalues(names(dta.metab),from=metabvar,to="metabolite_id")
     }
@@ -87,7 +86,8 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
       metabId = metabvar, # id used for metabolite names
       metab = dta.metab, # metabolite meta data
       mods = dta.models, # model specification information
-      integritymessage = integritymessage # message for integrity check
+      integritymessage = integritymessage, # message for integrity check
+      vmap = dplyr::filter(dta.vmap,!is.na(dta.vmap[["cohortvariable"]]) & dta.vmap[["varreference"]] != "metabolite_id") # variable mapping
     )
 
     # Harmonize metabolites
