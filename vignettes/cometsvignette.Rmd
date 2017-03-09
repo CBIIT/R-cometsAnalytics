@@ -35,7 +35,7 @@ The first step of the analysis is to load in the data with the *getModelData()* 
 ```{r}
 # Retrieve the full path of the input data
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInput.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 # Read in and process the input data
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
@@ -95,6 +95,19 @@ excorrdata  <- COMETS::getCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 ```
 
+Results can be written to an output CSV file with the following command:
+
+``{r}
+COMETS::OutputCSVResults("Model1",excordata,cohort="")
+```
+
+###4. Run Analysis on all models defined in the input Excell sheet
+All models desginated in the input file can be run with one command, and individual output CSV files or correlation results will be written in the current directory by default. The function returns a list of resulting data frames.
+
 ```{r}
+allresults <- COMETS::runAllModels(exmetabdata)
+
+```
+
 sessionInfo()
 ```
