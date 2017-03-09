@@ -1,4 +1,4 @@
-#---------------------------------------------------------
+#--------------------------------------------------------
 # getCorr: get correlation matrix ------------------------
 #---------------------------------------------------------
 #' Calculate correlation matrix
@@ -71,18 +71,28 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     spearcorr <- Hmisc::rcorr(as.matrix(data),type = "spearman")
 
     # get coordinates for outcomes and exposures for input into partial.r:
-    myind=c(match(modeldata$rcovs,colnames(spearcorr$r)),
+    x=c(match(modeldata$rcovs,colnames(spearcorr$r)),
 	  match(modeldata$ccovs,colnames(spearcorr$r)))
-    corr <-psych::partial.r(spearcorr$r,myind,col.adj)
+    y=match(modeldata$acovs,colnames(spearcorr$r))
+    corr <-psych::partial.r(spearcorr$r,x,y)
     # get coordinates of outcomes for output corr:
     xcorr=match(modeldata$rcovs,colnames(corr))
     ycorr=match(modeldata$ccovs,colnames(corr))
     corr=as.data.frame(corr[xcorr,ycorr])
+    colnames(corr)=modeldata$ccovs
 
-    n <- data.frame(spearcorr$n[xcorr,ycorr])
+    # Note that the order of spearcorr and corr is not the same!!
+    n <- data.frame(spearcorr$n[match(modeldata$rcovs,rownames(spearcorr$n)),
+               match(modeldata$ccovs,colnames(spearcorr$n))])
 
     ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
-    pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
+
+    # From this t-statistic, loop through and calculate p-values
+#    pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
+     pval <- data.frame(as.numeric(apply(cbind(abs(ttval[,1]),n[,1]),1,function(x)
+                stats::pt(as.numeric(x[1]),df=as.numeric(x[2])-length(col.adj)-2,
+                   lower.tail=FALSE)*2)) )
+
     colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
 
     # If there are more than one exposure, then need to transpose - not sure why???
