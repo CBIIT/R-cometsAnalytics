@@ -30,4 +30,3 @@ showHClust(corrmatrix)
 \references{
 For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
 }
-
