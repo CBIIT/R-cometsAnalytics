@@ -23,4 +23,3 @@ csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 
 }
-

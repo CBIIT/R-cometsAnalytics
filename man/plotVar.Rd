@@ -34,4 +34,3 @@ exmetabdata <- readCOMETSinput(csvfile)
 plotVar(exmetabdata)
 
 }
-

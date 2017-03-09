@@ -19,15 +19,15 @@ readCOMETSinput <- function(csvfilePath,modelspec="Interactive") {
     }
 
     #metabolite meta data
-    dta.metab<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, 1)))
+    dta.metab<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Metabolites")))
     #subject metabolite data
-    dta.smetab<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, 2)))
+    dta.smetab<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites")))
     #subject data
-    dta.sdata<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, 3)))
+    dta.sdata<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
     #variable mapping
-    dta.vmap<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, 4)))
+    dta.vmap<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
     #batch model specifications
-    dta.models<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, 5)))
+    dta.models<-suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models")))
 
   # Check file integrity:
     ckintegrity=checkIntegrity(dta.metab=dta.metab,dta.smetab=dta.smetab,
