@@ -47,4 +47,3 @@ exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
 
 }
-
