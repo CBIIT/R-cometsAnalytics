@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------
+ # ---------------------------------------------------------------------------
 # fixData function ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
@@ -65,7 +65,8 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
     # add _ to all metabolites before splitting at blank
-    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)))
+    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
+    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) # take out multiple blanks and add _ to all metabolites to avoid splitting
     allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
     if (length(metabid) == 0) {

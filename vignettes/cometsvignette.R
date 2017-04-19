@@ -1,7 +1,7 @@
 ## ------------------------------------------------------------------------
 # Retrieve the full path of the input data
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInput.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 # Read in and process the input data
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 
