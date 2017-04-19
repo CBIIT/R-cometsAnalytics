@@ -92,11 +92,12 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
 
     # From this t-statistic, loop through and calculate p-values
-#    pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
-     pval <- data.frame(as.numeric(apply(cbind(abs(ttval[,1]),n[,1]),1,function(x)
-                stats::pt(as.numeric(x[1]),df=as.numeric(x[2])-length(col.adj)-2,
-                   lower.tail=FALSE)*2)) )
-
+    pval<-ttval
+    for (i in 1:length(modeldata[[2]])){
+     pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-length(col.adj)-2,lower.tail=FALSE)*2)
+     
+    }
+    
     colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
 
     # If there are more than one exposure, then need to transpose - not sure why???
