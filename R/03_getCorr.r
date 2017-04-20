@@ -21,7 +21,19 @@
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
-  # Defining global variables to pass Rcheck()
+  # only run getcorr for n>15
+  if (nrow(modeldata$gdta)<15){
+    if (!is.na(modeldata$scovs)){
+      stop(paste(modeldata$modlabel," has at least 1 strata in",modeldata$scovs,"with less than 15 observations."))
+    }
+    else{
+      stop(paste(modeldata$modlabel," has less than 15 observations."))
+    }     
+  }
+  
+         
+      
+    # Defining global variables to pass Rcheck()
   ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
   cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
@@ -226,6 +238,7 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
       select(-dplyr::one_of(modeldata$scovs))
+    
     holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
     holdcorr$stratavar<-as.character(modeldata$scovs)
     holdcorr$strata<-stratlist[i,1]
