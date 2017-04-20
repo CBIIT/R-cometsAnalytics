@@ -21,7 +21,19 @@
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
-  # Defining global variables to pass Rcheck()
+  # only run getcorr for n>15
+  if (nrow(modeldata$gdta)<15){
+    if (!is.na(modeldata$scovs)){
+      stop(paste(modeldata$modlabel," has at least 1 strata in",modeldata$scovs,"with less than 15 observations."))
+    }
+    else{
+      stop(paste(modeldata$modlabel," has less than 15 observations."))
+    }     
+  }
+  
+         
+      
+    # Defining global variables to pass Rcheck()
   ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
   cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
@@ -74,8 +86,11 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     # get coordinates for outcomes and exposures for input into partial.r:
     x=c(match(modeldata$rcovs,colnames(spearcorr$r)),
 	  match(modeldata$ccovs,colnames(spearcorr$r)))
+
     y=match(modeldata$acovs,colnames(spearcorr$r))
+
     corr <-psych::partial.r(spearcorr$r,x,y)
+
     # get coordinates of outcomes for output corr:
     xcorr=match(modeldata$rcovs,colnames(corr))
     ycorr=match(modeldata$ccovs,colnames(corr))
@@ -89,11 +104,12 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
 
     # From this t-statistic, loop through and calculate p-values
-#    pval<-stats::pt(as.matrix(abs(ttval)),df=n-length(col.adj)-2,lower.tail=FALSE)*2
-     pval <- data.frame(as.numeric(apply(cbind(abs(ttval[,1]),n[,1]),1,function(x)
-                stats::pt(as.numeric(x[1]),df=as.numeric(x[2])-length(col.adj)-2,
-                   lower.tail=FALSE)*2)) )
-
+    pval<-ttval
+    for (i in 1:length(modeldata[[2]])){
+     pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-length(col.adj)-2,lower.tail=FALSE)*2)
+     
+    }
+    
     colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
 
     # If there are more than one exposure, then need to transpose - not sure why???
@@ -103,50 +119,81 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
   } # End else adjusted mode (length(col.adj) is not zero)
 
+  # create long data with pairwise correlations  ----------------------------------------------------
   corrlong <-
     fixData(data.frame(
+      cohort = cohort,
+      spec = modeldata$modelspec,
+      model = modeldata$modlabel,
       tidyr::gather(cbind(corr, outcomespec = rownames(corr)),
                     "exposurespec","corr",1:length(col.ccovar)
       ),
       tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
-      cohort = cohort,
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
     dplyr::select(-exposuren, -exposurep)
 
-  # Add in metabolite information and outcome labels:
-  # look in metabolite metadata
+  # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
+  # Add in metabolite information for outcome
+  # look in metabolite metadata match by metabolite id
   corrlong<-dplyr::left_join(corrlong,
                              dplyr::select(metabdata$metab,metabid,outcome_uid=uid_01,outmetname=biochemical),
                              by=c("outcomespec"=metabdata$metabId)) %>%
            dplyr::mutate(outcome=ifelse(!is.na(outmetname),outmetname,outcomespec)) %>%
            dplyr::select(-outmetname)
+
+
+  # Add in metabolite information and exposure labels:
+  # look in metabolite metadata
+  corrlong<-dplyr::left_join(corrlong,
+                             dplyr::select(metabdata$metab,metabid,exposure_uid=uid_01,expmetname=biochemical),
+                             by=c("exposurespec"=metabdata$metabId)) %>%
+    dplyr::mutate(exposure=ifelse(!is.na(expmetname),expmetname,exposurespec)) %>%
+    dplyr::select(-expmetname)
+
+
+
+
+  # patch in variable labels for better display and cohortvariables------------------------------------------
   # look in varmap
   vmap<-dplyr::select(metabdata$vmap,cohortvariable,vardefinition,varreference) %>%
-    mutate(cohortvariable=tolower(cohortvariable))
+    mutate(cohortvariable=tolower(cohortvariable),
+           vardefinition=ifelse(regexpr("\\(",vardefinition)>-1,substr(vardefinition,0,regexpr("\\(",vardefinition)-1),vardefinition))
 
-  # fill in outcome var from varmap
-  corrlong<-dplyr::left_join(corrlong,vmap,by=c("outcomespec"="cohortvariable")) %>%
-    dplyr::mutate(outcome=ifelse(!is.na(vardefinition),vardefinition,outcome),
-                  outcome_uid=ifelse(!is.na(varreference),varreference,outcome_uid)) %>%
-    dplyr::select(-vardefinition,-varreference)
+ # get good labels for the display of outcome and exposure
+ if (modeldata$modelspec=="Interactive"){
 
-  # fill in exposure var from varmap
-  corrlong<-dplyr::left_join(corrlong,vmap,by=c("exposurespec"="cohortvariable")) %>%
-    dplyr::mutate(exposure=ifelse(!is.na(vardefinition),vardefinition,exposure),
-                  exposure_uid=ifelse(!is.na(varreference),varreference,exposure_uid)) %>%
-    dplyr::select(-vardefinition,-varreference)
+  # fill in outcome vars from varmap
+   corrlong<-dplyr::left_join(corrlong,vmap,by=c("outcomespec"="cohortvariable")) %>%
+     dplyr::mutate(outcome_uid=ifelse(!is.na(varreference),varreference,outcomespec),
+                   outcome=ifelse(!is.na(vardefinition),vardefinition,outcomespec)) %>%
+     dplyr::select(-vardefinition,-varreference)
 
 
-  # fill in exposure from varmap
-  corrlong<-dplyr::left_join(corrlong,
-                             dplyr::select(metabdata$metab,metabid,uid_01,expmetname=metabolite_name),
-                             by=c("exposurespec"=metabdata$metabId)) %>%
-    dplyr::mutate(exposure=ifelse(!is.na(expmetname),expmetname,exposure),
-                  exposure_uid=ifelse(!is.na(expmetname),uid_01,exposure_uid)) %>%
-    dplyr::select(-expmetname,-uid_01)
+   # fill in exposure vars from varmap
+   corrlong<-dplyr::left_join(corrlong,vmap,by=c("exposurespec"="cohortvariable")) %>%
+     dplyr::mutate(exposure_uid=ifelse(!is.na(varreference),varreference,exposurespec),
+                   exposure=ifelse(!is.na(vardefinition),vardefinition,exposurespec)) %>%
+     dplyr::select(-vardefinition,-varreference)
+ }
+   else if (modeldata$modelspec=="Batch"){
 
-  # add in cohort reference variable info to output file.
+      # fill in outcome vars from varmap
+      corrlong<-dplyr::left_join(corrlong,vmap,by=c("outcomespec"="varreference")) %>%
+        dplyr::mutate(outcome_uid=ifelse(is.na(outcome_uid),outcomespec,outcome_uid),
+                      outcome=ifelse(!is.na(outcome),outcome,ifelse(!is.na(vardefinition),vardefinition,outcomespec)),
+                      outcomespec=ifelse(!is.na(cohortvariable),cohortvariable,outcomespec)) %>%
+        dplyr::select(-vardefinition,-cohortvariable)
+
+
+      # fill in exposure vars from varmap
+      corrlong<-dplyr::left_join(corrlong,vmap,by=c("exposurespec"="varreference")) %>%
+        dplyr::mutate(exposure_uid=exposurespec,
+                      exposure=ifelse(!is.na(exposure),exposure,ifelse(!is.na(vardefinition),vardefinition,exposurespec)),
+                      exposure=ifelse(!is.na(vardefinition),vardefinition,exposurespec),
+                      exposurespec=ifelse(!is.na(cohortvariable),cohortvariable,exposurespec)) %>%
+        dplyr::select(-vardefinition,-cohortvariable)
+    }
 
 
 
@@ -191,6 +238,7 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
       select(-dplyr::one_of(modeldata$scovs))
+    
     holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
     holdcorr$stratavar<-as.character(modeldata$scovs)
     holdcorr$strata<-stratlist[i,1]

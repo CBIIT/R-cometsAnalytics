@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------
+ # ---------------------------------------------------------------------------
 # fixData function ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
@@ -64,16 +64,16 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     # get the cohort equivalent of metabolite_id and subject id
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
-#    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
-    allmodelparams=c(dta.models$outcomes,dta.models$exposure, 
-          unlist(lapply(dta.models$adjustment,function(x) strsplit(x," "))))
-    allmodelparams=tolower(unique(allmodelparams[!is.na(allmodelparams)]))
+    # add _ to all metabolites before splitting at blank
+    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
+    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) # take out multiple blanks and add _ to all metabolites to avoid splitting
+    allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
     else if (length(intersect(allmodelparams,
-         tolower(c("All metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
+         tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
 # tolower(c("All metabolites", colnames(dta.smetab), colnames(dta.sdata)))))!=length(allmodelparams))
 {
          stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")
