@@ -32,7 +32,7 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
   #batch model specifications
   dta.models <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models")))
+    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
 
   # Check file integrity:
   ckintegrity = checkIntegrity(
@@ -173,7 +173,8 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
         "corr",
         "pvalue",
         "n",
-        "cohort")
+        "stratavar",
+        "strata")
 
 
 
