@@ -119,12 +119,13 @@
 ## ---------------------------------------------------------------------------
 ## processcohorts function ----------------------------------------------------------
 ## ---------------------------------------------------------------------------
-##' Code that creates the cohorts dataframe file
+##' Code that creates the cohorts dataframe file, just run the internal code within functionr
 ##' @keywords internal
 # processCOHORTS <- function() {
 # dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
 # xlsfile <- file.path(dir, "cohorts.xlsx")
 # cohorts = readxl::read_excel(xlsfile,1)
 # rm(dir,xlsfile)
+# save updated rdata from the global env
 # }
 #
