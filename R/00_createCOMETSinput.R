@@ -94,7 +94,7 @@ else {
 #  else {
 	# Write the Metabolite sheet
         metab=utils::read.csv(metabfile)
-	xlsx::write.xlsx(metab,outputfile,sheetName="Metabolite",
+	xlsx::write.xlsx(metab,outputfile,sheetName="Metabolites",
 		row.names=FALSE,showNA=FALSE)
 
         # Write the SubjectMetabolites sheet
