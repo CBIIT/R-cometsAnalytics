@@ -24,7 +24,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
     if (!is.na(modeldata$scovs)){
-      stop(paste(modeldata$modlabel," has at least 1 strata in",modeldata$scovs,"with less than 15 observations."))
+      return()
     }
     else{
       stop(paste(modeldata$modlabel," has less than 15 observations."))
@@ -240,9 +240,14 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
       select(-dplyr::one_of(modeldata$scovs))
     
     holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
-    holdcorr$stratavar<-as.character(modeldata$scovs)
-    holdcorr$strata<-stratlist[i,1]
-    scorr<-dplyr::bind_rows(scorr,holdcorr)
+    if (length(holdcorr)!=0){
+      holdcorr$stratavar<-as.character(modeldata$scovs)
+      holdcorr$strata<-stratlist[i,1]
+      scorr<-dplyr::bind_rows(scorr,holdcorr)
+    }
+    else
+      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep=""))
+    
   }
   # Stop the clock
   ptm <- proc.time() - ptm
