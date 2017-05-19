@@ -12,11 +12,6 @@ fixData <- function(dta) {
 
   # remove rows that have all NAs (EM)
   countnas=as.numeric(apply(data.frame(dta),1,function(x) length(which(is.na(x)))))
-
-  #trim white space
-  #dta<-data.frame(lapply(dta,trimws))
-
-
   if (length(which(countnas==ncol(dta)))>0) {
   	dta=dta[-c(which(countnas==ncol(dta))),]
   }
@@ -65,8 +60,10 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
 #    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
+    print(names(dta.models))
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, 
-          unlist(lapply(dta.models$adjustment,function(x) strsplit(x," "))))
+          unlist(lapply(as.character(dta.models$adjustment),function(x) strsplit(x," "))),
+          unlist(lapply(as.character(dta.models$stratification),function(x) strsplit(x," "))))
     allmodelparams=tolower(unique(allmodelparams[!is.na(allmodelparams)]))
     outmessage = c()
     if (length(metabid) == 0) {
