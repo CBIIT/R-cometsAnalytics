@@ -1,11 +1,12 @@
-# ---------------------------------------------------------------------------
+ # ---------------------------------------------------------------------------
 # fixData function ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
 #' @keywords internal
-#' @param dta results of reading a CSV data sheet (with read_excel)
-
-fixData <- function(dta) {
+#' @param dta any data frame
+#' @param compbl compress multiple blank spaces to single blank space for all character or factor variables in the dataset
+ 
+fixData <- function(dta,compbl=FALSE) {
   dta<-as.data.frame(dta) # have to convert to dataframe from local dataframe from readxl
   # run through the data
   colnames(dta) <- tolower(trimws(colnames(dta)))
@@ -31,7 +32,10 @@ fixData <- function(dta) {
   if (length(which(cls == "character")) > 0) {
     for (indc in names(dta)) {
       if(class(dta[, indc]) %in% c("factor", "character")){
-        dta[, indc] <- trimws(dta[, indc])
+        if (compbl==TRUE)
+          dta[, indc] <- gsub("\\s+", " ",trimws(dta[, indc])) # compress duplicate blanks
+        else 
+          dta[, indc] <- trimws(dta[, indc])
       }
     }
 
@@ -59,18 +63,18 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     # get the cohort equivalent of metabolite_id and subject id
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
-#    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment)
-    print(names(dta.models))
-    allmodelparams=c(dta.models$outcomes,dta.models$exposure, 
-          unlist(lapply(as.character(dta.models$adjustment),function(x) strsplit(x," "))),
-          unlist(lapply(as.character(dta.models$stratification),function(x) strsplit(x," "))))
-    allmodelparams=tolower(unique(allmodelparams[!is.na(allmodelparams)]))
+    # add _ to all metabolites before splitting at blank
+    allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
+    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) 
+
+    # take out multiple blanks and add _ to all metabolites to avoid splitting
+    allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
     else if (length(intersect(allmodelparams,
-         tolower(c("All metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
+         tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
 # tolower(c("All metabolites", colnames(dta.smetab), colnames(dta.sdata)))))!=length(allmodelparams))
 {
          stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")

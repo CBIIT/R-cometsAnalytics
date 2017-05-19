@@ -6,7 +6,7 @@ csvfile <- file.path(dir, "cometsInput.xlsx")
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 
 ## ------------------------------------------------------------------------
-exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
 
 ## ------------------------------------------------------------------------
 exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars="age bmi")
