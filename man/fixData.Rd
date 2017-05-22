@@ -4,10 +4,12 @@
 \alias{fixData}
 \title{Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)}
 \usage{
-fixData(dta)
+fixData(dta, compbl = FALSE)
 }
 \arguments{
-\item{dta}{results of reading a CSV data sheet (with read_excel)}
+\item{dta}{any data frame}
+
+\item{compbl}{compress multiple blank spaces to single blank space for all character or factor variables in the dataset}
 }
 \description{
 Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
