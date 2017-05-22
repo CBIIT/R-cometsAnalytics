@@ -94,7 +94,7 @@ plotMinvalues <- function(cometsdata,
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
@@ -120,7 +120,7 @@ showCorr <- function(corr, nlines=50) {
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' }
@@ -135,7 +135,7 @@ showHeatmap <- function (ccorrmat,
   exmetabdata=corr=exposure=metabolite_name=c()
 
   # order the rows according to sort by
-  if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+  if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
 
     ccorrmat$metabolite_name <- suppressWarnings(
       factor(ccorrmat$metabolite_name, levels =

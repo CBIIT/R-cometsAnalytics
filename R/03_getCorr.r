@@ -17,7 +17,7 @@
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
@@ -223,12 +223,12 @@ return(corrlong)
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 stratCorr<- function(modeldata,metabdata,cohort=""){
   # start the clock
-  ptm <- proc.time() # start processing time
+  ptm <- base::proc.time() # start processing time
 
   # initialize to avoid globalv errors
   stratlist=holdmod=holdcorr=scorr=NULL
@@ -251,8 +251,8 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
   }
   # Stop the clock
   ptm <- proc.time() - ptm
-  attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
-
+  #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+  scorr <- c(scorr,ptime = ptm)
   return(scorr)
 }
 

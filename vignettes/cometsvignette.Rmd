@@ -55,7 +55,7 @@ There are 2 ways to specify your model, batch or interactive.
 In Batch mode, models are specified in your input file. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
 ```{r}
-exmodeldata <- COMETS::getModelData(exmetabdata,modbatch="1.1 Unadjusted")
+exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
 ```
 In Interactive mode, models are specified as parameters. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
@@ -106,7 +106,8 @@ COMETS::OutputCSVResults("Model1",excordata,cohort="")
 The stratified correlation analysis is run by calling the function *stratCorr()*.  This function runs the model(s) that is(are) defined in the input data (Models tab) or in interactive mode. In this example, exmodeldata includes an object scovs that specifies the stratification variable. The function requires one stratification variable at a time.       
 
 ```{r}
-  exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi"),strvars="site")
+  exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",
+	colvars=c("age","bmi"),strvars="site")
   excorrdata2  <- COMETS::stratCorr(exmodeldata2,exmetabdata,"DPP")
 ```
 
@@ -115,7 +116,7 @@ The stratified correlation analysis is run by calling the function *stratCorr()*
 All models desginated in the input file can be run with one command, and individual output CSV files or correlation results will be written in the current directory by default. The function returns a list of resulting data frames.
 
 ```{r}
-# allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
+ allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
 
 ```
 
