@@ -66,12 +66,21 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
     allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) 
+    print(paste(dta.models$ccovs,dta.models$scovs))
 
     # take out multiple blanks and add _ to all metabolites to avoid splitting
     allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
+    }
+    else if (!is.na(dta.models$stratification) && 
+		length(intersect(dta.models$adjustment,dta.models$stratification))>=1) {
+	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
+    }
+    else if (!is.na(dta.models$stratification) &&
+		length(intersect(dta.models$exposure,dta.models$stratification))>=1) {
+        stop("Exposure and stratification parameters are the same!  This is not allowed.")
     }
     else if (length(intersect(allmodelparams,
          tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
