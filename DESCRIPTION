@@ -23,7 +23,8 @@ Imports:
     xlsx,
     shiny,
     shinyFiles,
-    Hmisc
+    Hmisc,
+    stringr
 Suggests:
     knitr
 VignetteBuilder: knitr
