@@ -163,7 +163,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
    for (i in dta.models$adjustment) {
         temp <- length(unique(dta.sdata[[i]]))
 	if(temp <= 1 && !is.na(i)) {
-		stop(paste("Error: one of your models specifies",i,"as an adjustment but that variable only has
+		outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an adjustment but that variable only has
 			one possible value"))
    	}
    }
@@ -172,7 +172,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
    for (i in dta.models$stratification) {
         temp <- length(unique(dta.sdata[[i]]))
         if(temp <= 1 && !is.na(i)) {
-                stop(paste("Error: one of your models specifies",i,"as an stratification but that variable only has
+                outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an stratification but that variable only has
                         one possible value"))
         }
    }
