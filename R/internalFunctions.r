@@ -215,11 +215,13 @@ Harmonize<-function(dtalist){
   # non-unique entries
   for (i in setdiff(colnames(dtalist$metab),dtalist$metabId)) {
  	harmlistg<-rbind(harmlistg,
-		dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
-        		by=c(dtalist$metabId)) %>%
-                dplyr::mutate(metlower=gsub("\\*$","",i)),
-		mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)) %>%
-		dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
+		dplyr::left_join(
+			dplyr::anti_join(dtalist$metab,harmlistg,
+        			by=c(dtalist$metabId)) %>%
+		             dplyr::mutate(metlower=gsub("\\*$","",i)),
+				mastermetid,by=c("metlower"=dtalist$metabId)) %>% 
+		dplyr::select(-metlower)) #%>%
+#		dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
   }
 
   # join by metabolite_name only keep those with a match
@@ -231,8 +233,18 @@ Harmonize<-function(dtalist){
   # combine the 2 data frames
 #  dtalist$metab<-rbind(harmlistg,harmlistc) %>%
 #    dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
-  dtalist$metab <- harmlistg
-  return(dtalist)
+
+# Reorder:
+  myord <- as.numeric(lapply(dtalist$metab[,dtalist$metabId],function(x)
+	which(harmlistg[,dtalist$metabId]==x)))
+  finharmlistg <- harmlistg[myord,]
+  if(all.equal(finharmlistg[,dtalist$metabId],dtalist$metab[,dtalist$metabId])) { 
+  	dtalist$metab <- finharmlistg
+  	return(dtalist)
+  }
+  else {
+	stop("Something went wrong with the harmonization")
+  }
 
 }
 
