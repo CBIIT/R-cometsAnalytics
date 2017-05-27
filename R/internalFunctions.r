@@ -144,7 +144,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
           )
         }
         else {
-          if (length(intersect(tolower(dta.metab[[metabid]]),tolower(colnames(dta.smetab)))) !=
+          if (length(intersect(tolower(make.names(dta.metab[[metabid]])),tolower(colnames(dta.smetab)))) !=
               nummetab) {
               stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
           }
@@ -211,16 +211,27 @@ Harmonize<-function(dtalist){
   # join by metabolite_id only keep those with a match
   harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId))
 
+  # Loop through and try to join all the other columns (at each loop, combine matches and remove
+  # non-unique entries
+  for (i in setdiff(colnames(dtalist$metab),dtalist$metabId)) {
+ 	harmlistg<-rbind(harmlistg,
+		dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
+        		by=c(dtalist$metabId)) %>%
+                dplyr::mutate(metlower=gsub("\\*$","",i)),
+		mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)) %>%
+		dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
+  }
+
   # join by metabolite_name only keep those with a match
-  harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
-        by=c(dtalist$metabId)) %>%
-          dplyr::mutate(metlower=gsub("\\*$","",tolower(metabolite_name))), # take out * in metabolite name
-        mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
+#  harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
+#        by=c(dtalist$metabId)) %>%
+#          dplyr::mutate(metlower=gsub("\\*$","",tolower(metabolite_name))), # take out * in metabolite name
+ #       mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
 
   # combine the 2 data frames
-  dtalist$metab<-rbind(harmlistg,harmlistc) %>%
-    dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
-
+#  dtalist$metab<-rbind(harmlistg,harmlistc) %>%
+#    dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
+  dtalist$metab <- harmlistg
   return(dtalist)
 
 }
