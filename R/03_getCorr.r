@@ -21,6 +21,9 @@
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
+
+.Machine$double.eps <- 1e-300
+
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
     if (!is.na(modeldata$scovs)){
