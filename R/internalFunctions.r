@@ -160,22 +160,22 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
    # Check that models are reasonable
    ########################################
    # Check that adjustment variables that at least two unique values
-   for (i in dta.models$adjustment) {
-        temp <- length(unique(dta.sdata[[i]]))
-	if(temp <= 1 && !is.na(i)) {
-		outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an adjustment but that variable only has
-			one possible value"))
-   	}
-   }
-
-   # Check that stratification variables that at least two unique values
-   for (i in dta.models$stratification) {
-        temp <- length(unique(dta.sdata[[i]]))
-        if(temp <= 1 && !is.na(i)) {
-                outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an stratification but that variable only has
-                        one possible value"))
-        }
-   }
+##   for (i in dta.models$adjustment) {
+##        temp <- length(unique(dta.sdata[[i]]))
+##	if(temp <= 1 && !is.na(i)) {
+##		outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an adjustment but that variable only has
+##			one possible value"))
+##   	}
+##   }
+##
+##   # Check that stratification variables that at least two unique values
+##   for (i in dta.models$stratification) {
+##        temp <- length(unique(dta.sdata[[i]]))
+##        if(temp <= 1 && !is.na(i)) {
+##                outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an stratification but that variable only has
+##                        one possible value"))
+##        }
+##   }
 
     if (is.null(outmessage)) {
       outmessage = "Input data has passed QC (metabolite and sample names match in all input files)"
