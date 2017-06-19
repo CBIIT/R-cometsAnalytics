@@ -21,18 +21,23 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
   #metabolite meta data
   dta.metab <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Metabolites")))
+  print("Metabolites sheet is read in")
   #subject metabolite data
   dta.smetab <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites")))
+  print("SubjectMetabolites sheet is read in")
   #subject data
   dta.sdata <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
+  print("SubjectData sheet is read in")
   #variable mapping
   dta.vmap <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
+  print("VarMap sheet is read in")
   #batch model specifications
   dta.models <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
+  print("Models sheet is read in")
 
   # Check file integrity:
   ckintegrity = checkIntegrity(
@@ -46,7 +51,6 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
   dta.metab = ckintegrity$dta.metab
   dta.smetab = ckintegrity$dta.smetab
   dta.sdata = ckintegrity$dta.sdata
-
 
   # If an error was found during integrity check (e.g. not all metabolites or subjects
   # in the SubjectMetabolite sheet are annotated in the respective metadatasheets Subjects
