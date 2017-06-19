@@ -31,8 +31,29 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     }     
   }
   
-         
-      
+   # Check that adjustment variables that at least two unique values
+   for (i in modeldata$acovs) {
+        temp <- length(unique(metabdata$subjdata[[i]]))
+        if(temp <= 1 && !is.na(i)) {
+                warning(paste("Warning: one of your models specifies",i,"as an adjustment 
+		but that variable only has one possible value.
+		Model will run without",i,"adjusted."))
+		modeldata$acovs <- setdiff(modeldata$acovs,i)
+        }
+   }
+   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
+   # Check that stratification variables that at least two unique values
+   for (i in modeldata$scovs) {
+        temp <- length(unique(metabdata$subjdata[[i]]))
+        if(temp <= 1 && !is.na(i)) {
+                warning(paste("Warning: one of your models specifies",i,"as an stratification 
+		but that variable only has one possible value.
+		Model will run without",i,"adjusted"))
+		modeldata$scovs <- setdiff(modeldata$scovs,i)
+        }
+   }
+   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
+
     # Defining global variables to pass Rcheck()
   ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
@@ -201,7 +222,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   ptm <- proc.time() - ptm
   attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
-return(corrlong)
+	return(corrlong)
+
+
 }
 
 
