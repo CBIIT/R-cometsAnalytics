@@ -4,7 +4,7 @@
 \alias{getModelData}
 \title{Get data ready for the model runs in interactive or batch mode as specified in the input}
 \usage{
-getModelData(readData, modelspec = "Batch", modbatch = "",
+getModelData(readData, modelspec = "Batch", modlabel = "",
   rowvars = "All metabolites", colvars = "", adjvars = NULL,
   strvars = NULL)
 }
@@ -13,7 +13,7 @@ getModelData(readData, modelspec = "Batch", modbatch = "",
 
 \item{modelspec}{How model is specified (Interactive or Batch)}
 
-\item{modbatch}{if batch, chosen model specified by batch mode}
+\item{modlabel}{if batch, chosen model specified by batch mode. If interactive model label.}
 
 \item{rowvars}{if Interactive, outcome variables (usually metabolites rendered in rows, default is All metabolites)}
 
@@ -35,6 +35,10 @@ a list comprising:
 4: adjustment variables: acovs
 
 5: stratification variable: scovs
+
+6: model specification: modspec
+
+6: model label: modlab
 }
 \description{
 Get data ready for the model runs in interactive or batch mode as specified in the input
@@ -44,6 +48,6 @@ Get data ready for the model runs in interactive or batch mode as specified in t
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
 
 }

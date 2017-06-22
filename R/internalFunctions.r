@@ -13,11 +13,6 @@ fixData <- function(dta,compbl=FALSE) {
 
   # remove rows that have all NAs (EM)
   countnas=as.numeric(apply(data.frame(dta),1,function(x) length(which(is.na(x)))))
-
-  #trim white space
-  #dta<-data.frame(lapply(dta,trimws))
-
-
   if (length(which(countnas==ncol(dta)))>0) {
   	dta=dta[-c(which(countnas==ncol(dta))),]
   }
@@ -70,11 +65,22 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
-    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) # take out multiple blanks and add _ to all metabolites to avoid splitting
+    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) 
+    print(paste(dta.models$ccovs,dta.models$scovs))
+
+    # take out multiple blanks and add _ to all metabolites to avoid splitting
     allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
+    }
+    else if (!is.na(dta.models$stratification) && 
+		length(intersect(dta.models$adjustment,dta.models$stratification))>=1) {
+	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
+    }
+    else if (!is.na(dta.models$stratification) &&
+		length(intersect(dta.models$exposure,dta.models$stratification))>=1) {
+        stop("Exposure and stratification parameters are the same!  This is not allowed.")
     }
     else if (length(intersect(allmodelparams,
          tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
@@ -138,7 +144,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
           )
         }
         else {
-          if (length(intersect(tolower(dta.metab[[metabid]]),tolower(colnames(dta.smetab)))) !=
+          if (length(intersect(tolower(make.names(dta.metab[[metabid]])),tolower(colnames(dta.smetab)))) !=
               nummetab) {
               stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
           }
@@ -149,6 +155,28 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
         }
       }
     }
+
+   ########################################
+   # Check that models are reasonable
+   ########################################
+   # Check that adjustment variables that at least two unique values
+##   for (i in dta.models$adjustment) {
+##        temp <- length(unique(dta.sdata[[i]]))
+##	if(temp <= 1 && !is.na(i)) {
+##		outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an adjustment but that variable only has
+##			one possible value"))
+##   	}
+##   }
+##
+##   # Check that stratification variables that at least two unique values
+##   for (i in dta.models$stratification) {
+##        temp <- length(unique(dta.sdata[[i]]))
+##        if(temp <= 1 && !is.na(i)) {
+##                outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an stratification but that variable only has
+##                        one possible value"))
+##        }
+##   }
+
     if (is.null(outmessage)) {
       outmessage = "Input data has passed QC (metabolite and sample names match in all input files)"
     }
@@ -183,17 +211,40 @@ Harmonize<-function(dtalist){
   # join by metabolite_id only keep those with a match
   harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId))
 
+  # Loop through and try to join all the other columns (at each loop, combine matches and remove
+  # non-unique entries
+  for (i in setdiff(colnames(dtalist$metab),dtalist$metabId)) {
+ 	harmlistg<-rbind(harmlistg,
+		dplyr::left_join(
+			dplyr::anti_join(dtalist$metab,harmlistg,
+        			by=c(dtalist$metabId)) %>%
+		             dplyr::mutate(metlower=gsub("\\*$","",i)),
+				mastermetid,by=c("metlower"=dtalist$metabId)) %>% 
+		dplyr::select(-metlower)) #%>%
+#		dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
+  }
+
   # join by metabolite_name only keep those with a match
-  harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
-        by=c(dtalist$metabId)) %>%
-          dplyr::mutate(metlower=gsub("\\*$","",tolower(metabolite_name))), # take out * in metabolite name
-        mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
+#  harmlistc<-dplyr::left_join(dplyr::anti_join(dtalist$metab,mastermetid,
+#        by=c(dtalist$metabId)) %>%
+#          dplyr::mutate(metlower=gsub("\\*$","",tolower(metabolite_name))), # take out * in metabolite name
+ #       mastermetid,by=c("metlower"=dtalist$metabId)) %>% dplyr::select(-metlower)
 
   # combine the 2 data frames
-  dtalist$metab<-rbind(harmlistg,harmlistc) %>%
-    dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
+#  dtalist$metab<-rbind(harmlistg,harmlistc) %>%
+#    dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
 
-  return(dtalist)
+# Reorder:
+  myord <- as.numeric(lapply(dtalist$metab[,dtalist$metabId],function(x)
+	which(harmlistg[,dtalist$metabId]==x)))
+  finharmlistg <- harmlistg[myord,]
+  if(all.equal(finharmlistg[,dtalist$metabId],dtalist$metab[,dtalist$metabId])) { 
+  	dtalist$metab <- finharmlistg
+  	return(dtalist)
+  }
+  else {
+	stop("Something went wrong with the harmonization")
+  }
 
 }
 

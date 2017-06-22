@@ -17,22 +17,46 @@
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 getCorr <- function (modeldata,metabdata,cohort=""){
+
+.Machine$double.eps <- 1e-300
+
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
     if (!is.na(modeldata$scovs)){
-      stop(paste(modeldata$modlabel," has at least 1 strata in",modeldata$scovs,"with less than 15 observations."))
+      return()
     }
     else{
       stop(paste(modeldata$modlabel," has less than 15 observations."))
     }     
   }
   
-         
-      
+   # Check that adjustment variables that at least two unique values
+   for (i in modeldata$acovs) {
+        temp <- length(unique(metabdata$subjdata[[i]]))
+        if(temp <= 1 && !is.na(i)) {
+                warning(paste("Warning: one of your models specifies",i,"as an adjustment 
+		but that variable only has one possible value.
+		Model will run without",i,"adjusted."))
+		modeldata$acovs <- setdiff(modeldata$acovs,i)
+        }
+   }
+   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
+   # Check that stratification variables that at least two unique values
+   for (i in modeldata$scovs) {
+        temp <- length(unique(metabdata$subjdata[[i]]))
+        if(temp <= 1 && !is.na(i)) {
+                warning(paste("Warning: one of your models specifies",i,"as an stratification 
+		but that variable only has one possible value.
+		Model will run without",i,"adjusted"))
+		modeldata$scovs <- setdiff(modeldata$scovs,i)
+        }
+   }
+   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
+
     # Defining global variables to pass Rcheck()
   ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
@@ -201,7 +225,9 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   ptm <- proc.time() - ptm
   attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
-return(corrlong)
+	return(corrlong)
+
+
 }
 
 
@@ -223,12 +249,12 @@ return(corrlong)
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modbatch="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
 #' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
 #' @export
 stratCorr<- function(modeldata,metabdata,cohort=""){
   # start the clock
-  ptm <- proc.time() # start processing time
+  ptm <- base::proc.time() # start processing time
 
   # initialize to avoid globalv errors
   stratlist=holdmod=holdcorr=scorr=NULL
@@ -240,14 +266,19 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
       select(-dplyr::one_of(modeldata$scovs))
     
     holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
-    holdcorr$stratavar<-as.character(modeldata$scovs)
-    holdcorr$strata<-stratlist[i,1]
-    scorr<-dplyr::bind_rows(scorr,holdcorr)
+    if (length(holdcorr)!=0){
+      holdcorr$stratavar<-as.character(modeldata$scovs)
+      holdcorr$strata<-stratlist[i,1]
+      scorr<-dplyr::bind_rows(scorr,holdcorr)
+    }
+    else
+      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep=""))
+    
   }
   # Stop the clock
   ptm <- proc.time() - ptm
-  attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
-
+  #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+  scorr <- c(scorr,ptime = ptm)
   return(scorr)
 }
 
