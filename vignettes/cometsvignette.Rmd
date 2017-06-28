@@ -40,6 +40,11 @@ csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
 
+# Alternatively, one can filter the data by specifying a clinical variable.  For example, to only include subjects with an age > 60, one can run the following:
+```{r}
+filtexmetabdata <- COMETS::filterCOMETSinput(exmetabdata, where <- c("age",">","60"))
+```
+
 To plot some the distribution of variances for each metabolite:
 ```{r}
 COMETS::plotVar(exmetabdata,titlesize=12)
