@@ -24,7 +24,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
   for (i in mymodels) {
         print(paste("Running",i))
 	mymod <- getModelData(readData,modlabel=i)
-        mycorr <- getCorr(mymod,readData,cohort)
+        mycorr <- runCorr(mymod,readData,cohort)
 	results[[i]] <- mycorr  
         if (writeTofile) {
               OutputCSVResults(i,mycorr,cohort=cohort)

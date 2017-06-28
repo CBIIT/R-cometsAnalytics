@@ -86,8 +86,8 @@ plotMinvalues <- function(cometsdata,
 #---------------------------------------------------------
 # showCorr
 #---------------------------------------------------------
-#' Function that returns top N lines of the getCorr() output
-#' @param corr COMETScorr class (S3) from getCorr() output
+#' Function that returns top N lines of the runCorr() output
+#' @param corr COMETScorr class (S3) from runCorr() output
 #' @param nlines number of lines to return (default 50)
 #' @return first 50 lines of output
 #' @examples
@@ -95,7 +95,7 @@ plotMinvalues <- function(cometsdata,
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
 showCorr <- function(corr, nlines=50) {
@@ -105,7 +105,7 @@ showCorr <- function(corr, nlines=50) {
 #---------------------------------------------------------
 #' Show interactive heatmap using plot_ly
 #'
-#' @param ccorrmat correlation matrix (output of getCorr())
+#' @param ccorrmat correlation matrix (output of runCorr())
 #' @param rowsortby How row labels are sorted
 #' @param plothgt Plot height default 700
 #' @param plotwid Plot width default 800
@@ -121,7 +121,7 @@ showCorr <- function(corr, nlines=50) {
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' }
 #' @export
@@ -201,7 +201,7 @@ showHeatmap <- function (ccorrmat,
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
 showHClust <- function (ccorrmat,

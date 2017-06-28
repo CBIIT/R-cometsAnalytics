@@ -24,7 +24,7 @@ dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
-corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHClust(corrmatrix)
 }
 \references{
