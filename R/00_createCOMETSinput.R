@@ -93,17 +93,17 @@ else {
 
 #  else {
 	# Write the Metabolite sheet
-        metab=utils::read.csv(metabfile)
+        metab=utils::read.csv(metabfile,check.names=FALSE)
 	xlsx::write.xlsx(metab,outputfile,sheetName="Metabolites",
 		row.names=FALSE,showNA=FALSE)
 
         # Write the SubjectMetabolites sheet
-	abund=utils::read.csv(abundancesfile)
+	abund=utils::read.csv(abundancesfile,check.names=FALSE)
         xlsx::write.xlsx(abund,outputfile,sheetName="SubjectMetabolites",
 		row.names=FALSE,append=TRUE,showNA=FALSE)
 
 	# Write the SubjectData sheet
-	subj=utils::read.csv(subjfile)
+	subj=utils::read.csv(subjfile,check.names=FALSE)
         xlsx::write.xlsx(subj,outputfile,sheetName="SubjectData",row.names=FALSE,
 		append=TRUE,showNA=FALSE)
 
