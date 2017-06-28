@@ -2,6 +2,7 @@
 
 export(OutputCSVResults)
 export(createCOMETSinput)
+export(filterCOMETSinput)
 export(getCorr)
 export(getModelData)
 export(plotMinvalues)
