@@ -1,5 +1,5 @@
 #--------------------------------------------------------
-# getCorr: get correlation matrix ------------------------
+# calcCorr: get correlation matrix ------------------------
 #---------------------------------------------------------
 #' Calculate correlation matrix
 #'
@@ -14,13 +14,14 @@
 #' run.
 #'
 #' @examples
+#' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
-#' @export
-getCorr <- function (modeldata,metabdata,cohort=""){
+#' corrmatrix <-calcCorr(modeldata,exmetabdata, "DPP")
+#' }
+calcCorr <- function(modeldata,metabdata,cohort=""){
 
 .Machine$double.eps <- 1e-300
 
@@ -76,7 +77,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   corr=c()
 
   if (length(col.adj)==0) {
-    print("running unadjusted")
+    #print("running unadjusted")
     data<-modeldata[[1]][,c(col.rcovar,col.ccovar)]
     # calculate unadjusted spearman correlation matrix
     #       names(data)<-paste0("v",1:length(names(data)))
@@ -232,7 +233,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
 
 #---------------------------------------------------------
-# stratCorr: stratified correlation analysis -------------
+# runCorr: stratified correlation analysis -------------
 #' Calculate correlation matrix for each strata specified if stratification is specified in the model tab or in interactive mode
 #'
 #' @param modeldata list from function getModelData
@@ -250,22 +251,27 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
+#' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
-stratCorr<- function(modeldata,metabdata,cohort=""){
+runCorr<- function(modeldata,metabdata,cohort=""){
   # start the clock
   ptm <- base::proc.time() # start processing time
 
+  if(is.null(modeldata$scovs)) {
+	scorr <- calcCorr(modeldata,metabdata, cohort = cohort)
+  }
+  else {
   # initialize to avoid globalv errors
   stratlist=holdmod=holdcorr=scorr=NULL
 
   stratlist <- unique(modeldata$gdta[modeldata$scovs])
   for (i in seq(along=stratlist[,1])) {
+    print(paste("Running analysis on subjects stratified by",stratlist[i,1]))
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
       select(-dplyr::one_of(modeldata$scovs))
     
-    holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
+    holdcorr  <- calcCorr(holdmod,metabdata,cohort=cohort)
     if (length(holdcorr)!=0){
       holdcorr$stratavar<-as.character(modeldata$scovs)
       holdcorr$strata<-stratlist[i,1]
@@ -279,6 +285,7 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
   ptm <- proc.time() - ptm
   #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
   scorr <- c(scorr,ptime = ptm)
+  } # end else run stratified analysis
   return(scorr)
 }
 
