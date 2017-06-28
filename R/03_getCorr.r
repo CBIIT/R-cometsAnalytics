@@ -274,7 +274,7 @@ stratCorr<- function(modeldata,metabdata,cohort=""){
     else
       warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep=""))
     
-  }
+  } # end for loop
   # Stop the clock
   ptm <- proc.time() - ptm
   #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")

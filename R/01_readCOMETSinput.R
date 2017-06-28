@@ -2,7 +2,6 @@
 #'
 #' @param csvfilePath path of CSV file to be read in
 #' @param modelspec if "BATCH", then runs multiple models (default is "NoBATCH")
-#'
 #' @return a list comprising:
 #'
 #' @examples
