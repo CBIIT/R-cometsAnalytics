@@ -265,6 +265,11 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   stratlist=holdmod=holdcorr=scorr=NULL
 
   stratlist <- unique(modeldata$gdta[modeldata$scovs])
+
+  # Gross check to see whether the stratification variable may not be categorical
+  if(nrow(stratlist) == nrow(modeldata$gdta)) {
+	stop(paste("The stratification variable ", modeldata$scovs," does not appear to be categorical.  Please check"))
+   }
   for (i in seq(along=stratlist[,1])) {
     print(paste("Running analysis on subjects stratified by",stratlist[i,1]))
     holdmod <- modeldata
