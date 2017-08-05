@@ -6,7 +6,7 @@
 \usage{
 getModelData(readData, modelspec = "Batch", modlabel = "",
   rowvars = "All metabolites", colvars = "", adjvars = NULL,
-  strvars = NULL)
+  strvars = NULL, where = NULL)
 }
 \arguments{
 \item{readData}{list from readComets}
