@@ -294,8 +294,9 @@ filterCOMETSinput <- function(readData,where=NULL) {
 	mycounts <- as.numeric(lapply(unique(samplesToKeep),function(x) 
 		length(which(samplesToKeep==x))))
 	fincounts <- which(mycounts == length(myfilts))
-        readData$subjdata <- readData$subjdata[fincounts,]
+        readData$subjdata <- readData$subjdata[unique(samplesToKeep)[fincounts],]
   }
+  else {(warning("No filtering was performed because 'where' parameter is NULL"))}
 return(readData)
 }
 

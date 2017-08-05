@@ -43,7 +43,8 @@ getModelData <-  function(readData,
                           rowvars   = "All metabolites",
                           colvars   = "",
                           adjvars   = NULL,
-                          strvars   = NULL) {
+                          strvars   = NULL,
+			  where     = NULL) {
   if (is.na(match(modelspec, c("Interactive", "Batch")))) {
     stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
   }
@@ -204,6 +205,13 @@ if (!is.null(acovs)) {
 if (!is.null(scovs)) {
   covlist <- c(covlist, scovs)
 }
+
+if(!is.null(where)) {
+      numallsamps <- nrow(readData$subjdata)
+      readData <- filterCOMETSinput(readData,where=where)
+      print(paste("Filtering subjects according to the rule(s)",where,". ",nrow(readData$subjdata)," of ", numallsamps,"are retained"))
+}
+
 gdta <- dplyr::select(readData$subjdata, one_of(covlist))
 
 # Create list for analyses  -------------------------------
@@ -221,7 +229,8 @@ list(
   acovs = acovs,
   scovs = scovs,
   modelspec = modelspec,
-  modlabel = modlabel
+  modlabel = modlabel,
+  where = where
 )
 
 }
