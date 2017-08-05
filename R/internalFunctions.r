@@ -263,3 +263,39 @@ prdebug<-function(lab,x){
   print(paste(lab," = ",x," Time: ",Sys.time()))
 }
 
+#' Function that subsets input data based on "where variable"
+#'
+#' @param readData list from readComets
+#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("Gender","=","Female")
+#' @return filtered list
+#'
+filterCOMETSinput <- function(readData,where=NULL) {
+  if (!is.null(where)) {
+	samplesToKeep=c()
+	myfilts <- strsplit(where,",")
+	# create rules for each filter
+	for (i in 1:length(myfilts)) {
+		myrule <- myfilts[[i]]
+        	if(length(grep("<",myrule))>0) {
+			mysplit <- strsplit(myrule,"<")[[1]]
+               		samplesToKeep <- c(samplesToKeep,
+                           which(readData$subjdata[,gsub(" ","",mysplit[1])] < gsub(" ","",mysplit[2]) ))
+        	} else if(length(grep(">",myfilts[i]))>0) {
+	        	mysplit <- strsplit(myrule,">")[[1]]
+                        samplesToKeep <- c(samplesToKeep,
+                           which(readData$subjdata[,gsub(" ","",mysplit[1])] > gsub(" ","",mysplit[2]) ))
+		} else if (length(grep("=",myfilts[i]))>0) {
+			mysplit <- strsplit(myrule,"=")[[1]]
+                        samplesToKeep <- c(samplesToKeep,
+                           which(readData$subjdata[,gsub(" ","",mysplit[1])] == gsub(" ","",mysplit[2]) ))
+        	} else
+                stop("Make sure your 'where' filters contain logicals '>', '<', or '='")
+        }
+	mycounts <- as.numeric(lapply(unique(samplesToKeep),function(x) 
+		length(which(samplesToKeep==x))))
+	fincounts <- which(mycounts == length(myfilts))
+        readData$subjdata <- readData$subjdata[fincounts,]
+  }
+return(readData)
+}
+
