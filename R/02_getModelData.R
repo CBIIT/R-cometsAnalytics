@@ -10,6 +10,7 @@
 #' @param colvars   if Interactive, exposure variables (usually covariates rendered in columns)
 #' @param adjvars   If Interactive, adjustment covariates
 #' @param strvars   If Interactive, stratification covariates
+#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.
 #'
 #' @return a list comprising:
 #'

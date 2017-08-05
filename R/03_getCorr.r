@@ -27,7 +27,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
-    if (!is.na(modeldata$scovs)){
+    if (!is.null(modeldata$scovs)){
       return()
     }
     else{
@@ -267,8 +267,8 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   stratlist <- unique(modeldata$gdta[modeldata$scovs])
 
   # Gross check to see whether the stratification variable may not be categorical
-  if(nrow(stratlist) == nrow(modeldata$gdta)) {
-	stop(paste("The stratification variable ", modeldata$scovs," does not appear to be categorical.  Please check"))
+  if(length(stratlist) > 10) {
+	stop(paste("The stratification variable ", modeldata$scovs," contains more than 10 unique values, which is too many for our software.  Please check your stratification variable"))
    }
   for (i in seq(along=stratlist[,1])) {
     print(paste("Running analysis on subjects stratified by",stratlist[i,1]))
