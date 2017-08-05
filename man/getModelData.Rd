@@ -23,7 +23,7 @@ getModelData(readData, modelspec = "Batch", modlabel = "",
 
 \item{strvars}{If Interactive, stratification covariates}
 
-\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi>22")}
+\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.}
 }
 \value{
 a list comprising:
