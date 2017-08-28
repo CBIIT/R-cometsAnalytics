@@ -145,16 +145,17 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   } # End else adjusted mode (length(col.adj) is not zero)
 
   # create long data with pairwise correlations  ----------------------------------------------------
+  mycols <- 1:length(col.ccovar)
+  corr.togather <- cbind(corr, outcomespec = rownames(corr))
   corrlong <-
     fixData(data.frame(
       cohort = cohort,
       spec = modeldata$modelspec,
       model = modeldata$modlabel,
-      tidyr::gather(cbind(corr, outcomespec = rownames(corr)),
-                    "exposurespec","corr",1:length(col.ccovar)
-      ),
-      tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
-      tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
+      tidyr::gather(corr.togather,
+                    "exposurespec","corr",colnames(corr.togather)[mycols]),
+      tidyr::gather(as.data.frame(n),"exposuren", "n", colnames(n)[mycols]),
+      tidyr::gather(as.data.frame(pval),"exposurep","pvalue",colnames(pval)[mycols]),
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
     dplyr::select(-exposuren, -exposurep)
 
@@ -283,7 +284,8 @@ runCorr<- function(modeldata,metabdata,cohort=""){
       scorr<-dplyr::bind_rows(scorr,holdcorr)
     }
     else {
-      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep="")) }
+      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep="")) 
+    }
     
   } # end for loop
   # Stop the clock
