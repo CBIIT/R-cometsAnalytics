@@ -6,9 +6,6 @@ csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 
 ## ------------------------------------------------------------------------
-filtexmetabdata <- COMETS::filterCOMETSinput(exmetabdata, where <- c("age",">","60"))
-
-## ------------------------------------------------------------------------
 COMETS::plotVar(exmetabdata,titlesize=12)
 
 ## ------------------------------------------------------------------------
@@ -18,7 +15,7 @@ COMETS::plotMinvalues(exmetabdata,titlesize=12)
 exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
 
 ## ------------------------------------------------------------------------
-exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi"))
+exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi"),where=c("age>40","bmi>20"))
 
 ## ------------------------------------------------------------------------
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
