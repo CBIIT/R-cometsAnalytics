@@ -90,7 +90,7 @@ To display the heatmap of the resulting correlation matrix, use the showheatmap 
 To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r}
-exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = "age bmi")
+exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("age","bmi"))
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 ```

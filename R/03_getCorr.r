@@ -54,7 +54,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
         if(temp <= 1 && !is.na(i)) {
                 warning(paste("Warning: one of your models specifies",i,"as an stratification 
 		but that variable only has one possible value.
-		Model will run without",i,"adjusted"))
+		Model will run without",i,"stratified"))
 		modeldata$scovs <- setdiff(modeldata$scovs,i)
         }
    }
@@ -222,8 +222,6 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
         dplyr::select(-vardefinition,-cohortvariable)
     }
 
-
-
   # Stop the clock
 #  ptm <- base::proc.time() - ptm
 #  print(paste("My ptm:", ptm))
@@ -291,6 +289,11 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   } # end for loop
   } # end else run stratified analysis
   
+  
+  if(is.null(scorr)) {
+	scorr <- data.frame()
+  }
+
   # Stop the clock
   ptm <- base::proc.time() - ptm
   attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=3),"sec")
