@@ -30,7 +30,7 @@ COMETS::showCorr(excorrdata,nlines=3)
 #COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
 
 ## ------------------------------------------------------------------------
-exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = "age bmi")
+exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("age","bmi"))
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 
