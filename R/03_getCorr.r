@@ -28,9 +28,11 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
     if (!is.null(modeldata$scovs)){
-      return()
-    }
-    else{
+      warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+      mycorr=data.frame()
+      attr(mycorr,"ptime")="Processing time: 0 sec"
+      return(mycorr)
+    } else{
       stop(paste(modeldata$modlabel," has less than 15 observations."))
     }     
   }
@@ -59,7 +61,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
    if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
 
     # Defining global variables to pass Rcheck()
-  ptm <- proc.time() # start processing time
+  #ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
   cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
   metabolite_name=expmetname=exposurespec=c()
@@ -224,9 +226,9 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
 
   # Stop the clock
-  ptm <- base::proc.time() - ptm
-  #print(ptime)
-  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+#  ptm <- base::proc.time() - ptm
+#  print(paste("My ptm:", ptm))
+#  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
 	return(corrlong)
 
@@ -261,8 +263,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
 
   if(is.null(modeldata$scovs)) {
 	scorr <- calcCorr(modeldata,metabdata, cohort = cohort)
-  }
-  else {
+  }  else {
   # initialize to avoid globalv errors
   stratlist=holdmod=holdcorr=scorr=NULL
 
@@ -276,24 +277,25 @@ runCorr<- function(modeldata,metabdata,cohort=""){
     print(paste("Running analysis on subjects stratified by",stratlist[i,1]))
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
-      select(-dplyr::one_of(modeldata$scovs))
+      dplyr::select(-dplyr::one_of(modeldata$scovs))
     
     holdcorr  <- calcCorr(holdmod,metabdata,cohort=cohort)
     if (length(holdcorr)!=0){
       holdcorr$stratavar<-as.character(modeldata$scovs)
       holdcorr$strata<-stratlist[i,1]
-      scorr<-dplyr::bind_rows(scorr,holdcorr)
+      #scorr<-dplyr::bind_rows(scorr,holdcorr)
     }    else {
       warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep="")) 
     }
+      scorr<-dplyr::bind_rows(scorr,holdcorr)
     
   } # end for loop
   } # end else run stratified analysis
+  
   # Stop the clock
   ptm <- base::proc.time() - ptm
-  #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
-  print(paste0("Processing time: ",ptm))
-#  scorr <- c(scorr,ptime = ptm)
+  attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=3),"sec")
+  #print(paste0("Processing time: ",ptm))
   return(scorr)
 }
 
