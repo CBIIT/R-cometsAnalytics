@@ -28,7 +28,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
     if (!is.null(modeldata$scovs)){
-      warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
       mycorr=data.frame()
       attr(mycorr,"ptime")="Processing time: 0 sec"
       return(mycorr)
@@ -39,7 +39,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   
    # Check that adjustment variables that at least two unique values
    for (i in modeldata$acovs) {
-        temp <- length(unique(metabdata$subjdata[[i]]))
+        temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
                 warning(paste("Warning: one of your models specifies",i,"as an adjustment 
 		but that variable only has one possible value.
@@ -47,10 +47,10 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 		modeldata$acovs <- setdiff(modeldata$acovs,i)
         }
    }
-   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
+#   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
    # Check that stratification variables that at least two unique values
    for (i in modeldata$scovs) {
-        temp <- length(unique(metabdata$subjdata[[i]]))
+        temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
                 warning(paste("Warning: one of your models specifies",i,"as an stratification 
 		but that variable only has one possible value.
@@ -58,7 +58,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 		modeldata$scovs <- setdiff(modeldata$scovs,i)
         }
    }
-   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
+#   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
 
     # Defining global variables to pass Rcheck()
   #ptm <- proc.time() # start processing time
@@ -79,7 +79,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   corr=c()
 
   if (length(col.adj)==0) {
-    #print("running unadjusted")
+    print("running unadjusted")
     data<-modeldata[[1]][,c(col.rcovar,col.ccovar)]
     # calculate unadjusted spearman correlation matrix
     #       names(data)<-paste0("v",1:length(names(data)))
@@ -102,8 +102,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
       pval=as.data.frame(t(pval))
     }
 
-  }
-  else {
+  }  else {
     # calculate partial correlation matrix
     print("running adjusted")
 
@@ -273,19 +272,19 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   if(length(stratlist) > 10) {
 	stop(paste("The stratification variable ", modeldata$scovs," contains more than 10 unique values, which is too many for our software.  Please check your stratification variable"))
    }
-  for (i in seq(along=stratlist[,1])) {
-    print(paste("Running analysis on subjects stratified by",stratlist[i,1]))
+  for (i in seq(along=stratlist)) {
+    print(paste("Running analysis on subjects stratified by",stratlist[1]))
     holdmod <- modeldata
-    holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
+    holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i])) %>%
       dplyr::select(-dplyr::one_of(modeldata$scovs))
     
     holdcorr  <- calcCorr(holdmod,metabdata,cohort=cohort)
     if (length(holdcorr)!=0){
       holdcorr$stratavar<-as.character(modeldata$scovs)
-      holdcorr$strata<-stratlist[i,1]
+      holdcorr$strata<-stratlist[i]
       #scorr<-dplyr::bind_rows(scorr,holdcorr)
     }    else {
-      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep="")) 
+      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep="")) 
     }
       scorr<-dplyr::bind_rows(scorr,holdcorr)
     

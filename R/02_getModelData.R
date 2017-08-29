@@ -49,10 +49,10 @@ getModelData <-  function(readData,
     stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
   }
 
-
-
 # figure out the model specification based on type (Interactive or Batch)
 if (modelspec == "Interactive") {
+  if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
+
   # rename the variables (Assumed to be 'All metabolites' by default)
   if (!is.na(match("All metabolites", rowvars))) {
     print("Analysis will run on 'All metabolites'")
