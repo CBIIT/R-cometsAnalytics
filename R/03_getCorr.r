@@ -224,7 +224,8 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
 
   # Stop the clock
-  ptm <- proc.time() - ptm
+  ptm <- base::proc.time() - ptm
+  #print(ptime)
   attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
 	return(corrlong)
@@ -282,18 +283,17 @@ runCorr<- function(modeldata,metabdata,cohort=""){
       holdcorr$stratavar<-as.character(modeldata$scovs)
       holdcorr$strata<-stratlist[i,1]
       scorr<-dplyr::bind_rows(scorr,holdcorr)
-    }
-    else {
+    }    else {
       warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep="")) 
     }
     
   } # end for loop
-  # Stop the clock
-  ptm <- proc.time() - ptm
-  #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
-  print(ptm)
-#  scorr <- c(scorr,ptime = ptm)
   } # end else run stratified analysis
+  # Stop the clock
+  ptm <- base::proc.time() - ptm
+  #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+  print(paste0("Processing time: ",ptm))
+#  scorr <- c(scorr,ptime = ptm)
   return(scorr)
 }
 
