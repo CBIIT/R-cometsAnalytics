@@ -267,7 +267,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   # initialize to avoid globalv errors
   stratlist=holdmod=holdcorr=scorr=NULL
 
-  stratlist <- unique(modeldata$gdta[modeldata$scovs])
+  stratlist <- unique(modeldata$gdta[,modeldata$scovs])
 
   # Gross check to see whether the stratification variable may not be categorical
   if(length(stratlist) > 10) {
