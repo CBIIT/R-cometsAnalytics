@@ -256,6 +256,12 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #' @export
 runCorr<- function(modeldata,metabdata,cohort=""){
   # start the clock
+ if(nrow(modeldata$gdta) == 0) {
+        warning("The number of samples for this model is zero so the model will not be run")
+	scorr <- data.frame()
+	attr(scorr,"ptime") <- "No time elapsed because model cannot run (no samples are input with given criteria)"
+	return(scorr)
+ }  else{
   ptm <- base::proc.time() # start processing time
 
   if(is.null(modeldata$scovs)) {
@@ -299,5 +305,6 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=3),"sec")
   #print(paste0("Processing time: ",ptm))
   return(scorr)
+ }
 }
 

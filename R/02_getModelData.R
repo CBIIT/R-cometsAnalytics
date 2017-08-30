@@ -242,6 +242,10 @@ if(!is.null(where)) {
 
 gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
 
+if(nrow(gdta) == 0) {
+        warning("The number of samples for this model is zero so the model will not be run")
+}
+
 # Create list for analyses  -------------------------------
 # list for subset data
 # 1: subset data: gdta
@@ -260,5 +264,4 @@ list(
   modlabel = modlabel,
   where = where
 )
-
 }
