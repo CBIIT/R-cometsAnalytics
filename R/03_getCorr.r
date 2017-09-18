@@ -92,6 +92,8 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
 
     colnames(corr)<-colnames(corrhm$r)[-(1:length(col.rcovar))]
+    # Fix rownames when only one outcome is considered:
+    if(length(col.rcovar)==1) {rownames(corr) <- colnames(corrhm$r)[(1:length(col.rcovar))]}
     colnames(n)<-colnames(corrhm$n)[-(1:length(col.rcovar))]
     colnames(pval)<-colnames(corrhm$P)[-(1:length(col.rcovar))]
 
@@ -277,7 +279,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
 	stop(paste("The stratification variable ", modeldata$scovs," contains more than 10 unique values, which is too many for our software.  Please check your stratification variable"))
    }
   for (i in seq(along=stratlist)) {
-    print(paste("Running analysis on subjects stratified by",stratlist[1]))
+    print(paste("Running analysis on subjects stratified by",stratlist[i]))
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i])) %>%
       dplyr::select(-dplyr::one_of(modeldata$scovs))
