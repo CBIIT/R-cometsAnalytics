@@ -11,9 +11,9 @@
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' # Get correlation results
 #' OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
