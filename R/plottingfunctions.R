@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotVar(exmetabdata)
 #'
@@ -54,7 +54,7 @@ plotVar <- function(cometsdata,
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotMinvalues(exmetabdata)
 #'
@@ -86,16 +86,16 @@ plotMinvalues <- function(cometsdata,
 #---------------------------------------------------------
 # showCorr
 #---------------------------------------------------------
-#' Function that returns top N lines of the getCorr() output
-#' @param corr COMETScorr class (S3) from getCorr() output
+#' Function that returns top N lines of the runCorr() output
+#' @param corr COMETScorr class (S3) from runCorr() output
 #' @param nlines number of lines to return (default 50)
 #' @return first 50 lines of output
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
 showCorr <- function(corr, nlines=50) {
@@ -105,7 +105,7 @@ showCorr <- function(corr, nlines=50) {
 #---------------------------------------------------------
 #' Show interactive heatmap using plot_ly
 #'
-#' @param ccorrmat correlation matrix (output of getCorr())
+#' @param ccorrmat correlation matrix (output of runCorr())
 #' @param rowsortby How row labels are sorted
 #' @param plothgt Plot height default 700
 #' @param plotwid Plot width default 800
@@ -118,10 +118,10 @@ showCorr <- function(corr, nlines=50) {
 #' @examples
 #' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' }
 #' @export
@@ -135,7 +135,7 @@ showHeatmap <- function (ccorrmat,
   exmetabdata=corr=exposure=metabolite_name=c()
 
   # order the rows according to sort by
-  if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
+  if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 
     ccorrmat$metabolite_name <- suppressWarnings(
       factor(ccorrmat$metabolite_name, levels =
@@ -198,10 +198,10 @@ showHeatmap <- function (ccorrmat,
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi_grp"))
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
 showHClust <- function (ccorrmat,

@@ -9,7 +9,7 @@
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' allmodeloutput <- runAllModels(exmetabdata)
 #'
@@ -24,7 +24,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
   for (i in mymodels) {
         print(paste("Running",i))
 	mymod <- getModelData(readData,modlabel=i)
-        mycorr <- getCorr(mymod,readData,cohort)
+        mycorr <- runCorr(mymod,readData,cohort)
 	results[[i]] <- mycorr  
         if (writeTofile) {
               OutputCSVResults(i,mycorr,cohort=cohort)

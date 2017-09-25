@@ -6,7 +6,7 @@
 \usage{
 getModelData(readData, modelspec = "Batch", modlabel = "",
   rowvars = "All metabolites", colvars = "", adjvars = NULL,
-  strvars = NULL)
+  strvars = NULL, where = NULL)
 }
 \arguments{
 \item{readData}{list from readComets}
@@ -22,6 +22,8 @@ getModelData(readData, modelspec = "Batch", modlabel = "",
 \item{adjvars}{If Interactive, adjustment covariates}
 
 \item{strvars}{If Interactive, stratification covariates}
+
+\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.}
 }
 \value{
 a list comprising:
@@ -46,8 +48,8 @@ Get data ready for the model runs in interactive or batch mode as specified in t
 \examples{
 
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAge.xlsx")
+csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
+modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 
 }

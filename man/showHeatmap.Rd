@@ -8,7 +8,7 @@ showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700, plotwid = 800,
   colscale = "RdYlBu")
 }
 \arguments{
-\item{ccorrmat}{correlation matrix (output of getCorr())}
+\item{ccorrmat}{correlation matrix (output of runCorr())}
 
 \item{rowsortby}{How row labels are sorted}
 
@@ -27,10 +27,10 @@ Show interactive heatmap using plot_ly
 \examples{
 \dontrun{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAge.xlsx")
+csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,modlabel="1.1 Unadjusted")
-corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHeatmap(corrmatrix)
 }
 }

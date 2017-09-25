@@ -1,5 +1,5 @@
 #--------------------------------------------------------
-# getCorr: get correlation matrix ------------------------
+# calcCorr: get correlation matrix ------------------------
 #---------------------------------------------------------
 #' Calculate correlation matrix
 #'
@@ -14,29 +14,32 @@
 #' run.
 #'
 #' @examples
+#' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
-#' @export
-getCorr <- function (modeldata,metabdata,cohort=""){
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+#' corrmatrix <-calcCorr(modeldata,exmetabdata, "DPP")
+#' }
+calcCorr <- function(modeldata,metabdata,cohort=""){
 
 .Machine$double.eps <- 1e-300
 
   # only run getcorr for n>15
   if (nrow(modeldata$gdta)<15){
-    if (!is.na(modeldata$scovs)){
-      return()
-    }
-    else{
+    if (!is.null(modeldata$scovs)){
+      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+      mycorr=data.frame()
+      attr(mycorr,"ptime")="Processing time: 0 sec"
+      return(mycorr)
+    } else{
       stop(paste(modeldata$modlabel," has less than 15 observations."))
     }     
   }
   
    # Check that adjustment variables that at least two unique values
    for (i in modeldata$acovs) {
-        temp <- length(unique(metabdata$subjdata[[i]]))
+        temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
                 warning(paste("Warning: one of your models specifies",i,"as an adjustment 
 		but that variable only has one possible value.
@@ -44,21 +47,21 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 		modeldata$acovs <- setdiff(modeldata$acovs,i)
         }
    }
-   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
+#   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
    # Check that stratification variables that at least two unique values
    for (i in modeldata$scovs) {
-        temp <- length(unique(metabdata$subjdata[[i]]))
+        temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
                 warning(paste("Warning: one of your models specifies",i,"as an stratification 
 		but that variable only has one possible value.
-		Model will run without",i,"adjusted"))
+		Model will run without",i,"stratified"))
 		modeldata$scovs <- setdiff(modeldata$scovs,i)
         }
    }
-   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
+#   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
 
     # Defining global variables to pass Rcheck()
-  ptm <- proc.time() # start processing time
+  #ptm <- proc.time() # start processing time
   metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
   cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
   metabolite_name=expmetname=exposurespec=c()
@@ -89,6 +92,8 @@ getCorr <- function (modeldata,metabdata,cohort=""){
     pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
 
     colnames(corr)<-colnames(corrhm$r)[-(1:length(col.rcovar))]
+    # Fix rownames when only one outcome is considered:
+    if(length(col.rcovar)==1) {rownames(corr) <- colnames(corrhm$r)[(1:length(col.rcovar))]}
     colnames(n)<-colnames(corrhm$n)[-(1:length(col.rcovar))]
     colnames(pval)<-colnames(corrhm$P)[-(1:length(col.rcovar))]
 
@@ -99,8 +104,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
       pval=as.data.frame(t(pval))
     }
 
-  }
-  else {
+  }  else {
     # calculate partial correlation matrix
     print("running adjusted")
 
@@ -144,16 +148,17 @@ getCorr <- function (modeldata,metabdata,cohort=""){
   } # End else adjusted mode (length(col.adj) is not zero)
 
   # create long data with pairwise correlations  ----------------------------------------------------
+  mycols <- 1:length(col.ccovar)
+  corr.togather <- cbind(corr, outcomespec = rownames(corr))
   corrlong <-
     fixData(data.frame(
       cohort = cohort,
       spec = modeldata$modelspec,
       model = modeldata$modlabel,
-      tidyr::gather(cbind(corr, outcomespec = rownames(corr)),
-                    "exposurespec","corr",1:length(col.ccovar)
-      ),
-      tidyr::gather(as.data.frame(n),"exposuren", "n", 1:length(col.ccovar)),
-      tidyr::gather(as.data.frame(pval),"exposurep","pvalue",1:length(col.ccovar)),
+      tidyr::gather(corr.togather,
+                    "exposurespec","corr",colnames(corr.togather)[mycols]),
+      tidyr::gather(as.data.frame(n),"exposuren", "n", colnames(n)[mycols]),
+      tidyr::gather(as.data.frame(pval),"exposurep","pvalue",colnames(pval)[mycols]),
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
     dplyr::select(-exposuren, -exposurep)
 
@@ -219,11 +224,10 @@ getCorr <- function (modeldata,metabdata,cohort=""){
         dplyr::select(-vardefinition,-cohortvariable)
     }
 
-
-
   # Stop the clock
-  ptm <- proc.time() - ptm
-  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+#  ptm <- base::proc.time() - ptm
+#  print(paste("My ptm:", ptm))
+#  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
 
 	return(corrlong)
 
@@ -232,7 +236,7 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 
 
 #---------------------------------------------------------
-# stratCorr: stratified correlation analysis -------------
+# runCorr: stratified correlation analysis -------------
 #' Calculate correlation matrix for each strata specified if stratification is specified in the model tab or in interactive mode
 #'
 #' @param modeldata list from function getModelData
@@ -247,38 +251,62 @@ getCorr <- function (modeldata,metabdata,cohort=""){
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata, "DPP")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+#' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
-stratCorr<- function(modeldata,metabdata,cohort=""){
+runCorr<- function(modeldata,metabdata,cohort=""){
   # start the clock
+ if(nrow(modeldata$gdta) == 0) {
+        warning("The number of samples for this model is zero so the model will not be run")
+	scorr <- data.frame()
+	attr(scorr,"ptime") <- "No time elapsed because model cannot run (no samples are input with given criteria)"
+	return(scorr)
+ }  else{
   ptm <- base::proc.time() # start processing time
 
+  if(is.null(modeldata$scovs)) {
+	scorr <- calcCorr(modeldata,metabdata, cohort = cohort)
+  }  else {
   # initialize to avoid globalv errors
   stratlist=holdmod=holdcorr=scorr=NULL
 
-  stratlist <- unique(modeldata$gdta[modeldata$scovs])
-  for (i in seq(along=stratlist[,1])) {
+  stratlist <- unique(modeldata$gdta[,modeldata$scovs])
+
+  # Gross check to see whether the stratification variable may not be categorical
+  if(length(stratlist) > 10) {
+	stop(paste("The stratification variable ", modeldata$scovs," contains more than 10 unique values, which is too many for our software.  Please check your stratification variable"))
+   }
+  for (i in seq(along=stratlist)) {
+    print(paste("Running analysis on subjects stratified by",stratlist[i]))
     holdmod <- modeldata
-    holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i,1])) %>%
-      select(-dplyr::one_of(modeldata$scovs))
+    holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i])) %>%
+      dplyr::select(-dplyr::one_of(modeldata$scovs))
     
-    holdcorr  <- COMETS::getCorr(holdmod,metabdata,cohort=cohort)
+    holdcorr  <- calcCorr(holdmod,metabdata,cohort=cohort)
     if (length(holdcorr)!=0){
       holdcorr$stratavar<-as.character(modeldata$scovs)
-      holdcorr$strata<-stratlist[i,1]
-      scorr<-dplyr::bind_rows(scorr,holdcorr)
+      holdcorr$strata<-stratlist[i]
+      #scorr<-dplyr::bind_rows(scorr,holdcorr)
+    }    else {
+      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep="")) 
     }
-    else
-      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i,1], ") with less than 15 observations.",sep=""))
+      scorr<-dplyr::bind_rows(scorr,holdcorr)
     
+  } # end for loop
+  } # end else run stratified analysis
+  
+  
+  if(is.null(scorr)) {
+	scorr <- data.frame()
   }
+
   # Stop the clock
-  ptm <- proc.time() - ptm
-  #attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
-  scorr <- c(scorr,ptime = ptm)
+  ptm <- base::proc.time() - ptm
+  attr(scorr,"ptime") = paste("Processing time:",round(ptm[3],digits=3),"sec")
+  #print(paste0("Processing time: ",ptm))
   return(scorr)
+ }
 }
 

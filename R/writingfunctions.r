@@ -4,17 +4,17 @@
 #' Create output CSV file
 #'
 #' @param filename if type_output is "CSVfile", name of file and can include path
-#' @param dataf correlation output (from function getCorr())
+#' @param dataf correlation output (from function runCorr())
 #' @param cohort cohort name
 #'
 #' @return the filename of the CSV file with results named with cohort
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
-#' corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' # Get correlation results
 #' OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
 #' # Get harmonization results

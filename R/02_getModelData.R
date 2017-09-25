@@ -10,6 +10,7 @@
 #' @param colvars   if Interactive, exposure variables (usually covariates rendered in columns)
 #' @param adjvars   If Interactive, adjustment covariates
 #' @param strvars   If Interactive, stratification covariates
+#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.
 #'
 #' @return a list comprising:
 #'
@@ -30,9 +31,9 @@
 #' @examples
 #'
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 #'
 #' @export
 
@@ -42,15 +43,38 @@ getModelData <-  function(readData,
                           rowvars   = "All metabolites",
                           colvars   = "",
                           adjvars   = NULL,
-                          strvars   = NULL) {
+                          strvars   = NULL,
+			  where     = NULL) {
   if (is.na(match(modelspec, c("Interactive", "Batch")))) {
     stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
   }
 
-
-
 # figure out the model specification based on type (Interactive or Batch)
 if (modelspec == "Interactive") {
+  if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
+
+  # list of variables named differently for cohort
+  tst <-
+    dplyr::filter(readData$vmap,
+                  !is.na(readData$vmap[["cohortvariable"]]) &
+                    readData$vmap[["varreference"]] != "metabolite_id")
+
+  # changes names string using mapvalues
+  newnames <- plyr::mapvalues(
+    names(readData$subjdata),
+    from = c(base::tolower(tst$cohortvariable)),
+    to = c(base::tolower(tst$varreference))
+  )
+
+  # apply changes names to data frame
+  names(readData$subjdata) <- newnames
+
+  # Check that all variables that are input by user exist in the renamed data
+  allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars),"All metabolites"))
+  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
+	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+  }
+
   # rename the variables (Assumed to be 'All metabolites' by default)
   if (!is.na(match("All metabolites", rowvars))) {
     print("Analysis will run on 'All metabolites'")
@@ -68,14 +92,14 @@ if (modelspec == "Interactive") {
     ccovs <- unlist(strsplit(colvars, " "))
   }
 
-  # rename the covariates
+  # rename the adjustment variables
   if (!is.null(adjvars)) {
     acovs <- unlist(strsplit(adjvars, " "))
   } else {
     acovs <- adjvars
   }
 
-  # rename the covariates
+  # rename the stratification variables
   if (!is.null(strvars)) {
     scovs <- unlist(strsplit(strvars, " "))
   } else {
@@ -169,28 +193,34 @@ else if (modelspec == "Batch") {
   names(readData$subjdata) <- newnames
 
   # assign outcome vars -------------------------
-  if (length(mods) > 0 & mods$outcomes == "All metabolites")
+  if (length(mods) > 0 & mods$outcomes == "All metabolites") {
     rcovs <- c(readData[[2]])
-  else
+  } else
     rcovs <- as.vector(strsplit(mods$outcomes, " ")[[1]])
 
   # assign exposure vars -------------------------
-  if (length(mods) > 0 & mods$exposure == "All metabolites")
+  if (length(mods) > 0 & mods$exposure == "All metabolites") {
     ccovs <- c(readData[[2]])
-  else
+  } else
     ccovs <- as.vector(strsplit(mods$exposure, " ")[[1]])
 
   # assign adjustment vars -------------------------
-  if (!is.na(mods$adjustment))
+  if (!is.na(mods$adjustment)) {
     acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
-  else
+  } else
     acovs <- NULL
 
   # assign stratification vars vars -------------------------
-  if (!is.na(mods$stratification))
+  if (!is.na(mods$stratification)) {
     scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
-  else
+  } else
     scovs <- NULL
+
+  # Check that all variables that are input by user exist in the renamed data
+  allvars <- c(setdiff(c(rcovs,ccovs,acovs,scovs),"All metabolites"))
+  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
+        stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+  }
 
 } # end if modelspec == "Batch"
 
@@ -203,7 +233,18 @@ if (!is.null(acovs)) {
 if (!is.null(scovs)) {
   covlist <- c(covlist, scovs)
 }
-gdta <- dplyr::select(readData$subjdata, one_of(covlist))
+
+if(!is.null(where)) {
+      numallsamps <- nrow(readData$subjdata)
+      readData <- filterCOMETSinput(readData,where=where)
+      print(paste("Filtering subjects according to the rule(s)",where,". ",nrow(readData$subjdata)," of ", numallsamps,"are retained"))
+}
+
+gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
+
+if(nrow(gdta) == 0) {
+        warning("The number of samples for this model is zero so the model will not be run")
+}
 
 # Create list for analyses  -------------------------------
 # list for subset data
@@ -220,7 +261,7 @@ list(
   acovs = acovs,
   scovs = scovs,
   modelspec = modelspec,
-  modlabel = modlabel
+  modlabel = modlabel,
+  where = where
 )
-
 }

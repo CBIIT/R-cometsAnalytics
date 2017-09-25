@@ -21,10 +21,10 @@ This function outputs a heatmap with hierarchical clustering.  It thus requires 
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAge.xlsx")
+csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi"))
-corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi_grp"))
+corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHClust(corrmatrix)
 }
 \references{

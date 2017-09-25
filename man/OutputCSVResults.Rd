@@ -9,7 +9,7 @@ OutputCSVResults(filename, dataf, cohort = "")
 \arguments{
 \item{filename}{if type_output is "CSVfile", name of file and can include path}
 
-\item{dataf}{correlation output (from function getCorr())}
+\item{dataf}{correlation output (from function runCorr())}
 
 \item{cohort}{cohort name}
 }
@@ -21,10 +21,10 @@ Create output CSV file
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAge.xlsx")
+csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1.1 Unadjusted")
-corrmatrix <-getCorr(modeldata,exmetabdata,"DPP")
+modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 # Get correlation results
 OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
 # Get harmonization results
