@@ -35,7 +35,7 @@ The first step of the analysis is to load in the data with the *getModelData()* 
 ```{r}
 # Retrieve the full path of the input data
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAge.xlsx")
+csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 # Read in and process the input data
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
@@ -55,12 +55,12 @@ There are 2 ways to specify your model, batch or interactive.
 In Batch mode, models are specified in your input file. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
 ```{r}
-exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
+exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 ```
 In Interactive mode, models are specified as parameters. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
 ```{r}
-exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi"),where=c("age>40","bmi>20"))
+exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi_grp"),where=c("age>40","bmi_grp>2"))
 ```
 
 ###3. Run Simple Correlation Analysis
@@ -90,7 +90,7 @@ To display the heatmap of the resulting correlation matrix, use the showheatmap 
 To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. Requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r}
-exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("age","bmi"))
+exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("age","bmi_grp"))
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 ```
@@ -107,7 +107,7 @@ The stratified correlation analysis is run by calling the function *stratCorr()*
 
 ```{r}
   exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",
-	colvars=c("age","bmi"),strvars="site")
+	colvars=c("age","bmi_grp"),strvars="race_grp")
   excorrdata2  <- COMETS::runCorr(exmodeldata2,exmetabdata,"DPP")
 ```
 
