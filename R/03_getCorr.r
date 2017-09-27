@@ -89,7 +89,14 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
     corr <- data.frame(corrhm$r[1:length(col.rcovar),-(1:length(col.rcovar))])
     n <- as.data.frame(corrhm$n[1:length(col.rcovar),-(1:length(col.rcovar))])
-    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
+#    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
+    # Calculate p-values by hand to ensure that enough precision is printed:
+    ttval<-sqrt(n--2)*corr/sqrt(1-corr**2)
+   # From this t-statistic, loop through and calculate p-values
+    pval<-ttval
+    for (i in 1:length(modeldata[[2]])){
+     pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-2,lower.tail=FALSE)*2)
+    }  
 
     colnames(corr)<-colnames(corrhm$r)[-(1:length(col.rcovar))]
     # Fix rownames when only one outcome is considered:
