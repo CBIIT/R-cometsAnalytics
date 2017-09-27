@@ -1,7 +1,7 @@
 ## ------------------------------------------------------------------------
 # Retrieve the full path of the input data
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAge.xlsx")
+csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 # Read in and process the input data
 exmetabdata <- COMETS::readCOMETSinput(csvfile)
 
@@ -12,10 +12,10 @@ COMETS::plotVar(exmetabdata,titlesize=12)
 COMETS::plotMinvalues(exmetabdata,titlesize=12)
 
 ## ------------------------------------------------------------------------
-exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1.1 Unadjusted")
+exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 
 ## ------------------------------------------------------------------------
-exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi"),where=c("age>40","bmi>20"))
+exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi_grp"),where=c("age>40","bmi_grp>2"))
 
 ## ------------------------------------------------------------------------
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
@@ -30,13 +30,13 @@ COMETS::showCorr(excorrdata,nlines=3)
 #COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
 
 ## ------------------------------------------------------------------------
-exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("age","bmi"))
+exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("age","bmi_grp"))
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 
 ## ------------------------------------------------------------------------
   exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",
-	colvars=c("age","bmi"),strvars="site")
+	colvars=c("age","bmi_grp"),strvars="race_grp")
   excorrdata2  <- COMETS::runCorr(exmodeldata2,exmetabdata,"DPP")
 
 ## ------------------------------------------------------------------------
