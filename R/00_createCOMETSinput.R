@@ -44,25 +44,19 @@ createCOMETSinput <- function(template="age",filenames=NULL,varmap=NULL,
 
   if (!file.exists(metabfile)) {
      stop("metabfile does not exist, please check name")
-  }
-  else if (!file.exists(abundancesfile)) {
+  }  else if (!file.exists(abundancesfile)) {
        stop("abundancesfile does not exist, please check name")
-  }
-  else if (!file.exists(subjfile)) {
+  } else if (!file.exists(subjfile)) {
      stop("subjfile does not exist, please check name")
-  }
-
-else {
+  } else {
   # Get appropriate template file:
   if(template=="age") {
      dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
      templatefile <- file.path(dir, "cometsInputAge.xlsx")
-  }
-  else if (template=="basic") {
+  }  else if (template=="basic") {
      dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
      templatefile <- file.path(dir, "cometsInputBasic.xlsx")
-  }
-  else {
+  } else {
 	stop("Template does not exist.  Please contact COMETS-Analytics developers so it can be included.")
   }
 
@@ -75,8 +69,7 @@ else {
                 COHORTVARIABLE=rep("Needs User Input",nrow(tomap)),
                 COHORTNOTES=rep("",nrow(tomap)))
         warning("no variable mapping is provided through the varmap parameter so that sheet will be left blank")
-}
-  else {
+}  else {
         # Check that the input varmap file has all entries:
         numvarmap=length(intersect(names(varmap),tomap$varreference))
         if(numvarmap != length(tomap$varreference)) {
@@ -94,25 +87,30 @@ else {
 #  else {
 	# Write the Metabolite sheet
         metab=utils::read.csv(metabfile,check.names=FALSE)
-	xlsx::write.xlsx(metab,outputfile,sheetName="Metabolites",
-		row.names=FALSE,showNA=FALSE)
+	rio::export(metab,outputfile,which="Metabolites")
+#	xlsx::write.xlsx(metab,outputfile,sheetName="Metabolites",
+#		row.names=FALSE,showNA=FALSE)
 
         # Write the SubjectMetabolites sheet
 	abund=utils::read.csv(abundancesfile,check.names=FALSE)
-        xlsx::write.xlsx(abund,outputfile,sheetName="SubjectMetabolites",
-		row.names=FALSE,append=TRUE,showNA=FALSE)
+	rio::export(abund,outputfile,which="SubjectMetabolites",overwrite=FALSE)
+#        xlsx::write.xlsx(abund,outputfile,sheetName="SubjectMetabolites",
+#		row.names=FALSE,append=TRUE,showNA=FALSE)
 
 	# Write the SubjectData sheet
 	subj=utils::read.csv(subjfile,check.names=FALSE)
-        xlsx::write.xlsx(subj,outputfile,sheetName="SubjectData",row.names=FALSE,
-		append=TRUE,showNA=FALSE)
+	rio::export(subj,outputfile,which="SubjectData",overwrite=FALSE) 
+#       xlsx::write.xlsx(subj,outputfile,sheetName="SubjectData",row.names=FALSE,
+#		append=TRUE,showNA=FALSE)
 
 	# Write the VarMap sheet
-        xlsx::write.xlsx(varmap,outputfile,sheetName="VarMap",row.names=FALSE,
-		append=TRUE,showNA=FALSE)
+	rio::export(varmap,outputfile,which="VarMap",overwrite=FALSE)
+#        xlsx::write.xlsx(varmap,outputfile,sheetName="VarMap",row.names=FALSE,
+#		append=TRUE,showNA=FALSE)
 
 	#Write the Models sheet
-        xlsx::write.xlsx(models,outputfile,sheetName="Models",row.names=FALSE,
-		append=TRUE,showNA=FALSE)
+	rio::export(models,outputfile,which="Models",overwrite=FALSE)
+#       xlsx::write.xlsx(models,outputfile,sheetName="Models",row.names=FALSE,
+#		append=TRUE,showNA=FALSE)
   }
 } # end of function
