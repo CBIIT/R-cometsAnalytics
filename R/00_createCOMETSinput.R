@@ -67,6 +67,8 @@ createCOMETSinput <- function(template="age",filenames=NULL,varmap=NULL,
         varmap=data.frame(VARREFERENCE=tomap$varreference,
                 VARDEFINITION=tomap$vardefinition,
                 COHORTVARIABLE=rep("Needs User Input",nrow(tomap)),
+		VARTYPE=rep("User should input 'continuous' or 'categorical'",
+			nrow(tomap)),
                 COHORTNOTES=rep("",nrow(tomap)))
         warning("no variable mapping is provided through the varmap parameter so that sheet will be left blank")
 }  else {
