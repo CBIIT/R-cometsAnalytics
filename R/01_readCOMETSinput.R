@@ -38,6 +38,13 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
   print("Models sheet is read in")
 
+  # Go through the varmap VARTYPE column and convert categorical entries into factors
+  myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical")]
+  print(paste("There are",length(myfactors),"categorical variables"))
+  for (i in myfactors) {
+	dta.sdata[,i] <- factor(dta.sdata[,i])
+   }
+
   # Check file integrity:
   ckintegrity = checkIntegrity(
     dta.metab = dta.metab,
