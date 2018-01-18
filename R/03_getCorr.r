@@ -21,6 +21,7 @@
 #' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 #' corrmatrix <-calcCorr(modeldata,exmetabdata, "DPP")
 #' }
+#' @export
 calcCorr <- function(modeldata,metabdata,cohort=""){
 
 .Machine$double.eps <- 1e-300
