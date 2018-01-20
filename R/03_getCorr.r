@@ -116,7 +116,31 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     # calculate partial correlation matrix
     print("running adjusted")
 
-    data<-modeldata[[1]][,c(col.adj,col.rcovar,col.ccovar)]
+    #########
+    # Create dummy variables for categorical variables in col.adj
+    newcol=c()
+    for (i in col.adj) {
+	# If variable has levels (meaning it's categorical)
+	if(!is.null(levels(modeldata$gdta[,i]))) {
+		# Create dummy variables
+		print("Detected categorical adjustments, creating dummy variables")
+		for (j in 2:(length(mylevs))) {
+			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
+			myvec <- rep(0,nrow(modeldata$gdta))
+			myvec[which(modeldata$gdta[,i]==mylevs[j])]=1
+			modeldata$gdta=cbind(modeldata$gdta,myvec)
+			colnames(modeldata$gdta)[ncol(modeldata$gdta)]=newcol[length(newcol)]
+		}
+		modeldata$gdta <- modeldata$gdta[ , !(names(modeldata$gdta) %in% colnames(modeldata$gdta)[i])]
+		col.adj=which(colnames(modeldata$gdta) %in% newcol)
+		modeldata$acovs=colnames(modeldata$gdta)[col.adj]
+	}
+    }
+
+    data <- data.matrix(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
+	print(head(data))
+
+#    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
     spearcorr <- Hmisc::rcorr(as.matrix(data),type = "spearman")
 
     # get coordinates for outcomes and exposures for input into partial.r:
