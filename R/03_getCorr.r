@@ -121,7 +121,8 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     newcol=c()
     for (i in col.adj) {
 	# If variable has levels (meaning it's categorical)
-	if(!is.null(levels(modeldata$gdta[,i]))) {
+	mylevs=levels(modeldata$gdta[,i])
+	if(!is.null(mylevs)) {
 		# Create dummy variables
 		print("Detected categorical adjustments, creating dummy variables")
 		for (j in 2:(length(mylevs))) {
