@@ -139,7 +139,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     }
 
     data <- data.matrix(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
-	print(head(data))
+#	print(head(data))
 
 #    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
     spearcorr <- Hmisc::rcorr(as.matrix(data),type = "spearman")
