@@ -109,6 +109,46 @@
 #
 #  )
 # #
+# compile  master hmdb------------------
+# clean up variables
+# fixhash<-function(varfix){
+#   varfix<-gsub("###","",varfix)
+#   varfix<-gsub("##","",varfix)
+#   varfix<-gsub("#$","",varfix)
+#   varfix<-gsub("^#","",varfix)
+#   varfix
+# }
+#
+# holdmetid<-mastermetid %>%
+#   separate_rows(hmdb_id,sep="#") %>%
+#   separate_rows(hmdb_id,sep=";") %>%
+#   filter(hmdb_id!='')
+#
+# # clean-up multiple hashtags and semicolons
+# fixlist<-names(holdmetid)[2:7]
+#
+# holdmetid[,fixlist] <- as.data.frame(apply(holdmetid[,fixlist],2,fixhash))
+#
+# # concatenate all uidsource for each unuqie hmdb_id
+# masterhmdb1<-aggregate(uidsource~hmdb_id,
+#                        data=holdmetid,
+#                        paste,
+#                        collapse="#",
+#                        na.action=na.pass)
+# # concatenate all metid for each unuqie hmdb_id
+# masterhmdb2<-aggregate(metid~hmdb_id,
+#                        data=holdmetid,
+#                        paste,
+#                        collapse="#",
+#                        na.action=na.pass)
+#
+# # bring it all together
+# masterhmdb <- holdmetid %>%
+#   distinct(hmdb_id,uid_01,main_class,chemical_id,comp_id,biochemical) %>%
+#   left_join(masterhmdb1) %>%
+#   left_join(masterhmdb2)
+
+
 # }
 # # do not run
 # processUID()
@@ -129,3 +169,6 @@
 # save updated rdata from the global env
 # }
 #
+#
+# save the data for package
+save(cohorts,masterhmdb,mastermetid,file="~/Comets/CometsAnalyticsGood/inst/extdata/compileduids.RData")
