@@ -146,7 +146,8 @@
 # masterhmdb <- holdmetid %>%
 #   distinct(hmdb_id,uid_01,main_class,chemical_id,comp_id,biochemical) %>%
 #   left_join(masterhmdb1) %>%
-#   left_join(masterhmdb2)
+#   left_join(masterhmdb2) %>%
+#   select(uid_01,uidsource,main_class,chemical_id,comp_id,hmdb_id,biochemical)
 
 
 # }
@@ -170,5 +171,3 @@
 # }
 #
 #
-# save the data for package
-save(cohorts,masterhmdb,mastermetid,file="~/Comets/CometsAnalyticsGood/inst/extdata/compileduids.RData")
