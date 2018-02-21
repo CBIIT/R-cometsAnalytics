@@ -5,7 +5,7 @@
 #' @keywords internal
 #' @param dta any data frame
 #' @param compbl compress multiple blank spaces to single blank space for all character or factor variables in the dataset
- 
+
 fixData <- function(dta,compbl=FALSE) {
   dta<-as.data.frame(dta) # have to convert to dataframe from local dataframe from readxl
   # run through the data
@@ -34,7 +34,7 @@ fixData <- function(dta,compbl=FALSE) {
       if(class(dta[, indc]) %in% c("factor", "character")){
         if (compbl==TRUE)
           dta[, indc] <- gsub("\\s+", " ",trimws(dta[, indc])) # compress duplicate blanks
-        else 
+        else
           dta[, indc] <- trimws(dta[, indc])
       }
     }
@@ -65,7 +65,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
-    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)])) 
+    allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)]))
     print(paste(dta.models$ccovs,dta.models$scovs))
 
     # take out multiple blanks and add _ to all metabolites to avoid splitting
@@ -74,7 +74,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
-    else if (!is.na(dta.models$stratification) && 
+    else if (!is.na(dta.models$stratification) &&
 		length(intersect(dta.models$adjustment,dta.models$stratification))>=1) {
 	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
     }
@@ -198,7 +198,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
 #' @param dtalist results of reading a CSV data sheet (with read_excel)
 
 Harmonize<-function(dtalist){
-  mastermetid=metabolite_name=metlower=uid_01=NULL
+  mastermetid=metabolite_name=metlower=uid_01=cohorthmdb=foundhmdb=NULL
   # Load processed UIDs file:
   dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
   masterfile <- file.path(dir, "compileduids.RData")
@@ -209,7 +209,7 @@ Harmonize<-function(dtalist){
 
 
   # join by metabolite_id only keep those with a match
-  harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId))
+  harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId),suffix=c(".cohort",".comets"))
 
   # Loop through and try to join all the other columns (at each loop, combine matches and remove
   # non-unique entries
@@ -219,7 +219,7 @@ Harmonize<-function(dtalist){
 			dplyr::anti_join(dtalist$metab,harmlistg,
         			by=c(dtalist$metabId)) %>%
 		             dplyr::mutate(metlower=gsub("\\*$","",i)),
-				mastermetid,by=c("metlower"=dtalist$metabId)) %>% 
+				mastermetid,by=c("metlower"=dtalist$metabId),suffix=c(".cohort",".comets")) %>%
 		dplyr::select(-metlower)) #%>%
 #		dplyr::mutate(multrows=grepl("#",uid_01),harmflag=!is.na(uid_01))
   }
@@ -238,7 +238,37 @@ Harmonize<-function(dtalist){
   myord <- as.numeric(lapply(dtalist$metab[,dtalist$metabId],function(x)
 	which(harmlistg[,dtalist$metabId]==x)))
   finharmlistg <- harmlistg[myord,]
-  if(all.equal(finharmlistg[,dtalist$metabId],dtalist$metab[,dtalist$metabId])) { 
+
+# routine for hmdb look-up for those without a match
+  if (length(names(finharmlistg)[grepl("^hmdb",names(finharmlistg))])>=2){
+
+    # first hmdb is from cohort metabolite metadata
+    cohorthmdb <- names(finharmlistg)[grepl("^hmdb",names(finharmlistg))][1]
+
+    # need to rename to hmdb_id so that it can be left_join match
+    names(finharmlistg)<-gsub(cohorthmdb,"hmdb_id",names(finharmlistg))
+
+    # bring in the masterhmdb file to find further matches
+    foundhmdb<-finharmlistg %>%
+      filter(is.na(uid_01)) %>% # only find match for unmatched metabolites
+      select(1:ncol(dtalist$metab)) %>%  # keep only original columns before match
+      left_join(masterhmdb,suffix=c(".cohort",".comets"))
+
+    # rename back so we can combine
+    names(foundhmdb)<-gsub("hmdb_id",cohorthmdb,names(foundhmdb))
+    names(finharmlistg)<-gsub("hmdb_id",cohorthmdb,names(finharmlistg))
+
+    finharmlistg<-finharmlistg %>%
+      filter(!is.na(uid_01)) %>% # take the ones with the previous match
+      union_all(foundhmdb)       # union with the non-matches
+
+    # fix found hmdb name
+    names(finharmlistg)<-gsub(".cohort.comets",".comets",names(finharmlistg))
+
+  }
+
+
+  if(all.equal(sort(finharmlistg[,dtalist$metabId]),sort(dtalist$metab[,dtalist$metabId]))) {
   	dtalist$metab <- finharmlistg
   	return(dtalist)
   }
@@ -291,7 +321,7 @@ filterCOMETSinput <- function(readData,where=NULL) {
         	} else
                 stop("Make sure your 'where' filters contain logicals '>', '<', or '='")
         }
-	mycounts <- as.numeric(lapply(unique(samplesToKeep),function(x) 
+	mycounts <- as.numeric(lapply(unique(samplesToKeep),function(x)
 		length(which(samplesToKeep==x))))
 	fincounts <- which(mycounts == length(myfilts))
         readData$subjdata <- readData$subjdata[unique(samplesToKeep)[fincounts],]
