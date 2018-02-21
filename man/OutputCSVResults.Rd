@@ -7,7 +7,7 @@
 OutputCSVResults(filename, dataf, cohort = "")
 }
 \arguments{
-\item{filename}{if type_output is "CSVfile", name of file and can include path}
+\item{filename}{name of CSV file and can include path}
 
 \item{dataf}{correlation output (from function runCorr())}
 

@@ -39,11 +39,11 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
   print("Models sheet is read in")
 
   # Go through the varmap VARTYPE column and convert categorical entries into factors
-  myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical")]
+  myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical" & dta.vmap$varreference!="metabolite_id")]
   print(paste("There are",length(myfactors),"categorical variables"))
   for (i in myfactors) {
 	dta.sdata[,i] <- factor(dta.sdata[,i])
-   }
+  }
 
   # Check file integrity:
   ckintegrity = checkIntegrity(
@@ -113,8 +113,10 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
                              dta.vmap[["varreference"]] != "metabolite_id") # variable mapping
     )
 
+
     # Harmonize metabolites
     dtalist <- Harmonize(dtalist)
+
 
     # check to see which columns have non-missing values
     havedata <-

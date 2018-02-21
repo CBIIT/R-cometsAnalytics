@@ -8,17 +8,18 @@
 # processUID <- function() {
 #
 # source('~/Comets/Git-RComets/R/internalFunctions.r')
-#  # initialize parameters:
+#dir <- system.file("R", package = "COMETS", mustWork = TRUE)
+#intfile <- file.path(dir, "internalFunctions.R")
+#source(intfile)
+# initialize parameters:
 #  metid=uid_01=uidsource=hmdb=main_class=c()
 #
-#  dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
-#  xlsfile <- file.path(dir, "uid.xls")
-#  masteruids = fixData(readxl::read_excel(xlsfile,1))
-#  library(dplyr)
-#  library(tidyr)
+ # dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
+ # xlsfile <- file.path(dir, "uid.xls")
+ # masteruids = fixData(rio::import(xlsfile))
 #
-#  # Compile indices of name columns
-#  uidsource.ind <- grep("_name", names(masteruids))
+ # # Compile indices of name columns
+ # uidsource.ind <- grep("_name", names(masteruids))
 #
 #  # get master list of all metabolite_id and attribute to source
 #  mastercname <-
@@ -91,64 +92,66 @@
 #   dplyr::mutate(chemical_id=ifelse(trimws(chemical_id) == "NA","",chemical_id)) %>%
 #   dplyr::mutate(hmdb_id=ifelse(trimws(hmdb_id) == "NA","",hmdb_id))
 #
-#  rm(
-#    uidsource.ind,
-#    mastercname,
-#    masteruids,
-#    xlsfile,
-#    fixData,
-#    dir,
-#    hmdb,
-#    metid,
-#    main_class,
-#    uid_01,
-#    uidsource,
-#    checkIntegrity,
-#    Harmonize,
-#    prdebug
+# # #
+# # compile  master hmdb------------------
+# # take only unique hmdb (those with only 1 hmdb in uid_01)
+#  onlyhmdb<-union(dplyr::filter(masteruids,hmdb_id1!="") %>% select(-hmdb_id,-hmdb_id2) %>% rename(hmdb_id=hmdb_id1),
+#    dplyr::filter(masteruids,hmdb_id2!="") %>% select(-hmdb_id,-hmdb_id1) %>% rename(hmdb_id=hmdb_id2)) %>%
+#    filter(!grepl("_",uid_01)) %>%
+#    dplyr::distinct(hmdb_id,.keep_all=TRUE)
 #
-#  )
-# #
-# compile  master hmdb------------------
-# clean up variables
-# fixhash<-function(varfix){
-#   varfix<-gsub("###","",varfix)
-#   varfix<-gsub("##","",varfix)
-#   varfix<-gsub("#$","",varfix)
-#   varfix<-gsub("^#","",varfix)
-#   varfix
-# }
 #
-# holdmetid<-mastermetid %>%
-#   separate_rows(hmdb_id,sep="#") %>%
-#   separate_rows(hmdb_id,sep=";") %>%
-#   filter(hmdb_id!='')
+# hmdb<-onlyhmdb %>%
+#   tidyr::gather("uidsource", "metid", c(min(uidsource.ind):max(uidsource.ind)))
 #
-# # clean-up multiple hashtags and semicolons
-# fixlist<-names(holdmetid)[2:7]
+# hmdb1<-stats::aggregate(uidsource ~ hmdb_id + uid_01 ,hmdb,paste,collapse = ";")
 #
-# holdmetid[,fixlist] <- as.data.frame(apply(holdmetid[,fixlist],2,fixhash))
+# # bring in super-pathway and other metabolite metadata
+# masterhmdb <- hmdb1 %>%
+#   filter(!grepl("_",uid_01)) %>% # keep only single hmdb identifiers
+#   left_join(dplyr::filter(onlyhmdb,!grepl("_",uid_01))%>%dplyr::select(main_class,chemical_id,comp_id,hmdb_id,biochemical))
 #
-# # concatenate all uidsource for each unuqie hmdb_id
-# masterhmdb1<-aggregate(uidsource~hmdb_id,
-#                        data=holdmetid,
-#                        paste,
-#                        collapse="#",
-#                        na.action=na.pass)
-# # concatenate all metid for each unuqie hmdb_id
-# masterhmdb2<-aggregate(metid~hmdb_id,
-#                        data=holdmetid,
-#                        paste,
-#                        collapse="#",
-#                        na.action=na.pass)
 #
-# # bring it all together
-# masterhmdb <- holdmetid %>%
-#   distinct(hmdb_id,uid_01,main_class,chemical_id,comp_id,biochemical) %>%
-#   left_join(masterhmdb1) %>%
-#   left_join(masterhmdb2) %>%
-#   select(uid_01,uidsource,main_class,chemical_id,comp_id,hmdb_id,biochemical)
-
+#
+#
+#
+# rm(
+#   onlyhmdb,
+#   hmdb,hmdb1,hmdb2,
+#   uidsource.ind,
+#   mastercname,
+#   masteruids,
+#   xlsfile,
+#   fixData,
+#   dir,
+#   hmdb,
+#   metid,
+#   main_class,
+#   uid_01,
+#   uidsource,
+#   checkIntegrity,
+#   Harmonize,
+#   prdebug,
+#   filterCOMETSinput,
+#   intfile
+#
+# )
+# ## ---------------------------------------------------------------------------
+# ## processcohorts function ----------------------------------------------------------
+# ## ---------------------------------------------------------------------------
+# dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
+# xlsfile <- file.path(dir, "cohorts.xlsx")
+# cohorts = readxl::read_excel(xlsfile,1)
+# rm(dir,xlsfile)
+#
+#
+# ## ---------------------------------------------------------------------------
+# ## update rdata for package ----------------------------------------------------------
+# ## ---------------------------------------------------------------------------
+# # save updated rdata from the global env
+# rdfile <- file.path(paste0(getwd(),"/inst/extdata"), "compileduids.RData")
+# save(cohorts,masterhmdb,mastermetid,file=rdfile)
+# rm(rdfile)
 
 # }
 # # do not run
@@ -157,17 +160,6 @@
 ##'
 #
 #
-## ---------------------------------------------------------------------------
-## processcohorts function ----------------------------------------------------------
-## ---------------------------------------------------------------------------
-##' Code that creates the cohorts dataframe file, just run the internal code within functionr
-##' @keywords internal
-# processCOHORTS <- function() {
-# dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
-# xlsfile <- file.path(dir, "cohorts.xlsx")
-# cohorts = readxl::read_excel(xlsfile,1)
-# rm(dir,xlsfile)
-# save updated rdata from the global env
-# }
 #
 #
+
