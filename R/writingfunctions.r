@@ -47,7 +47,7 @@ OutputCSVResults <- function (filename,dataf,cohort=""){
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 #' # Get descriptive data
-#' descdata <-runDescrip(exmetabdata,"DPP")
+#' descdata <-runDescrip(exmetabdata)
 #' OutputXLSResults(filename="corr",datal=descdata,cohort="DPP")
 #' @export
 

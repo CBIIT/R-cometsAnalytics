@@ -54,23 +54,23 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 #' @export
 
 runDescrip<- function(readData){
-  sumcat<-NULL
+  sumcat<-variable<-value<-NULL
   # check if vartype is in vmap to see whether anyvars are categorical
-  if (which(grepl("vartype",names(readData$vmap)))>0){
+  if (length(which(grepl("vartype",names(readData$vmap))))>0){
 
-  catvars<-names(readData$subjdata)[which(sapply(readData$subjdata, is.factor)==TRUE)]
+  	catvars<-names(readData$subjdata)[which(sapply(readData$subjdata, is.factor)==TRUE)]
 
-  msdata<-readData$subjdata %>%
-    select_(catvars)
-  msdata <- data.table::melt(readData$subjdata,measure.vars=catvars)
-  sumcat <- msdata %>%
-    group_by(variable, value) %>%
-    summarise (n = n()) %>%
-    mutate(proportion = n / sum(n))
+  	msdata<-readData$subjdata %>%
+    		select_(catvars)
+  	msdata <- suppressWarnings(data.table::melt(readData$subjdata,measure.vars=catvars))
+  	sumcat <- msdata %>%
+    	group_by(variable, value) %>%
+    	summarise (n = n()) %>%
+    	mutate(proportion = n / sum(n))
   }
 
-  sumcnt <-psych::describe(readData$subjdata,quant = c(.05,.25,.5,.75,.95))
-  sumcnt$varname<-rownames(sumcnt)
+  sumcnt <-as.data.frame(psych::describe(readData$subjdata,quant = c(.05,.25,.5,.75,.95)))
+  sumcnt$vars<-rownames(sumcnt)
 
   return(list(sumcat=sumcat,sumall=sumcnt))
 
