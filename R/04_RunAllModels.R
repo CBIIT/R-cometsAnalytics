@@ -73,5 +73,4 @@ runDescrip<- function(readData){
   sumcnt$vars<-rownames(sumcnt)
 
   return(list(sumcat=sumcat,sumall=sumcnt))
-
 }
