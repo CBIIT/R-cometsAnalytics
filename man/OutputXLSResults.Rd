@@ -25,6 +25,6 @@ csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 # Get descriptive data
-descdata <-runDescrip(exmetabdata,"DPP")
+descdata <-runDescrip(exmetabdata)
 OutputXLSResults(filename="corr",datal=descdata,cohort="DPP")
 }
