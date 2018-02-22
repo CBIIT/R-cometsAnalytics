@@ -24,7 +24,8 @@ Imports:
     shiny,
     shinyFiles,
     Hmisc,
-    stringr
+    stringr,
+    data.table
 Suggests:
     knitr
 VignetteBuilder: knitr

@@ -54,7 +54,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 #' @export
 
 runDescrip<- function(readData){
-  sumcat<-variable<-value<-NULL
+  sumcat<-variable<-value<-cohort<-NULL
   # check if vartype is in vmap to see whether anyvars are categorical
   if (length(which(grepl("vartype",names(readData$vmap))))>0){
 
