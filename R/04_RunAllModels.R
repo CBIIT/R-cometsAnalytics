@@ -72,5 +72,5 @@ runDescrip<- function(readData){
   sumcnt <-as.data.frame(psych::describe(readData$subjdata,quant = c(.05,.25,.5,.75,.95)))
   sumcnt$vars<-rownames(sumcnt)
 
-  return(list(sumcat=sumcat,sumall=sumcnt))
+  return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
 }
