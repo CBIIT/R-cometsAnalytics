@@ -9,8 +9,6 @@ runDescrip(readData)
 }
 \arguments{
 \item{readData}{list from readComets}
-
-\item{cohort}{cohort label (e.g. DPP, NCI, Shanghai)}
 }
 \value{
 a list with 2 data frames, continuous and categorical summaries. Type of variable is defined in varmap
