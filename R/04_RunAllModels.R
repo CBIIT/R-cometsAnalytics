@@ -38,7 +38,6 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 #' This function allows users to run all models that are provided in the "Models" sheet of
 #' the input Excell file.
 #' @param readData list from readComets
-#' @param cohort cohort label (e.g. DPP, NCI, Shanghai)
 #'
 #' @return a list with 2 data frames, continuous and categorical summaries. Type of variable is defined in varmap
 #'
