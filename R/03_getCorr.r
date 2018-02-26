@@ -118,13 +118,19 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
     #########
     # Create dummy variables for categorical variables in col.adj
-    newcol=c()
+    newcol<-c()
+    print("Looping through")
+    print(colnames(modeldata$gdta)[col.adj])
+    # Using this to track the original adjusted column names
+    orig.adjcol <- colnames(modeldata$gdta)[col.adj];tracker=1
     for (i in col.adj) {
 	# If variable has levels (meaning it's categorical)
 	mylevs=levels(modeldata$gdta[,i])
 	if(!is.null(mylevs)) {
 		# Create dummy variables
-		print("Detected categorical adjustments, creating dummy variables")
+		print(paste("Detected categorical adjustments, creating dummy variables for", colnames(modeldata$gdta)[i]))
+		# Remove current variable from adjusted variables (it will be replaced by categorical below)
+		#modeldata$acovs=modeldata$acovs[which(modeldata$acovs!=colnames(modeldata$gdta)[i])]
 		for (j in 2:(length(mylevs))) {
 			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
 			myvec <- rep(0,nrow(modeldata$gdta))
@@ -133,15 +139,28 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 			colnames(modeldata$gdta)[ncol(modeldata$gdta)]=newcol[length(newcol)]
 		}
 		modeldata$gdta <- modeldata$gdta[ , !(names(modeldata$gdta) %in% colnames(modeldata$gdta)[i])]
-		col.adj=which(colnames(modeldata$gdta) %in% newcol)
-		modeldata$acovs=colnames(modeldata$gdta)[col.adj]
+		tracker=tracker+1
+	} else {
+		newcol=c(newcol,orig.adjcol[tracker])
+		tracker=tracker+1
 	}
     }
-
-    data <- data.matrix(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
-#	print(head(data))
+	newcol.adj <- which(colnames(modeldata$gdta) %in% newcol)
+	# keep track of original adjustments (for printing) but reassign for 
+	# partial correlation calculations
+	oldcol.adj <- modeldata$acovs
+	modeldata$acovs <- newcol
+	print("New adjusted variables")
+	print(newcol)	
+	data <- data.matrix(modeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
+	print("Modeldata adjusted covariates")
+	print(modeldata$acovs)
+	print("Adjusted covariates for data")
+	print(colnames(modeldata$gdta)[newcol.adj])
 
 #    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
+    # R uses the Hollander and Wolfe method to deal with ties (midranks are used, see
+    # https://www2.units.it/ipl/students_area/imm2/files/Numerical_Recipes.pdf for more details
     spearcorr <- Hmisc::rcorr(as.matrix(data),type = "spearman")
 
     # get coordinates for outcomes and exposures for input into partial.r:
@@ -177,6 +196,9 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     #if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
 
 #   corr=cbind(corr,n)
+
+  # Rename the adjusted covariate now to original (without dummies)
+   modeldata$acovs=oldcol.adj
 
   } # End else adjusted mode (length(col.adj) is not zero)
 
