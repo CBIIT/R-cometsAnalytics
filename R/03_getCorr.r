@@ -122,6 +122,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     print("Looping through")
     print(colnames(modeldata$gdta)[col.adj])
     # Using this to track the original adjusted column names
+    newmodeldata <- modeldata
     orig.adjcol <- colnames(modeldata$gdta)[col.adj];tracker=1
     for (i in col.adj) {
 	# If variable has levels (meaning it's categorical)
@@ -135,28 +136,28 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
 			myvec <- rep(0,nrow(modeldata$gdta))
 			myvec[which(modeldata$gdta[,i]==mylevs[j])]=1
-			modeldata$gdta=cbind(modeldata$gdta,myvec)
-			colnames(modeldata$gdta)[ncol(modeldata$gdta)]=newcol[length(newcol)]
+			newmodeldata$gdta=cbind(newmodeldata$gdta,myvec)
+			colnames(newmodeldata$gdta)[ncol(newmodeldata$gdta)]=newcol[length(newcol)]
 		}
-		modeldata$gdta <- modeldata$gdta[ , !(names(modeldata$gdta) %in% colnames(modeldata$gdta)[i])]
+		newmodeldata$gdta <- newmodeldata$gdta[ , !(names(newmodeldata$gdta) %in% colnames(modeldata$gdta)[i])]
 		tracker=tracker+1
 	} else {
 		newcol=c(newcol,orig.adjcol[tracker])
 		tracker=tracker+1
 	}
     }
-	newcol.adj <- which(colnames(modeldata$gdta) %in% newcol)
+	newcol.adj <- which(colnames(newmodeldata$gdta) %in% newcol)
 	# keep track of original adjustments (for printing) but reassign for 
 	# partial correlation calculations
 	oldcol.adj <- modeldata$acovs
-	modeldata$acovs <- newcol
+	newmodeldata$acovs <- newcol
 	print("New adjusted variables")
 	print(newcol)	
-	data <- data.matrix(modeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
+	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
 	print("Modeldata adjusted covariates")
-	print(modeldata$acovs)
+	print(newmodeldata$acovs)
 	print("Adjusted covariates for data")
-	print(colnames(modeldata$gdta)[newcol.adj])
+	print(colnames(newmodeldata$gdta)[newcol.adj])
 
 #    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
     # R uses the Hollander and Wolfe method to deal with ties (midranks are used, see
@@ -167,19 +168,19 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     x=c(match(modeldata$rcovs,colnames(spearcorr$r)),
 	  match(modeldata$ccovs,colnames(spearcorr$r)))
 
-    y=match(modeldata$acovs,colnames(spearcorr$r))
+    y=match(newmodeldata$acovs,colnames(spearcorr$r))
 
     corr <-psych::partial.r(spearcorr$r,x,y)
 
     # get coordinates of outcomes for output corr:
-    xcorr=match(modeldata$rcovs,colnames(corr))
-    ycorr=match(modeldata$ccovs,colnames(corr))
+    xcorr=match(newmodeldata$rcovs,colnames(corr))
+    ycorr=match(newmodeldata$ccovs,colnames(corr))
     corr=as.data.frame(corr[xcorr,ycorr])
-    colnames(corr)=modeldata$ccovs
+    colnames(corr)=newmodeldata$ccovs
 
     # Note that the order of spearcorr and corr is not the same!!
-    n <- data.frame(spearcorr$n[match(modeldata$rcovs,rownames(spearcorr$n)),
-               match(modeldata$ccovs,colnames(spearcorr$n))])
+    n <- data.frame(spearcorr$n[match(newmodeldata$rcovs,rownames(spearcorr$n)),
+               match(newmodeldata$ccovs,colnames(spearcorr$n))])
 
     ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
 
@@ -198,7 +199,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #   corr=cbind(corr,n)
 
   # Rename the adjusted covariate now to original (without dummies)
-   modeldata$acovs=oldcol.adj
+   #modeldata$acovs=oldcol.adj
 
   } # End else adjusted mode (length(col.adj) is not zero)
 
@@ -214,7 +215,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
                     "exposurespec","corr",colnames(corr.togather)[mycols]),
       tidyr::gather(as.data.frame(n),"exposuren", "n", colnames(n)[mycols]),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",colnames(pval)[mycols]),
-      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata[[4]], collapse = " ")) )) %>%
+      adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata$acovs, collapse = " ")) )) %>%
     dplyr::select(-exposuren, -exposurep)
 
   # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
