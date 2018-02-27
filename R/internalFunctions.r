@@ -296,7 +296,7 @@ prdebug<-function(lab,x){
 #' Function that subsets input data based on "where variable"
 #'
 #' @param readData list from readComets
-#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("Gender","=","Female")
+#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator ("<", ">", "=","<=",">="), and a value.  For example, "where = c("Gender","=","Female")
 #' @return filtered list
 #'
 filterCOMETSinput <- function(readData,where=NULL) {
