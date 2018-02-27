@@ -306,7 +306,15 @@ filterCOMETSinput <- function(readData,where=NULL) {
 	# create rules for each filter
 	for (i in 1:length(myfilts)) {
 		myrule <- myfilts[[i]]
-        	if(length(grep("<",myrule))>0) {
+                if(length(grep("<=",myrule))>0) {
+                        mysplit <- strsplit(myrule,"<=")[[1]]
+                        samplesToKeep <- c(samplesToKeep,
+                           which(readData$subjdata[,gsub(" ","",mysplit[1])] <= gsub(" ","",mysplit[2]) ))
+                } else if(length(grep(">=",myrule))>0) {
+                        mysplit <- strsplit(myrule,">=")[[1]]
+                        samplesToKeep <- c(samplesToKeep,
+                           which(readData$subjdata[,gsub(" ","",mysplit[1])] >= gsub(" ","",mysplit[2]) ))
+                } else if(length(grep("<",myrule))>0) {
 			mysplit <- strsplit(myrule,"<")[[1]]
                		samplesToKeep <- c(samplesToKeep,
                            which(readData$subjdata[,gsub(" ","",mysplit[1])] < gsub(" ","",mysplit[2]) ))
