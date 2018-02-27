@@ -222,6 +222,12 @@ else if (modelspec == "Batch") {
         stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
 
+  # assign where filtering -------------------------
+  if (!is.na(mods$where)) {
+	where <- mods$where
+  } else
+        where <- NULL
+
 } # end if modelspec == "Batch"
 
 # Keep only needed variables for the data -------------------------------
