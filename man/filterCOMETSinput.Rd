@@ -9,7 +9,7 @@ filterCOMETSinput(readData, where = NULL)
 \arguments{
 \item{readData}{list from readComets}
 
-\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("Gender","=","Female")}
+\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator ("<", ">", "=","<=",">="), and a value.  For example, "where = c("Gender","=","Female")}
 }
 \value{
 filtered list
