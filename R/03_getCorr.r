@@ -345,7 +345,14 @@ runCorr<- function(modeldata,metabdata,cohort=""){
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i])) %>%
       dplyr::select(-dplyr::one_of(modeldata$scovs))
-    
+
+    # Need to reset levels in case one of the levels is dropped (e.g. due to stratification)
+    for (mycol in colnames(holdmod$gdta)) {
+	if(length(levels(holdmod$gdta[,mycol]))>0) {
+		holdmod$gdta[,mycol]=droplevels(holdmod$gdta[,mycol])
+	} else {next;}
+    }
+
     holdcorr  <- calcCorr(holdmod,metabdata,cohort=cohort)
     if (length(holdcorr)!=0){
       holdcorr$stratavar<-as.character(modeldata$scovs)
