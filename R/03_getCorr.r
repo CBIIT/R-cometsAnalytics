@@ -53,7 +53,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
    for (i in modeldata$scovs) {
         temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
-                warning(paste("Warning: one of your models specifies",i,"as an stratification 
+                warning(paste("Warning: one of your models specifies",i,"as a stratification 
 		but that variable only has one possible value.
 		Model will run without",i,"stratified"))
 		modeldata$scovs <- setdiff(modeldata$scovs,i)
@@ -119,8 +119,8 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     #########
     # Create dummy variables for categorical variables in col.adj
     newcol<-c()
-    print("Looping through")
-    print(colnames(modeldata$gdta)[col.adj])
+    #print("Looping through")
+    #print(colnames(modeldata$gdta)[col.adj])
     # Using this to track the original adjusted column names
     newmodeldata <- modeldata
     orig.adjcol <- colnames(modeldata$gdta)[col.adj];tracker=1
@@ -158,13 +158,13 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	# partial correlation calculations
 	oldcol.adj <- modeldata$acovs
 	newmodeldata$acovs <- newcol
-	print("New adjusted variables")
-	print(newcol)	
+	#print("New adjusted variables")
+	#print(newcol)	
 	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
-	print("Modeldata adjusted covariates")
-	print(newmodeldata$acovs)
-	print("Adjusted covariates for data")
-	print(colnames(newmodeldata$gdta)[newcol.adj])
+	#print("Modeldata adjusted covariates")
+	#print(newmodeldata$acovs)
+	#print("Adjusted covariates for data")
+	#print(colnames(newmodeldata$gdta)[newcol.adj])
 #    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
     # R uses the Hollander and Wolfe method to deal with ties (midranks are used, see
     # https://www2.units.it/ipl/students_area/imm2/files/Numerical_Recipes.pdf for more details
