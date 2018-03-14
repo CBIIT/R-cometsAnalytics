@@ -135,9 +135,16 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 		for (j in 2:(length(mylevs))) {
 			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
 			myvec <- rep(0,nrow(modeldata$gdta))
+			if(length(which(is.na(modeldata$gdta)))>0) {
+				myvec[which(is.na(modeldata$gdta[,i]))]=NA
+			}
 			myvec[which(modeldata$gdta[,i]==mylevs[j])]=1
 			newmodeldata$gdta=cbind(newmodeldata$gdta,myvec)
 			colnames(newmodeldata$gdta)[ncol(newmodeldata$gdta)]=newcol[length(newcol)]
+		}
+		if(length(which(is.na(modeldata$gdta)))>0) {
+			warning(paste("WARNING: You have blank/missing values for variable",colnames(modeldata$gdta)[i],
+				"please check the coding for missingness in the varmap sheet"))
 		}
 		newmodeldata$gdta <- newmodeldata$gdta[ , !(names(newmodeldata$gdta) %in% colnames(modeldata$gdta)[i])]
 		tracker=tracker+1
@@ -158,7 +165,6 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	print(newmodeldata$acovs)
 	print("Adjusted covariates for data")
 	print(colnames(newmodeldata$gdta)[newcol.adj])
-
 #    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
     # R uses the Hollander and Wolfe method to deal with ties (midranks are used, see
     # https://www2.units.it/ipl/students_area/imm2/files/Numerical_Recipes.pdf for more details
