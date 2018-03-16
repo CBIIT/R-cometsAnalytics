@@ -19,9 +19,9 @@ Function that returns top N lines of the runCorr() output
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showCorr(corrmatrix)
 }
