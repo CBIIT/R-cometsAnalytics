@@ -23,9 +23,10 @@ This function allows users to run all models that are provided in the "Models" s
 the input Excell file.
 }
 \examples{
+\dontrun{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 allmodeloutput <- runAllModels(exmetabdata)
-
+}
 }

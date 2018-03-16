@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotVar(exmetabdata)
 #'
@@ -54,7 +54,7 @@ plotVar <- function(cometsdata,
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotMinvalues(exmetabdata)
 #'
@@ -92,9 +92,9 @@ plotMinvalues <- function(cometsdata,
 #' @return first 50 lines of output
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
@@ -118,9 +118,9 @@ showCorr <- function(corr, nlines=50) {
 #' @examples
 #' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' }
@@ -198,9 +198,9 @@ showHeatmap <- function (ccorrmat,
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi_grp"))
+#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi_grp"),rowvars=c("lactose","lactate"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export

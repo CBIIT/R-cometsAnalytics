@@ -6,7 +6,7 @@
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #'
 #' @export

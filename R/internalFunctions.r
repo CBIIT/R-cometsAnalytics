@@ -309,23 +309,23 @@ filterCOMETSinput <- function(readData,where=NULL) {
                 if(length(grep("<=",myrule))>0) {
                         mysplit <- strsplit(myrule,"<=")[[1]]
                         samplesToKeep <- c(samplesToKeep,
-                           which(readData$subjdata[,gsub(" ","",mysplit[1])] <= gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(readData$subjdata[,gsub(" ","",mysplit[1])]) <= gsub(" ","",mysplit[2]) ))
                 } else if(length(grep(">=",myrule))>0) {
                         mysplit <- strsplit(myrule,">=")[[1]]
                         samplesToKeep <- c(samplesToKeep,
-                           which(readData$subjdata[,gsub(" ","",mysplit[1])] >= gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(readData$subjdata[,gsub(" ","",mysplit[1])]) >= gsub(" ","",mysplit[2]) ))
                 } else if(length(grep("<",myrule))>0) {
 			mysplit <- strsplit(myrule,"<")[[1]]
                		samplesToKeep <- c(samplesToKeep,
-                           which(readData$subjdata[,gsub(" ","",mysplit[1])] < gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(readData$subjdata[,gsub(" ","",mysplit[1])]) < gsub(" ","",mysplit[2]) ))
         	} else if(length(grep(">",myfilts[i]))>0) {
 	        	mysplit <- strsplit(myrule,">")[[1]]
                         samplesToKeep <- c(samplesToKeep,
-                           which(readData$subjdata[,gsub(" ","",mysplit[1])] > gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(readData$subjdata[,gsub(" ","",mysplit[1])]) > gsub(" ","",mysplit[2]) ))
 		} else if (length(grep("=",myfilts[i]))>0) {
 			mysplit <- strsplit(myrule,"=")[[1]]
                         samplesToKeep <- c(samplesToKeep,
-                           which(readData$subjdata[,gsub(" ","",mysplit[1])] == gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(readData$subjdata[,gsub(" ","",mysplit[1])]) == gsub(" ","",mysplit[2]) ))
         	} else
                 stop("Make sure your 'where' filters contain logicals '>', '<', or '='")
         }

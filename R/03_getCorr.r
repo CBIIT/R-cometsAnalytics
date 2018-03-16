@@ -16,9 +16,9 @@
 #' @examples
 #' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
 #' corrmatrix <-calcCorr(modeldata,exmetabdata, "DPP")
 #' }
 #' @export
@@ -307,9 +307,9 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
 #' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
 runCorr<- function(modeldata,metabdata,cohort=""){
@@ -353,7 +353,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
       holdcorr$strata<-stratlist[i]
       #scorr<-dplyr::bind_rows(scorr,holdcorr)
     }    else {
-      warning(paste("Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep="")) 
+      warning(paste("Warning: Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep="")) 
     }
       scorr<-dplyr::bind_rows(scorr,holdcorr)
     

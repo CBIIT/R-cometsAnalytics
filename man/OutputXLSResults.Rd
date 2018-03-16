@@ -21,9 +21,9 @@ Create output XLSX file
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
 # Get descriptive data
 descdata <-runDescrip(exmetabdata)
 OutputXLSResults(filename="corr",datal=descdata,cohort="DPP")
