@@ -95,7 +95,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     ttval<-sqrt(n--2)*corr/sqrt(1-corr**2)
    # From this t-statistic, loop through and calculate p-values
     pval<-ttval
-    for (i in 1:length(modeldata[[2]])){
+    for (i in 1:length(modeldata$ccovs)){
      pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-2,lower.tail=FALSE)*2)
     }  
 
@@ -158,16 +158,10 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	# partial correlation calculations
 	oldcol.adj <- modeldata$acovs
 	newmodeldata$acovs <- newcol
-	#print("New adjusted variables")
-	#print(newcol)	
 	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
-	#print("Modeldata adjusted covariates")
-	#print(newmodeldata$acovs)
-	#print("Adjusted covariates for data")
-	#print(colnames(newmodeldata$gdta)[newcol.adj])
-#    data<-as.numeric(modeldata$gdta[,c(col.adj,col.rcovar,col.ccovar)])
     # R uses the Hollander and Wolfe method to deal with ties (midranks are used, see
     # https://www2.units.it/ipl/students_area/imm2/files/Numerical_Recipes.pdf for more details
+    
     spearcorr <- Hmisc::rcorr(as.matrix(data),type = "spearman")
 
     # get coordinates for outcomes and exposures for input into partial.r:
@@ -178,35 +172,34 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
     corr <-psych::partial.r(spearcorr$r,x,y)
 
-    # get coordinates of outcomes for output corr:
+    n <- data.frame(spearcorr$n[match(newmodeldata$rcovs,rownames(spearcorr$n)),
+               match(newmodeldata$ccovs,colnames(spearcorr$n))])
+
+    # Loop through and calculate p-values
+    pval <- c()
+    for (i in 1:length(modeldata$ccovs)){
+	temp <- format(psych::corr.p(corr,n=nrow(data)-2)$p,digits=22)
+	y <- match(newmodeldata$rcovs,colnames(temp))
+	pval <-c(pval,temp[modeldata$ccovs[i],y])
+    }
+    pval=as.data.frame(pval)
+    colnames(pval) <- paste(as.character(modeldata$ccovs),".p",sep = "")
+
+    # If there are more than one exposure, then need to transpose - not sure why???
+    #if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
+
+    # Reformat corr:
     xcorr=match(newmodeldata$rcovs,colnames(corr))
     ycorr=match(newmodeldata$ccovs,colnames(corr))
     corr=as.data.frame(corr[xcorr,ycorr])
     rownames(corr) <- newmodeldata$rcovs
     colnames(corr)=newmodeldata$ccovs
 
-    # Note that the order of spearcorr and corr is not the same!!
-    n <- data.frame(spearcorr$n[match(newmodeldata$rcovs,rownames(spearcorr$n)),
-               match(newmodeldata$ccovs,colnames(spearcorr$n))])
-
-    ttval<-sqrt(n-length(col.adj)-2)*corr/sqrt(1-corr**2)
-
-    # From this t-statistic, loop through and calculate p-values
-    pval<-ttval
-    for (i in 1:length(modeldata[[2]])){
-     pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-length(col.adj)-2,lower.tail=FALSE)*2)
-     
-    }
-    
-    colnames(pval) <- paste(as.character(modeldata[[2]]),".p",sep = "")
-
-    # If there are more than one exposure, then need to transpose - not sure why???
-    #if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
-
 #   corr=cbind(corr,n)
 
   # Rename the adjusted covariate now to original (without dummies)
    #modeldata$acovs=oldcol.adj
+  print("finished adjustment")
 
   } # End else adjusted mode (length(col.adj) is not zero)
 
