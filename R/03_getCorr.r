@@ -182,6 +182,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     xcorr=match(newmodeldata$rcovs,colnames(corr))
     ycorr=match(newmodeldata$ccovs,colnames(corr))
     corr=as.data.frame(corr[xcorr,ycorr])
+    rownames(corr) <- newmodeldata$rcovs
     colnames(corr)=newmodeldata$ccovs
 
     # Note that the order of spearcorr and corr is not the same!!
