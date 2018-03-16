@@ -8,11 +8,12 @@
 #' @return a list of data frames, where each data frame has rows representing the correlation for each combination of outcomes and exposures with additional columns for n, pvalue, metabolite_id, method of model specification (Interactive or Batch), name of the cohort and adjustment variables. Attribute of dataframe includes ptime for processing time of model run.
 #'
 #' @examples
+#' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' allmodeloutput <- runAllModels(exmetabdata)
-#'
+#' }
 #' @export
 
 runAllModels <- function(readData, cohort="", writeTofile=T) {
@@ -43,7 +44,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-#' csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' allmodeloutput <- runAllModels(exmetabdata)
 #' # Get descriptive data

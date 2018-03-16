@@ -48,7 +48,7 @@ Get data ready for the model runs in interactive or batch mode as specified in t
 \examples{
 
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
-csvfile <- file.path(dir, "cometsInputAgeTest.xlsx")
+csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
 
