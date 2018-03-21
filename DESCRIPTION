@@ -25,7 +25,8 @@ Imports:
     shinyFiles,
     Hmisc,
     stringr,
-    data.table
+    data.table,
+    ppcor
 Suggests:
     knitr
 VignetteBuilder: knitr
