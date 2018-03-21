@@ -43,6 +43,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 #' @return a list with 2 data frames, continuous and categorical summaries. Type of variable is defined in varmap
 #'
 #' @examples
+#' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
@@ -50,7 +51,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 #' # Get descriptive data
 #' descdata <-runDescrip(exmetabdata)
 #' OutputXLSResults(filename="corr",datal=descdata,cohort="DPP")
-#'
+#' }
 #' @export
 
 runDescrip<- function(readData){
