@@ -159,43 +159,30 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	oldcol.adj <- modeldata$acovs
 	newmodeldata$acovs <- newcol
 	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
-    # R uses the Hollander and Wolfe method to deal with ties (midranks are used, see
-    # https://www2.units.it/ipl/students_area/imm2/files/Numerical_Recipes.pdf for more details
-    
-    spearcorr <- Hmisc::rcorr(as.matrix(data),type = "spearman")
+  
+	# The pcor.test function will automatically remove adjustement variables that do not have any individuals (which can happen
+	# when we stratify...) and produce a warning.  This removes having to check for 
+	# singularity errors...
 
-    # get coordinates for outcomes and exposures for input into partial.r:
-    x=c(match(modeldata$rcovs,colnames(spearcorr$r)),
-	  match(modeldata$ccovs,colnames(spearcorr$r)))
-
-    y=match(newmodeldata$acovs,colnames(spearcorr$r))
-
-    corr <-psych::partial.r(spearcorr$r,x,y)
-
-    n <- data.frame(spearcorr$n[match(newmodeldata$rcovs,rownames(spearcorr$n)),
-               match(newmodeldata$ccovs,colnames(spearcorr$n))])
-
-    # Loop through and calculate p-values
-    pval <- c()
-    for (i in 1:length(modeldata$ccovs)){
-	temp <- format(psych::corr.p(corr,n=nrow(data)-2)$p,digits=22)
-	y <- match(newmodeldata$rcovs,colnames(temp))
-	pval <-c(pval,temp[modeldata$ccovs[i],y])
+    # Loop through and calculate cor, n, and p-values
+    pval <- corr <- matrix(nrow=length(modeldata$rcovs), ncol=length(modeldata$ccovs))
+    n <- matrix(nrow=length(modeldata$rcovs), ncol=1)
+    rownames(pval)=rownames(n)=rownames(corr)=modeldata$rcovs
+    colnames(pval)=paste0(modeldata$ccovs,".p")
+    colnames(n)="n"
+    colnames(corr)=modeldata$ccovs
+    for (i in 1:length(modeldata$rcovs)){
+	for (j in 1:length(modeldata$ccovs)) {
+		temp <- ppcor::pcor.test(data[,modeldata$rcovs[i]],data[,modeldata$ccovs[j]],
+			data[,newmodeldata$acovs],method="spearman")
+		pval[i,j] <-format(temp$p.value,digits=20)
+		corr[i,j] <- format(temp$estimate,digits=20)
+	}
+	n [i,1] <- temp$n
     }
-    pval=as.data.frame(pval)
-    colnames(pval) <- paste(as.character(modeldata$ccovs),".p",sep = "")
-
-    # If there are more than one exposure, then need to transpose - not sure why???
-    #if(length(col.ccovar)>1 && length(col.rcovar)==1) {corr=as.data.frame(t(corr))}
-
-    # Reformat corr:
-    xcorr=match(newmodeldata$rcovs,colnames(corr))
-    ycorr=match(newmodeldata$ccovs,colnames(corr))
-    corr=as.data.frame(corr[xcorr,ycorr])
-    rownames(corr) <- newmodeldata$rcovs
-    colnames(corr)=newmodeldata$ccovs
-
-#   corr=cbind(corr,n)
+    pval <- as.data.frame(pval)
+    n <- as.data.frame(n)
+    corr <- as.data.frame(corr)
 
   # Rename the adjusted covariate now to original (without dummies)
    #modeldata$acovs=oldcol.adj
