@@ -50,15 +50,15 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
    }
 #   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
    # Check that stratification variables that at least two unique values
-   for (i in modeldata$scovs) {
-        temp <- length(unique(modeldata$gdta[[i]]))
-        if(temp <= 1 && !is.na(i)) {
-                warning(paste("Warning: one of your models specifies",i,"as a stratification 
-		but that variable only has one possible value.
-		Model will run without",i,"stratified"))
-		modeldata$scovs <- setdiff(modeldata$scovs,i)
-        }
-   }
+#   for (i in modeldata$scovs) {
+#        temp <- length(unique(modeldata$gdta[[i]]))
+#        if(temp <= 1 && !is.na(i)) {
+#                warning(paste("Warning: one of your models specifies",i,"as a stratification 
+#		but that variable only has one possible value.
+#		Model will run without",i,"stratified"))
+#		modeldata$scovs <- setdiff(modeldata$scovs,i)
+#        }
+#   }
 #   if (length(modeldata$scovs)==1) {modeldata$scovs=NULL}
 
     # Defining global variables to pass Rcheck()
@@ -129,7 +129,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	mylevs=levels(modeldata$gdta[,i])
 	if(!is.null(mylevs)) {
 		# Create dummy variables
-		print(paste("Detected categorical adjustments, creating dummy variables for", colnames(modeldata$gdta)[i]))
+		# print(paste("Detected categorical adjustments, creating dummy variables for", colnames(modeldata$gdta)[i]))
 		# Remove current variable from adjusted variables (it will be replaced by categorical below)
 		#modeldata$acovs=modeldata$acovs[which(modeldata$acovs!=colnames(modeldata$gdta)[i])]
 		for (j in 2:(length(mylevs))) {
@@ -164,16 +164,29 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	# when we stratify...) and produce a warning.  This removes having to check for 
 	# singularity errors...
 
+	# However, we still need to check whether some of the model covariates are perfectly correlated since
+	# this may cause errors.  
+	corcheck <- cor(data[,newmodeldata$acovs])
+	corcheck[upper.tri(corcheck,diag=T)]=NA
+	perfcorr <- which(corcheck==1,arr.ind=T)
+	toremove <- rownames(perfcorr)[which(perfcorr[,1]!=perfcorr[,2],arr.ind=T)]
+	# if there are perfectly correlated variables, than remove all but one (the first one)
+	if(length(toremove) > 0) {	
+		data=data[,-which(colnames(data) %in% toremove)]
+		newmodeldata$acovs=setdiff(newmodeldata$acovs,toremove)
+	}
+	warning(paste("WARNING: Dummy variables",toremove,"are removed because they are perfectly correlated with other adjustment covariables"))
+
     # Loop through and calculate cor, n, and p-values
-    pval <- corr <- matrix(nrow=length(modeldata$rcovs), ncol=length(modeldata$ccovs))
+    pval <- corr <- matrix(nrow=length(newmodeldata$rcovs), ncol=length(newmodeldata$ccovs))
     n <- matrix(nrow=length(modeldata$rcovs), ncol=1)
     rownames(pval)=rownames(n)=rownames(corr)=modeldata$rcovs
     colnames(pval)=paste0(modeldata$ccovs,".p")
     colnames(n)="n"
     colnames(corr)=modeldata$ccovs
-    for (i in 1:length(modeldata$rcovs)){
-	for (j in 1:length(modeldata$ccovs)) {
-		temp <- ppcor::pcor.test(data[,modeldata$rcovs[i]],data[,modeldata$ccovs[j]],
+    for (i in 1:length(newmodeldata$rcovs)){
+	for (j in 1:length(newmodeldata$ccovs)) {
+		temp <- ppcor::pcor.test(data[,newmodeldata$rcovs[i]],data[,newmodeldata$ccovs[j]],
 			data[,newmodeldata$acovs],method="spearman")
 		pval[i,j] <-format(temp$p.value,digits=20)
 		corr[i,j] <- format(temp$estimate,digits=20)
@@ -322,11 +335,11 @@ runCorr<- function(modeldata,metabdata,cohort=""){
 	stop(paste("The stratification variable ", modeldata$scovs," contains more than 10 unique values, which is too many for our software.  Please check your stratification variable"))
    }
   for (i in seq(along=stratlist)) {
-    print(paste("Running analysis on subjects stratified by",stratlist[i]))
+    #print(paste("Running analysis on subjects stratified by",stratlist[i]))
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i])) %>%
       dplyr::select(-dplyr::one_of(modeldata$scovs))
-
+     print(dim(holdmod$gdta))
     # Need to reset levels in case one of the levels is dropped (e.g. due to stratification)
     for (mycol in colnames(holdmod$gdta)) {
 	if(length(levels(holdmod$gdta[,mycol]))>0) {
