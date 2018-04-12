@@ -94,7 +94,8 @@ plotMinvalues <- function(cometsdata,
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",
+#' 	rowvars=c("lactose","lactate"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
@@ -120,7 +121,8 @@ showCorr <- function(corr, nlines=50) {
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",
+#' 	rowvars=c("lactose","lactate"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' }
@@ -200,7 +202,8 @@ showHeatmap <- function (ccorrmat,
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi_grp"),rowvars=c("lactose","lactate"))
+#' modeldata <- getModelData(exmetabdata, modelspec="Interactive",
+#'	colvars=c("age","bmi_grp"),rowvars=c("lactose","lactate"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
