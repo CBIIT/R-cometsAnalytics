@@ -23,7 +23,8 @@ This function outputs a heatmap with hierarchical clustering.  It thus requires 
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata, modelspec="Interactive",colvars=c("age","bmi_grp"),rowvars=c("lactose","lactate"))
+modeldata <- getModelData(exmetabdata, modelspec="Interactive",
+colvars=c("age","bmi_grp"),rowvars=c("lactose","lactate"))
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHClust(corrmatrix)
 }

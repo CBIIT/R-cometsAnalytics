@@ -18,7 +18,8 @@
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
+#' 	rowvars=c("lactose","lactate"))
 #' corrmatrix <-calcCorr(modeldata,exmetabdata, "DPP")
 #' }
 #' @export
@@ -27,27 +28,27 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 .Machine$double.eps <- 1e-300
 
   # only run getcorr for n>15
-  if (nrow(modeldata$gdta)<15){
-    if (!is.null(modeldata$scovs)){
-      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
-      mycorr=data.frame()
-      attr(mycorr,"ptime")="Processing time: 0 sec"
-      return(mycorr)
-    } else{
-      stop(paste(modeldata$modlabel," has less than 15 observations."))
-    }     
-  }
-  
-   # Check that adjustment variables that at least two unique values
-   for (i in modeldata$acovs) {
-        temp <- length(unique(modeldata$gdta[[i]]))
-        if(temp <= 1 && !is.na(i)) {
-                warning(paste("Warning: one of your models specifies",i,"as an adjustment 
-		but that variable only has one possible value.
-		Model will run without",i,"adjusted."))
-		modeldata$acovs <- setdiff(modeldata$acovs,i)
-        }
-   }
+#  if (nrow(modeldata$gdta)<15){
+#    if (!is.null(modeldata$scovs)){
+#      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+#      mycorr=data.frame()
+#      attr(mycorr,"ptime")="Processing time: 0 sec"
+#      return(mycorr)
+#    } else{
+#      stop(paste(modeldata$modlabel," has less than 15 observations."))
+#    }     
+#  }
+#  
+#   # Check that adjustment variables that at least two unique values
+#   for (i in modeldata$acovs) {
+#        temp <- length(unique(modeldata$gdta[[i]]))
+#        if(temp <= 1 && !is.na(i)) {
+#                warning(paste("Warning: one of your models specifies",i,"as an adjustment 
+#		but that variable only has one possible value.
+#		Model will run without",i,"adjusted."))
+#		modeldata$acovs <- setdiff(modeldata$acovs,i)
+#        }
+#   }
 #   if (length(modeldata$acovs)==1) {modeldata$acovs=NULL}
    # Check that stratification variables that at least two unique values
 #   for (i in modeldata$scovs) {
@@ -78,10 +79,34 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
   # Defining global variable to remove R check warnings
   corr=c()
+ 
+     # Check model design
+    designcheck <- checkModelDesign(modeldata,createDummies=TRUE)
+    if(length(names(designcheck))==0) {
+        return(designcheck)
+    }
+
+    col.adj <- match(designcheck$modeldata[["acovs"]],names(modeldata[["gdta"]]))
 
   if (length(col.adj)==0) {
     print("running unadjusted")
-    data<-modeldata[[1]][,c(col.rcovar,col.ccovar)]
+
+    # Check model design 
+#    designcheck <- checkModelDesign(modeldata,createDummies=FALSE)
+#    if(length(names(designcheck))==0) {
+#        return(designcheck)
+#    }
+
+    newmodeldata <- designcheck$modeldata
+    print(designcheck$warningmessage)
+    if(length(designcheck$warningmessage) > 0) {
+        print(designcheck$warningmessage)
+    }
+    if(length(designcheck$errormessage) > 0) {
+        stop(designcheck$errormessage)
+    }
+
+    data<-modeldata$gdta[,c(col.rcovar,col.ccovar)]
     # calculate unadjusted spearman correlation matrix
     #       names(data)<-paste0("v",1:length(names(data)))
     #    assign('gdata',data,envir=.GlobalEnv)
@@ -118,64 +143,80 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
     #########
     # Create dummy variables for categorical variables in col.adj
-    newcol<-c()
-    #print("Looping through")
-    #print(colnames(modeldata$gdta)[col.adj])
-    # Using this to track the original adjusted column names
-    newmodeldata <- modeldata
-    orig.adjcol <- colnames(modeldata$gdta)[col.adj];tracker=1
-    for (i in col.adj) {
-	# If variable has levels (meaning it's categorical)
-	mylevs=levels(modeldata$gdta[,i])
-	if(!is.null(mylevs)) {
-		# Create dummy variables
-		# print(paste("Detected categorical adjustments, creating dummy variables for", colnames(modeldata$gdta)[i]))
-		# Remove current variable from adjusted variables (it will be replaced by categorical below)
-		#modeldata$acovs=modeldata$acovs[which(modeldata$acovs!=colnames(modeldata$gdta)[i])]
-		for (j in 2:(length(mylevs))) {
-			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
-			myvec <- rep(0,nrow(modeldata$gdta))
-			if(length(which(is.na(modeldata$gdta)))>0) {
-				myvec[which(is.na(modeldata$gdta[,i]))]=NA
-			}
-			myvec[which(modeldata$gdta[,i]==mylevs[j])]=1
-			newmodeldata$gdta=cbind(newmodeldata$gdta,myvec)
-			colnames(newmodeldata$gdta)[ncol(newmodeldata$gdta)]=newcol[length(newcol)]
-		}
-		if(length(which(is.na(modeldata$gdta)))>0) {
-			warning(paste("WARNING: You have blank/missing values for variable",colnames(modeldata$gdta)[i],
-				"please check the coding for missingness in the varmap sheet"))
-		}
-		newmodeldata$gdta <- newmodeldata$gdta[ , !(names(newmodeldata$gdta) %in% colnames(modeldata$gdta)[i])]
-		tracker=tracker+1
-	} else {
-		newcol=c(newcol,orig.adjcol[tracker])
-		tracker=tracker+1
-	}
-    }
-	newcol.adj <- which(colnames(newmodeldata$gdta) %in% newcol)
-	# keep track of original adjustments (for printing) but reassign for 
-	# partial correlation calculations
-	oldcol.adj <- modeldata$acovs
-	newmodeldata$acovs <- newcol
-	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
-  
-	# The pcor.test function will automatically remove adjustement variables that do not have any individuals (which can happen
-	# when we stratify...) and produce a warning.  This removes having to check for 
-	# singularity errors...
+#     newcol<-c()
+#     #print("Looping through")
+#     #print(colnames(modeldata$gdta)[col.adj])
+#     # Using this to track the original adjusted column names
+#     newmodeldata <- modeldata
+#     orig.adjcol <- colnames(modeldata$gdta)[col.adj];tracker=1
+#     for (i in col.adj) {
+# 	# If variable has levels (meaning it's categorical)
+# 	mylevs=levels(modeldata$gdta[,i])
+# 	if(!is.null(mylevs)) {
+# 		# Create dummy variables
+# 		# print(paste("Detected categorical adjustments, creating dummy variables for", colnames(modeldata$gdta)[i]))
+# 		# Remove current variable from adjusted variables (it will be replaced by categorical below)
+# 		#modeldata$acovs=modeldata$acovs[which(modeldata$acovs!=colnames(modeldata$gdta)[i])]
+# 		for (j in 2:(length(mylevs))) {
+# 			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
+# 			myvec <- rep(0,nrow(modeldata$gdta))
+# 			if(length(which(is.na(modeldata$gdta)))>0) {
+# 				myvec[which(is.na(modeldata$gdta[,i]))]=NA
+# 			}
+# 			myvec[which(modeldata$gdta[,i]==mylevs[j])]=1
+# 			newmodeldata$gdta=cbind(newmodeldata$gdta,myvec)
+# 			colnames(newmodeldata$gdta)[ncol(newmodeldata$gdta)]=newcol[length(newcol)]
+# 		}
+# 		if(length(which(is.na(modeldata$gdta)))>0) {
+# 			warning(paste("WARNING: You have blank/missing values for variable",colnames(modeldata$gdta)[i],
+# 				"please check the coding for missingness in the varmap sheet"))
+# 		}
+# 		newmodeldata$gdta <- newmodeldata$gdta[ , !(names(newmodeldata$gdta) %in% colnames(modeldata$gdta)[i])]
+# 		tracker=tracker+1
+# 	} else {
+# 		newcol=c(newcol,orig.adjcol[tracker])
+# 		tracker=tracker+1
+# 	}
+#     }
+# 	newcol.adj <- which(colnames(newmodeldata$gdta) %in% newcol)
+# 	# keep track of original adjustments (for printing) but reassign for 
+# 	# partial correlation calculations
+# 	oldcol.adj <- modeldata$acovs
+# 	newmodeldata$acovs <- newcol
+# 	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
+#   
+# 	# The pcor.test function will automatically remove adjustement variables that do not have any individuals (which can happen
+# 	# when we stratify...) and produce a warning.  This removes having to check for 
+# 	# singularity errors...
+# 
+# 	# However, we still need to check whether some of the model covariates are perfectly correlated since
+# 	# this may cause errors.  
+# 	corcheck <- cor(data[,newmodeldata$acovs])
+# 	corcheck[upper.tri(corcheck,diag=T)]=NA
+# 	perfcorr <- which(corcheck==1,arr.ind=T)
+# 	toremove <- rownames(perfcorr)[which(perfcorr[,1]!=perfcorr[,2],arr.ind=T)]
+# 	# if there are perfectly correlated variables, than remove all but one (the first one)
+# 	if(length(toremove) > 0) {	
+#		data=data[,-which(colnames(data) %in% toremove)]
+#		newmodeldata$acovs=setdiff(newmodeldata$acovs,toremove)
+#		warning(paste("WARNING: Dummy variables",toremove,"are removed because they are perfectly correlated with other adjustment covariables"))
+#	}
 
-	# However, we still need to check whether some of the model covariates are perfectly correlated since
-	# this may cause errors.  
-	corcheck <- cor(data[,newmodeldata$acovs])
-	corcheck[upper.tri(corcheck,diag=T)]=NA
-	perfcorr <- which(corcheck==1,arr.ind=T)
-	toremove <- rownames(perfcorr)[which(perfcorr[,1]!=perfcorr[,2],arr.ind=T)]
-	# if there are perfectly correlated variables, than remove all but one (the first one)
-	if(length(toremove) > 0) {	
-		data=data[,-which(colnames(data) %in% toremove)]
-		newmodeldata$acovs=setdiff(newmodeldata$acovs,toremove)
-	}
-	warning(paste("WARNING: Dummy variables",toremove,"are removed because they are perfectly correlated with other adjustment covariables"))
+    # Check model design and create dummy variable
+    #designcheck <- checkModelDesign(modeldata,createDummies=TRUE)
+    # if output of checkModelDesign is an empty data.frame, then it means that there were < 15
+    # observations in the input data
+    #if(length(names(designcheck))==0) {
+#	return(designcheck)
+#    }
+    newmodeldata <- designcheck$modeldata
+    print(designcheck$warningmessage)
+    if(length(designcheck$warningmessage) > 0) {
+	print(designcheck$warningmessage)
+    }
+    if(length(designcheck$errormessage) > 0) {
+	stop(designcheck$errormessage) 
+    }
 
     # Loop through and calculate cor, n, and p-values
     pval <- corr <- matrix(nrow=length(newmodeldata$rcovs), ncol=length(newmodeldata$ccovs))
@@ -186,8 +227,9 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     colnames(corr)=modeldata$ccovs
     for (i in 1:length(newmodeldata$rcovs)){
 	for (j in 1:length(newmodeldata$ccovs)) {
-		temp <- ppcor::pcor.test(data[,newmodeldata$rcovs[i]],data[,newmodeldata$ccovs[j]],
-			data[,newmodeldata$acovs],method="spearman")
+		temp <- ppcor::pcor.test(newmodeldata$gdta[,newmodeldata$rcovs[i]],
+			newmodeldata$gdta[,newmodeldata$ccovs[j]],
+			newmodeldata$gdta[,newmodeldata$acovs],method="spearman")
 		pval[i,j] <-format(temp$p.value,digits=20)
 		corr[i,j] <- format(temp$estimate,digits=20)
 	}
@@ -309,7 +351,8 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
+#' 	rowvars=c("lactose","lactate"))
 #' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
 runCorr<- function(modeldata,metabdata,cohort=""){
@@ -323,6 +366,11 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   ptm <- base::proc.time() # start processing time
 
   if(is.null(modeldata$scovs)) {
+	for (mycol in colnames(modeldata$gdta)) {
+        	if(length(levels(modeldata$gdta[,mycol]))>0) {
+        	        modeldata$gdta[,mycol]=droplevels(modeldata$gdta[,mycol])
+        	} else {next;}
+    	}
 	scorr <- calcCorr(modeldata,metabdata, cohort = cohort)
   }  else {
   # initialize to avoid globalv errors
@@ -335,7 +383,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
 	stop(paste("The stratification variable ", modeldata$scovs," contains more than 10 unique values, which is too many for our software.  Please check your stratification variable"))
    }
   for (i in seq(along=stratlist)) {
-    #print(paste("Running analysis on subjects stratified by",stratlist[i]))
+    print(paste("Running analysis on subjects stratified by",stratlist[i]))
     holdmod <- modeldata
     holdmod[[1]] <- dplyr::filter_(modeldata$gdta,paste(modeldata$scovs," == ",stratlist[i])) %>%
       dplyr::select(-dplyr::one_of(modeldata$scovs))

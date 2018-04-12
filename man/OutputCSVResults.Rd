@@ -23,7 +23,8 @@ Create output CSV file
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
+modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
+	rowvars=c("lactose","lactate"))
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 # Get correlation results
 OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
