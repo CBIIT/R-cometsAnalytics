@@ -338,3 +338,133 @@ filterCOMETSinput <- function(readData,where=NULL) {
 return(readData)
 }
 
+
+#' Checks integrity of sheets in the user input CSV file
+#' @keywords internal
+#' @param modeldata (output of function getModelData())
+#' @param crateDummies TRUE or FALSE
+#' @return modeldata after checks are performed
+checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
+	if(is.null(modeldata) || is.null(createDummies)) {
+		stop("Please make sure that modeldata and createDummies are defined")
+	}
+	
+  errormessage=warningmessage=c()
+ # Check that there are at least 15 samples (n>15)
+  if (nrow(modeldata$gdta)<15){
+    if (!is.null(modeldata$scovs)){
+      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+      mycorr=data.frame()
+      attr(mycorr,"ptime")="Processing time: 0 sec"
+      return(mycorr)
+    } else{
+      stop(paste(modeldata$modlabel," has less than 15 observations."))
+    }
+  }
+
+   # Check that adjustment variable that at least two unique values
+   for (i in modeldata$acovs) {
+        temp <- length(unique(modeldata$gdta[[i]]))
+        if(temp <= 1 && !is.na(i)) {
+               warning(paste("Warning: one of your models specifies",i,"as an adjustment value
+               but that variable only has one possible value.
+               Model will run without",i,"as an adjustment"))
+               modeldata$acovs <- setdiff(modeldata$acovs,i)
+        }
+   }
+   if (length(modeldata$acovs)==0) {
+	modeldata$acovs=NULL
+	createDummies=FALSE
+   }
+
+   if(createDummies) {
+	print("Creating dummies")
+  	metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
+  	cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
+  	metabolite_name=expmetname=exposurespec=c()
+
+  	# column indices of row/outcome covariates
+  	col.rcovar <- match(modeldata[["rcovs"]],names(modeldata[["gdta"]]))
+
+  	# column indices of column/exposure covariates
+  	col.ccovar <- match(modeldata[["ccovs"]],names(modeldata[["gdta"]]))
+
+  	# column indices of adj-var
+  	col.adj <- match(modeldata[["acovs"]],names(modeldata[["gdta"]]))
+
+  	# Defining global variable to remove R check warnings
+  	corr=c()
+
+	# Create dummy variables
+	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ .")
+	dummies <- caret::dummyVars(myformula, data = modeldata$gdta)
+	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
+
+	# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
+	nonzero <- caret::nearZeroVar(mydummies)
+	if(length(nonzero)>0) {
+	        filtdummies <- mydummies[,-nonzero]
+		warningmessage <- c(warningmessage,
+			paste0("Removed ",paste(colnames(mydummies)[unique(nonzero)],collapse=","), 
+				" because of zero-variance",collapse=""))
+	} else {
+	        filtdummies <- mydummies
+	}
+
+	# Check for correlated predictors (this will remove the first "factor" that is highly
+	# correlated with another
+	cors <- caret::findCorrelation(stats::cor(filtdummies,method="Spearman"), cutoff = .95)
+	if(length(cors)>0) {
+	        filtdummies2 <- filtdummies[,-cors]
+		warningmessage <- c(warningmessage,
+                        paste("Removed ",paste(colnames(mydummies)[unique(cors)],collapse=","),
+				" because of correlation > 0.95 with other covariates",collapse=""))
+	} else {
+	        filtdummies2=filtdummies
+	}
+
+	# Check for linear dependencies
+	ldeps <- caret::findLinearCombos(filtdummies2)
+	if(length(ldeps$remove)>0) {
+	        findummies <-filtdummies2[,-ldeps$remove]
+		warningmessage <- c(warningmessage,
+                        paste0("Removed ",paste(colnames(mydummies)[unique(ldeps$remove)],collapse=","),
+				" because of linear dependencies",collapse=""))
+	} else {
+	        findummies=filtdummies2
+	}
+
+
+	newdat <- cbind(modeldata$gdta[,modeldata$rcovs],findummies)
+	colnames(newdat)[1:length(modeldata$rcovs)]=modeldata$rcovs
+	modeldata$acovs <- colnames(newdat)[grep(modeldata$acovs,colnames(newdat))]
+	modeldata$gdta <- newdat
+     }
+
+ # Check that there are at least 15 samples (n>15)
+  if (nrow(modeldata$gdta)<15){
+    if (!is.null(modeldata$scovs)){
+      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+      mycorr=data.frame()
+      attr(mycorr,"ptime")="Processing time: 0 sec"
+      return(mycorr)
+    } else{
+      stop(paste(modeldata$modlabel," has less than 15 observations."))
+    }
+  }
+
+     return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

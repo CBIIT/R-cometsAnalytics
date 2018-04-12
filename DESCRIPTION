@@ -26,7 +26,8 @@ Imports:
     Hmisc,
     stringr,
     data.table,
-    ppcor
+    ppcor,
+    caret
 Suggests:
     knitr
 VignetteBuilder: knitr
