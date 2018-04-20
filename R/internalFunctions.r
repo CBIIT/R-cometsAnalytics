@@ -348,7 +348,8 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	if(is.null(modeldata) || is.null(createDummies)) {
 		stop("Please make sure that modeldata and createDummies are defined")
 	}
-	
+
+  library(caret) #need this to avoid problem of not finding
   errormessage=warningmessage=c()
  # Check that there are at least 15 samples (n>15)
   if (nrow(modeldata$gdta)<15){
@@ -397,7 +398,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
 	# Create dummy variables
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ .")
-	dummies <- caret::dummyVars(myformula, data = modeldata$gdta)
+	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
 
 	# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
@@ -405,7 +406,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	if(length(nonzero)>0) {
 	        filtdummies <- mydummies[,-nonzero]
 		warningmessage <- c(warningmessage,
-			paste0("Removed ",paste(colnames(mydummies)[unique(nonzero)],collapse=","), 
+			paste0("Removed ",paste(colnames(mydummies)[unique(nonzero)],collapse=","),
 				" because of zero-variance",collapse=""))
 	} else {
 	        filtdummies <- mydummies
@@ -413,7 +414,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
 	# Check for correlated predictors (this will remove the first "factor" that is highly
 	# correlated with another
-	cors <- caret::findCorrelation(stats::cor(filtdummies,method="Spearman"), cutoff = .95)
+	cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
 	if(length(cors)>0) {
 	        filtdummies2 <- filtdummies[,-cors]
 		warningmessage <- c(warningmessage,
