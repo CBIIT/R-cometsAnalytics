@@ -10,6 +10,7 @@
 #' @import dplyr
 #' @importFrom psych partial.r
 #' @import plotly
+#' @import caret
 #' @importFrom tidyr gather
 #' @importFrom d3heatmap d3heatmap
 #' @importFrom Hmisc rcorr
