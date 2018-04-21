@@ -339,7 +339,7 @@ return(readData)
 }
 
 
-#' Checks integrity of sheets in the user input CSV file
+#' Preprocess design matrix for zero variance, linear combinations, and dummies
 #' @keywords internal
 #' @param modeldata (output of function getModelData())
 #' @param crateDummies TRUE or FALSE
@@ -348,8 +348,6 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	if(is.null(modeldata) || is.null(createDummies)) {
 		stop("Please make sure that modeldata and createDummies are defined")
 	}
-
-  library(caret) #need this to avoid problem of not finding
   errormessage=warningmessage=c()
  # Check that there are at least 15 samples (n>15)
   if (nrow(modeldata$gdta)<15){
@@ -359,7 +357,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
       attr(mycorr,"ptime")="Processing time: 0 sec"
       return(mycorr)
     } else{
-      stop(paste(modeldata$modlabel," has less than 15 observations."))
+      stop(paste(modeldata$modlabel," has less than 15 observations and will not be run."))
     }
   }
 
@@ -395,9 +393,10 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
   	# Defining global variable to remove R check warnings
   	corr=c()
+  	loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
 
 	# Create dummy variables
-	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ .")
+	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",paste(colnames(modeldata$gdta)[c(col.ccovar, col.adj)],collapse = " + "))
 	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
 
@@ -414,15 +413,17 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
 	# Check for correlated predictors (this will remove the first "factor" that is highly
 	# correlated with another
-	cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
+	if (ncol(filtdummies)>1){
+		cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
 	if(length(cors)>0) {
 	        filtdummies2 <- filtdummies[,-cors]
 		warningmessage <- c(warningmessage,
                         paste("Removed ",paste(colnames(mydummies)[unique(cors)],collapse=","),
 				" because of correlation > 0.95 with other covariates",collapse=""))
-	} else {
-	        filtdummies2=filtdummies
 	}
+		else {
+		  filtdummies2=filtdummies
+		}
 
 	# Check for linear dependencies
 	ldeps <- caret::findLinearCombos(filtdummies2)
@@ -434,25 +435,18 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	} else {
 	        findummies=filtdummies2
 	}
+	}
+	else {
+	  findummies=filtdummies
+	}
 
 
 	newdat <- cbind(modeldata$gdta[,modeldata$rcovs],findummies)
 	colnames(newdat)[1:length(modeldata$rcovs)]=modeldata$rcovs
-	modeldata$acovs <- colnames(newdat)[grep(modeldata$acovs,colnames(newdat))]
+	modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(findummies), value=TRUE)
 	modeldata$gdta <- newdat
      }
 
- # Check that there are at least 15 samples (n>15)
-  if (nrow(modeldata$gdta)<15){
-    if (!is.null(modeldata$scovs)){
-      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
-      mycorr=data.frame()
-      attr(mycorr,"ptime")="Processing time: 0 sec"
-      return(mycorr)
-    } else{
-      stop(paste(modeldata$modlabel," has less than 15 observations."))
-    }
-  }
 
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 }

@@ -257,6 +257,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
                     "exposurespec","corr",colnames(corr.togather)[mycols]),
       tidyr::gather(as.data.frame(n),"exposuren", "n", colnames(n)[mycols]),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",colnames(pval)[mycols]),
+      adjspec = ifelse(length(col.adj) == 0, "None", paste(newmodeldata$acovs, collapse = " ")),
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata$acovs, collapse = " ")) )) %>%
     dplyr::select(-exposuren, -exposurep)
 
