@@ -444,6 +444,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	newdat <- cbind(modeldata$gdta[,modeldata$rcovs],findummies)
 	colnames(newdat)[1:length(modeldata$rcovs)]=modeldata$rcovs
 	modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(findummies), value=TRUE)
+	modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
 	modeldata$gdta <- newdat
      }
 
