@@ -330,7 +330,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
       holdcorr$strata<-stratlist[i]
       #scorr<-dplyr::bind_rows(scorr,holdcorr)
     }    else {
-      warning(paste("Warning: Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep=""))
+      warning(paste("Warning: Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run for this stratum.",sep=""))
     }
       scorr<-dplyr::bind_rows(scorr,holdcorr)
 
