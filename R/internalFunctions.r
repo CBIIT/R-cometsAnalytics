@@ -413,6 +413,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
 	# Check for correlated predictors (this will remove the first "factor" that is highly
 	# correlated with another
+	cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
 	if (ncol(filtdummies)>1){
 		cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
 	if(length(cors)>0) {
@@ -449,6 +450,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
      }
 
 
+     print(warningmessage)
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 }
 
