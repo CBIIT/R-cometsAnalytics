@@ -203,7 +203,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   corrlong<-dplyr::left_join(corrlong,
                              dplyr::select(metabdata$metab,metabid,exposure_uid=uid_01,expmetname=biochemical),
                              by=c("exposurespec"=metabdata$metabId)) %>%
-    dplyr::mutate(exposure=ifelse(!is.na(expmetname),expmetname,exposurespec)) %>%
+    dplyr::mutate(exposure=ifelse(!is.na(expmetname),expmetname,modeldata$ccovs)) %>%
     dplyr::select(-expmetname)
 
 

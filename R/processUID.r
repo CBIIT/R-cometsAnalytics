@@ -7,19 +7,18 @@
 # uncomment to run
 # processUID <- function() {
 #
-# source('~/Comets/Git-RComets/R/internalFunctions.r')
 #dir <- system.file("R", package = "COMETS", mustWork = TRUE)
-#intfile <- file.path(dir, "internalFunctions.R")
-#source(intfile)
-# initialize parameters:
+# library(tidyverse)
+# source(paste0(getwd(),"/R/internalFunctions.r"))
+# # initialize parameters:
 #  metid=uid_01=uidsource=hmdb=main_class=c()
 #
- # dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
- # xlsfile <- file.path(dir, "uid.xls")
- # masteruids = fixData(rio::import(xlsfile))
+# ## dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
+# xlsfile <- file.path(getwd(), "/inst/extdata/uidcheck.xls")
+# masteruids = fixData(rio::import(xlsfile))
 #
- # # Compile indices of name columns
- # uidsource.ind <- grep("_name", names(masteruids))
+# # Compile indices of name columns
+# uidsource.ind <- grep("_name", names(masteruids))
 #
 #  # get master list of all metabolite_id and attribute to source
 #  mastercname <-
@@ -113,29 +112,6 @@
 #
 #
 #
-#
-#
-# rm(
-#   onlyhmdb,
-#   hmdb,hmdb1,hmdb2,
-#   uidsource.ind,
-#   mastercname,
-#   masteruids,
-#   xlsfile,
-#   fixData,
-#   dir,
-#   hmdb,
-#   metid,
-#   main_class,
-#   uid_01,
-#   uidsource,
-#   checkIntegrity,
-#   Harmonize,
-#   prdebug,
-#   filterCOMETSinput,
-#   intfile
-#
-# )
 # ## ---------------------------------------------------------------------------
 # ## processcohorts function ----------------------------------------------------------
 # ## ---------------------------------------------------------------------------
@@ -151,7 +127,9 @@
 # # save updated rdata from the global env
 # rdfile <- file.path(paste0(getwd(),"/inst/extdata"), "compileduids.RData")
 # save(cohorts,masterhmdb,mastermetid,file=rdfile)
-# rm(rdfile)
+# rmlist<-setdiff(ls(),c("cohorts","masterhmdb","mastermetid"))
+# rm(list=rmlist,rmlist)
+
 
 # }
 # # do not run
