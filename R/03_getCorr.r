@@ -36,14 +36,14 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #      return(mycorr)
 #    } else{
 #      stop(paste(modeldata$modlabel," has less than 15 observations."))
-#    }     
+#    }
 #  }
-#  
+#
 #   # Check that adjustment variables that at least two unique values
 #   for (i in modeldata$acovs) {
 #        temp <- length(unique(modeldata$gdta[[i]]))
 #        if(temp <= 1 && !is.na(i)) {
-#                warning(paste("Warning: one of your models specifies",i,"as an adjustment 
+#                warning(paste("Warning: one of your models specifies",i,"as an adjustment
 #		but that variable only has one possible value.
 #		Model will run without",i,"adjusted."))
 #		modeldata$acovs <- setdiff(modeldata$acovs,i)
@@ -54,7 +54,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #   for (i in modeldata$scovs) {
 #        temp <- length(unique(modeldata$gdta[[i]]))
 #        if(temp <= 1 && !is.na(i)) {
-#                warning(paste("Warning: one of your models specifies",i,"as a stratification 
+#                warning(paste("Warning: one of your models specifies",i,"as a stratification
 #		but that variable only has one possible value.
 #		Model will run without",i,"stratified"))
 #		modeldata$scovs <- setdiff(modeldata$scovs,i)
@@ -79,7 +79,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 
   # Defining global variable to remove R check warnings
   corr=c()
- 
+
      # Check model design
     designcheck <- checkModelDesign(modeldata,createDummies=TRUE)
     if(length(names(designcheck))==0) {
@@ -91,7 +91,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   if (length(col.adj)==0) {
     print("running unadjusted")
 
-    # Check model design 
+    # Check model design
 #    designcheck <- checkModelDesign(modeldata,createDummies=FALSE)
 #    if(length(names(designcheck))==0) {
 #        return(designcheck)
@@ -122,7 +122,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     pval<-ttval
     for (i in 1:length(modeldata$ccovs)){
      pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-2,lower.tail=FALSE)*2)
-    }  
+    }
 
     colnames(corr)<-colnames(corrhm$r)[-(1:length(col.rcovar))]
     # Fix rownames when only one outcome is considered:
@@ -179,24 +179,24 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 # 	}
 #     }
 # 	newcol.adj <- which(colnames(newmodeldata$gdta) %in% newcol)
-# 	# keep track of original adjustments (for printing) but reassign for 
+# 	# keep track of original adjustments (for printing) but reassign for
 # 	# partial correlation calculations
 # 	oldcol.adj <- modeldata$acovs
 # 	newmodeldata$acovs <- newcol
 # 	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
-#   
+#
 # 	# The pcor.test function will automatically remove adjustement variables that do not have any individuals (which can happen
-# 	# when we stratify...) and produce a warning.  This removes having to check for 
+# 	# when we stratify...) and produce a warning.  This removes having to check for
 # 	# singularity errors...
-# 
+#
 # 	# However, we still need to check whether some of the model covariates are perfectly correlated since
-# 	# this may cause errors.  
+# 	# this may cause errors.
 # 	corcheck <- cor(data[,newmodeldata$acovs])
 # 	corcheck[upper.tri(corcheck,diag=T)]=NA
 # 	perfcorr <- which(corcheck==1,arr.ind=T)
 # 	toremove <- rownames(perfcorr)[which(perfcorr[,1]!=perfcorr[,2],arr.ind=T)]
 # 	# if there are perfectly correlated variables, than remove all but one (the first one)
-# 	if(length(toremove) > 0) {	
+# 	if(length(toremove) > 0) {
 #		data=data[,-which(colnames(data) %in% toremove)]
 #		newmodeldata$acovs=setdiff(newmodeldata$acovs,toremove)
 #		warning(paste("WARNING: Dummy variables",toremove,"are removed because they are perfectly correlated with other adjustment covariables"))
@@ -215,7 +215,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 	print(designcheck$warningmessage)
     }
     if(length(designcheck$errormessage) > 0) {
-	stop(designcheck$errormessage) 
+	stop(designcheck$errormessage)
     }
 
     # Loop through and calculate cor, n, and p-values
@@ -257,6 +257,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
                     "exposurespec","corr",colnames(corr.togather)[mycols]),
       tidyr::gather(as.data.frame(n),"exposuren", "n", colnames(n)[mycols]),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",colnames(pval)[mycols]),
+      adjspec = ifelse(length(col.adj) == 0, "None", paste(newmodeldata$acovs, collapse = " ")),
       adjvars = ifelse(length(col.adj) == 0, "None", paste(modeldata$acovs, collapse = " ")) )) %>%
     dplyr::select(-exposuren, -exposurep)
 
@@ -293,7 +294,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
   # fill in outcome vars from varmap
    corrlong<-dplyr::left_join(corrlong,vmap,by=c("outcomespec"="cohortvariable")) %>%
      dplyr::mutate(outcome_uid=ifelse(!is.na(varreference),varreference,outcomespec),
-                   outcome=ifelse(!is.na(vardefinition),vardefinition,outcomespec)) %>%
+                   outcome=ifelse(!is.na(outcome),outcome,ifelse(!is.na(vardefinition),vardefinition,outcomespec))) %>%
      dplyr::select(-vardefinition,-varreference)
 
 
@@ -401,14 +402,14 @@ runCorr<- function(modeldata,metabdata,cohort=""){
       holdcorr$strata<-stratlist[i]
       #scorr<-dplyr::bind_rows(scorr,holdcorr)
     }    else {
-      warning(paste("Warning: Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep="")) 
+      warning(paste("Warning: Model ",modeldata$modlabel," has strata (",as.character(modeldata$scovs),"=",stratlist[i], ") with less than 15 observations. Model will not be run",sep=""))
     }
       scorr<-dplyr::bind_rows(scorr,holdcorr)
-    
+
   } # end for loop
   } # end else run stratified analysis
-  
-  
+
+
   if(is.null(scorr)) {
 	scorr <- data.frame()
   }
