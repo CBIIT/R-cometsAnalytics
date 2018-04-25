@@ -2,7 +2,7 @@
 % Please edit documentation in R/internalFunctions.r
 \name{checkModelDesign}
 \alias{checkModelDesign}
-\title{Checks integrity of sheets in the user input CSV file}
+\title{Preprocess design matrix for zero variance, linear combinations, and dummies}
 \usage{
 checkModelDesign(modeldata = NULL, createDummies = NULL)
 }
@@ -15,6 +15,6 @@ checkModelDesign(modeldata = NULL, createDummies = NULL)
 modeldata after checks are performed
 }
 \description{
-Checks integrity of sheets in the user input CSV file
+Preprocess design matrix for zero variance, linear combinations, and dummies
 }
 \keyword{internal}
