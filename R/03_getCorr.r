@@ -86,7 +86,19 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
         return(designcheck)
     }
 
-    col.adj <- match(designcheck$modeldata[["acovs"]],names(modeldata[["gdta"]]))
+    newmodeldata <- designcheck$modeldata
+    print(designcheck$warningmessage)
+    if(length(designcheck$warningmessage) > 0) {
+      print(designcheck$warningmessage)
+    }
+    if(length(designcheck$errormessage) > 0) {
+      stop(designcheck$errormessage)
+    }
+
+    # readjust exposure and adjustment covariates
+    col.adj <- match(newmodeldata[["acovs"]],names(newmodeldata[["gdta"]]))
+    col.ccovar <- match(newmodeldata[["ccovs"]],names(newmodeldata[["gdta"]]))
+
 
   if (length(col.adj)==0) {
     print("running unadjusted")
@@ -97,16 +109,8 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
 #        return(designcheck)
 #    }
 
-    newmodeldata <- designcheck$modeldata
-    print(designcheck$warningmessage)
-    if(length(designcheck$warningmessage) > 0) {
-        print(designcheck$warningmessage)
-    }
-    if(length(designcheck$errormessage) > 0) {
-        stop(designcheck$errormessage)
-    }
 
-    data<-modeldata$gdta[,c(col.rcovar,col.ccovar)]
+    data<-newmodeldata$gdta[,c(col.rcovar,col.ccovar)]
     # calculate unadjusted spearman correlation matrix
     #       names(data)<-paste0("v",1:length(names(data)))
     #    assign('gdata',data,envir=.GlobalEnv)
@@ -120,7 +124,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     ttval<-sqrt(n--2)*corr/sqrt(1-corr**2)
    # From this t-statistic, loop through and calculate p-values
     pval<-ttval
-    for (i in 1:length(modeldata$ccovs)){
+    for (i in 1:length(newmodeldata$ccovs)){
      pval[,i] <-as.vector(stats::pt(as.matrix(abs(ttval[,i])),df=n[,i]-2,lower.tail=FALSE)*2)
     }
 
@@ -141,99 +145,22 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     # calculate partial correlation matrix
     print("running adjusted")
 
-    #########
-    # Create dummy variables for categorical variables in col.adj
-#     newcol<-c()
-#     #print("Looping through")
-#     #print(colnames(modeldata$gdta)[col.adj])
-#     # Using this to track the original adjusted column names
-#     newmodeldata <- modeldata
-#     orig.adjcol <- colnames(modeldata$gdta)[col.adj];tracker=1
-#     for (i in col.adj) {
-# 	# If variable has levels (meaning it's categorical)
-# 	mylevs=levels(modeldata$gdta[,i])
-# 	if(!is.null(mylevs)) {
-# 		# Create dummy variables
-# 		# print(paste("Detected categorical adjustments, creating dummy variables for", colnames(modeldata$gdta)[i]))
-# 		# Remove current variable from adjusted variables (it will be replaced by categorical below)
-# 		#modeldata$acovs=modeldata$acovs[which(modeldata$acovs!=colnames(modeldata$gdta)[i])]
-# 		for (j in 2:(length(mylevs))) {
-# 			newcol=c(newcol,paste0(colnames(modeldata$gdta)[i],mylevs[j]))
-# 			myvec <- rep(0,nrow(modeldata$gdta))
-# 			if(length(which(is.na(modeldata$gdta)))>0) {
-# 				myvec[which(is.na(modeldata$gdta[,i]))]=NA
-# 			}
-# 			myvec[which(modeldata$gdta[,i]==mylevs[j])]=1
-# 			newmodeldata$gdta=cbind(newmodeldata$gdta,myvec)
-# 			colnames(newmodeldata$gdta)[ncol(newmodeldata$gdta)]=newcol[length(newcol)]
-# 		}
-# 		if(length(which(is.na(modeldata$gdta)))>0) {
-# 			warning(paste("WARNING: You have blank/missing values for variable",colnames(modeldata$gdta)[i],
-# 				"please check the coding for missingness in the varmap sheet"))
-# 		}
-# 		newmodeldata$gdta <- newmodeldata$gdta[ , !(names(newmodeldata$gdta) %in% colnames(modeldata$gdta)[i])]
-# 		tracker=tracker+1
-# 	} else {
-# 		newcol=c(newcol,orig.adjcol[tracker])
-# 		tracker=tracker+1
-# 	}
-#     }
-# 	newcol.adj <- which(colnames(newmodeldata$gdta) %in% newcol)
-# 	# keep track of original adjustments (for printing) but reassign for
-# 	# partial correlation calculations
-# 	oldcol.adj <- modeldata$acovs
-# 	newmodeldata$acovs <- newcol
-# 	data <- data.matrix(newmodeldata$gdta[,c(newcol.adj,col.rcovar,col.ccovar)])
-#
-# 	# The pcor.test function will automatically remove adjustement variables that do not have any individuals (which can happen
-# 	# when we stratify...) and produce a warning.  This removes having to check for
-# 	# singularity errors...
-#
-# 	# However, we still need to check whether some of the model covariates are perfectly correlated since
-# 	# this may cause errors.
-# 	corcheck <- cor(data[,newmodeldata$acovs])
-# 	corcheck[upper.tri(corcheck,diag=T)]=NA
-# 	perfcorr <- which(corcheck==1,arr.ind=T)
-# 	toremove <- rownames(perfcorr)[which(perfcorr[,1]!=perfcorr[,2],arr.ind=T)]
-# 	# if there are perfectly correlated variables, than remove all but one (the first one)
-# 	if(length(toremove) > 0) {
-#		data=data[,-which(colnames(data) %in% toremove)]
-#		newmodeldata$acovs=setdiff(newmodeldata$acovs,toremove)
-#		warning(paste("WARNING: Dummy variables",toremove,"are removed because they are perfectly correlated with other adjustment covariables"))
-#	}
-
-    # Check model design and create dummy variable
-    #designcheck <- checkModelDesign(modeldata,createDummies=TRUE)
-    # if output of checkModelDesign is an empty data.frame, then it means that there were < 15
-    # observations in the input data
-    #if(length(names(designcheck))==0) {
-#	return(designcheck)
-#    }
-    newmodeldata <- designcheck$modeldata
-    print(designcheck$warningmessage)
-    if(length(designcheck$warningmessage) > 0) {
-	print(designcheck$warningmessage)
-    }
-    if(length(designcheck$errormessage) > 0) {
-	stop(designcheck$errormessage)
-    }
 
     # Loop through and calculate cor, n, and p-values
-    pval <- corr <- matrix(nrow=length(newmodeldata$rcovs), ncol=length(newmodeldata$ccovs))
-    n <- matrix(nrow=length(modeldata$rcovs), ncol=1)
+    pval <- corr <- n <- matrix(nrow=length(modeldata$rcovs), ncol=length(newmodeldata$ccovs))
     rownames(pval)=rownames(n)=rownames(corr)=modeldata$rcovs
-    colnames(pval)=paste0(modeldata$ccovs,".p")
-    colnames(n)="n"
-    colnames(corr)=modeldata$ccovs
+    colnames(pval)=paste0(newmodeldata$ccovs,".p")
+    colnames(n)=paste0(newmodeldata$ccovs,".n")
+    colnames(corr)=newmodeldata$ccovs
     for (i in 1:length(newmodeldata$rcovs)){
 	for (j in 1:length(newmodeldata$ccovs)) {
 		temp <- ppcor::pcor.test(newmodeldata$gdta[,newmodeldata$rcovs[i]],
 			newmodeldata$gdta[,newmodeldata$ccovs[j]],
 			newmodeldata$gdta[,newmodeldata$acovs],method="spearman")
-		pval[i,j] <-format(temp$p.value,digits=20)
-		corr[i,j] <- format(temp$estimate,digits=20)
+		pval[i,j] <-round(temp$p.value,digits=20)
+		corr[i,j] <- round(temp$estimate,digits=20)
+		n [i,j] <- temp$n
 	}
-	n [i,1] <- temp$n
     }
     pval <- as.data.frame(pval)
     n <- as.data.frame(n)
@@ -254,7 +181,7 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
       spec = modeldata$modelspec,
       model = modeldata$modlabel,
       tidyr::gather(corr.togather,
-                    "exposurespec","corr",colnames(corr.togather)[mycols]),
+                    "exposurespec","corr",-outcomespec),
       tidyr::gather(as.data.frame(n),"exposuren", "n", colnames(n)[mycols]),
       tidyr::gather(as.data.frame(pval),"exposurep","pvalue",colnames(pval)[mycols]),
       adjspec = ifelse(length(col.adj) == 0, "None", paste(newmodeldata$acovs, collapse = " ")),
@@ -367,6 +294,7 @@ runCorr<- function(modeldata,metabdata,cohort=""){
   ptm <- base::proc.time() # start processing time
 
   if(is.null(modeldata$scovs)) {
+    # drop unused levels for analyses
 	for (mycol in colnames(modeldata$gdta)) {
         	if(length(levels(modeldata$gdta[,mycol]))>0) {
         	        modeldata$gdta[,mycol]=droplevels(modeldata$gdta[,mycol])
