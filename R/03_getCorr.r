@@ -152,7 +152,15 @@ calcCorr <- function(modeldata,metabdata,cohort=""){
     colnames(pval)=paste0(newmodeldata$ccovs,".p")
     colnames(n)=paste0(newmodeldata$ccovs,".n")
     colnames(corr)=newmodeldata$ccovs
+    vartoggle <- 0;
     for (i in 1:length(newmodeldata$rcovs)){
+	tempvar <- var(newmodeldata$gdta[,i],na.rm=T)
+	if(vartoggle==0) {
+		print("Warning: Metabolites dropped due to 0 variance:")
+		vartoggle=1
+	}
+	print(colnames(newmodeldata$gdta)[i])
+	
 	for (j in 1:length(newmodeldata$ccovs)) {
 		temp <- ppcor::pcor.test(newmodeldata$gdta[,newmodeldata$rcovs[i]],
 			newmodeldata$gdta[,newmodeldata$ccovs[j]],
