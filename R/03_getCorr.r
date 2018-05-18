@@ -421,7 +421,7 @@ runCorr <- function(modeldata, metabdata, cohort = "") {
               as.character(modeldata$scovs),
               "=",
               stratlist[i],
-              ") with less than 15 observations. Model will not be run for this stratum.",
+              ") with less than 25 observations. Model will not be run for this stratum.",
               sep = ""
             )
           )
