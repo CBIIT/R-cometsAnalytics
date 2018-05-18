@@ -118,7 +118,6 @@
 # dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
 # xlsfile <- file.path(dir, "cohorts.xlsx")
 # cohorts = readxl::read_excel(xlsfile,1)
-# rm(dir,xlsfile)
 #
 #
 # ## ---------------------------------------------------------------------------
