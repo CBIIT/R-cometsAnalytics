@@ -243,7 +243,7 @@ if (!is.null(scovs)) {
 if(!is.null(where)) {
       numallsamps <- nrow(readData$subjdata)
       readData <- filterCOMETSinput(readData,where=where)
-      print(paste("Filtering subjects according to the rule(s)",where,". ",nrow(readData$subjdata)," of ", numallsamps,"are retained"))
+      print(paste0("Filtering subjects according to the rule(s)",where,". ",nrow(readData$subjdata)," of ", numallsamps,"are retained"))
 }
 
 gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))

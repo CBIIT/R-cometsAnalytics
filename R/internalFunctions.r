@@ -1,4 +1,4 @@
- # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # fixData function ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 #' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
@@ -113,12 +113,12 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
       }
       else if (length(unique(dta.sdata[,subjid])) != length(unique(dta.smetab[,subjid]))) {
         outmessage = c(
-          outmessage,"Warning: Number of subjects in SubjectData sheet does not match number of subjects in SubjectMetabolites sheet"
+          outmessage,"Number of subjects in SubjectData sheet does not match number of subjects in SubjectMetabolites sheet"
         )
       }
       else if (length(unique(colnames(dta.smetab))) != ncol(dta.smetab)) {
         outmessage = c(
-          outmessage,"Warning: Metabolite abundances sheet (SubjectMetabolites) contains duplicate columns (metabolite names)"
+          outmessage,"Metabolite abundances sheet (SubjectMetabolites) contains duplicate columns (metabolite names)"
         )
       }
       else if (length(unique(unlist(dta.sdata[,subjid]))) != nrow(dta.sdata)) {
@@ -365,9 +365,8 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
    for (i in modeldata$acovs) {
         temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
-               warning(paste("Warning: one of your models specifies",i,"as an adjustment value
-               but that variable only has one possible value.
-               Model will run without",i,"as an adjustment"))
+               warning(paste("One of your models specifies",i,"as an adjustment value but that variable only has one possible value.",
+               "Model will run without",i,"as an adjustment"))
                modeldata$acovs <- setdiff(modeldata$acovs,i)
         }
    }
@@ -401,7 +400,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
 
 	# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
-	nonzero <- caret::nearZeroVar(mydummies)
+	nonzero <- caret::nearZeroVar(mydummies,freqCut = 95/5)
 	if(length(nonzero)>0) {
 	        filtdummies <- mydummies[,-nonzero]
 		warningmessage <- c(warningmessage,
@@ -413,14 +412,13 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
 	# Check for correlated predictors (this will remove the first "factor" that is highly
 	# correlated with another
-	cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
 	if (ncol(filtdummies)>1){
-		cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .95)
-	if(length(cors)>0) {
+		cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .97)
+	  if(length(cors)>0) {
 	        filtdummies2 <- filtdummies[,-cors]
 		warningmessage <- c(warningmessage,
                         paste("Removed ",paste(colnames(mydummies)[unique(cors)],collapse=","),
-				" because of correlation > 0.95 with other covariates",collapse=""))
+				" because of correlation > 0.97 with other covariates",collapse=""))
 	}
 		else {
 		  filtdummies2=filtdummies
@@ -433,24 +431,36 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 		warningmessage <- c(warningmessage,
                         paste0("Removed ",paste(colnames(mydummies)[unique(ldeps$remove)],collapse=","),
 				" because of linear dependencies",collapse=""))
-	} else {
+	} else
 	        findummies=filtdummies2
-	}
 	}
 	else {
 	  findummies=filtdummies
 	}
 
+	# check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
 
-	newdat <- cbind(modeldata$gdta[,modeldata$rcovs],findummies)
-	colnames(newdat)[1:length(modeldata$rcovs)]=modeldata$rcovs
+
+	# check for variance = 0 for rcovs
+	outcwvar<-psych::describe(modeldata$gdta[,modeldata$rcovs])
+	if (length(outcwvar$vars[outcwvar$sd==0])>0){
+	  warningmessage <- c(paste(warningmessage,"Zero variance for these outcome(s) removed:",modeldata$rcovs[outcwvar$vars[outcwvar$sd==0]],collapse = " "))
+	}
+	outcwvar<-modeldata$rcovs[outcwvar$vars[outcwvar$sd>0]]
+
+
+
+
+	newdat <- cbind(modeldata$gdta[,outcwvar],findummies)
+	colnames(newdat)[1:length(outcwvar)]=outcwvar
 	modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(findummies), value=TRUE)
 	modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
+	modeldata$rcovs <- outcwvar
 	modeldata$gdta <- newdat
      }
 
 
-     print(warningmessage)
+     #print(warningmessage)
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 }
 
