@@ -439,12 +439,16 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	}
 
 	# check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
-
+	ckqr<-subselect::trim.matrix(cor(findummies,method = "spearman"))
+	if (length(ckqr$names.discarded)>0) {
+	  findummies<-findummies[,-match(ckqr$names.discarded,colnames(findummies))]
+	  warningmessage <- c(warningmessage,paste("Removed ill-conditioned covariate(s) removed:",ckqr$names.discarded,collapse = ", "))
+	}
 
 	# check for variance = 0 for rcovs
 	outcwvar<-psych::describe(modeldata$gdta[,modeldata$rcovs])
 	if (length(outcwvar$vars[outcwvar$sd==0])>0){
-	  warningmessage <- c(paste(warningmessage,"Zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar$vars[outcwvar$sd==0]],collapse = " ")))
+	  warningmessage <- c(warningmessage,paste("Zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar$vars[outcwvar$sd==0]],collapse = ", ")))
 	}
 	outcwvar<-modeldata$rcovs[outcwvar$vars[outcwvar$sd>0]]
 
@@ -460,7 +464,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
      }
 
 
-     #print(warningmessage)
+     print(warningmessage)
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 }
 
