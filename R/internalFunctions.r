@@ -349,15 +349,15 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 		stop("Please make sure that modeldata and createDummies are defined")
 	}
   errormessage=warningmessage=c()
- # Check that there are at least 15 samples (n>15)
-  if (nrow(modeldata$gdta)<15){
+ # Check that there are at least 25 samples (n>=25) reference https://link.springer.com/content/pdf/10.1007%2FBF02294183.pdf
+  if (nrow(modeldata$gdta)<25){
     if (!is.null(modeldata$scovs)){
-      #warning(paste("Data has < 15 observations for strata in",modeldata$scovs))
+      #warning(paste("Data has < 25 observations for strata in",modeldata$scovs))
       mycorr=data.frame()
       attr(mycorr,"ptime")="Processing time: 0 sec"
       return(mycorr)
     } else{
-      stop(paste(modeldata$modlabel," has less than 15 observations and will not be run."))
+      stop(paste(modeldata$modlabel," has less than 25 observations and will not be run."))
     }
   }
 
@@ -444,7 +444,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	# check for variance = 0 for rcovs
 	outcwvar<-psych::describe(modeldata$gdta[,modeldata$rcovs])
 	if (length(outcwvar$vars[outcwvar$sd==0])>0){
-	  warningmessage <- c(paste(warningmessage,"Zero variance for these outcome(s) removed:",modeldata$rcovs[outcwvar$vars[outcwvar$sd==0]],collapse = " "))
+	  warningmessage <- c(paste(warningmessage,"Zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar$vars[outcwvar$sd==0]],collapse = " ")))
 	}
 	outcwvar<-modeldata$rcovs[outcwvar$vars[outcwvar$sd>0]]
 
