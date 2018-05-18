@@ -1,14 +1,16 @@
 Package: COMETS
 Type: Package
 Title: Comets Analytics for consortium based metabolomic analyses
-Version: 1.3.10.4
+Version: 1.3.10.5
 Author: Ella Temprosa, Ewy Mathe
 Maintainer: Ewy Mathe <ewy.mathe@osumc.edu>, Ella Temprosa <ella@bsc.gwu.edu>
 Description: This R package support all cohort-specific analyses of the COMETS
     consortium. Data are not saved in the system but output must be downloaded and
     submitted for meta-analyses. This package can be used in several ways: supports
     the CBIIT implementation of comets-analytics, local shiny based add-in called
-    shinycomets, or console based analysis. See example vignette. 
+    shinycomets, or console based analysis. See example vignette. The version of the package
+    is noted as: level 1 and 2 reflect the comets-analytics version, 3rd level 
+    reflects the number of major revision and 4th level for bug fixes.
 Depends:
     R (>= 3.3.0)
 Imports:
