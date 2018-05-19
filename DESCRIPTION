@@ -29,7 +29,8 @@ Imports:
     stringr,
     data.table,
     ppcor,
-    caret
+    caret,
+    subselect
 Suggests:
     knitr
 VignetteBuilder: knitr
