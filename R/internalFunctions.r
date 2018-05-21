@@ -445,12 +445,12 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	  warningmessage <- c(warningmessage,paste("Removed ill-conditioned covariate(s) removed:",ckqr$names.discarded,collapse = ", "))
 	}
 
-	# check for variance = 0 for rcovs
-	outcwvar<-psych::describe(modeldata$gdta[,modeldata$rcovs])
-	if (length(outcwvar$vars[outcwvar$sd==0])>0){
-	  warningmessage <- c(warningmessage,paste("Zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar$vars[outcwvar$sd==0]],collapse = ", ")))
+	# check for variance near 0 for rcovs
+	outcwvar<-caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
+	if (length(outcwvar)>0){
+	  warningmessage <- c(warningmessage,paste("Near zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar],collapse = ", ")))
 	}
-	outcwvar<-modeldata$rcovs[outcwvar$vars[outcwvar$sd>0]]
+	outcwvar<-modeldata$rcovs[-outcwvar]
 
 
 
