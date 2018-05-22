@@ -95,7 +95,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     print(designcheck$warningmessage)
   }
   if (length(designcheck$errormessage) > 0) {
-    stop(designcheck$errormessage)
+    stop(print(designcheck$errormessage))
   }
 
   # readjust exposure and adjustment covariates
