@@ -452,19 +452,21 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	}
 	outcwvar<-modeldata$rcovs[-outcwvar]
 
-
-
-
-	newdat <- cbind(modeldata$gdta[,outcwvar],findummies)
-	colnames(newdat)[1:length(outcwvar)]=outcwvar
-	modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(findummies), value=TRUE)
-	modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
-	modeldata$rcovs <- outcwvar
-	modeldata$gdta <- newdat
+	if(length(outcwvar)>0) {
+		newdat <- cbind(modeldata$gdta[,outcwvar],findummies)
+		colnames(newdat)[1:length(outcwvar)]=outcwvar
+		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(findummies), value=TRUE)
+		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
+		modeldata$rcovs <- outcwvar
+		modeldata$gdta <- newdat
+     	}
+	else {
+		errormessage <- "All outcomes have near-zero variance, no model(s) can't be run."
+	}
      }
 
-
      print(warningmessage)
+     print(errormessage)
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 }
 
