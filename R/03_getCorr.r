@@ -171,7 +171,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     colnames(n) = paste0(newmodeldata$ccovs, ".n")
     colnames(corr) = newmodeldata$ccovs
     for (i in 1:length(newmodeldata$rcovs)) {
-      print(newmodeldata$rcovs[i])
+    #  print(newmodeldata$rcovs[i])
       for (j in 1:length(newmodeldata$ccovs)) {
         temp <- ppcor::pcor.test(newmodeldata$gdta[, newmodeldata$rcovs[i]],
                                  newmodeldata$gdta[, newmodeldata$ccovs[j]],
