@@ -461,7 +461,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 		modeldata$gdta <- newdat
      	}
 	else {
-		errormessage <- "All outcomes have near-zero variance, no model(s) can't be run."
+		errormessage <- "All outcomes have near-zero variance, model(s) will not be run."
 	}
      }
 
