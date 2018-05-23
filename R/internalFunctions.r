@@ -398,87 +398,88 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",paste(colnames(modeldata$gdta)[c(col.ccovar, col.adj)],collapse = " + "))
 	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
-
-	# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
-	nonzero <- caret::nearZeroVar(mydummies,freqCut = 95/5)
-	if(length(nonzero)>0) {
-	        filtdummies <- mydummies[,-nonzero]
-		warningmessage <- c(warningmessage,
-			paste0("Removed ",paste(colnames(mydummies)[unique(nonzero)],collapse=","),
-				" because of zero-variance",collapse=""))
+    } else { 
+	if(length(modeldata$acovs>0)) {
+		mydummies <- modeldata$gdta[,c(modeldata$ccovs,modeldata$acovs)]
 	} else {
-	        filtdummies <- mydummies
+		mydummies <- as.data.frame(modeldata$gdta[,c(modeldata$ccovs)])
+		colnames(mydummies)=modeldata$ccovs
 	}
+    } # end create dummies
 
-	# Check for correlated predictors (this will remove the first "factor" that is highly
-	# correlated with another
-	if (ncol(filtdummies)>1){
-		cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .97)
-	  if(length(cors)>0) {
-	        filtdummies2 <- filtdummies[,-cors]
-		warningmessage <- c(warningmessage,
-                        paste("Removed ",paste(colnames(mydummies)[unique(cors)],collapse=","),
-				" because of correlation > 0.97 with other covariates",collapse=""))
-	}
-		else {
-		  filtdummies2=filtdummies
+	# Now perform all the checks on the design matrix (if there are covariates)
+	if(!is.null(mydummies)) {
+		# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
+		nonzero <- caret::nearZeroVar(mydummies,freqCut = 95/5)
+		if(length(nonzero)>0) {
+		        filtdummies <- mydummies[,-nonzero]
+			warningmessage <- c(warningmessage,
+				paste0("Removed ",paste(colnames(mydummies)[unique(nonzero)],collapse=","),
+					" because of zero-variance",collapse=""))
+		} else {
+		        filtdummies <- mydummies
 		}
 
-	# Check for linear dependencies
-	ldeps <- caret::findLinearCombos(filtdummies2)
-	if(length(ldeps$remove)>0) {
-	        findummies <-filtdummies2[,-ldeps$remove]
-		warningmessage <- c(warningmessage,
-                        paste0("Removed ",paste(colnames(mydummies)[unique(ldeps$remove)],collapse=","),
-				" because of linear dependencies",collapse=""))
-	} else
-	        findummies=filtdummies2
-	}
-	else {
-	  findummies=filtdummies
-	}
+		# Check for correlated predictors (this will remove the first "factor" that is highly
+		# correlated with another
 
-	# check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
-	ckqr<-subselect::trim.matrix(cor(findummies,method = "spearman"))
-	if (length(ckqr$names.discarded)>0) {
-	  findummies<-findummies[,-match(ckqr$names.discarded,colnames(findummies))]
-	  warningmessage <- c(warningmessage,paste("Removed ill-conditioned covariate(s) removed:",ckqr$names.discarded,collapse = ", "))
-	}
-
-	# check for variance near 0 for rcovs
+		if(is.numeric(filtdummies)) { # meaning there is only one column retained and it's now a vector
+			errormessage <- c(errormessage,"Covariates failed design model check (zero variance). Model will not be run")
+			return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
+		} 
+		if (ncol(filtdummies)>1){
+			cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .97)
+		 		if(length(cors)>0) {
+		       		  filtdummies2 <- filtdummies[,-cors]
+				  warningmessage <- c(warningmessage,
+        	       	          paste("Removed ",paste(colnames(mydummies)[unique(cors)],collapse=","),
+					" because of correlation > 0.97 with other covariates",collapse=""))
+		  		} else {
+			  filtdummies2=filtdummies
+		  		}
+			#Check for linear dependencies
+			ldeps <- caret::findLinearCombos(filtdummies2)
+			if(length(ldeps$remove)>0) {
+			        findummies <-filtdummies2[,-ldeps$remove]
+				warningmessage <- c(warningmessage,
+        	                paste0("Removed ",paste(colnames(mydummies)[unique(ldeps$remove)],collapse=","),
+					" because of linear dependencies",collapse=""))
+			} else {
+		        	findummies=filtdummies2
+			}
+		} else {
+		  	findummies=filtdummies
+		}
+	
+		# check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
+		ckqr<-subselect::trim.matrix(cor(findummies,method = "spearman"))
+		if (length(ckqr$names.discarded)>0) {
+		  	findummies<-findummies[,-match(ckqr$names.discarded,colnames(findummies))]
+		  	warningmessage <- c(warningmessage,paste("Removed ill-conditioned covariate(s) removed:",ckqr$names.discarded,collapse = ", "))
+		}
+	} 
+	
+	# Now run check on outcome
+	# check for variance near 0 for rcovs (outcome)
 	outcwvar<-caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
 	if (length(outcwvar)>0){
-	  warningmessage <- c(warningmessage,paste("Near zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar],collapse = ", ")))
+	  	warningmessage <- c(warningmessage,paste("Near zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar],collapse = ", ")))
+		outcwvar<-modeldata$rcovs[-outcwvar]
+	} else {
+		outcwvar<-modeldata$rcovs
 	}
-	outcwvar<-modeldata$rcovs[-outcwvar]
-
 	if(length(outcwvar)>0) {
 		newdat <- cbind(modeldata$gdta[,outcwvar],findummies)
 		colnames(newdat)[1:length(outcwvar)]=outcwvar
-		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(findummies), value=TRUE)
+		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
+			setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)), value=TRUE)
 		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
 		modeldata$rcovs <- outcwvar
 		modeldata$gdta <- newdat
-     	}
-	else {
+	} else {
 		errormessage <- "All outcomes have near-zero variance, model(s) will not be run."
 	}
-     }
-
-     print(warningmessage)
-     print(errormessage)
+     #print(warningmessage)
+     #print(errormessage)
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
