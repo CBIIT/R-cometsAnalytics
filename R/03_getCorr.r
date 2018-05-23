@@ -103,6 +103,8 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     match(newmodeldata[["acovs"]], names(newmodeldata[["gdta"]]))
   col.ccovar <-
     match(newmodeldata[["ccovs"]], names(newmodeldata[["gdta"]]))
+  col.rcovar <-
+    match(newmodeldata[["rcovs"]], names(newmodeldata[["gdta"]]))
 
 
   if (length(col.adj) == 0) {
@@ -161,14 +163,14 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
 
 
     # Loop through and calculate cor, n, and p-values
-    pval <- corr <- n <- matrix(nrow = length(modeldata$rcovs),
+    pval <- corr <- n <- matrix(nrow = length(newmodeldata$rcovs),
              ncol = length(newmodeldata$ccovs))
-    rownames(pval) = rownames(n) = rownames(corr) = modeldata$rcovs
+    rownames(pval) = rownames(n) = rownames(corr) = newmodeldata$rcovs
     colnames(pval) = paste0(newmodeldata$ccovs, ".p")
     colnames(n) = paste0(newmodeldata$ccovs, ".n")
     colnames(corr) = newmodeldata$ccovs
     for (i in 1:length(newmodeldata$rcovs)) {
-#      print(newmodeldata$rcovs[i])
+      print(newmodeldata$rcovs[i])
       for (j in 1:length(newmodeldata$ccovs)) {
         temp <- ppcor::pcor.test(newmodeldata$gdta[, newmodeldata$rcovs[i]],
                                  newmodeldata$gdta[, newmodeldata$ccovs[j]],
