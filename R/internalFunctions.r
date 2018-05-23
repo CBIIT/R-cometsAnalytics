@@ -422,11 +422,10 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 
 		# Check for correlated predictors (this will remove the first "factor" that is highly
 		# correlated with another
-
-		if(is.numeric(filtdummies)) { # meaning there is only one column retained and it's now a vector
-			errormessage <- c(errormessage,"Covariates failed design model check (zero variance). Model will not be run")
-			return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
-		} 
+#		if(is.numeric(filtdummies)) { # meaning there is only one column retained and it's now a vector
+#			errormessage <- c(errormessage,"Covariates failed design model check (zero variance). Model will not be run")
+#			return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
+#		} 
 		if (ncol(filtdummies)>1){
 			cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .97)
 		 		if(length(cors)>0) {
