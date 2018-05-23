@@ -95,7 +95,8 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     print(designcheck$warningmessage)
   }
   if (length(designcheck$errormessage) > 0) {
-    stop(print(designcheck$errormessage))
+    print(designcheck$errormessage)
+    return(NULL)
   }
 
   # readjust exposure and adjustment covariates
@@ -103,6 +104,8 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     match(newmodeldata[["acovs"]], names(newmodeldata[["gdta"]]))
   col.ccovar <-
     match(newmodeldata[["ccovs"]], names(newmodeldata[["gdta"]]))
+  col.rcovar <-
+    match(newmodeldata[["rcovs"]], names(newmodeldata[["gdta"]]))
 
 
   if (length(col.adj) == 0) {
@@ -416,13 +419,11 @@ runCorr <- function(modeldata, metabdata, cohort = "") {
         }    else {
           warning(
             paste(
-              "Warning: Model ",
-              modeldata$modlabel,
-              " has strata (",
+              "Warning: strata (",
               as.character(modeldata$scovs),
               "=",
               stratlist[i],
-              ") with less than 25 observations. Model will not be run for this stratum.",
+              " could not be run because model check failed",
               sep = ""
             )
           )
