@@ -342,13 +342,13 @@ return(readData)
 #' Preprocess design matrix for zero variance, linear combinations, and dummies
 #' @keywords internal
 #' @param modeldata (output of function getModelData())
-#' @param crateDummies TRUE or FALSE
 #' @return modeldata after checks are performed
-checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
-	if(is.null(modeldata) || is.null(createDummies)) {
-		stop("Please make sure that modeldata and createDummies are defined")
+checkModelDesign <- function (modeldata=NULL) {
+	if(is.null(modeldata)) {
+		stop("Please make sure that modeldata is defined")
 	}
-  errormessage=warningmessage=c()
+ 
+ errormessage=warningmessage=c()
  # Check that there are at least 25 samples (n>=25) reference https://link.springer.com/content/pdf/10.1007%2FBF02294183.pdf
   if (nrow(modeldata$gdta)<25){
     if (!is.null(modeldata$scovs)){
@@ -370,13 +370,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
                modeldata$acovs <- setdiff(modeldata$acovs,i)
         }
    }
-   if (length(modeldata$acovs)==0) {
-	modeldata$acovs=NULL
-	createDummies=FALSE
-   }
 
-   if(createDummies) {
-	print("Creating dummies")
   	metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
   	cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
   	metabolite_name=expmetname=exposurespec=c()
@@ -398,21 +392,30 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",paste(colnames(modeldata$gdta)[c(col.ccovar, col.adj)],collapse = " + "))
 	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
-    } else { 
-	if(length(modeldata$acovs>0)) {
-		mydummies <- modeldata$gdta[,c(modeldata$ccovs,modeldata$acovs)]
-	} else {
-		mydummies <- as.data.frame(modeldata$gdta[,c(modeldata$ccovs)])
-		colnames(mydummies)=modeldata$ccovs
+	# Rename variables if they are returned in mydummies
+	tempccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(mydummies),value=TRUE)
+	if(length(tempccovs)>0) {
+		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(mydummies),value=TRUE)
 	}
-    } # end create dummies
+	temprcovs <- grep(paste(modeldata$rcovs,collapse="|"),colnames(mydummies),value=TRUE)
+	if(length(temprcovs)>0) {
+		modeldata$rcovs <- grep(paste(modeldata$rcovs,collapse="|"),colnames(mydummies),value=TRUE)
+	}
+	tempacovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(mydummies),value=TRUE)
+	if(length(tempacovs)>0) {
+		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(mydummies),value=TRUE)
+	}
 
-	# Now perform all the checks on the design matrix (if there are covariates)
+	# Now perform all the checks on the design matrix (if there are adjusted covariates)
 	if(!is.null(mydummies)) {
 		# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
 		nonzero <- caret::nearZeroVar(mydummies,freqCut = 95/5)
 		if(length(nonzero)>0) {
 		        filtdummies <- mydummies[,-nonzero]
+			if(is.null(ncol(filtdummies))) {
+				filtdummies <- as.matrix(filtdummies)
+				colnames(filtdummies) <- colnames(mydummies)[-nonzero]
+			}
 			warningmessage <- c(warningmessage,
 				paste0("Removed ",paste(colnames(mydummies)[unique(nonzero)],collapse=","),
 					" because of zero-variance",collapse=""))
@@ -426,8 +429,9 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 #			errormessage <- c(errormessage,"Covariates failed design model check (zero variance). Model will not be run")
 #			return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
 #		} 
-		if (ncol(filtdummies)>1){
-			cors <- caret::findCorrelation(stats::cor(filtdummies,method="spearman"), cutoff = .97)
+
+		if (!is.null(ncol(filtdummies)) && ncol(filtdummies)>1){
+			cors <- caret::findCorrelation(stats::cor(as.data.frame(filtdummies),method="spearman"), cutoff = .97)
 		 		if(length(cors)>0) {
 		       		  filtdummies2 <- filtdummies[,-cors]
 				  warningmessage <- c(warningmessage,
@@ -472,6 +476,7 @@ checkModelDesign <- function (modeldata=NULL, createDummies=NULL) {
 		colnames(newdat)[1:length(outcwvar)]=outcwvar
 		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
 			setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)), value=TRUE)
+		if(length(modeldata$acovs)==0) {modeldata$acovs <- NULL}
 		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
 		modeldata$rcovs <- outcwvar
 		modeldata$gdta <- newdat
