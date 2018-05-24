@@ -4,12 +4,10 @@
 \alias{checkModelDesign}
 \title{Preprocess design matrix for zero variance, linear combinations, and dummies}
 \usage{
-checkModelDesign(modeldata = NULL, createDummies = NULL)
+checkModelDesign(modeldata = NULL)
 }
 \arguments{
 \item{modeldata}{(output of function getModelData())}
-
-\item{crateDummies}{TRUE or FALSE}
 }
 \value{
 modeldata after checks are performed

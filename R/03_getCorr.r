@@ -84,7 +84,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   corr = c()
 
   # Check model design
-  designcheck <- checkModelDesign(modeldata, createDummies = TRUE)
+  designcheck <- checkModelDesign(modeldata)
   if (length(names(designcheck)) == 0) {
     return(designcheck)
   }
@@ -101,11 +101,11 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
 
   # readjust exposure and adjustment covariates
   col.adj <-
-    match(newmodeldata[["acovs"]], names(newmodeldata[["gdta"]]))
+    match(newmodeldata[["acovs"]], colnames(newmodeldata[["gdta"]]))
   col.ccovar <-
-    match(newmodeldata[["ccovs"]], names(newmodeldata[["gdta"]]))
+    match(newmodeldata[["ccovs"]], colnames(newmodeldata[["gdta"]]))
   col.rcovar <-
-    match(newmodeldata[["rcovs"]], names(newmodeldata[["gdta"]]))
+    match(newmodeldata[["rcovs"]], colnames(newmodeldata[["gdta"]]))
 
 
   if (length(col.adj) == 0) {
