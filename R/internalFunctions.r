@@ -389,21 +389,25 @@ checkModelDesign <- function (modeldata=NULL) {
   	loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
 
 	# Create dummy variables
-	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",paste(colnames(modeldata$gdta)[c(col.ccovar, col.adj)],collapse = " + "))
+	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",
+		paste0("`",colnames(modeldata$gdta)[c(col.ccovar, col.adj)],"`",collapse = " + "))
 	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
 	# Rename variables if they are returned in mydummies
-	tempccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(mydummies),value=TRUE)
+	tempccovs <- grep(paste(modeldata$ccovs,collapse="|"),
+		gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
 	if(length(tempccovs)>0) {
-		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(mydummies),value=TRUE)
+		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),
+			gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
 	}
-	temprcovs <- grep(paste(modeldata$rcovs,collapse="|"),colnames(mydummies),value=TRUE)
-	if(length(temprcovs)>0) {
-		modeldata$rcovs <- grep(paste(modeldata$rcovs,collapse="|"),colnames(mydummies),value=TRUE)
-	}
-	tempacovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(mydummies),value=TRUE)
-	if(length(tempacovs)>0) {
-		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),colnames(mydummies),value=TRUE)
+	# Check if adjusted covariates are present or else grep will be on "" and will always return something
+	if(!is.null(modeldata$acovs)) {
+		tempacovs <- grep(paste(modeldata$acovs,collapse="|"),
+			gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
+		if(length(tempacovs)>0) {
+			modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
+				gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
+		}
 	}
 
 	# Now perform all the checks on the design matrix (if there are adjusted covariates)
@@ -474,10 +478,15 @@ checkModelDesign <- function (modeldata=NULL) {
 	if(length(outcwvar)>0) {
 		newdat <- cbind(modeldata$gdta[,outcwvar],findummies)
 		colnames(newdat)[1:length(outcwvar)]=outcwvar
-		modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
-			setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)), value=TRUE)
-		if(length(modeldata$acovs)==0) {modeldata$acovs <- NULL}
-		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE)
+		# Remove "`" that were introduced when building the formula
+		colnames(newdat)=gsub("^`","",gsub("`$","",colnames(newdat)))
+		colnames(findummies)=gsub("^`","",gsub("`$","",colnames(findummies)))
+		if(!is.null(modeldata$acovs)) {
+			modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
+				setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)), 
+					fixed=TRUE,value=TRUE)
+		}
+		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE,fixed=TRUE)
 		modeldata$rcovs <- outcwvar
 		modeldata$gdta <- newdat
 	} else {
