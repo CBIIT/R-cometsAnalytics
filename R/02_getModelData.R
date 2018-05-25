@@ -6,9 +6,9 @@
 #' @param readData list from readComets
 #' @param modelspec How model is specified (Interactive or Batch)
 #' @param modlabel  if batch, chosen model specified by batch mode. If interactive model label.
-#' @param rowvars   if Interactive, outcome variables (usually metabolites rendered in rows, default is All metabolites)
-#' @param colvars   if Interactive, exposure variables (usually covariates rendered in columns)
-#' @param adjvars   If Interactive, adjustment covariates
+#' @param rowvars   if Interactive, a vector of outcome variables (usually metabolites rendered in rows, default is All metabolites)
+#' @param colvars   if Interactive, a vector of exposure variables (usually covariates rendered in columns)
+#' @param adjvars   If Interactive, a vector adjustment covariates
 #' @param strvars   If Interactive, stratification covariates
 #' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.
 #'
@@ -81,7 +81,8 @@ if (modelspec == "Interactive") {
     rcovs <-
       unique(c(rowvars[rowvars != "All metabolites"], c(readData$allMetabolites)))
   }  else {
-    rcovs <- unlist(strsplit(rowvars, " "))
+    rcovs <- rowvars
+    #rcovs <- unlist(strsplit(rowvars, " "))
   }
 
   # rename the exposure variables
@@ -89,7 +90,8 @@ if (modelspec == "Interactive") {
     ccovs <-
       unique(c(colvars[colvars != "All metabolites"], c(readData$allMetabolites)))
   } else {
-    ccovs <- unlist(strsplit(colvars, " "))
+    ccovs <- colvars
+    #ccovs <- unlist(strsplit(colvars, " "))
   }
 
   # rename the adjustment variables
