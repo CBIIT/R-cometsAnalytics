@@ -411,19 +411,18 @@ checkModelDesign <- function (modeldata=NULL) {
 	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
 	# Rename variables if they are returned in mydummies
-	tempccovs <- grep(paste(modeldata$ccovs,collapse="|"),
-		gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
+	tempccovs <- as.character(unlist(sapply(modeldata$ccovs,
+		function(x) grep(x,colnames(mydummies),value=TRUE,fixed=TRUE))))
 	if(length(tempccovs)>0) {
-		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),
-			gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
+		modeldata$ccovs <- tempccovs
 	}
-	# Check if adjusted covariates are present or else grep will be on "" and will always return something
+	# Check if adjusted covariates are present or else grep will return "" and will 
+	# always return something
 	if(!is.null(modeldata$acovs)) {
-		tempacovs <- grep(paste(modeldata$acovs,collapse="|"),
-			gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
+		tempacovs <- as.character(unlist(sapply(modeldata$acovs,
+			function(x) grep(x,colnames(mydummies),value=TRUE,fixed=TRUE))))
 		if(length(tempacovs)>0) {
-			modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
-				gsub("^`","",gsub("`$","",colnames(mydummies))),value=TRUE,fixed=TRUE)
+			modeldata$acovs <- tempacovs
 		}
 	}
 
@@ -498,11 +497,11 @@ checkModelDesign <- function (modeldata=NULL) {
 		colnames(newdat)=gsub("^`","",gsub("`$","",colnames(newdat)))
 		colnames(findummies)=gsub("^`","",gsub("`$","",colnames(findummies)))
 		if(!is.null(modeldata$acovs)) {
-			modeldata$acovs <- grep(paste(modeldata$acovs,collapse="|"),
-				setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)), 
-					fixed=TRUE,value=TRUE)
+			modeldata$acovs <- as.character(unlist(sapply(modeldata$acovs,
+				function(x) grep(x,setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)),value=TRUE,fixed=TRUE))))
 		}
-		modeldata$ccovs <- grep(paste(modeldata$ccovs,collapse="|"),colnames(findummies), value=TRUE,fixed=TRUE)
+		modeldata$ccovs <- as.character(unlist(sapply(modeldata$ccovs, 
+			function(x) grep(x,colnames(findummies),value=TRUE,fixed=TRUE))))
 		modeldata$rcovs <- outcwvar
 		modeldata$gdta <- newdat
 	} else {

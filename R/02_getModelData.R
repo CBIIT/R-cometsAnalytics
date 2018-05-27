@@ -13,20 +13,14 @@
 #' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.
 #'
 #' @return a list comprising:
-#'
 #' 1: subset data: gdta
-#'
 #' 2: column variables: ccovs
-#'
 #' 3: row variables: rcovs
-#'
 #' 4: adjustment variables: acovs
-#'
 #' 5: stratification variable: scovs
-#'
 #' 6: model specification: modspec
-#'
-#' 6: model label: modlab
+#' 7: model label: modlab
+#' 8: whether all metabolites vs all metabolites is run: allvsall
 #'
 #' @examples
 #'
@@ -48,6 +42,8 @@ getModelData <-  function(readData,
   if (is.na(match(modelspec, c("Interactive", "Batch")))) {
     stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
   }
+
+allvsall=F
 
 # figure out the model specification based on type (Interactive or Batch)
 if (modelspec == "Interactive") {
