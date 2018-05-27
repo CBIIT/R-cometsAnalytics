@@ -108,6 +108,13 @@ if (modelspec == "Interactive") {
     scovs <- strvars
   }
 
+  # Assign allvsall variable
+  if((colvars=="All metabolites") && (rowvars=="All metabolites")) {
+	allvsall=TRUE
+  } else {
+	allvsall=FALSE
+  }
+
   # Throw error if an ajdusted covariate is also an exposure and there is only 1 exposure
   if (length(intersect(adjvars, ccovs)) > 0 &&
       length(ccovs) == 1) {
@@ -270,6 +277,7 @@ list(
   scovs = scovs,
   modelspec = modelspec,
   modlabel = modlabel,
-  where = where
+  where = where,
+  allvsall = allvsall
 )
 }

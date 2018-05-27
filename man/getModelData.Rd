@@ -15,11 +15,11 @@ getModelData(readData, modelspec = "Batch", modlabel = "",
 
 \item{modlabel}{if batch, chosen model specified by batch mode. If interactive model label.}
 
-\item{rowvars}{if Interactive, outcome variables (usually metabolites rendered in rows, default is All metabolites)}
+\item{rowvars}{if Interactive, a vector of outcome variables (usually metabolites rendered in rows, default is All metabolites)}
 
-\item{colvars}{if Interactive, exposure variables (usually covariates rendered in columns)}
+\item{colvars}{if Interactive, a vector of exposure variables (usually covariates rendered in columns)}
 
-\item{adjvars}{If Interactive, adjustment covariates}
+\item{adjvars}{If Interactive, a vector adjustment covariates}
 
 \item{strvars}{If Interactive, stratification covariates}
 
