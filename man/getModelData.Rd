@@ -27,20 +27,14 @@ getModelData(readData, modelspec = "Batch", modlabel = "",
 }
 \value{
 a list comprising:
-
 1: subset data: gdta
-
 2: column variables: ccovs
-
 3: row variables: rcovs
-
 4: adjustment variables: acovs
-
 5: stratification variable: scovs
-
 6: model specification: modspec
-
-6: model label: modlab
+7: model label: modlab
+8: whether all metabolites vs all metabolites is run: allvsall
 }
 \description{
 Get data ready for the model runs in interactive or batch mode as specified in the input
