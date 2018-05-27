@@ -388,6 +388,23 @@ checkModelDesign <- function (modeldata=NULL) {
   	corr=c()
   	loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
 
+	# If all vs all, only check variance is zero for covars and allvars
+	if(modeldata$allvsall) {
+		print("Performing check for All metabolites vs All metabolites. Metabolites are assumed to all be continuous.")
+		nonzero <- caret::nearZeroVar(modeldata$gdta[,modeldata$ccovs],freqCut = 95/5)
+                if(length(nonzero)>0) {
+			modeldata$gdta <- modeldata$gdta[,-nonzero]
+			modeldata$ccovs <- modeldata$ccovs[-nonzero]
+			modeldata$rcovs <- modeldata$rcovs[-nonzero]
+                        warningmessage <- c(warningmessage,
+                                paste0("Removed ",paste(colnames(modeldata$gdta)[unique(nonzero)],
+					collapse=","),
+                                        " because of zero-variance",collapse=""))
+			 return(list(warningmessage=warningmessage,errormessage=errormessage,
+				modeldata=modeldata))
+                } 
+        } else {		
+
 	# Create dummy variables
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",
 		paste0("`",colnames(modeldata$gdta)[c(col.ccovar, col.adj)],"`",collapse = " + "))
@@ -427,14 +444,14 @@ checkModelDesign <- function (modeldata=NULL) {
 		        filtdummies <- mydummies
 		}
 
-		# Check for correlated predictors (this will remove the first "factor" that is highly
-		# correlated with another
-#		if(is.numeric(filtdummies)) { # meaning there is only one column retained and it's now a vector
+		  # Check for correlated predictors (this will remove the first "factor" that is highly
+		  # correlated with another
+#		  if(is.numeric(filtdummies)) { # meaning there is only one column retained and it's now a vector
 #			errormessage <- c(errormessage,"Covariates failed design model check (zero variance). Model will not be run")
 #			return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
-#		} 
+#		  } 
 
-		if (!is.null(ncol(filtdummies)) && ncol(filtdummies)>1){
+		  if (!is.null(ncol(filtdummies)) && ncol(filtdummies)>1){
 			cors <- caret::findCorrelation(stats::cor(as.data.frame(filtdummies),method="spearman"), cutoff = .97)
 		 		if(length(cors)>0) {
 		       		  filtdummies2 <- filtdummies[,-cors]
@@ -454,18 +471,17 @@ checkModelDesign <- function (modeldata=NULL) {
 			} else {
 		        	findummies=filtdummies2
 			}
-		} else {
+		    } else {
 		  	findummies=filtdummies
-		}
+		    }
 	
-		# check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
-		ckqr<-subselect::trim.matrix(cor(findummies,method = "spearman"))
-		if (length(ckqr$names.discarded)>0) {
+		  # check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
+	  	  ckqr<-subselect::trim.matrix(cor(findummies,method = "spearman"))
+		  if (length(ckqr$names.discarded)>0) {
 		  	findummies<-findummies[,-match(ckqr$names.discarded,colnames(findummies))]
 		  	warningmessage <- c(warningmessage,paste("Removed ill-conditioned covariate(s) removed:",ckqr$names.discarded,collapse = ", "))
-		}
-	} 
-	
+		  }
+	  } 
 	# Now run check on outcome
 	# check for variance near 0 for rcovs (outcome)
 	outcwvar<-caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
@@ -495,4 +511,5 @@ checkModelDesign <- function (modeldata=NULL) {
      #print(warningmessage)
      #print(errormessage)
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
+     }
 }
