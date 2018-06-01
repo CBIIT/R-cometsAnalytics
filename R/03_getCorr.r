@@ -108,6 +108,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     match(newmodeldata[["rcovs"]], colnames(newmodeldata[["gdta"]]))
 
 
+
   if (length(col.adj) == 0) {
     print("running unadjusted")
 
@@ -118,7 +119,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     #    }
 
 
-    data <- newmodeldata$gdta[, c(col.rcovar, col.ccovar)]
+    data <- newmodeldata$gdta[ , unique(c(col.rcovar, col.ccovar))]
     # calculate unadjusted spearman correlation matrix
     #       names(data)<-paste0("v",1:length(names(data)))
     #    assign('gdata',data,envir=.GlobalEnv)
@@ -126,9 +127,10 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     corrhm <- Hmisc::rcorr(as.matrix(data), type = "spearman")
 
     corr <-
-      data.frame(corrhm$r[1:length(col.rcovar), -(1:length(col.rcovar))])
+      data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs])
+
     n <-
-      as.data.frame(corrhm$n[1:length(col.rcovar), -(1:length(col.rcovar))])
+      data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs])
     #    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
     # Calculate p-values by hand to ensure that enough precision is printed:
     ttval <- sqrt(n--2) * corr / sqrt(1 - corr ** 2)
@@ -143,13 +145,17 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
         ) * 2)
     }
 
-    colnames(corr) <- colnames(corrhm$r)[-(1:length(col.rcovar))]
+    #colnames(corr) <- colnames(corrhm$r)[-(1:length(col.rcovar))]
     # Fix rownames when only one outcome is considered:
     if (length(col.rcovar) == 1) {
-      rownames(corr) <- colnames(corrhm$r)[(1:length(col.rcovar))]
+      rownames(corr) <- newmodeldata$rcovs
     }
-    colnames(n) <- colnames(corrhm$n)[-(1:length(col.rcovar))]
-    colnames(pval) <- colnames(corrhm$P)[-(1:length(col.rcovar))]
+    if (length(col.ccovar) == 1) {
+      names(corr) <- newmodeldata$ccovs
+    }
+    # no longer needed
+    #colnames(n) <- colnames(corrhm$n)[-(1:length(col.rcovar))]
+    #colnames(pval) <- colnames(corrhm$P)[-(1:length(col.rcovar))]
 
 
     # If there are more than one exposure, then need to transpose - not sure why???
@@ -173,6 +179,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     for (i in 1:length(newmodeldata$rcovs)) {
     #  print(newmodeldata$rcovs[i])
       for (j in 1:length(newmodeldata$ccovs)) {
+        if (newmodeldata$rcovs[i]!=newmodeldata$ccovs[j]) {
         temp <- ppcor::pcor.test(newmodeldata$gdta[, newmodeldata$rcovs[i]],
                                  newmodeldata$gdta[, newmodeldata$ccovs[j]],
                                  newmodeldata$gdta[, newmodeldata$acovs],
@@ -180,6 +187,12 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
         pval[i, j] <- round(temp$p.value, digits = 20)
         corr[i, j] <- round(temp$estimate, digits = 20)
         n [i, j] <- temp$n
+        } else{
+          pval[i, j] <- 0
+          corr[i, j] <- 1
+          n[i, j] <- sum(!is.na(newmodeldata$gdta[, newmodeldata$ccovs[j]]))
+        }
+
       }
     }
     pval <- as.data.frame(pval)

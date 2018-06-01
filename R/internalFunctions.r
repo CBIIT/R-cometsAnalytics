@@ -347,7 +347,7 @@ checkModelDesign <- function (modeldata=NULL) {
 	if(is.null(modeldata)) {
 		stop("Please make sure that modeldata is defined")
 	}
- 
+
  errormessage=warningmessage=c()
  # Check that there are at least 25 samples (n>=25) reference https://link.springer.com/content/pdf/10.1007%2FBF02294183.pdf
   if (nrow(modeldata$gdta)<25){
@@ -388,22 +388,57 @@ checkModelDesign <- function (modeldata=NULL) {
   	corr=c()
   	loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
 
+  	# check if any of the exposure and adjustments are factors
+  	ckfactor<-sapply(dplyr::select(modeldata$gdta,dplyr::one_of(modeldata$rcovs,modeldata$acovs)),class)
+  	hasfactor<-NULL
+  	if (length(ckfactor[ckfactor=="factor"])==0){
+  	  hasfactor<-FALSE
+  	} else {
+  	  hasfactor<-TRUE
+  	}
+
 	# If all vs all, only check variance is zero for covars and allvars
-	if(modeldata$allvsall) {
-		print("Performing check for All metabolites vs All metabolites. Metabolites are assumed to all be continuous.")
-		nonzero <- caret::nearZeroVar(modeldata$gdta[,modeldata$ccovs],freqCut = 95/5)
-                if(length(nonzero)>0) {
-			modeldata$gdta <- modeldata$gdta[,-nonzero]
-			modeldata$ccovs <- modeldata$ccovs[-nonzero]
-			modeldata$rcovs <- modeldata$rcovs[-nonzero]
-                        warningmessage <- c(warningmessage,
-                                paste0("Removed ",paste(colnames(modeldata$gdta)[unique(nonzero)],
-					collapse=","),
-                                        " because of zero-variance",collapse=""))
+	if(modeldata$allvsall | hasfactor==FALSE) {
+		print("No factors found,  only performing near zero variance check for all covariates.")
+		nonzeroc <- caret::nearZeroVar(modeldata$gdta[,modeldata$ccovs],freqCut = 95/5)
+		if(length(nonzeroc)>0) {
+			modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
+			warningmessage <- c(warningmessage,
+			                    paste0("Removed ",length(nonzeroc),"exposure(s):",paste(colnames(modeldata$gdta)[unique(nonzeroc)],
+			                                            collapse=","),
+			                           " because of zero-variance",collapse=""))
+
+		}
+		nonzeror <- caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
+		if(length(nonzeror)>0) {
+		  modeldata$rcovs <- modeldata$rcovs[-nonzeror]
+		  warningmessage <- c(warningmessage,
+		                      paste0("Removed ",length(nonzeror)," outcome(s): ",paste(colnames(modeldata$gdta)[unique(nonzeror)],
+		                                              collapse=","),
+		                             " because of zero-variance",collapse=""))
+		}
+		if (length(modeldata$acovs)>0){
+		nonzeroa <- caret::nearZeroVar(modeldata$gdta[,modeldata$acovs],freqCut = 95/5)
+		if(length(nonzeroa)>0) {
+		  modeldata$acovs <- modeldata$acovs[-nonzeroa]
+		  warningmessage <- c(warningmessage,
+		                      paste0("Removed ",length(nonzeroa),"adjustment(s):",paste(colnames(modeldata$gdta)[unique(nonzeroa)],
+		                                              collapse=","),
+		                             " because of zero-variance",collapse=""))
+		}
+		if (length(unique(c(nonzeroa,nonzeroc,nonzeror)))>0){
+		  modeldata$gdta <- modeldata$gdta[,-unique(c(nonzeroa,nonzeroc,nonzeror))]
+		}
+		}
+
 			 return(list(warningmessage=warningmessage,errormessage=errormessage,
 				modeldata=modeldata))
-                } 
-        } else {		
+
+        } else {
+
+  # Create models to run for each ccovar
+
+
 
 	# Create dummy variables
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",
@@ -416,7 +451,7 @@ checkModelDesign <- function (modeldata=NULL) {
 	if(length(tempccovs)>0) {
 		modeldata$ccovs <- tempccovs
 	}
-	# Check if adjusted covariates are present or else grep will return "" and will 
+	# Check if adjusted covariates are present or else grep will return "" and will
 	# always return something
 	if(!is.null(modeldata$acovs)) {
 		tempacovs <- as.character(unlist(sapply(modeldata$acovs,
@@ -448,7 +483,7 @@ checkModelDesign <- function (modeldata=NULL) {
 #		  if(is.numeric(filtdummies)) { # meaning there is only one column retained and it's now a vector
 #			errormessage <- c(errormessage,"Covariates failed design model check (zero variance). Model will not be run")
 #			return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
-#		  } 
+#		  }
 
 		  if (!is.null(ncol(filtdummies)) && ncol(filtdummies)>1){
 			cors <- caret::findCorrelation(stats::cor(as.data.frame(filtdummies),method="spearman"), cutoff = .97)
@@ -473,14 +508,14 @@ checkModelDesign <- function (modeldata=NULL) {
 		    } else {
 		  	findummies=filtdummies
 		    }
-	
+
 		  # check for ill conditioned square matrix for cor - on hold but consider trim.matrix in subselect package
 	  	  ckqr<-subselect::trim.matrix(cor(findummies,method = "spearman"))
 		  if (length(ckqr$names.discarded)>0) {
 		  	findummies<-findummies[,-match(ckqr$names.discarded,colnames(findummies))]
 		  	warningmessage <- c(warningmessage,paste("Removed ill-conditioned covariate(s) removed:",ckqr$names.discarded,collapse = ", "))
 		  }
-	  } 
+	  }
 	# Now run check on outcome
 	# check for variance near 0 for rcovs (outcome)
 	outcwvar<-caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
@@ -500,7 +535,7 @@ checkModelDesign <- function (modeldata=NULL) {
 			modeldata$acovs <- as.character(unlist(sapply(modeldata$acovs,
 				function(x) grep(x,setdiff(colnames(findummies),c(modeldata$ccovs,modeldata$rcovs,modeldata$scovs)),value=TRUE,fixed=TRUE))))
 		}
-		modeldata$ccovs <- as.character(unlist(sapply(modeldata$ccovs, 
+		modeldata$ccovs <- as.character(unlist(sapply(modeldata$ccovs,
 			function(x) grep(x,colnames(findummies),value=TRUE,fixed=TRUE))))
 		modeldata$rcovs <- outcwvar
 		modeldata$gdta <- newdat
