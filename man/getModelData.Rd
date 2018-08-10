@@ -2,7 +2,7 @@
 % Please edit documentation in R/02_getModelData.R
 \name{getModelData}
 \alias{getModelData}
-\title{Get data ready for the model runs in interactive or batch mode as specified in the input}
+\title{Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).}
 \usage{
 getModelData(readData, modelspec = "Batch", modlabel = "",
   rowvars = "All metabolites", colvars = "", adjvars = NULL,
@@ -37,10 +37,9 @@ a list comprising:
 8: whether all metabolites vs all metabolites is run: allvsall
 }
 \description{
-Get data ready for the model runs in interactive or batch mode as specified in the input
+Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).
 }
 \examples{
-
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)

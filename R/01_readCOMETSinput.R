@@ -1,7 +1,6 @@
-#' Read in CSV file that contains metabolite abundances and metab data
+#' Read in Excell file that contains metabolite abundances and metab data
 #'
-#' @param csvfilePath path of CSV file to be read in
-#' @param modelspec if "BATCH", then runs multiple models (default is "NoBATCH")
+#' @param csvfilePath path of Excell file to be read in
 #' @return a list comprising:
 #'
 #' @examples
@@ -11,7 +10,7 @@
 #'
 #' @export
 
-readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
+readCOMETSinput <- function(csvfilePath) {
   stopifnot(is.character(csvfilePath))
   if (!file.exists(csvfilePath)) {
     stop("CSV input file does not exist")
@@ -72,23 +71,6 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
     metabvar <-
       base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
 
-
-
-    # # Change Models so that they grab the correct cohortvariable name
-    #     modelvar=unique(c(dta.models$outcomes,dta.models$exposure,
-    #             unlist(strsplit(dta.models$adjustment," "))))
-    #     modelvar=base::tolower(base::setdiff(unique(modelvar[!is.na(modelvar)]),
-    # 	"All metabolites"))
-    #     modelvar <- modelvar[!is.na(modelvar)]
-    #
-    #     for (i in modelvar) {
-    # 	newmodelvar=base::tolower(dta.vmap$cohortvariable[which(dta.vmap$varreference==i)])
-    #         dta.models$outcomes[which(dta.models$outcomes==i)]=newmodelvar
-    #         dta.models$exposure[which(dta.models$exposure==i)]=newmodelvar
-    #         dta.models$adjustment[which(dta.models$adjustment==i)]=newmodelvar
-    #         dta.models$stratification[which(dta.models$adjustment==i)]=newmodelvar
-    #     }
-
     # run through all vmap specifications to create variables
     dtalist <- list(
       subjdata = dta,
@@ -113,10 +95,8 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
                              dta.vmap[["varreference"]] != "metabolite_id") # variable mapping
     )
 
-
     # Harmonize metabolites
     dtalist <- Harmonize(dtalist)
-
 
     # check to see which columns have non-missing values
     havedata <-
@@ -188,15 +168,47 @@ readCOMETSinput <- function(csvfilePath, modelspec = "Interactive") {
         "stratavar",
         "strata")
 
-
-
-
-    # et it is possible that we can have non-numeric subject data for example, sex etc. 10/5/16
-    # Check that all exposure variables are mode numeric:
-    #    modes=unique(sapply(dtalist$subjdata[,dtalist$allSubjectMetaData],class))
-    #    if(length(modes)>1 || modes != "numeric") {
-    #       stop("One of the variables used in the analysis (defined in the SubjectData sheet) includes non-numeric value.  These variables should include only numeric values.")
     print(integritymessage)
     return(dtalist)
   }
 }
+
+
+#' This function provides a description of the input data (for categorical data, the number of samples of each type; for continous data, the median and other statistics for each variable)
+#' @param readData list from readComets
+#'
+#' @return a list with 2 data frames, continuous and categorical summaries. Type of variable is defined in varmap
+#'
+#' @examples
+#' \dontrun{
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' allmodeloutput <- runAllModels(exmetabdata)
+#' # Get descriptive data
+#' descdata <-runDescrip(exmetabdata)
+#' OutputXLSResults(filename="corr",datal=descdata,cohort="DPP")
+#' }
+#' @export
+runDescrip<- function(readData){
+  sumcat<-variable<-value<-cohort<-NULL
+  # check if vartype is in vmap to see whether anyvars are categorical
+  if (length(which(grepl("vartype",names(readData$vmap))))>0){
+
+        catvars<-names(readData$subjdata)[which(sapply(readData$subjdata, is.factor)==TRUE)]
+
+        msdata<-readData$subjdata %>%
+                select_(catvars)
+        msdata <- suppressWarnings(data.table::melt(readData$subjdata,measure.vars=catvars))
+        sumcat <- msdata %>%
+        group_by(variable, value) %>%
+        summarise (n = n()) %>%
+        mutate(proportion = n / sum(n))
+  }
+
+  sumcnt <-as.data.frame(psych::describe(readData$subjdata,quant = c(.05,.25,.5,.75,.95)))
+  sumcnt$vars<-rownames(sumcnt)
+
+  return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
+}
+

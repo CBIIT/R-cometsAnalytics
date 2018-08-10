@@ -2,20 +2,18 @@
 % Please edit documentation in R/01_readCOMETSinput.R
 \name{readCOMETSinput}
 \alias{readCOMETSinput}
-\title{Read in CSV file that contains metabolite abundances and metab data}
+\title{Read in Excell file that contains metabolite abundances and metab data}
 \usage{
-readCOMETSinput(csvfilePath, modelspec = "Interactive")
+readCOMETSinput(csvfilePath)
 }
 \arguments{
-\item{csvfilePath}{path of CSV file to be read in}
-
-\item{modelspec}{if "BATCH", then runs multiple models (default is "NoBATCH")}
+\item{csvfilePath}{path of Excell file to be read in}
 }
 \value{
 a list comprising:
 }
 \description{
-Read in CSV file that contains metabolite abundances and metab data
+Read in Excell file that contains metabolite abundances and metab data
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
