@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 # fixData function ----------------------------------------------------------
 # ---------------------------------------------------------------------------
-#' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
+#' Fixes input data (e.g. takes care of factors, and other data frame conversions)
 #' @keywords internal
 #' @param dta any data frame
 #' @param compbl compress multiple blank spaces to single blank space for all character or factor variables in the dataset
@@ -193,7 +193,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
 # ---------------------------------------------------------------------------
 # Harmonize ---------------------------------------------------
 # ---------------------------------------------------------------------------
-#' Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
+#' Harmonizes metabolites by looking up metabolites names from user input and finding the corresponding COMETS harmonized name.
 #' @keywords internal
 #' @param dtalist results of reading a CSV data sheet (with read_excel)
 
@@ -278,9 +278,6 @@ Harmonize<-function(dtalist){
 
 }
 
-
-
-
 # ---------------------------------------------------------------------------
 # prdebug ---------------------------------------------------
 # ---------------------------------------------------------------------------
@@ -339,7 +336,8 @@ return(readData)
 }
 
 
-#' Preprocess design matrix for zero variance, linear combinations, and dummies
+#' Ensures that models will run without errors.  Preprocesses design matrix for 
+#' zero variance, linear combinations, and dummies.
 #' @keywords internal
 #' @param modeldata (output of function getModelData())
 #' @return modeldata after checks are performed
@@ -347,7 +345,6 @@ checkModelDesign <- function (modeldata=NULL) {
 	if(is.null(modeldata)) {
 		stop("Please make sure that modeldata is defined")
 	}
-
  errormessage=warningmessage=c()
  # Check that there are at least 25 samples (n>=25) reference https://link.springer.com/content/pdf/10.1007%2FBF02294183.pdf
   if (nrow(modeldata$gdta)<25){
@@ -437,9 +434,6 @@ checkModelDesign <- function (modeldata=NULL) {
         } else {
 
   # Create models to run for each ccovar
-
-
-
 	# Create dummy variables
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",
 		paste0("`",colnames(modeldata$gdta)[c(col.ccovar, col.adj)],"`",collapse = " + "))
@@ -547,3 +541,291 @@ checkModelDesign <- function (modeldata=NULL) {
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
      }
 }
+
+
+#--------------------------------------------------------
+#' Check model design and calculate correlation matrix. This is an internal function.  Use runCorr() instead (which is a wrapper to this function).
+#'
+#' @param modeldata list from function getModelData
+#' @param metabdata metabolite data list
+#' @param cohort cohort label (e.g DPP, NCI, Shanghai)
+#'
+#' @return data frame with each row representing the correlation for each combination of outcomes and exposures represented as specified in the
+#' model (*spec), label (*lab), and universal id (*_uid)
+#' with additional columns for n, pvalue, method of model specification (Interactive or Batch), universal id for outcomes () and exposures
+#' name of the cohort and adjustment variables. Attribute of dataframe includes ptime for processing time of model
+#' run.
+calcCorr <- function(modeldata, metabdata, cohort = "") {
+  .Machine$double.eps <- 1e-300
+
+  # Defining global variables to pass Rcheck()
+  #ptm <- proc.time() # start processing time
+  metabid = uid_01 = biochemical = outmetname = outcomespec = exposuren =
+    exposurep = metabolite_id = c()
+  cohortvariable = vardefinition = varreference = outcome = outcome_uid =
+    exposure = exposure_uid = c()
+  metabolite_name = expmetname = exposurespec = c()
+
+  # column indices of row/outcome covariates
+  col.rcovar <-
+    match(modeldata[["rcovs"]], names(modeldata[["gdta"]]))
+
+  # column indices of column/exposure covariates
+  col.ccovar <-
+    match(modeldata[["ccovs"]], names(modeldata[["gdta"]]))
+
+  # column indices of adj-var
+  col.adj <- match(modeldata[["acovs"]], names(modeldata[["gdta"]]))
+
+  # Defining global variable to remove R check warnings
+  corr = c()
+
+  # Check model design
+  designcheck <- checkModelDesign(modeldata)
+  if (length(names(designcheck)) == 0) {
+    return(designcheck)
+  }
+
+  newmodeldata <- designcheck$modeldata
+  print(designcheck$warningmessage)
+  if (length(designcheck$warningmessage) > 0) {
+    print(designcheck$warningmessage)
+  }
+  if (length(designcheck$errormessage) > 0) {
+    print(designcheck$errormessage)
+    return(NULL)
+  }
+
+  # readjust exposure and adjustment covariates
+  col.adj <-
+    match(newmodeldata[["acovs"]], colnames(newmodeldata[["gdta"]]))
+  col.ccovar <-
+    match(newmodeldata[["ccovs"]], colnames(newmodeldata[["gdta"]]))
+  col.rcovar <-
+    match(newmodeldata[["rcovs"]], colnames(newmodeldata[["gdta"]]))
+
+
+
+  if (length(col.adj) == 0) {
+    print("running unadjusted")
+
+    data <- newmodeldata$gdta[ , unique(c(col.rcovar, col.ccovar))]
+    # calculate unadjusted spearman correlation matrix
+    corrhm <- Hmisc::rcorr(as.matrix(data), type = "spearman")
+
+    corr <-
+      data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs])
+
+    n <-
+      data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs])
+    #    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
+    # Calculate p-values by hand to ensure that enough precision is printed:
+    ttval <- sqrt(n--2) * corr / sqrt(1 - corr ** 2)
+    # From this t-statistic, loop through and calculate p-values
+    pval <- ttval
+    for (i in 1:length(newmodeldata$ccovs)) {
+      pval[, i] <-
+        as.vector(stats::pt(
+          as.matrix(abs(ttval[, i])),
+          df = n[, i] - 2,
+          lower.tail = FALSE
+        ) * 2)
+    }
+
+    #colnames(corr) <- colnames(corrhm$r)[-(1:length(col.rcovar))]
+    # Fix rownames when only one outcome is considered:
+    if (length(col.rcovar) == 1) {
+      rownames(corr) <- newmodeldata$rcovs
+    }
+    if (length(col.ccovar) == 1) {
+      names(corr) <- newmodeldata$ccovs
+    }
+    # no longer needed
+    #colnames(n) <- colnames(corrhm$n)[-(1:length(col.rcovar))]
+    #colnames(pval) <- colnames(corrhm$P)[-(1:length(col.rcovar))]
+
+
+    # If there are more than one exposure, then need to transpose - not sure why???
+    if (length(col.ccovar) > 1 && length(col.rcovar) == 1) {
+      corr = as.data.frame(t(corr))
+      pval = as.data.frame(t(pval))
+    }
+
+  }  else {
+    # calculate partial correlation matrix
+    print("running adjusted")
+
+
+    # Loop through and calculate cor, n, and p-values
+    pval <- corr <- n <- matrix(nrow = length(newmodeldata$rcovs),
+             ncol = length(newmodeldata$ccovs))
+    rownames(pval) = rownames(n) = rownames(corr) = newmodeldata$rcovs
+    colnames(pval) = paste0(newmodeldata$ccovs, ".p")
+    colnames(n) = paste0(newmodeldata$ccovs, ".n")
+    colnames(corr) = newmodeldata$ccovs
+    for (i in 1:length(newmodeldata$rcovs)) {
+    #  print(newmodeldata$rcovs[i])
+      for (j in 1:length(newmodeldata$ccovs)) {
+        if (newmodeldata$rcovs[i]!=newmodeldata$ccovs[j]) {
+        temp <- ppcor::pcor.test(newmodeldata$gdta[, newmodeldata$rcovs[i]],
+                                 newmodeldata$gdta[, newmodeldata$ccovs[j]],
+                                 newmodeldata$gdta[, newmodeldata$acovs],
+                                 method = "spearman")
+        pval[i, j] <- round(temp$p.value, digits = 20)
+        corr[i, j] <- round(temp$estimate, digits = 20)
+        n [i, j] <- temp$n
+        } else{
+          pval[i, j] <- 0
+          corr[i, j] <- 1
+          n[i, j] <- sum(!is.na(newmodeldata$gdta[, newmodeldata$ccovs[j]]))
+        }
+
+      }
+    }
+    pval <- as.data.frame(pval)
+    n <- as.data.frame(n)
+    corr <- as.data.frame(corr)
+
+    # Rename the adjusted covariate now to original (without dummies)
+    #modeldata$acovs=oldcol.adj
+    print("finished adjustment")
+
+  } # End else adjusted mode (length(col.adj) is not zero)
+
+  # create long data with pairwise correlations  ----------------------------------------------------
+  mycols <- 1:length(col.ccovar)
+  corr.togather <- cbind(corr, outcomespec = rownames(corr))
+  corrlong <-
+    fixData(
+      data.frame(
+        cohort = cohort,
+        spec = modeldata$modelspec,
+        model = modeldata$modlabel,
+        tidyr::gather(corr.togather,
+                      "exposurespec", "corr", -outcomespec),
+        tidyr::gather(as.data.frame(n), "exposuren", "n", colnames(n)[mycols]),
+        tidyr::gather(as.data.frame(pval), "exposurep", "pvalue", colnames(pval)[mycols]),
+        adjspec = ifelse(
+          length(col.adj) == 0,
+          "None",
+          paste(newmodeldata$acovs, collapse = " ")
+        ),
+        adjvars = ifelse(
+          length(col.adj) == 0,
+          "None",
+          paste(modeldata$acovs, collapse = " ")
+        )
+      )
+    ) %>%
+    dplyr::select(-exposuren,-exposurep)
+
+  # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
+  # Add in metabolite information for outcome
+  # look in metabolite metadata match by metabolite id
+  corrlong <- dplyr::left_join(
+    corrlong,
+    dplyr::select(
+      metabdata$metab,
+      metabid,
+      outcome_uid = uid_01,
+      outmetname = biochemical
+    ),
+    by = c("outcomespec" = metabdata$metabId)
+  ) %>%
+    dplyr::mutate(outcome = ifelse(!is.na(outmetname), outmetname, outcomespec)) %>%
+    dplyr::select(-outmetname)
+
+
+  # Add in metabolite information and exposure labels:
+  # look in metabolite metadata
+  corrlong <- dplyr::left_join(
+    corrlong,
+    dplyr::select(
+      metabdata$metab,
+      metabid,
+      exposure_uid = uid_01,
+      expmetname = biochemical
+    ),
+    by = c("exposurespec" = metabdata$metabId)
+  ) %>%
+    dplyr::mutate(exposure = ifelse(!is.na(expmetname), expmetname, modeldata$ccovs)) %>%
+    dplyr::select(-expmetname)
+
+  # patch in variable labels for better display and cohortvariables------------------------------------------
+  # look in varmap
+  vmap <-
+    dplyr::select(metabdata$vmap, cohortvariable, vardefinition, varreference) %>%
+    mutate(
+      cohortvariable = tolower(cohortvariable),
+      vardefinition = ifelse(
+        regexpr("\\(", vardefinition) > -1,
+        substr(vardefinition, 0, regexpr("\\(", vardefinition) - 1),
+        vardefinition
+      )
+    )
+
+  # get good labels for the display of outcome and exposure
+  if (modeldata$modelspec == "Interactive") {
+    # fill in outcome vars from varmap
+    corrlong <-
+      dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "cohortvariable")) %>%
+      dplyr::mutate(
+        outcome_uid = ifelse(!is.na(varreference), varreference, outcomespec),
+        outcome = ifelse(
+          !is.na(outcome),
+          outcome,
+          ifelse(!is.na(vardefinition), vardefinition, outcomespec)
+        )
+      ) %>%
+      dplyr::select(-vardefinition, -varreference)
+
+
+    # fill in exposure vars from varmap
+    corrlong <-
+      dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "cohortvariable")) %>%
+      dplyr::mutate(
+        exposure_uid = ifelse(!is.na(varreference), varreference, exposurespec),
+        exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec)
+      ) %>%
+      dplyr::select(-vardefinition, -varreference)
+  }
+  else if (modeldata$modelspec == "Batch") {
+    # fill in outcome vars from varmap
+    corrlong <-
+      dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "varreference")) %>%
+      dplyr::mutate(
+        outcome_uid = ifelse(is.na(outcome_uid), outcomespec, outcome_uid),
+        outcome = ifelse(
+          !is.na(outcome),
+          outcome,
+          ifelse(!is.na(vardefinition), vardefinition, outcomespec)
+        ),
+        outcomespec = ifelse(!is.na(cohortvariable), cohortvariable, outcomespec)
+      ) %>%
+      dplyr::select(-vardefinition, -cohortvariable)
+
+
+    # fill in exposure vars from varmap
+    corrlong <-
+      dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "varreference")) %>%
+      dplyr::mutate(
+        exposure_uid = exposurespec,
+        exposure = ifelse(
+          !is.na(exposure),
+          exposure,
+          ifelse(!is.na(vardefinition), vardefinition, exposurespec)
+        ),
+        exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec),
+        exposurespec = ifelse(!is.na(cohortvariable), cohortvariable, exposurespec)
+      ) %>%
+      dplyr::select(-vardefinition, -cohortvariable)
+  }
+
+  # Stop the clock
+  #  ptm <- base::proc.time() - ptm
+  #  print(paste("My ptm:", ptm))
+  #  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+
+  return(corrlong)
+}
+

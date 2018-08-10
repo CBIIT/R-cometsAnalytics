@@ -16,7 +16,6 @@
 #' plotVar(exmetabdata)
 #'
 #' @export
-
 plotVar <- function(cometsdata,
                     title = "Distribution of Variance",
                     titlesize=16,
@@ -210,7 +209,7 @@ showHeatmap <- function (ccorrmat,
 showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
- outcome=metabolite_name=exposure=corr=c()
+ outcome=metabolite_name=exposure=corr=outcomespec=c()
   excorr <-
     ccorrmat %>% dplyr::select(outcomespec, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
