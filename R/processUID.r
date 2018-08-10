@@ -4,17 +4,17 @@
 ##' Code that creates the "compileuids.RData file"
 ##' @keywords internal
 #
-# uncomment to run
+## uncomment to run
 # processUID <- function() {
 #
 #dir <- system.file("R", package = "COMETS", mustWork = TRUE)
-# library(tidyverse)
+# #library(tidyverse)
 # source(paste0(getwd(),"/R/internalFunctions.r"))
 # # initialize parameters:
 #  metid=uid_01=uidsource=hmdb=main_class=c()
 #
 # ## dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
-# xlsfile <- file.path(getwd(), "/inst/extdata/uidcheck.xls")
+# xlsfile <- file.path(getwd(), "/inst/extdata/uid.xlsx")
 # masteruids = fixData(rio::import(xlsfile))
 #
 # # Compile indices of name columns
@@ -128,8 +128,8 @@
 # save(cohorts,masterhmdb,mastermetid,file=rdfile)
 # rmlist<-setdiff(ls(),c("cohorts","masterhmdb","mastermetid"))
 # rm(list=rmlist,rmlist)
-
-
+#
+#
 # }
 # # do not run
 # processUID()
@@ -139,4 +139,4 @@
 #
 #
 #
-
+#

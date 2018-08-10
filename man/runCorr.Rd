@@ -2,7 +2,7 @@
 % Please edit documentation in R/03_getCorr.r
 \name{runCorr}
 \alias{runCorr}
-\title{Calculate correlation matrix for each strata specified if stratification is specified in the model tab or in interactive mode}
+\title{Calculate correlation matrix for input model. This function will check for strata and if present, it will run the correlation matrix within each strata. Each model design is checked for validity (correlation between predictors, zero variance, etc.).}
 \usage{
 runCorr(modeldata, metabdata, cohort = "")
 }
@@ -21,7 +21,7 @@ name of the cohort, adjustment (adjvars) and stratification (stratavar,strata)  
 run.
 }
 \description{
-Calculate correlation matrix for each strata specified if stratification is specified in the model tab or in interactive mode
+Calculate correlation matrix for input model. This function will check for strata and if present, it will run the correlation matrix within each strata. Each model design is checked for validity (correlation between predictors, zero variance, etc.).
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)

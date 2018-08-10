@@ -2,7 +2,7 @@
 % Please edit documentation in R/internalFunctions.r
 \name{fixData}
 \alias{fixData}
-\title{Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)}
+\title{Fixes input data (e.g. takes care of factors, and other data frame conversions)}
 \usage{
 fixData(dta, compbl = FALSE)
 }
@@ -12,6 +12,6 @@ fixData(dta, compbl = FALSE)
 \item{compbl}{compress multiple blank spaces to single blank space for all character or factor variables in the dataset}
 }
 \description{
-Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
+Fixes input data (e.g. takes care of factors, and other data frame conversions)
 }
 \keyword{internal}
