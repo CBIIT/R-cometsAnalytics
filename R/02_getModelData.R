@@ -64,9 +64,19 @@ if (modelspec == "Interactive") {
   # apply changes names to data frame
   names(readData$subjdata) <- newnames
 
+#  if(!is.null(rowvars) && rowvars != "All metabolite") {
+#	rowvars <- as.character(names(exmetabdata$dict_metabnames)[as.numeric(lapply(rowvars,function(x) 
+#		which(readData$dict_metabnames==x)))])
+#  }
   # Check that all variables that are input by user exist in the renamed data
   allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars),"All metabolites"))
-  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
+  subjmetab <- as.character(lapply(colnames(readData$subjdata), function(x) {
+        myind <- which(names(readData$dict_metabnames)==x)
+        if(length(myind==1)) {x=readData$dict_metabnames[myind]}
+        return(x) }))
+  
+#  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
+  if(any(is.na(match(allvars,subjmetab)))) {
 	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
 
@@ -76,7 +86,11 @@ if (modelspec == "Interactive") {
     rcovs <-
       unique(c(rowvars[rowvars != "All metabolites"], c(readData$allMetabolites)))
   }  else {
-    rcovs <- rowvars
+    rcovs <- as.character(lapply(rowvars, function(x) {
+        myind <- which(readData$dict_metabnames==x)
+        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
+        return(x) }))
+    #rcovs <- rowvars
     #rcovs <- unlist(strsplit(rowvars, " "))
   }
 
@@ -85,20 +99,32 @@ if (modelspec == "Interactive") {
     ccovs <-
       unique(c(colvars[colvars != "All metabolites"], c(readData$allMetabolites)))
   } else {
-    ccovs <- colvars
+    ccovs <- as.character(lapply(colvars, function(x) {
+        myind <- which(readData$dict_metabnames==x)
+        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
+        return(x) }))
+    # ccovs <- colvars
     #ccovs <- unlist(strsplit(colvars, " "))
   }
 
   # rename the adjustment variables
   if (!is.null(adjvars)) {
-    acovs <- unlist(strsplit(adjvars, " "))
+    tempacovs <- unlist(strsplit(adjvars, " "))
+    acovs <- as.character(lapply(tempacovs, function(x) {
+        myind <- which(readData$dict_metabnames==x)
+        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
+        return(x) }))
   } else {
     acovs <- adjvars
   }
 
   # rename the stratification variables
   if (!is.null(strvars)) {
-    scovs <- unlist(strsplit(strvars, " "))
+    tempscovs <- unlist(strsplit(strvars, " "))
+    scovs <- as.character(lapply(tempscovs, function(x) {
+        myind <- which(readData$dict_metabnames==x)
+        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
+        return(x) }))
   } else {
     scovs <- strvars
   }
@@ -270,6 +296,7 @@ list(
   rcovs = rcovs,
   acovs = acovs,
   scovs = scovs,
+  dict_metabnames = readData$dict_metabnames,
   modelspec = modelspec,
   modlabel = modlabel,
   where = where,

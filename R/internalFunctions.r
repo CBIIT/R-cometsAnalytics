@@ -57,12 +57,14 @@ fixData <- function(dta,compbl=FALSE) {
 #' @param dta.sdata dta.sdata
 #' @param dta.vmap dta.vmap
 #' @param dta.models dta.models
-checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models) {
+#' @param dict_metabnames dict_metabnames
+checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames) {
 
     print("Running Integrity Check...")
     # get the cohort equivalent of metabolite_id and subject id
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
     subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
+    subjid.smetab = names(dict_metabnames)[which(dict_metabnames==subjid)] # to access dta.smetab
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
     allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)]))
@@ -94,7 +96,8 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     else if (length(intersect(subjid,colnames(dta.sdata))) != 1) {
         stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectData' sheet. Check the input file.")
     }
-    else if (length(intersect(subjid,colnames(dta.smetab))) != 1) {
+    #else if (length(intersect(subjid,colnames(dta.smetab))) != 1) {
+     else if (length(intersect(subjid,dict_metabnames)) !=1) {
         stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectMetabolites' sheet. Check the input file.")
     }
     else if (length(intersect(metabid,colnames(dta.metab))) != 1) {
@@ -104,14 +107,14 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
       #print("Passed the checks")
       dta.metab[[metabid]] = tolower(dta.metab[[metabid]])
       dta.sdata[[subjid]] = tolower(dta.sdata[[subjid]])
-      dta.smetab[[subjid]] = tolower(dta.smetab[[subjid]])
+      dta.smetab[[subjid.smetab]] = tolower(dta.smetab[[subjid.smetab]])
       if (length(grep(metabid,colnames(dta.metab))) == 0) {
           stop("Error: Metabolite ID from 'VarMap Sheet' (",metabid,") does not match column name from 'Metabolites Sheet'")
       }
       else if (length(grep(subjid,colnames(dta.sdata))) == 0) {
           stop("Error: Sample ID from 'VarMap Sheet' (",subjid,") does not match a column name in 'SubjectData Sheet'")
       }
-      else if (length(unique(dta.sdata[,subjid])) != length(unique(dta.smetab[,subjid]))) {
+      else if (length(unique(dta.sdata[,subjid])) != length(unique(dta.smetab[,subjid.smetab]))) {
         outmessage = c(
           outmessage,"Number of subjects in SubjectData sheet does not match number of subjects in SubjectMetabolites sheet"
         )
@@ -133,22 +136,24 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
       }
       else {
         nummetab = length(unique(colnames(dta.smetab)[-c(which(colnames(dta.smetab) ==
-                                                                 subjid))]))
-        numsamples = length(unique(dta.smetab[[subjid]]))
+                                                                 subjid.smetab))]))
+        numsamples = length(unique(dta.smetab[[subjid.smetab]]))
         if (length(intersect(as.character(unlist(dta.metab[,metabid])),colnames(dta.smetab)[-c(which(colnames(dta.smetab) ==
-                                                                                                     subjid))])) == nummetab &&
-            length(intersect(as.character(unlist(dta.sdata[,subjid])),dta.smetab[[subjid]])) ==
+            subjid.smetab))])) == nummetab &&
+            length(intersect(as.character(unlist(dta.sdata[,subjid])),dta.smetab[[subjid.smetab]])) ==
             numsamples) {
           outmessage = c(
             outmessage,"Passed all integrity checks, analyses can proceed. If you are part of COMETS, please download metabolite list below and submit to the COMETS harmonization group."
           )
         }
         else {
-          if (length(intersect(tolower(make.names(dta.metab[[metabid]])),tolower(colnames(dta.smetab)))) !=
-              nummetab) {
+          # if (length(intersect(tolower(make.names(dta.metab[[metabid]])),tolower(colnames(dta.smetab)))) !=
+          #    nummetab) {
+	  if (length(intersect(names(dict_metabnames)[match(tolower(dta.metab[[metabid]]),dict_metabnames)],
+		tolower(colnames(dta.smetab)))) != nummetab) {	
               stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
           }
-          if (length(intersect(dta.sdata[[subjid]],dta.smetab[[subjid]])) !=
+          if (length(intersect(dta.sdata[[subjid]],dta.smetab[[subjid.smetab]])) !=
               numsamples) {
               stop("Error: Sample ids in SubjectMetabolites DO NOT ALL match subject ids in SubjectData sheet")
           }
@@ -180,6 +185,9 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models)
     if (is.null(outmessage)) {
       outmessage = "Input data has passed QC (metabolite and sample names match in all input files)"
     }
+
+    # rename subjid in dta.smetab sheet for merging later on
+    colnames(dta.smetab)[which(colnames(dta.smetab)==subjid.smetab)] <- subjid
 
     return(
       list(
@@ -305,24 +313,34 @@ filterCOMETSinput <- function(readData,where=NULL) {
 		myrule <- myfilts[[i]]
                 if(length(grep("<=",myrule))>0) {
                         mysplit <- strsplit(myrule,"<=")[[1]]
-                        samplesToKeep <- c(samplesToKeep,
-                           which((readData$subjdata[,gsub(" ","",mysplit[1])]) <= gsub(" ","",mysplit[2]) ))
+			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
+                        myvar = gsub(" ","",mysplit[1])
+			samplesToKeep <- c(samplesToKeep,
+                           which(as.numeric(as.character(readData$subjdata[,myvar])) <= gsub(" ","",as.numeric(mysplit[2]))) )
                 } else if(length(grep(">=",myrule))>0) {
                         mysplit <- strsplit(myrule,">=")[[1]]
-                        samplesToKeep <- c(samplesToKeep,
-                           which((readData$subjdata[,gsub(" ","",mysplit[1])]) >= gsub(" ","",mysplit[2]) ))
+			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
+                        myvar = gsub(" ","",mysplit[1])
+			samplesToKeep <- c(samplesToKeep,
+                           which(as.numeric(as.character(readData$subjdata[,myvar])) >= gsub(" ","",as.numeric(mysplit[2]))) )
                 } else if(length(grep("<",myrule))>0) {
 			mysplit <- strsplit(myrule,"<")[[1]]
+			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
+			myvar = gsub(" ","",mysplit[1])
                		samplesToKeep <- c(samplesToKeep,
-                           which((readData$subjdata[,gsub(" ","",mysplit[1])]) < gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(as.character(readData$subjdata[,myvar])) < gsub(" ","",as.numeric(mysplit[2]))) )
         	} else if(length(grep(">",myfilts[i]))>0) {
 	        	mysplit <- strsplit(myrule,">")[[1]]
+			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
+			myvar = gsub(" ","",mysplit[1])
                         samplesToKeep <- c(samplesToKeep,
-                           which((readData$subjdata[,gsub(" ","",mysplit[1])]) > gsub(" ","",mysplit[2]) ))
+                           which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(gsub(" ","",mysplit[2]))) )
 		} else if (length(grep("=",myfilts[i]))>0) {
 			mysplit <- strsplit(myrule,"=")[[1]]
-                        samplesToKeep <- c(samplesToKeep,
-                           which((readData$subjdata[,gsub(" ","",mysplit[1])]) == gsub(" ","",mysplit[2]) ))
+			# myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
+                        myvar = gsub(" ","",mysplit[1])
+			samplesToKeep <- c(samplesToKeep,
+                           which(as.numeric(as.character(readData$subjdata[,myvar])) == gsub(" ","",as.numeric(mysplit[2]))) )
         	} else
                 stop("Make sure your 'where' filters contain logicals '>', '<', or '='")
         }
@@ -401,7 +419,9 @@ checkModelDesign <- function (modeldata=NULL) {
 		if(length(nonzeroc)>0) {
 			modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
 			warningmessage <- c(warningmessage,
-			                    paste0("Removed ",length(nonzeroc),"exposure(s):",paste(colnames(modeldata$gdta)[unique(nonzeroc)],
+			                    paste0("Removed ",length(nonzeroc),"exposure(s):",
+			#paste(colnames(modeldata$gdta)[unique(nonzeroc)],
+			paste(modeldata$dict_metabnames[colnames(modeldata$gdta)[unique(nonzeroc)]],
 			                                            collapse=","),
 			                           " because of zero-variance",collapse=""))
 
@@ -410,7 +430,9 @@ checkModelDesign <- function (modeldata=NULL) {
 		if(length(nonzeror)>0) {
 		  modeldata$rcovs <- modeldata$rcovs[-nonzeror]
 		  warningmessage <- c(warningmessage,
-		                      paste0("Removed ",length(nonzeror)," outcome(s): ",paste(colnames(modeldata$gdta)[unique(nonzeror)],
+		                      paste0("Removed ",length(nonzeror)," outcome(s): ",
+					#paste(colnames(modeldata$gdta)[unique(nonzeror)],
+					paste(modeldata$dict_metabnames[colnames(modeldata$gdta)[unique(nonzeror)]],
 		                                              collapse=","),
 		                             " because of zero-variance",collapse=""))
 		}
@@ -419,7 +441,9 @@ checkModelDesign <- function (modeldata=NULL) {
 		if(length(nonzeroa)>0) {
 		  modeldata$acovs <- modeldata$acovs[-nonzeroa]
 		  warningmessage <- c(warningmessage,
-		                      paste0("Removed ",length(nonzeroa),"adjustment(s):",paste(colnames(modeldata$gdta)[unique(nonzeroa)],
+		                      paste0("Removed ",length(nonzeroa),"adjustment(s):",
+					#paste(colnames(modeldata$gdta)[unique(nonzeroa)],
+					paste(modeldata$dict_metabnames[colnames(modeldata$gdta)[unique(nonzeroa)]],
 		                                              collapse=","),
 		                             " because of zero-variance",collapse=""))
 		}
@@ -722,6 +746,11 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
   # Add in metabolite information for outcome
   # look in metabolite metadata match by metabolite id
+  corrlong$outcomespec <- as.character(lapply(corrlong$outcomespec, function(x) {
+	myind <- which(names(metabdata$dict_metabnames)==x)
+	if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
+	return(x) }))
+
   corrlong <- dplyr::left_join(
     corrlong,
     dplyr::select(
@@ -738,6 +767,10 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
 
   # Add in metabolite information and exposure labels:
   # look in metabolite metadata
+  corrlong$exposurespec <- as.character(lapply(corrlong$exposurespec, function(x) {
+        myind <- which(names(metabdata$dict_metabnames)==x)
+        if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
+        return(x) }))
   corrlong <- dplyr::left_join(
     corrlong,
     dplyr::select(

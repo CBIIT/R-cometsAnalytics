@@ -2,7 +2,7 @@
 % Please edit documentation in R/internalFunctions.r
 \name{Harmonize}
 \alias{Harmonize}
-\title{Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)}
+\title{Harmonizes metabolites by looking up metabolites names from user input and finding the corresponding COMETS harmonized name.}
 \usage{
 Harmonize(dtalist)
 }
@@ -10,6 +10,6 @@ Harmonize(dtalist)
 \item{dtalist}{results of reading a CSV data sheet (with read_excel)}
 }
 \description{
-Fixes input CSV data (e.g. takes care of factors, and other data frame conversions)
+Harmonizes metabolites by looking up metabolites names from user input and finding the corresponding COMETS harmonized name.
 }
 \keyword{internal}

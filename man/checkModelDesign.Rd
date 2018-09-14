@@ -2,7 +2,8 @@
 % Please edit documentation in R/internalFunctions.r
 \name{checkModelDesign}
 \alias{checkModelDesign}
-\title{Preprocess design matrix for zero variance, linear combinations, and dummies}
+\title{Ensures that models will run without errors.  Preprocesses design matrix for 
+zero variance, linear combinations, and dummies.}
 \usage{
 checkModelDesign(modeldata = NULL)
 }
@@ -13,6 +14,7 @@ checkModelDesign(modeldata = NULL)
 modeldata after checks are performed
 }
 \description{
-Preprocess design matrix for zero variance, linear combinations, and dummies
+Ensures that models will run without errors.  Preprocesses design matrix for 
+zero variance, linear combinations, and dummies.
 }
 \keyword{internal}
