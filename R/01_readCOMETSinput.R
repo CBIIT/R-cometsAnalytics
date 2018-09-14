@@ -22,8 +22,14 @@ readCOMETSinput <- function(csvfilePath) {
   print("Metabolites sheet is read in")
   #subject metabolite data
   dta.smetab <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites")))
+    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",skip=1,col_names=F)))
   print("SubjectMetabolites sheet is read in")
+
+  # Read in the first row (column names) of subject metabolite data (this is now the dictionary of metabolite names)
+  dict_metabnames <- 
+	tolower(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",col_names=F,n_max=1)))
+  names(dict_metabnames) <- colnames(dta.smetab)
+ 
   #subject data
   dta.sdata <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
@@ -50,7 +56,8 @@ readCOMETSinput <- function(csvfilePath) {
     dta.smetab = dta.smetab,
     dta.sdata = dta.sdata,
     dta.vmap = dta.vmap,
-    dta.models = dta.models
+    dta.models = dta.models,
+    dict_metabnames = dict_metabnames
   )
   integritymessage = ckintegrity$outmessage
   dta.metab = ckintegrity$dta.metab
@@ -87,6 +94,7 @@ readCOMETSinput <- function(csvfilePath) {
       # id used for metabolite names
       metab = dta.metab,
       # metabolite meta data
+      dict_metabnames = dict_metabnames,
       mods = dta.models,
       # model specification information
       integritymessage = integritymessage,
@@ -105,6 +113,8 @@ readCOMETSinput <- function(csvfilePath) {
 
     # keep only columns with non-missing values
     mymets = dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
+    # convert the names to indexes from dictionary:
+    mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
     mymets = mymets[mymets %in% names(havedata[havedata == FALSE])]
 
     if (length(mymets) > 0) {
@@ -138,19 +148,17 @@ readCOMETSinput <- function(csvfilePath) {
         temp = which(colnames(dtalist$subjdata) == x)
         if (length(temp) == 0) {
           return(NA)
-        }
-        else
+        } else
           return(length(which(
             dtalist$subjdata[[x]] == min(dtalist$subjdata[[x]], na.rm = TRUE)
           )))
       }))
       dtalist$transformation = transformation
-      dtalist$metab$var[dtalist$metab[, dtalist$metabId] %in% mymets] =
+      dtalist$metab$var[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] =
         log2metvar
-      dtalist$metab$num.min[dtalist$metab[, dtalist$metabId] %in% mymets] =
+      dtalist$metab$num.min[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] =
         num.min
-    }
-    else {
+    } else {
       # if all subject metabolite data is missing
       dtalist$transformation = NA
       dtalist$metab$var = NA
