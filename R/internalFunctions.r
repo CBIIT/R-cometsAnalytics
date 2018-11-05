@@ -637,14 +637,18 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     # calculate unadjusted spearman correlation matrix
     corrhm <- Hmisc::rcorr(as.matrix(data), type = "spearman")
 
-    corr <-
-      data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs])
-
-    n <-
-      data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs])
+    # Need to transpose pval and corrhm if there's only one row bc data.frame will switch the rows
+    # and columns when there's only one row. 
+    if(length(newmodeldata$rcovs)==1) {
+	corr <- t(data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs]))
+	n<-t(data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs]))
+    } else {
+    	corr <- data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs])
+        n <- data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs])
+    }
     #    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
     # Calculate p-values by hand to ensure that enough precision is printed:
-    ttval <- sqrt(n--2) * corr / sqrt(1 - corr ** 2)
+    	ttval <- sqrt(n--2) * corr / sqrt(1 - corr ** 2)
     # From this t-statistic, loop through and calculate p-values
     pval <- ttval
     for (i in 1:length(newmodeldata$ccovs)) {
@@ -660,9 +664,11 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     # Fix rownames when only one outcome is considered:
     if (length(col.rcovar) == 1) {
       rownames(corr) <- newmodeldata$rcovs
+      rownames(pval) <- newmodeldata$rcovs
     }
     if (length(col.ccovar) == 1) {
-      names(corr) <- newmodeldata$ccovs
+      colnames(corr) <- newmodeldata$ccovs
+      colnames(pval) <- newmodeldata$ccovs
     }
     # no longer needed
     #colnames(n) <- colnames(corrhm$n)[-(1:length(col.rcovar))]
@@ -670,10 +676,10 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
 
 
     # If there are more than one exposure, then need to transpose - not sure why???
-    if (length(col.ccovar) > 1 && length(col.rcovar) == 1) {
-      corr = as.data.frame(t(corr))
-      pval = as.data.frame(t(pval))
-    }
+#    if (length(col.ccovar) > 1 && length(col.rcovar) == 1) {
+#      corr = as.data.frame(t(corr))
+#      pval = as.data.frame(t(pval))
+#    }
 
   }  else {
     # calculate partial correlation matrix
@@ -719,8 +725,9 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   # create long data with pairwise correlations  ----------------------------------------------------
   mycols <- 1:length(col.ccovar)
   corr.togather <- cbind(corr, outcomespec = rownames(corr))
+  if(class(corr.togather)=="matrix") {corr.togather<-as.data.frame(corr.togather)}
   corrlong <-
-    fixData(
+    suppressWarnings(fixData(
       data.frame(
         cohort = cohort,
         spec = modeldata$modelspec,
@@ -741,7 +748,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
         )
       )
     ) %>%
-    dplyr::select(-exposuren,-exposurep)
+    dplyr::select(-exposuren,-exposurep))
 
   # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
   # Add in metabolite information for outcome
