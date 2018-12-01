@@ -41,12 +41,12 @@ exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
 
 To plot some the distribution of variances for each metabolite:
-```{r}
+```{r, eval=F}
 COMETS::plotVar(exmetabdata,titlesize=12)
 ```
 
 To plot the distribution of minimum/missing values:
-```{r}
+```{r, eval=F}
 COMETS::plotMinvalues(exmetabdata,titlesize=12)
 ```
 
@@ -92,12 +92,12 @@ To display the hierarchical clustering of the resulting correlation matrix, use 
 ```{r}
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
-COMETS::showHClust(excorrdata)
+# COMETS::showHClust(excorrdata)
 ```
 
 Results can be written to an output CSV file with the following command:
 
-``{r}
+``{r eval=F}
 COMETS::OutputCSVResults("Model1",excorrdata,cohort="")
 ```
 

@@ -4,8 +4,8 @@
 \alias{showHeatmap}
 \title{Show interactive heatmap using plot_ly}
 \usage{
-showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700, plotwid = 800,
-  colscale = "RdYlBu")
+showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700,
+  plotwid = 800, colscale = "RdYlBu")
 }
 \arguments{
 \item{ccorrmat}{correlation matrix (output of runCorr())}
