@@ -417,38 +417,53 @@ checkModelDesign <- function (modeldata=NULL) {
 		print("No factors found,  only performing near zero variance check for all covariates.")
 		nonzeroc <- caret::nearZeroVar(modeldata$gdta[,modeldata$ccovs],freqCut = 95/5)
 		if(length(nonzeroc)>0) {
-			modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
+			#modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
 			warningmessage <- c(warningmessage,
 			                    paste0("Removed ",length(nonzeroc),"exposure(s):",
 			#paste(colnames(modeldata$gdta)[unique(nonzeroc)],
-			paste(modeldata$dict_metabnames[colnames(modeldata$gdta)[unique(nonzeroc)]],
+			paste(modeldata$dict_metabnames[colnames(modeldata$gdta[,modeldata$ccovs])[unique(nonzeroc)]],
 			                                            collapse=","),
 			                           " because of zero-variance",collapse=""))
 
+			temp <- modeldata$ccovs[nonzeroc]
+			modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
+			nonzeroc <- temp
 		}
 		nonzeror <- caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
 		if(length(nonzeror)>0) {
-		  modeldata$rcovs <- modeldata$rcovs[-nonzeror]
+		  #modeldata$rcovs <- modeldata$rcovs[-nonzeror]
 		  warningmessage <- c(warningmessage,
 		                      paste0("Removed ",length(nonzeror)," outcome(s): ",
 					#paste(colnames(modeldata$gdta)[unique(nonzeror)],
-					paste(modeldata$dict_metabnames[colnames(modeldata$gdta)[unique(nonzeror)]],
+			paste(modeldata$dict_metabnames[colnames(modeldata$gdta[,modeldata$rcovs])[unique(nonzeror)]],
 		                                              collapse=","),
 		                             " because of zero-variance",collapse=""))
+		  temp <- modeldata$rcovs[nonzeror]
+		  modeldata$rcovs <- modeldata$rcovs[-nonzeror]
+		  nonzeror <- temp
 		}
 		if (length(modeldata$acovs)>0){
 		nonzeroa <- caret::nearZeroVar(modeldata$gdta[,modeldata$acovs],freqCut = 95/5)
 		if(length(nonzeroa)>0) {
-		  modeldata$acovs <- modeldata$acovs[-nonzeroa]
+		  # modeldata$acovs <- modeldata$acovs[-nonzeroa]
 		  warningmessage <- c(warningmessage,
 		                      paste0("Removed ",length(nonzeroa),"adjustment(s):",
 					#paste(colnames(modeldata$gdta)[unique(nonzeroa)],
-					paste(modeldata$dict_metabnames[colnames(modeldata$gdta)[unique(nonzeroa)]],
+					paste(modeldata$dict_metabnames[colnames(modeldata$gdta[,modeldata$acovs])[unique(nonzeroa)]],
 		                                              collapse=","),
 		                             " because of zero-variance",collapse=""))
+		  temp <- modeldata$acovs[nonzeroa]
+		  modeldata$acovs <- modeldata$acovs[-nonzeroa]
+		  nonzeroa <- temp
 		}
 		if (length(unique(c(nonzeroa,nonzeroc,nonzeror)))>0){
-		  modeldata$gdta <- modeldata$gdta[,-unique(c(nonzeroa,nonzeroc,nonzeror))]
+		  # Get indices before modifying gdta.  They need to be converted to names above or else
+		  # the wrong indices are getting removed (because the nearZeroVar function returns indices
+		  # based on input, and the input is not the entire gdta data frame)
+		  myind <- as.numeric(lapply(unique(c(nonzeroa,nonzeroc,nonzeror)), function(x) {
+			which(colnames(modeldata$gdta)==x)}))
+		  #modeldata$gdta <- modeldata$gdta[,-unique(c(nonzeroa,nonzeroc,nonzeror))]
+		  modeldata$gdta <- modeldata$gdta[,-myind]
 		}
 		}
 
@@ -611,7 +626,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   }
 
   newmodeldata <- designcheck$modeldata
-  print(designcheck$warningmessage)
+  #print(designcheck$warningmessage)
   if (length(designcheck$warningmessage) > 0) {
     print(designcheck$warningmessage)
   }
