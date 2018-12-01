@@ -4,7 +4,8 @@
 \alias{plotMinvalues}
 \title{Plot the distribution of the number of missing values for each metabolite}
 \usage{
-plotMinvalues(cometsdata, title = "Distribution of the Number/Missing Values",
+plotMinvalues(cometsdata,
+  title = "Distribution of the Number/Missing Values",
   xlabel = "Number of minimum/missing values", ylabel = "Frequency",
   xylabelsize = 12, titlesize = 16)
 }
