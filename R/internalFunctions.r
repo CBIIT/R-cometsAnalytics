@@ -700,7 +700,6 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     # calculate partial correlation matrix
     print("running adjusted")
 
-
     # Loop through and calculate cor, n, and p-values
     pval <- corr <- n <- matrix(nrow = length(newmodeldata$rcovs),
              ncol = length(newmodeldata$ccovs))
@@ -783,6 +782,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     ),
     by = c("outcomespec" = metabdata$metabId)
   ) %>%
+    dplyr::mutate(outcome_uid = ifelse(!is.na(outcome_uid), outcome_uid, outcomespec)) %>%
     dplyr::mutate(outcome = ifelse(!is.na(outmetname), outmetname, outcomespec)) %>%
     dplyr::select(-outmetname)
 
@@ -803,7 +803,9 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     ),
     by = c("exposurespec" = metabdata$metabId)
   ) %>%
-    dplyr::mutate(exposure = ifelse(!is.na(expmetname), expmetname, modeldata$ccovs)) %>%
+    #dplyr::mutate(exposure = ifelse(!is.na(expmetname), expmetname, modeldata$ccovs)) %>%
+    dplyr::mutate(exposure = ifelse(!is.na(expmetname), expmetname, exposurespec)) %>%
+    dplyr::mutate(exposure_uid = ifelse(!is.na(exposure_uid), exposure_uid, exposurespec)) %>%
     dplyr::select(-expmetname)
 
   # patch in variable labels for better display and cohortvariables------------------------------------------
@@ -821,59 +823,65 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
 
   # get good labels for the display of outcome and exposure
   if (modeldata$modelspec == "Interactive") {
-    # fill in outcome vars from varmap
-    corrlong <-
-      dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "cohortvariable")) %>%
-      dplyr::mutate(
-        outcome_uid = ifelse(!is.na(varreference), varreference, outcomespec),
-        outcome = ifelse(
-          !is.na(outcome),
-          outcome,
-          ifelse(!is.na(vardefinition), vardefinition, outcomespec)
-        )
-      ) %>%
-      dplyr::select(-vardefinition, -varreference)
+    # fill in outcome vars from varmap if not a metabolite:
+    if(length(suppressWarnings(grep(corrlong$outcomespec,vmap$cohortvariable)) != 0)) {
+    	corrlong <-
+    	  dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "cohortvariable")) %>%
+    	  dplyr::mutate(
+    	    outcome_uid = ifelse(!is.na(varreference), varreference, outcomespec),
+    	    outcome = ifelse(
+    	      !is.na(outcome),
+    	      outcome,
+    	      ifelse(!is.na(vardefinition), vardefinition, outcomespec)
+    	    )
+    	  ) %>%
+    	  dplyr::select(-vardefinition, -varreference)
+    }
 
-
-    # fill in exposure vars from varmap
-    corrlong <-
-      dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "cohortvariable")) %>%
-      dplyr::mutate(
-        exposure_uid = ifelse(!is.na(varreference), varreference, exposurespec),
-        exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec)
-      ) %>%
-      dplyr::select(-vardefinition, -varreference)
+    # fill in exposure vars from varmap if not a metabolite:
+    if(length(suppressWarnings(grep(corrlong$exposurespec,vmap$cohortvariable)) != 0)) {
+    	corrlong <-
+    	  dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "cohortvariable")) %>%
+    	  dplyr::mutate(
+    	    exposure_uid = ifelse(!is.na(varreference), varreference, exposurespec),
+    	    exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec)
+    	  ) %>%
+    	  dplyr::select(-vardefinition, -varreference)
+       }
   }
   else if (modeldata$modelspec == "Batch") {
-    # fill in outcome vars from varmap
-    corrlong <-
-      dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "varreference")) %>%
-      dplyr::mutate(
-        outcome_uid = ifelse(is.na(outcome_uid), outcomespec, outcome_uid),
-        outcome = ifelse(
-          !is.na(outcome),
-          outcome,
-          ifelse(!is.na(vardefinition), vardefinition, outcomespec)
-        ),
-        outcomespec = ifelse(!is.na(cohortvariable), cohortvariable, outcomespec)
-      ) %>%
-      dplyr::select(-vardefinition, -cohortvariable)
+    # fill in outcome vars from varmap if not a metabolite
+    if(length(suppressWarnings(grep(corrlong$outcomespec,vmap$cohortvariable)) != 0)) {
+    	corrlong <-
+    	  dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "varreference")) %>%
+    	  dplyr::mutate(
+    	    outcome_uid = ifelse(is.na(outcome_uid), outcomespec, outcome_uid),
+    	    outcome = ifelse(
+    	      !is.na(outcome),
+    	      outcome,
+    	      ifelse(!is.na(vardefinition), vardefinition, outcomespec)
+    	    ),
+    	    outcomespec = ifelse(!is.na(cohortvariable), cohortvariable, outcomespec)
+    	  ) %>%
+    	  dplyr::select(-vardefinition, -cohortvariable)
+    }
 
-
-    # fill in exposure vars from varmap
-    corrlong <-
-      dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "varreference")) %>%
-      dplyr::mutate(
-        exposure_uid = exposurespec,
-        exposure = ifelse(
-          !is.na(exposure),
-          exposure,
-          ifelse(!is.na(vardefinition), vardefinition, exposurespec)
-        ),
-        exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec),
-        exposurespec = ifelse(!is.na(cohortvariable), cohortvariable, exposurespec)
-      ) %>%
-      dplyr::select(-vardefinition, -cohortvariable)
+    # fill in exposure vars from varmap if not a metabolite:
+    if(length(suppressWarnings(grep(corrlong$exposurespec,vmap$cohortvariable)) != 0)) {
+    	corrlong <-
+    	  dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "varreference")) %>%
+    	  dplyr::mutate(
+    	    exposure_uid = exposurespec,
+    	    exposure = ifelse(
+    	      !is.na(exposure),
+    	      exposure,
+    	      ifelse(!is.na(vardefinition), vardefinition, exposurespec)
+    	    ),
+    	    exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec),
+    	    exposurespec = ifelse(!is.na(cohortvariable), cohortvariable, exposurespec)
+    	  ) %>%
+    	  dplyr::select(-vardefinition, -cohortvariable)
+   }
   }
 
   # Stop the clock
