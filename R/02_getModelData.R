@@ -77,7 +77,7 @@ if (modelspec == "Interactive") {
   
 #  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
   if(any(is.na(match(allvars,subjmetab)))) {
-	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+	stop("HICheck that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
 
   # rename the variables (Assumed to be 'All metabolites' by default)
