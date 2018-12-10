@@ -809,7 +809,8 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     dplyr::select(-expmetname)
 
   # Add in metabolite info for adjusted variables
-  	corrlong$adjspec <- as.character(lapply(corrlong$adjspec, function(x) {
+  	corrlong$adjvars <- corrlong$adjspec <- 
+	      as.character(lapply(corrlong$adjspec, function(x) {
   	      myind <- which(names(metabdata$dict_metabnames)==x)
   	      if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
   	      return(x) }))
@@ -823,9 +824,9 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   	  ),
   	  by = c("adjspec" = metabdata$metabId)
   	) %>%
-  	  dplyr::mutate(adj = ifelse(!is.na(adjname), adjname, adjspec)) %>%
-  	  dplyr::mutate(adj_uid = ifelse(!is.na(adj_uid), adj_uid, adjspec)) %>%
-  	  dplyr::select(-adjname)
+  	  dplyr::mutate(adj = ifelse(!is.na(adjname), adjname, adjvars)) %>%
+  	  dplyr::mutate(adj_uid = ifelse(!is.na(adj_uid), adj_uid, adjvars)) %>%
+  	  dplyr::select(-adjname) 
 
   # patch in variable labels for better display and cohortvariables------------------------------------------
   # look in varmap
