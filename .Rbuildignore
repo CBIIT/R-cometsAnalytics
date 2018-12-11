@@ -1,3 +1,5 @@
+^Meta$
+^doc$
 ^CometsAnalyticsPackage\.Rproj$
 ^\.travis\.yml$
 ^\.appveyor\.yml$

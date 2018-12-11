@@ -136,18 +136,19 @@ showHeatmap <- function (ccorrmat,
   exmetabdata=corr=exposure=metabolite_name=c()
 
   # order the rows according to sort by
-  if (rowsortby == "metasc") {exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
+  if (rowsortby == "metasc") {
+	exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 
-    ccorrmat$metabolite_name <- suppressWarnings(
-      factor(ccorrmat$metabolite_name, levels =
-               ccorrmat$metabolite_name[rev(order(unlist(ccorrmat["metabolite_name"])))]))
+    ccorrmat$exposurespec <- suppressWarnings(
+      factor(ccorrmat$exposurespec, levels =
+               unique(ccorrmat$exposurespec[rev(order(unlist(ccorrmat["exposurespec"])))])))
   } else {
-    ccorrmat$metabolite_name <- suppressWarnings(
-      factor(ccorrmat$metabolite_name, levels = ccorrmat$metabolite_name[order(unlist(ccorrmat[rowsortby]))]))
+    ccorrmat$exposurespec <- suppressWarnings(
+      factor(ccorrmat$exposurespec, levels = unique(ccorrmat$exposurespec[order(unlist(ccorrmat[rowsortby]))])))
   }
 
   # stack the correlations together
-  ccorrmat <- ccorrmat[order(ccorrmat$metabolite_name),]
+  ccorrmat <- ccorrmat[order(ccorrmat$exposurespec),]
   # Number of columns identified by suffix of .n
 
   # plotly will not plot if there is only one row (so quick fix is to duplicate data)
@@ -211,7 +212,7 @@ showHClust <- function (ccorrmat,
                         colscale = "RdYlBu") {
  outcome=metabolite_name=exposure=corr=outcomespec=c()
   excorr <-
-    ccorrmat %>% dplyr::select(outcomespec, exposure, corr) %>% tidyr::spread(exposure, corr)
+    ccorrmat %>% dplyr::select(outcome, exposure, corr) %>% tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
 
   ncols <- ncol(excorr)

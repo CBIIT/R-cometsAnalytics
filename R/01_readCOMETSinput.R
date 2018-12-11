@@ -214,8 +214,20 @@ runDescrip<- function(readData){
         mutate(proportion = n / sum(n))
   }
 
-  sumcnt <-as.data.frame(psych::describe(readData$subjdata,quant = c(.05,.25,.5,.75,.95)))
+  sumcnt <-as.data.frame(psych::describe(readData$subjdata,
+	quant = c(.05,.25,.5,.75,.95)))
   sumcnt$vars<-rownames(sumcnt)
+
+  # Retrieve the original names for metabolites
+  newvars <- data.frame(vars=as.character(names(modeldata$dict_metabname)),
+		new=as.character(modeldata$dict_metabname),stringsAsFactors = FALSE)
+  sumcnt <- suppressWarnings(dplyr::left_join(sumcnt, newvars,by=c("vars","vars"))) %>% 
+	dplyr::mutate(vars = ifelse(!is.na(new), new, vars)) %>%
+	dplyr::select(-new)
+  colnames(newvars)[which(colnames(newvars)=="vars")]="variable"
+  sumcat <- suppressWarnings(dplyr::left_join(as.data.frame(sumcat), newvars,by=c("variable","variable"))) %>%
+        dplyr::mutate(variable = ifelse(!is.na(new), new, variable)) %>%
+        dplyr::select(-new)
 
   return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
 }

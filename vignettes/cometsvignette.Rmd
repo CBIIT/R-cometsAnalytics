@@ -1,6 +1,6 @@
 ---
-title: "Comets Analytics: vignette"
-author: "Ewy Mathe, Ella Temprosa"
+title: "Running COMETS Analytics locally"
+author: "Ewy Mathé, Ella Temprosa"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -11,12 +11,10 @@ vignette: >
 
 ## Introduction
 
-COMETS Analytics support all cohort-specific analyses of the COMETS consortium.
-
-This collaborative work is done via the COMETS harmonization group activities. For more information, see the [COMETS website] (http://epi.grants.cancer.gov/comets/).
-
+COMETS Analytics support all cohort-specific analyses of the COMETS consortium. This collaborative work is done via the COMETS harmonization group activities. For more information, see the [COMETS website] (http://epi.grants.cancer.gov/comets/).
 
 ## Data Input Format
+
 The required input file shoudl be in excel format with the following 5 sheets: 
 
   1. Metabolites - from harmonized metabolites output
@@ -25,11 +23,12 @@ The required input file shoudl be in excel format with the following 5 sheets:
   4. VarMap - maps the variables needed to conduct the cohort specific analysis. Specify the name of variables under CohortVariable column. if the VarReference has the same name in the cohort, leave blank
   5. Models - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
 
-An example input file is available **HERE**.
+An example input file is available [**HERE**](https://www.comets-analytics.org/examples/cometsInput.xlsx).
 
 ## Analysis Workflow for correlation analysis
 
-###1. Load Data
+### 1. Load Data
+
 The first step of the analysis is to load in the data with the *getModelData()* function.  Input for this function is an Excel spreadsheet, per the description above.  
 
 ```{r}
@@ -41,7 +40,7 @@ exmetabdata <- COMETS::readCOMETSinput(csvfile)
 ```
 
 To plot some the distribution of variances for each metabolite:
-```{r, eval=F}
+```{r, eval=T}
 COMETS::plotVar(exmetabdata,titlesize=12)
 ```
 
@@ -50,7 +49,8 @@ To plot the distribution of minimum/missing values:
 COMETS::plotMinvalues(exmetabdata,titlesize=12)
 ```
 
-###2. Get Model Data
+### 2. Get Model Data
+
 There are 2 ways to specify your model, batch or interactive.
 In Batch mode, models are specified in your input file. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
 
@@ -63,7 +63,8 @@ In Interactive mode, models are specified as parameters. The model information n
 exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive",colvars=c("age","bmi_grp"),where=c("age>40","bmi_grp>2"))
 ```
 
-###3. Run Simple Correlation Analysis
+### 3. Run Simple Correlation Analysis
+
 The unstratified correlation analysis is run by calling the function *runCorr()*.  This function runs the model(s) that is(are) defined in the input data (Models tab).  
 
 ```{r}
@@ -82,7 +83,7 @@ COMETS::showCorr(excorrdata,nlines=3)
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
 ```{r in-text-fig}
-#COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
+COMETS::showHeatmap(excorrdata,plothgt=350,plotwid=400)
 ```
 \
 \
@@ -101,8 +102,8 @@ Results can be written to an output CSV file with the following command:
 COMETS::OutputCSVResults("Model1",excorrdata,cohort="")
 ```
 
+### 4. Run Stratified Correlation Analysis
 
-###4. Run Stratified Correlation Analysis
 The stratified correlation analysis is run by calling the function *stratCorr()*.  This function runs the model(s) that is(are) defined in the input data (Models tab) or in interactive mode. In this example, exmodeldata includes an object scovs that specifies the stratification variable. The function requires one stratification variable at a time.       
 
 ```{r}
@@ -111,14 +112,13 @@ The stratified correlation analysis is run by calling the function *stratCorr()*
   excorrdata2  <- COMETS::runCorr(exmodeldata2,exmetabdata,"DPP")
 ```
 
+### 5. Run Analysis on all models defined in the input Excell sheet
 
-###5. Run Analysis on all models defined in the input Excell sheet
 All models desginated in the input file can be run with one command, and individual output CSV files or correlation results will be written in the current directory by default. The function returns a list of resulting data frames.
 
 ```{r eval=F}
  allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
 
-```
-
+```{r}
 sessionInfo()
 ```
