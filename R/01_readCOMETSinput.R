@@ -219,8 +219,8 @@ runDescrip<- function(readData){
   sumcnt$vars<-rownames(sumcnt)
 
   # Retrieve the original names for metabolites
-  newvars <- data.frame(vars=as.character(names(modeldata$dict_metabname)),
-		new=as.character(modeldata$dict_metabname),stringsAsFactors = FALSE)
+  newvars <- data.frame(vars=as.character(names(readData$dict_metabname)),
+		new=as.character(readData$dict_metabname),stringsAsFactors = FALSE)
   sumcnt <- suppressWarnings(dplyr::left_join(sumcnt, newvars,by=c("vars","vars"))) %>% 
 	dplyr::mutate(vars = ifelse(!is.na(new), new, vars)) %>%
 	dplyr::select(-new)
