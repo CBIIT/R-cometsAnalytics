@@ -133,7 +133,7 @@ showHeatmap <- function (ccorrmat,
        plotwid=800,
        colscale="RdYlBu") {
 
-  exmetabdata=corr=exposure=metabolite_name=c()
+  exmetabdata=corr=exposure=outcome=metabolite_name=c()
 
   # order the rows according to sort by
   if (rowsortby == "metasc") {
@@ -156,13 +156,20 @@ showHeatmap <- function (ccorrmat,
         ccorrmat=rbind(ccorrmat,ccorrmat)
   }
 
-  ccorrmat %>%
-  plotly::plot_ly(z = signif(as.numeric(corr)),x = exposure, y = metabolite_name,
-          type = "heatmap",
-          colorscale=colscale,
-          colorbar = list(title = "Correlation")) %>%
-  plotly::layout(height=plothgt,
-         width=plotwid,
+#  ccorrmat %>%
+#  plotly::plot_ly(z = signif(as.numeric(corr)), x = exposure, 
+#	  y = metabolite_name,
+#          type = "heatmap",
+#          colorscale=colscale,
+#          colorbar = list(title = "Correlation")) %>%
+
+  plotly::plot_ly(z = data.matrix(signif(ccorrmat$corr,2)), x = ccorrmat$exposure,
+	   y = ccorrmat$outcome,
+	   type="heatmap", colorscale = colscale,
+	   colorbar = list(title = "Correlation"),
+	   width=plotwid,
+	   height=plothgt) %>%
+  plotly::layout(
          margin = list(l = 200),
          title = " ",      # layout's title: /r/reference/#layout-title
          xaxis = list(           # layout's xaxis is a named list.
@@ -190,7 +197,7 @@ showHeatmap <- function (ccorrmat,
 #' @description
 #' This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
 #'
-#' @param ccorrmat correlation matrix
+#' @param ccorrmat correlation matrix (output of runCorr())
 #' @param clust Show hierarchical clustering
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
 #'
@@ -211,8 +218,11 @@ showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
  outcome=metabolite_name=exposure=corr=outcomespec=c()
+# Note, using outcome spec, not outcome because muultiple outcomespec can map to 
+# the same outcome (which is the harmonized id)
   excorr <-
-    ccorrmat %>% dplyr::select(outcome, exposure, corr) %>% tidyr::spread(exposure, corr)
+    ccorrmat %>% dplyr::select(outcomespec, exposure, corr) %>% 
+	tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
 
   ncols <- ncol(excorr)
