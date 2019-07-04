@@ -13,7 +13,7 @@ To install R Comets-Analytics, simply type the following:
 devtools::install_github("CBIIT/R-cometsAnalytics")
 ```
 # Vignette
-[Click here](https://mathelab.github.io/R-cometsAnalytics/cometsvignette.html) to view a detailed vignette that outlines the basic steps of the software.
+[Click here](https://CBIIT.github.io/R-cometsAnalytics/cometsvignette.html) to view a detailed vignette that outlines the basic steps of the software.
 
 # Example Data
 We have provided an example input file for users to mimic when creating their own.  This data can be found in the folder inst/extdata.
