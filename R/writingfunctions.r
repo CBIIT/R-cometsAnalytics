@@ -9,6 +9,7 @@
 #' @return the filename of the CSV file with results named with cohort
 #'
 #' @examples
+#' \dontrun{
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
@@ -19,6 +20,7 @@
 #' OutputCSVResults(filename="corr",dataf=corrmatrix,cohort="DPP")
 #' # Get harmonization results
 #' OutputCSVResults(filename="harmonization",dataf=exmetabdata$metab,cohort="DPP")
+#' }
 #' @export
 
 
