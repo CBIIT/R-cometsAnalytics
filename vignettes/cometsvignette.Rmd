@@ -1,6 +1,6 @@
 ---
 title: "Running COMETS Analytics locally"
-author: "Ewy Mathé, Ella Temprosa"
+author: "Ewy Mathé"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
