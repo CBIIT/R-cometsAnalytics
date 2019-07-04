@@ -604,6 +604,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   cohortvariable = vardefinition = varreference = outcome = outcome_uid =
     exposure = exposure_uid = c()
   metabolite_name = expmetname = exposurespec = c()
+  adjname = adjvars = adj_uid = c()
 
   # column indices of row/outcome covariates
   col.rcovar <-

@@ -7,7 +7,7 @@
 showHClust(ccorrmat, clust = TRUE, colscale = "RdYlBu")
 }
 \arguments{
-\item{ccorrmat}{correlation matrix}
+\item{ccorrmat}{correlation matrix (output of runCorr())}
 
 \item{clust}{Show hierarchical clustering}
 
