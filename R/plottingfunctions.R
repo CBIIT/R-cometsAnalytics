@@ -229,7 +229,8 @@ showHClust <- function (ccorrmat,
   if(ncols <= 2)
         stop("Cannot run heatmap because there is only one exposure variable")
   d3heatmap::d3heatmap(excorr[, 2:ncols],
-            colors = colscale,
+            colors = scales::col_quantile(colscale,NULL,10),
+	    show_grid=FALSE,
             dendrogram = if (clust)
               "both"
             else

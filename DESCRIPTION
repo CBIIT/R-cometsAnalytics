@@ -30,7 +30,8 @@ Imports:
     data.table,
     ppcor,
     caret,
-    subselect
+    subselect,
+    scales
 Suggests:
     knitr
 VignetteBuilder: knitr

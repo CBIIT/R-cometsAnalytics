@@ -95,12 +95,12 @@ To display the hierarchical clustering of the resulting correlation matrix, use 
 ```{r}
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
 excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
-# COMETS::showHClust(excorrdata)
+COMETS::showHClust(excorrdata)
 ```
 
 Results can be written to an output CSV file with the following command:
 
-``{r eval=F}
+```{r eval=F}
 COMETS::OutputCSVResults("Model1",excorrdata,cohort="")
 ```
 
