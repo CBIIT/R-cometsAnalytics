@@ -1,0 +1,78 @@
+
+# Manual
+
+Some _significant_ applications are demonstrated in this chapter.
+
+## Registration and Account Set-up
+
+## Input File
+???This duplicative of the step by step, how do we deal with this???
+
+### Metabolites {#metabolites}
+
+### Subject Metabolites {#subjectmetabolites}
+(ref:subjdata)
+
+### Subject Data {#subjectdata}
+
+### Variable mapping {#varmap}
+![Input Varmap](static/Input_varmap.png)
+
+
+### Models {#models}
+![Input Models](static/Input_models.png)
+
+## Interactive mode
+
+### Metabolite Tagging
+```{r harmonize,fig.margin = TRUE,fig.cap="Output harmonization",echo=FALSE,out.width='100%',fig.align='center'}
+knitr::include_graphics('static/Output_heatmap1.PNG')
+knitr::include_graphics('static/Output_heatmap2.PNG')
+```
+## Batch Mode
+### Correlation example: batch mode _SMOKING STATIFIED_
+<span class='textcollightblue'> _Batch mode: Smoking stratified_</span>
+<div class ="marginnote">
+<span class='textcolblue'>**a. Batch as specified in the input file**</span> select this option to run the analysis in batch mode.
+</div>
+
+<div class ="marginnote">
+<span class='textcolorange'>**b. Choose Model**</span> select "Smoking stratified" from the dropdown menu.
+
+</div>
+
+<div class ="marginnote">
+<span class='textcolgreen'>**c. Run Model**</span> once you hit this button the selected model will be run. The results will be shown in the Correlation Results tab.
+</div>
+
+<div class ="marginnote">
+<span class='textcolgold'>**d. Correlation Results tab**</span> displays the results of the correlation analysis.
+</div>
+
+<div class ="marginnote">
+<span class='textcollightblue'>**e. Correlation analysis succesfull**</span> message will be displayed if the analysis was performed without any errors. If this massage is not shown please go to (insert hyperlink). 
+</div>
+
+<div class ="marginnote">
+<span class='textcollightgreen'>**f. Download results**</span> once you hit this button the results will be downloaded.
+</div>
+
+<div class ="marginnote">
+<span class='textcoldarkgreen'>**g. Strata **</span> The results of the correlation analysis will be shown for each of the specified strata. In this case there are two strata, 1 = smoking and 0 = non-smoking. Once results for strata are meta-analyzed, heterogeneity across strata will be tested using the Wald Test for Homogeneity.
+</div>
+
+```{r fig-main1, cache=TRUE, echo=FALSE, out.width='100%'}
+knitr::include_graphics('static/input_batch_correlation_smoking_example.png')
+```
+
+## Super Batch Mode
+In addition to running all the models specified in the models tab, the zip file created during super batch mode also includes descriptive statistics and a metabolite X metabolite correlations.
+
+### Descriptive statistics
+![Frequencies](static/output_summary1.png)
+![Summary statistics](static/output_summary2.png)
+
+
+### Metabolite correlations
+
+
