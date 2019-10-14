@@ -1,0 +1,24 @@
+### Create input file: Model specification
+ <span class='textintro'>Specify the Analytical Models you wish to Run </span>
+
+ `r margin_note("
+ <span class='texta'>**a. Models**</span> is a sheet in the input file that contains the models to be run on the cohort data.
+ <br>&nbsp;<br>
+ <span class='textb'>**b. MODEL** </span> contains the model number and the model name. The results files will be named according to the chosen model name.
+ <br>&nbsp;<br>
+ <span class='textc'>**c. OUTCOME**</span> specifies which variable(s) will be the dependent variable(s).
+ <br>&nbsp;<br>
+ <span class='textd'>**d. EXPOSURE**</span> specifies the independent variable of interest. The beta coefficient for this variable will be returned in the results 
+ <br>&nbsp;<br>
+ <span class='texte'>**e. ADJUSTMENT**</span> specifies the potential confounders to be included in the model (optional).
+ <br>&nbsp;<br>
+ <span class='texte'>**f. STRATIFICATION**</span> for stratified analyses only. Results will be returned for all strata within this variable (optional)
+  <br>&nbsp;<br>
+ <span class='texte'>**g. WHERE**</span> If the analysis is meant to be run on only a subset of the cohort, this column will contain the subset definition (e.g., “female==1” for an analysis stratified by hormone therapy use). (optional)
+ <br>&nbsp;<br>
+ <span class='texte'>**e.g.**</span> Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes while adjusting for smoking status (“smk_grp”), BMI (“bmi_grp”), race (“race_grp”), education (“educ_grp”), alcohol consumption (“alc_grp”), multivitamin use (“multivitamin”), hormonal status (“horm_curr”) and fasting status (“fasted”). This analysis will be stratified by gender using the internal COMETS variable “female”. 
+ ")`
+
+ ```{r fig-subjdata, cache=TRUE, echo=FALSE, out.width='60%'}
+ knitr::include_graphics('static/input_models.png')
+ ```

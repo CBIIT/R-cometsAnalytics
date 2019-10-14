@@ -1,0 +1,10 @@
+book_filename: "catutorial"
+language:
+  ui:
+    chapter_name: "Chapter "
+delete_merged_file: true
+output_dir: "docs"
+new_session: yes
+
+rmd_files: ["index.Rmd", "01-quickstart.Rmd","02-stepbystep.Rmd","03-manual.Rmd","04-faq.Rmd","05-references.Rmd"]
+#rmd_files: ["index.Rmd", "01-quickstart.Rmd","02-stepbystep.Rmd", "03-manual.Rmd"]
