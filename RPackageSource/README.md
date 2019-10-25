@@ -10,7 +10,7 @@
 To install R Comets-Analytics, simply type the following:
 
 ```
-devtools::install_github("CBIIT/RPackageSource/R-cometsAnalytics")
+devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource")
 ```
 # Vignette
 [Click here](https://CBIIT.github.io/R-cometsAnalytics/cometsvignette.html) to view a detailed vignette that outlines the basic steps of the software.
