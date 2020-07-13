@@ -40,7 +40,7 @@ build_script:
   - travis-tool.sh install_r htmltools httpuv evaluate
 
 test_script:
-  - travis-tool.sh runTests
+  - travis-tool.sh run_tests
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
