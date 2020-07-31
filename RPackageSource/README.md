@@ -1,4 +1,4 @@
-# [![Build Status](https://travis-ci.org/Mathelab/RaMP-DB.svg?branch=master)](https://travis-ci.org/Mathelab/RaMP-DB)
+# [![Build Status](https://travis-ci.org/Mathelab/R-cometsAnalytics.svg?branch=master)](https://travis-ci.org/Mathelab/R-cometsAnalytics)
 # [![Build status](https://ci.appveyor.com/api/projects/status/cg0md9vd8njancij?svg=true)](https://ci.appveyor.com/project/Mathelab/ramp-db)
 
 # R Comets-Analytics
