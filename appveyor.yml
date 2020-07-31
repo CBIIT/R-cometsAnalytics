@@ -8,8 +8,8 @@ init:
         Import-Module '..\appveyor-tool.ps1'
 install:
   ps: |
-        mv source ..
-        cd ..\source 
+        mv RPackageSource ..
+        cd ..\RPackageSource 
         Bootstrap
 # Adapt as necessary starting from here
 
