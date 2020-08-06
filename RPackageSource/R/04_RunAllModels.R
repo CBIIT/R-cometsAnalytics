@@ -16,20 +16,24 @@
 #' }
 #' @export
 
-runAllModels <- function(readData, cohort="", writeTofile=T) {
+runAllModels <- function(readData, cohort="", writeTofile=T,
+                  model="pcorr", family="gaussian", link="identity", ...) {
 
   mymodels <- readData$mods$model
 
   results <- list()
 
   for (i in mymodels) {
-        print(paste("Running",i))
+       print(paste("Running",i))
 	mymod <- getModelData(readData,modlabel=i)
-        mycorr <- runCorr(mymod,readData,cohort)
-	results[[i]] <- mycorr
-        if (writeTofile) {
-              OutputCSVResults(i,mycorr,cohort=cohort)
-        }
+       #mycorr <- runCorr(mymod,readData,cohort)
+       myobj   <- runModel(mymod, readData, cohort=cohort, model=model,
+                           family=family, link=link, ...)
+
+	results[[i]] <- myobj
+       if (writeTofile) {
+           OutputCSVResults(i,myobj,cohort=cohort)
+       }
   }
   return(results)
 }
