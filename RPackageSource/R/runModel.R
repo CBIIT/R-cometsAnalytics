@@ -1,21 +1,15 @@
 #' Main function for running a model
-#' @param modeldata
-#' @param metabdata
-#' @param cohort
-#' @param model
-#' @param family
-#' @param link
-#' @param ...
+#' @param modeldata list from function getModelData
+#' @param metabdata metabolite data list
+#' @param cohort cohort label (e.g DPP, NCI, Shanghai)
+#' @param model string specifiying the model, "pcorr" or "glm"
+#' @param family string for the family when model="glm"
+#' @param link string for the link function when model="glm". The default will be to use the canonical link.
+#' @param ... additional arguments for glm
 #'
 #' @return 
 runModel <- function(modeldata, metabdata, cohort="", 
                      model="pcorr", family="gaussian", link="", ...) {
-
-  # model    "pcorr" or "glm"
-  # family   String for the family to use
-  # link     String for the link function. The default will be to use
-  #          the canonical link.
-  # ...      Additional arguments
 
   model <- runModel.check.model(model)
   if (model == "pcorr") {
