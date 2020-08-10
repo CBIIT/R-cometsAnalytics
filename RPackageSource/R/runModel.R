@@ -1,4 +1,13 @@
-
+#' Main function for running a model
+#' @param modeldata
+#' @param metabdata
+#' @param cohort
+#' @param model
+#' @param family
+#' @param link
+#' @param ...
+#'
+#' @return 
 runModel <- function(modeldata, metabdata, cohort="", 
                      model="pcorr", family="gaussian", link="", ...) {
 
