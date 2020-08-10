@@ -7,7 +7,12 @@
 #' @param link string for the link function when model="glm". The default will be to use the canonical link.
 #' @param ... additional arguments for glm
 #'
-#' @return 
+#' @return data frame with each row representing the correlation for each combination of outcomes and exposures represented as specified in the
+#' model (*spec), label (*lab), and universal id (*_uid)
+#' with additional columns for n, pvalue, method of model specification (Interactive or Batch), universal id for outcomes (outcome_uid) and exposures (exposure_uid)
+#' name of the cohort, adjustment (adjvars) and stratification (stratavar,strata)  variables. Attribute of dataframe includes ptime for processing time of model
+#' run.
+#'
 runModel <- function(modeldata, metabdata, cohort="", 
                      model="pcorr", family="gaussian", link="", ...) {
 
