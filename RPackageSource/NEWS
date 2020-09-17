@@ -1,0 +1,11 @@
+CHANGES IN VERSION 1.5.0.0
+--------------------------
+
+NEW FEATURES
+
+    o Generalized linear models are now included for analyses. 
+
+BUG FIXES
+
+    o The t-statistic computation for unadjusted correlation analyses has been updated.
+
