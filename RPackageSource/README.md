@@ -1,5 +1,5 @@
 # [![Build Status](https://travis-ci.org/Mathelab/R-cometsAnalytics.svg?branch=master)](https://travis-ci.org/Mathelab/r-cometsanalytics)
-# [![Build status](https://ci.appveyor.com/api/projects/status/cg0md9vd8njancij?svg=true)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
+# [![Build status](https://ci.appveyor.com/api/projects/status/cg0md9vd8njancij?branch=wheelerb)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
 
 # R Comets-Analytics
 
