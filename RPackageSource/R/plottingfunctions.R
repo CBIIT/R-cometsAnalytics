@@ -192,18 +192,18 @@ showHeatmap <- function (ccorrmat,
 #---------------------------------------------------------
 # showHClust -----------------------------------------
 #---------------------------------------------------------
-#' Show interactive heatmap using d3heatmap with hierarchical clustering
+#' Show interactive heatmap using heatmaply_cor with hierarchical clustering
 #'
 #' @description
 #' This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
 #'
 #' @param ccorrmat correlation matrix (output of runCorr())
 #' @param clust Show hierarchical clustering
-#' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}
+#' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}
 #'
 #' @return a heatmap with outcomes as rows and exposures in columns.
 #'
-#' @references For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
+#' @references For colorscale reference: \code{\link[heatmaply]{RColorBrewer_colors}}
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
@@ -217,6 +217,9 @@ showHeatmap <- function (ccorrmat,
 showHClust <- function (ccorrmat,
                         clust = TRUE,
                         colscale = "RdYlBu") {
+
+ if (!length(colscale)) colscale <- "RdYlBu"  
+
  outcome=metabolite_name=exposure=corr=outcomespec=c()
 # Note, using outcome spec, not outcome because muultiple outcomespec can map to 
 # the same outcome (which is the harmonized id)
@@ -225,14 +228,35 @@ showHClust <- function (ccorrmat,
 	tidyr::spread(exposure, corr)
   rownames(excorr) <- excorr[, 1]
 
+
   ncols <- ncol(excorr)
+
   if(ncols <= 2)
         stop("Cannot run heatmap because there is only one exposure variable")
-  d3heatmap::d3heatmap(excorr[, 2:ncols],
-            colors = scales::col_quantile(colscale,NULL,10),
-	    show_grid=FALSE,
-            dendrogram = if (clust)
-              "both"
-            else
-              "none")
+  #d3heatmap::d3heatmap(excorr[, 2:ncols],
+  #          colors = scales::col_quantile(colscale,NULL,10),
+  #	    show_grid=FALSE,
+  #          dendrogram = if (clust)
+  #            "both"
+  #          else
+  #            "none")
+
+  # Get 10 colors
+  if (length(colscale) == 1) {
+    colors <- rev(eval(parse(text=paste(colscale, "(10)", sep=""))))
+  } else {
+    colors <- colscale
+  }
+
+  # For dendrogram
+  if (clust) {
+    dend <- "both"
+  } else {
+    dend <- "none"
+  }
+
+  heatmaply::heatmaply_cor(excorr[, 2:ncols],
+            colors=colors, show_grid=FALSE, dendrogram=dend)
+
+
 }
