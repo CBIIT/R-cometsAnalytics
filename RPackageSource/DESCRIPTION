@@ -22,7 +22,7 @@ Imports:
     psych,
     plotly,
     tidyr,
-    d3heatmap,
+    heatmaply,
     shiny,
     shinyFiles,
     Hmisc,
