@@ -255,7 +255,7 @@ showHClust <- function (ccorrmat,
     dend <- "none"
   }
 
-  heatmaply::heatmaply_cor(excorr[, 2:ncols],
+  heatmaply::heatmaply(excorr[, 2:ncols],
             colors=colors, show_grid=FALSE, dendrogram=dend)
 
 

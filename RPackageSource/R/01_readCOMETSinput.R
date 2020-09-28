@@ -38,10 +38,26 @@ readCOMETSinput <- function(csvfilePath) {
   dta.vmap <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
   print("VarMap sheet is read in")
+  
+  # Make sure columns are in lower case
+  dta.vmap$varreference   <- checkVariableNames(dta.vmap$varreference, "VarMap sheet, VARREFERENCE column") 
+  dta.vmap$cohortvariable <- checkVariableNames(dta.vmap$cohortvariable, "VarMap sheet, COHORTVARIABLE column")
+  dta.vmap$vartype        <- checkVariableNames(dta.vmap$vartype, "VarMap sheet, VARYTYPE column")
+
   #batch model specifications
   dta.models <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
   print("Models sheet is read in")
+
+  # Make sure columns are in lower case. The adjustment and stratification columns
+  #  can have missing values.
+  dta.models$outcomes       <- checkVariableNames(dta.models$outcomes, "Models sheet, OUTCOMES column") 
+  dta.models$exposure       <- checkVariableNames(dta.models$exposure, "Models sheet, EXPOSURE column") 
+  dta.models$adjustment     <- checkVariableNames(dta.models$adjustment, "Models sheet, ADJUSTMENT column", convertMissTo=NA, stopOnMissError=0) 
+  dta.models$stratification <- checkVariableNames(dta.models$stratification, "Models sheet, STRATIFICATION column", convertMissTo=NA, stopOnMissError=0) 
+  
+  # We need a different function for the WHERE column
+  dta.models$where <- normalizeWhere(dta.models$where) 
 
   # Go through the varmap VARTYPE column and convert categorical entries into factors
   myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical" & dta.vmap$varreference!="metabolite_id")]
@@ -59,6 +75,7 @@ readCOMETSinput <- function(csvfilePath) {
     dta.models = dta.models,
     dict_metabnames = dict_metabnames
   )
+
   integritymessage = ckintegrity$outmessage
   dta.metab = ckintegrity$dta.metab
   dta.smetab = ckintegrity$dta.smetab
@@ -106,17 +123,25 @@ readCOMETSinput <- function(csvfilePath) {
     # Harmonize metabolites
     dtalist <- Harmonize(dtalist)
 
+    # keep only columns with non-missing values
+    mymets = dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
+
+    # convert the names to indexes from dictionary:
+    mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
+
+    # Make sure the metabololites are numeric
+    cls <- sapply(dtalist$subjdata, class)
+    tmp <- (cls != "numeric") & (names(cls) %in% mymets)
+    tmp[is.na(tmp)] <- FALSE
+    if (any(tmp)) {
+      for (v in names(cls[tmp])) dtalist$subjdata[, v] <- as.numeric(dtalist$subjdata[, v])
+    }
+
     # check to see which columns have non-missing values
     havedata <-
       base::apply(dtalist$subjdata, 2, function(x)
         all(is.na(x)))
-
-    # keep only columns with non-missing values
-    mymets = dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
-    # convert the names to indexes from dictionary:
-    mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
     mymets = mymets[mymets %in% names(havedata[havedata == FALSE])]
-
     if (length(mymets) > 0) {
       # Determine whether data is already transformed:
       tst <- min(dtalist$subjdata[, c(mymets)], na.rm = T)
@@ -221,14 +246,73 @@ runDescrip<- function(readData){
   # Retrieve the original names for metabolites
   newvars <- data.frame(vars=as.character(names(readData$dict_metabname)),
 		new=as.character(readData$dict_metabname),stringsAsFactors = FALSE)
-  sumcnt <- suppressWarnings(dplyr::left_join(sumcnt, newvars,by=c("vars","vars"))) %>% 
+  new     <- newvars$new
+  vars    <- newvars$vars
+  sumcnt  <- suppressWarnings(dplyr::left_join(sumcnt, newvars,by=unique(c("vars","vars")))) %>% 
 	dplyr::mutate(vars = ifelse(!is.na(new), new, vars)) %>%
 	dplyr::select(-new)
   colnames(newvars)[which(colnames(newvars)=="vars")]="variable"
-  sumcat <- suppressWarnings(dplyr::left_join(as.data.frame(sumcat), newvars,by=c("variable","variable"))) %>%
+  sumcat <- suppressWarnings(dplyr::left_join(as.data.frame(sumcat), newvars,by=unique(c("variable","variable")))) %>%
         dplyr::mutate(variable = ifelse(!is.na(new), new, variable)) %>%
         dplyr::select(-new)
 
   return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
 }
 
+getNewWhereStr <- function(whereStr, operator) {
+
+  ret <- ""
+  vec <- strsplit(whereStr, operator, fixed=TRUE)[[1]]
+  len <- length(vec)
+  if (len) {
+    var <- tolower(trimws(vec[1]))
+    
+    # Remainder of where clause
+    if (len > 1) {
+      rem <- paste(vec[-1], collapse="", sep="")
+    } else {
+      rem <- ""
+    }
+    ret <- paste(var, operator, rem, sep="") 
+  }
+  
+  ret
+
+} # END: getNewWhereStr
+
+normalizeWhere <- function(vec) {
+
+  # vec : character vector of where conditions
+  
+  ret  <- vec
+  tmp  <- is.na(vec)
+  if (any(tmp)) vec[tmp] <- ""
+  rows <- 1:length(vec)
+  tmp1 <- grepl("<", vec, fixed=TRUE)
+  tmp2 <- grepl(">", vec, fixed=TRUE)
+  tmp3 <- grepl("==", vec, fixed=TRUE)
+  if (any(tmp1)) {
+    r2 <- rows[tmp1]
+    for (i in 1:length(r2)) {
+      row      <- r2[i]
+      ret[row] <- getNewWhereStr(vec[row], "<") 
+    }
+  } 
+  if (any(tmp2)) {
+    r2 <- rows[tmp2]
+    for (i in 1:length(r2)) {
+      row      <- r2[i]
+      ret[row] <- getNewWhereStr(vec[row], ">") 
+    }
+  } 
+  if (any(tmp3)) {
+    r2 <- rows[tmp3]
+    for (i in 1:length(r2)) {
+      row      <- r2[i]
+      ret[row] <- getNewWhereStr(vec[row], "==") 
+    }
+  } 
+
+  ret
+
+} # END: normalizeWhere
