@@ -5,7 +5,7 @@
 
 [Comets-Analytics](http://comets-analytics.org/) is a software that supports consortia-level analyses of metabolomics data collected in epidemiological studies.  This R package contains all the functions that are used by Comets-Analytics, but can also be run independently.  
 
-# Installatio
+# Installation
 
 To install R Comets-Analytics, simply type the following:
 
