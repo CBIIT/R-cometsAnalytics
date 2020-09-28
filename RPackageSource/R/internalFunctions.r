@@ -215,7 +215,6 @@ Harmonize<-function(dtalist){
   # rename metid to be the same as metabid
   colnames(mastermetid)[which(colnames(mastermetid)=="metid")]=dtalist$metabId
 
-
   # join by metabolite_id only keep those with a match
   harmlistg<-dplyr::inner_join(dtalist$metab,mastermetid,by=c(dtalist$metabId),suffix=c(".cohort",".comets"))
 
@@ -256,11 +255,25 @@ Harmonize<-function(dtalist){
     # need to rename to hmdb_id so that it can be left_join match
     names(finharmlistg)<-gsub(cohorthmdb,"hmdb_id",names(finharmlistg))
 
+    ###########################################################  
+    # The following code fixes a bug in the code below it. 
+    #   The select statement was throwing an error, 
+    #   and the chemical_id column was sometimes numeric.
+    # bring in the masterhmdb file to find further matches
+    foundhmdb <- finharmlistg %>% filter(is.na(uid_01)) # only find match for unmatched metabolites
+    foundhmdb <- foundhmdb[, 1:ncol(dtalist$metab), drop=FALSE] # keep only original columns before match
+    foundhmdb <- foundhmdb %>% left_join(masterhmdb,suffix=c(".cohort",".comets"))
+    foundhmdb[, "chemical_id"] <- as.character(foundhmdb[, "chemical_id"])
+
+if (0) {
     # bring in the masterhmdb file to find further matches
     foundhmdb<-finharmlistg %>%
       filter(is.na(uid_01)) %>% # only find match for unmatched metabolites
       select(1:ncol(dtalist$metab)) %>%  # keep only original columns before match
       left_join(masterhmdb,suffix=c(".cohort",".comets"))
+}
+##############################################################
+
 
     # rename back so we can combine
     names(foundhmdb)<-gsub("hmdb_id",cohorthmdb,names(foundhmdb))
@@ -354,6 +367,8 @@ return(readData)
 }
 
 
+
+
 #' Ensures that models will run without errors.  Preprocesses design matrix for 
 #' zero variance, linear combinations, and dummies.
 #' @keywords internal
@@ -404,14 +419,15 @@ checkModelDesign <- function (modeldata=NULL) {
   	loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
 
   	# check if any of the exposure and adjustments are factors
-  	ckfactor<-sapply(dplyr::select(modeldata$gdta,dplyr::one_of(modeldata$rcovs,modeldata$acovs)),class)
+  	ckfactor<-sapply(dplyr::select(modeldata$gdta,dplyr::one_of(modeldata$ccovs,modeldata$acovs)),class)
   	hasfactor<-NULL
   	if (length(ckfactor[ckfactor=="factor"])==0){
   	  hasfactor<-FALSE
   	} else {
   	  hasfactor<-TRUE
   	}
-
+       ckfactor.vars <- c(modeldata$ccovs,modeldata$acovs) 
+       
 	# If all vs all, only check variance is zero for covars and allvars
 	if(modeldata$allvsall | hasfactor==FALSE) {
 		print("No factors found,  only performing near zero variance check for all covariates.")
@@ -476,14 +492,17 @@ checkModelDesign <- function (modeldata=NULL) {
 	# Create dummy variables
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",
 		paste0("`",colnames(modeldata$gdta)[c(col.ccovar, col.adj)],"`",collapse = " + "))
+
 	dummies <- caret::dummyVars(myformula, data = modeldata$gdta,fullRank = TRUE)
 	mydummies <- stats::predict(dummies, newdata = modeldata$gdta)
+
 	# Rename variables if they are returned in mydummies
 	tempccovs <- as.character(unlist(sapply(modeldata$ccovs,
 		function(x) grep(x,colnames(mydummies),value=TRUE,fixed=TRUE))))
 	if(length(tempccovs)>0) {
 		modeldata$ccovs <- tempccovs
 	}
+
 	# Check if adjusted covariates are present or else grep will return "" and will
 	# always return something
 	if(!is.null(modeldata$acovs)) {
@@ -577,6 +596,7 @@ checkModelDesign <- function (modeldata=NULL) {
 	}
      #print(warningmessage)
      #print(errormessage)
+
      return(list(warningmessage=warningmessage,errormessage=errormessage,modeldata=modeldata))
      }
 }
@@ -645,7 +665,6 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     match(newmodeldata[["rcovs"]], colnames(newmodeldata[["gdta"]]))
 
 
-
   if (length(col.adj) == 0) {
     print("running unadjusted")
 
@@ -664,7 +683,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     }
     #    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
     # Calculate p-values by hand to ensure that enough precision is printed:
-    	ttval <- sqrt(n--2) * corr / sqrt(1 - corr ** 2)
+    	ttval <- sqrt(n-2) * corr / sqrt(1 - corr ** 2)
     # From this t-statistic, loop through and calculate p-values
     pval <- ttval
     for (i in 1:length(newmodeldata$ccovs)) {
@@ -701,30 +720,46 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
     # calculate partial correlation matrix
     print("running adjusted")
 
+    rcovs <- newmodeldata$rcovs
+    ccovs <- newmodeldata$ccovs
+    acovs <- newmodeldata$acovs
+
     # Loop through and calculate cor, n, and p-values
-    pval <- corr <- n <- matrix(nrow = length(newmodeldata$rcovs),
-             ncol = length(newmodeldata$ccovs))
-    rownames(pval) = rownames(n) = rownames(corr) = newmodeldata$rcovs
-    colnames(pval) = paste0(newmodeldata$ccovs, ".p")
-    colnames(n) = paste0(newmodeldata$ccovs, ".n")
-    colnames(corr) = newmodeldata$ccovs
-    for (i in 1:length(newmodeldata$rcovs)) {
+    pval <- corr <- n <- matrix(nrow = length(rcovs),
+             ncol = length(ccovs))
+    rownames(pval) = rownames(n) = rownames(corr) = rcovs
+    colnames(pval) = paste0(ccovs, ".p")
+    colnames(n) = paste0(ccovs, ".n")
+    colnames(corr) = ccovs
+
+    # Matrix of adjustments
+    z <- newmodeldata$gdta[, acovs, drop=FALSE] 
+
+    for (i in 1:length(rcovs)) {
     #  print(newmodeldata$rcovs[i])
-      for (j in 1:length(newmodeldata$ccovs)) {
-        if (newmodeldata$rcovs[i]!=newmodeldata$ccovs[j]) {
-        temp <- ppcor::pcor.test(newmodeldata$gdta[, newmodeldata$rcovs[i]],
-                                 newmodeldata$gdta[, newmodeldata$ccovs[j]],
-                                 newmodeldata$gdta[, newmodeldata$acovs],
-                                 method = "spearman")
-        pval[i, j] <- round(temp$p.value, digits = 20)
-        corr[i, j] <- round(temp$estimate, digits = 20)
-        n [i, j] <- temp$n
-        } else{
+      x    <- newmodeldata$gdta[, rcovs[i], drop=TRUE]
+      tmpx <- !is.na(x) 
+      for (j in 1:length(ccovs)) {
+        y      <- newmodeldata$gdta[, ccovs[j], drop=TRUE]
+        subset <- tmpx & !is.na(y)        
+        if (rcovs[i]!=ccovs[j]) {
+          temp <- try(ppcor::pcor.test(x[subset], y[subset], z[subset, , drop=FALSE], 
+                      method="spearman"), silent=TRUE)
+          if (!("try-error" %in% class(temp))) {
+            pval[i, j] <- round(temp$p.value,  digits = 20)
+            corr[i, j] <- round(temp$estimate, digits = 20)
+            n[i, j]    <- temp$n
+          } else {
+            pval[i, j] <- NA
+            corr[i, j] <- NA
+            n[i, j]    <- sum(subset)
+          }
+        } else {
+          # same variable
           pval[i, j] <- 0
           corr[i, j] <- 1
-          n[i, j] <- sum(!is.na(newmodeldata$gdta[, newmodeldata$ccovs[j]]))
+          n[i, j]    <- sum(subset)
         }
-
       }
     }
     pval <- as.data.frame(pval)
@@ -764,6 +799,23 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
       )
     ) %>%
     dplyr::select(-exposuren,-exposurep))
+
+  corrlong <- addMetabInfo(corrlong, modeldata, metabdata)
+
+  return(corrlong)
+}
+
+# Common code for adding metabolite info
+addMetabInfo <- function(corrlong, modeldata, metabdata) {
+
+  # Defining global variables to pass Rcheck()
+  metabid = uid_01 = biochemical = outmetname = outcomespec = exposuren =
+    exposurep = metabolite_id = c()
+  cohortvariable = vardefinition = varreference = outcome = outcome_uid =
+    exposure = exposure_uid = c()
+  metabolite_name = expmetname = exposurespec = c()
+  adjname = adjvars = adj_uid = c()
+
 
   # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
   # Add in metabolite information for outcome
@@ -905,11 +957,31 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
    }
   }
 
-  # Stop the clock
-  #  ptm <- base::proc.time() - ptm
-  #  print(paste("My ptm:", ptm))
-  #  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+  corrlong
 
-  return(corrlong)
-}
+} # END: addMetabInfo
 
+checkVariableNames <- function(varnames, name, convertMissTo="", default=NULL, only.unique=0,
+                               stopOnMissError=1) {
+
+  if (!length(varnames)) return(default)
+  varnames <- try(as.vector(varnames), silent=TRUE)
+  if ("try-error" %in% class(varnames)) stop(paste(name, " must be a character vector", sep=""))
+  if (!is.character(varnames)) stop(paste(name, " must be a character vector", sep=""))
+  if (!is.vector(varnames)) stop(paste(name, " must be a character vector", sep=""))
+
+  if (!is.na(convertMissTo)) {
+    tmp <- is.na(varnames)
+    if (any(tmp)) varnames[tmp] <- convertMissTo
+  }
+  varnames <- tolower(trimws(varnames))
+  if (only.unique) varnames <- unique(varnames)
+  tmp <- nchar(varnames)
+  if (stopOnMissError && any(tmp < 1)) stop(paste("some variable names in ", name, " are not valid", sep=""))  
+  tmp <- varnames == "all metabolites"  
+  tmp[is.na(tmp)] <- FALSE
+  if (any(tmp)) varnames[tmp] <- "All metabolites"
+
+  varnames
+
+} # END: normalizeVarNames
