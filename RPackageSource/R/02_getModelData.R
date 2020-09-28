@@ -48,6 +48,12 @@ allvsall=F
 if (modelspec == "Interactive") {
   if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
 
+  # Normalize variables so that it is consistent with readCOMETSinput
+  rowvars <- checkVariableNames(rowvars, "rowvars", default="All metabolites", only.unique=1)
+  colvars <- checkVariableNames(colvars, "colvars", default="", only.unique=1)
+  adjvars <- checkVariableNames(adjvars, "adjvars", default=NULL, only.unique=1)
+  strvars <- checkVariableNames(strvars, "strvars", default=NULL, only.unique=1)
+
   # list of variables named differently for cohort
   tst <-
     dplyr::filter(readData$vmap,
@@ -75,10 +81,13 @@ if (modelspec == "Interactive") {
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
         return(x) }))
   
+
+
 #  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
   if(any(is.na(match(allvars,subjmetab)))) {
 	stop("HICheck that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
+
 
   # rename the variables (Assumed to be 'All metabolites' by default)
   if (!is.na(match("All metabolites", rowvars))) {
@@ -303,3 +312,5 @@ list(
   allvsall = allvsall
 )
 }
+
+
