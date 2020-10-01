@@ -22,6 +22,23 @@ runModel <- function(modeldata, metabdata, cohort="",
 
 } # END: runModel 
 
+runModel.adjVars <- function(adjvars, metabdata) {
+
+  if (!length(adjvars)) return(adjvars)
+
+  metabs     <- metabdata$dict_metabnames
+  metabs_new <- names(metabdata$dict_metabnames)
+  rows       <- match(adjvars, metabs_new)
+  tmp        <- !is.na(rows)
+  if (any(tmp)) {
+    rows         <- rows[tmp]
+    adjvars[tmp] <- metabs[rows]
+  }
+
+  adjvars
+
+} # END: runModel.adjVars
+
 runModel.runGLM <- function(modeldata, metabdata, cohort=cohort, 
                             family=family, link=link) {
 
@@ -31,6 +48,9 @@ runModel.runGLM <- function(modeldata, metabdata, cohort=cohort,
   # Get the initial design matrix and other objects
   modeldata <- runModel.checkModelDesign(modeldata, op=op)
   if (!length(names(modeldata))) return(modeldata)
+
+  # Check if any adjustment vars are metabolites
+  modeldata$designMatCols0 <- runModel.adjVars(modeldata$designMatCols0, metabdata)
 
   # Run all metabolite and exposures
   tmp  <- runModel.runAllMetabs(modeldata, famFun, family) 
@@ -44,17 +64,16 @@ runModel.runGLM <- function(modeldata, metabdata, cohort=cohort,
   tmp <- modeldata[["acovs", exact=TRUE]]
   if (length(tmp)) {
     adjspec <- paste(tmp, collapse = " ")
-    adjvars <- paste(modeldata$acovs, collapse = " ")
   } else {
     adjspec <- "None"
-    adjvars <- "None"
   }
   ret[, "adjspec"] <- adjspec
-  ret[, "adjvars"] <- adjvars
   ret <- fixData(ret)
+  #tmp <- ret[, "adjvars", drop=TRUE]
 
-  # Add metabolite info
+  # Add metabolite info, fix bug in this function call with adjvars, adjspec
   ret <- addMetabInfo(ret, modeldata, metabdata)
+  #ret[, "adjvars"] <- tmp
 
   # Let run, cohort, spec, model column be the first columns
   ret <- orderVars(ret, c("run", "cohort", "spec", "model"))
@@ -88,7 +107,7 @@ runModel.getErrorMsg <- function(obj) {
 
 } # END: runModel.getErrorMsg
 
-runModel.tidyGLM <- function(fit, expVars, defObj) {
+runModel.tidyGLM <- function(fit, expVars, defObj, dmatCols0) {
 
   if (!length(fit)) {
     ret     <- defObj
@@ -114,14 +133,26 @@ runModel.tidyGLM <- function(fit, expVars, defObj) {
       obj1 <- defObj$coef.stats
       msg  <- "exposure could not be estimated"
     }
+    vec    <- fit$coefficients
+    nms    <- names(vec)
+    tmp    <- is.finite(vec) & (nms %in% names(dmatCols0))
+    tmp[1] <- FALSE
+    if (any(tmp)) {
+      nms  <- nms[tmp]
+      orig <- dmatCols0[nms]
+      adj  <- paste(orig, collapse=" ", sep="")
+    } else {
+      adj  <- "" 
+    }
     
-    ret  <- list(converged=conv, coef.stats=obj1, fit.stats=obj2, msg=msg)  
+    ret  <- list(converged=conv, coef.stats=obj1, fit.stats=obj2, 
+                 msg=msg, adj=adj)  
   } 
   ret
 
 } # END: runModel.tidyGLM
 
-runModel.defRetObj <- function() {
+runModel.defRetObj <- function(dmatCols0) {
 
   vec               <- c("term", "estimate", "std.error", "statistic", "p.value")
   coef.names        <- vec
@@ -131,8 +162,16 @@ runModel.defRetObj <- function() {
   names(coef.stats) <- coef.names
   fit.stats         <- rep(NA, length(fit.names))
   names(fit.stats)  <- fit.names
+  adj               <- dmatCols0[-1]
+  if (length(adj)) {
+    adj <- paste(adj, collapse=" ", sep="")
 
-  list(converged=FALSE, coef.stats=coef.stats, fit.stats=fit.stats, msg="")
+  } else {
+    adj <- ""
+  }
+
+  list(converged=FALSE, coef.stats=coef.stats, fit.stats=fit.stats, 
+       msg="", adj=adj)
 
 } # END: runModel.defRetObj
 
@@ -222,12 +261,13 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
   anyFactor   <- any(isfactor[ccovs])
   nruns       <- nrcovs*nccovs
   subOrder    <- newmodeldata$designSubOrder
+  dmatCols0   <- newmodeldata$designMatCols0
 
   # Get the maximum number of rows in the return objects
   N <- nrcovs*sum(newmodeldata$nlevels)
 
   # Get a default summary object when glm fails 
-  defObj <- runModel.defRetObj()
+  defObj <- runModel.defRetObj(dmatCols0)
 
   # objects to store results
   conv     <- rep(FALSE, nruns)
@@ -238,6 +278,7 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
   runVec   <- rep(0, N)
   runRows  <- rep(0, nruns)
   msgVec   <- rep("", nruns)
+  adjVec   <- rep("", nruns)
 
   # Loop over each exposure in the outer loop
   for (j in 1:nccovs) {
@@ -273,9 +314,9 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
       } else {
         fit  <- NULL
       } 
-      
+   
       # Get the results to save
-      tmp <- runModel.tidyGLM(fit, ccovNames, defObj)
+      tmp <- runModel.tidyGLM(fit, ccovNames, defObj, dmatCols0)
 
       # Save results
       k              <- k + 1
@@ -291,14 +332,15 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
       runVec[vec]    <- k1
       fitMat[k1,]    <- tmp$fit.stats
       msgVec[k1]     <- tmp$msg
+      adjVec[k1]     <- tmp$adj
       k              <- k2
     }
   }
 
-  ret1 <- data.frame(1:k1, rname[runRows], cname[runRows], conv, fitMat, msgVec,
-                     stringsAsFactors=FALSE)
+  ret1 <- data.frame(1:k1, rname[runRows], cname[runRows], conv, fitMat, 
+                     msgVec, adjVec, stringsAsFactors=FALSE)
   colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged",
-                     names(defObj$fit.stats), "message")
+                     names(defObj$fit.stats), "message", "adjvars")
   ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
   colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
                       names(defObj$coef.stats))
@@ -552,8 +594,9 @@ runModel.checkModelDesign <- function (modeldata, op=NULL) {
 
   # Change column names of the design matrix to prevent names colliding later
   dmatCols <- colnames(dmat)
-  colnames(dmat) <- paste(op$colNamePrefix, 0:(ncol(dmat)-1), sep="")
-   
+  colnames(dmat)  <- paste(op$colNamePrefix, 0:(ncol(dmat)-1), sep="")
+  names(dmatCols) <- colnames(dmat)
+
   # If subjects were removed, then update gdta
   if (nrow(dmat) < nrow(gdta)) {
     tmp  <- rownames(gdta) %in%  rownames(dmat)
