@@ -44,7 +44,29 @@ fixData <- function(dta,compbl=FALSE) {
   return(dta)
 } # end fixData function
 
+checkForSameVars <- function(v1, v2) {
 
+  # Variables should be "tolowered" at this point
+  ret <- FALSE
+  n1  <- length(v1)
+  if (n1 != length(v2)) stop("Vectors do not have the same length")
+  v1  <- trimws(v1)
+  v2  <- trimws(v2)
+  tmp <- !is.na(v1) & !is.na(v2) & (nchar(v1) > 0) & (nchar(v2) > 0)
+  tmp[is.na(tmp)] <- FALSE
+  if (any(tmp)) {
+    rows <- (1:n1)[tmp]
+    for (row in rows) {
+      vars1 <- trimws(unlist(strsplit(v1[row], " ", fixed=TRUE)))
+      vars2 <- trimws(unlist(strsplit(v2[row], " ", fixed=TRUE)))
+      tmp   <- intersect(vars1, vars2)
+      if (length(tmp)) return(TRUE)
+    }
+  }
+
+  ret
+
+} # END: cehckForSameVars
 
 
 # ---------------------------------------------------------------------------
@@ -76,12 +98,10 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
-    else if (!is.na(dta.models$stratification) &&
-		length(intersect(dta.models$adjustment,dta.models$stratification))>=1) {
+    else if (checkForSameVars(dta.models$stratification, dta.models$adjustment)) { 
 	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
     }
-    else if (!is.na(dta.models$stratification) &&
-		length(intersect(dta.models$exposure,dta.models$stratification))>=1) {
+    else if (checkForSameVars(dta.models$stratification, dta.models$exposure)) { 
         stop("Exposure and stratification parameters are the same!  This is not allowed.")
     }
     else if (length(intersect(allmodelparams,
@@ -862,11 +882,13 @@ addMetabInfo <- function(corrlong, modeldata, metabdata) {
     dplyr::select(-expmetname)
 
   # Add in metabolite info for adjusted variables
-  	corrlong$adjvars <- corrlong$adjspec <- 
-	      as.character(lapply(corrlong$adjspec, function(x) {
-  	      myind <- which(names(metabdata$dict_metabnames)==x)
-  	      if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
-  	      return(x) }))
+  # This commented-out block of code does not work correctly
+  	#corrlong$adjvars <- corrlong$adjspec <- 
+	#      as.character(lapply(corrlong$adjspec, function(x) {
+  	#      myind <- which(names(metabdata$dict_metabnames)==x)
+  	#      if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
+  	#      return(x) }))
+
   	corrlong <- dplyr::left_join(
   	  corrlong,
   	  dplyr::select(
