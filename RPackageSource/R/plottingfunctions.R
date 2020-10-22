@@ -99,13 +99,13 @@ plotMinvalues <- function(cometsdata,
 #' showCorr(corrmatrix)
 #' @export
 showCorr <- function(corr, nlines=50) {
-        return(utils::head(as.data.frame(corr),nlines))
+        return(utils::head(as.data.frame(corr$Effects),nlines))
 }
 
 #---------------------------------------------------------
 #' Show interactive heatmap using plot_ly
 #'
-#' @param ccorrmat correlation matrix (output of runCorr())
+#' @param ccorrList correlation object (output of runCorr())
 #' @param rowsortby How row labels are sorted
 #' @param plothgt Plot height default 700
 #' @param plotwid Plot width default 800
@@ -127,13 +127,17 @@ showCorr <- function(corr, nlines=50) {
 #' }
 #' @export
 
-showHeatmap <- function (ccorrmat,
+showHeatmap <- function (ccorrList,
        rowsortby = "corr",
        plothgt=700,
        plotwid=800,
        colscale="RdYlBu") {
 
   exmetabdata=corr=exposure=outcome=metabolite_name=c()
+
+  if (!is.list(ccorrList)) stop("ccorrList must be a list")
+  ccorrmat <- ccorrList[["Effects", exact=TRUE]]
+  if (!length(ccorrmat)) stop("Effects data frame not found in ccorList")  
 
   # order the rows according to sort by
   if (rowsortby == "metasc") {
@@ -163,8 +167,8 @@ showHeatmap <- function (ccorrmat,
 #          colorscale=colscale,
 #          colorbar = list(title = "Correlation")) %>%
 
-  plotly::plot_ly(z = data.matrix(signif(ccorrmat$corr,2)), x = ccorrmat$exposure,
-	   y = ccorrmat$outcome,
+  plotly::plot_ly(z = data.matrix(signif(ccorrmat$corr,2)), x = ccorrmat$exposurespec,
+	   y = ccorrmat$outcomespec,
 	   type="heatmap", colorscale = colscale,
 	   colorbar = list(title = "Correlation"),
 	   width=plotwid,
@@ -197,7 +201,7 @@ showHeatmap <- function (ccorrmat,
 #' @description
 #' This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
 #'
-#' @param ccorrmat correlation matrix (output of runCorr())
+#' @param ccorrList correlation object (output of runCorr())
 #' @param clust Show hierarchical clustering
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}
 #'
@@ -214,18 +218,21 @@ showHeatmap <- function (ccorrmat,
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
-showHClust <- function (ccorrmat,
+showHClust <- function (ccorrList,
                         clust = TRUE,
                         colscale = "RdYlBu") {
 
  if (!length(colscale)) colscale <- "RdYlBu"  
+ if (!is.list(ccorrList)) stop("ccorrList must be a list")
+ ccorrmat <- ccorrList[["Effects", exact=TRUE]]
+ if (!length(ccorrmat)) stop("Effects data frame not found in ccorList")  
 
  outcome=metabolite_name=exposure=corr=outcomespec=c()
 # Note, using outcome spec, not outcome because muultiple outcomespec can map to 
 # the same outcome (which is the harmonized id)
   excorr <-
-    ccorrmat %>% dplyr::select(outcomespec, exposure, corr) %>% 
-	tidyr::spread(exposure, corr)
+    ccorrmat %>% dplyr::select(outcomespec, exposurespec, corr) %>% 
+	tidyr::spread(exposurespec, corr)
   rownames(excorr) <- excorr[, 1]
 
 
@@ -242,7 +249,7 @@ showHClust <- function (ccorrmat,
   #            "none")
 
   # Get 10 colors
-  if (length(colscale) == 1) {
+  if (length(colscale) < 2) {
     colors <- rev(eval(parse(text=paste(colscale, "(10)", sep=""))))
   } else {
     colors <- colscale
