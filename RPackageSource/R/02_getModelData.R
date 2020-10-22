@@ -85,7 +85,7 @@ if (modelspec == "Interactive") {
 
 #  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
   if(any(is.na(match(allvars,subjmetab)))) {
-	stop("HICheck that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
 
 
@@ -145,53 +145,36 @@ if (modelspec == "Interactive") {
 	allvsall=FALSE
   }
 
-  # Throw error if an ajdusted covariate is also an exposure and there is only 1 exposure
-  if (length(intersect(adjvars, ccovs)) > 0 &&
-      length(ccovs) == 1) {
-    stop(
-      "ERROR: one of the adjusted covariates is also an exposure and there is only one exposure!!
-      Please make sure adjusted covariates are not exposures."
-    )
+  # Check if adjusted variables are also exposures
+  vartoremove <- intersect(adjvars, ccovs)
+  if (length(vartoremove)) {
+    ccovs <- setdiff(ccovs, adjvars)
+    if (!length(ccovs)) {
+      stop("ERROR: all of the exposure variables are also adjusted covariates!!
+           Please make sure adjusted covariates are not exposures.")
+    } else {
+      msg <- paste0("Some of the adjusted covariates are also exposure variables!!\n",
+                    "The variable(s) ", paste0(vartoremove, collapse=", "),
+                    " will be dropped from the list of exposures")
+      warning(msg)
+    }
   }
 
-  # Throw a warning if an ajdusted covariate is also an exposure and there is more than 1 exposure
-  if (length(intersect(adjvars, ccovs)) > 0 &&
-      length(ccovs) > length(adjvars)) {
-    vartoremove = intersect(adjvars, ccovs)
-    print(
-      paste0(
-        "WARNING: one of the adjusted covariates is also an exposure!!\n",
-        "The variable ",
-        vartoremove,
-        " will be dropped from the list of exposures"
-      )
-    )
-    ccovs = setdiff(ccovs, adjvars)
+  # Check if adjusted variables are also outcomes
+  vartoremove <- intersect(adjvars, rcovs)
+  if (length(vartoremove)) {
+    rcovs <- setdiff(rcovs, adjvars)
+    if (!length(rcovs)) {
+      stop("ERROR: all of the exposure variables are also outcomes!!
+           Please make sure adjusted covariates are not outcomes.")
+    } else {
+      msg <- paste0("Some of the adjusted covariates are also outcome variables!!\n",
+                    "The variable(s) ", paste0(vartoremove, collapse=", "),
+                    " will be dropped from the list of outcomes")
+      warning(msg)
+    }
   }
 
-  # Throw error if an adjusted covariate is also an outcome and there is only 1 outcome
-  if (length(intersect(adjvars, rcovs)) > 0 &&
-      length(rcovs) == 1) {
-    stop(
-      "ERROR: one of the adjusted covariates is also an outcome and there is only 1 outcome!!
-      Please make sure adjusted covariates are not outcomes."
-    )
-  }
-
-  # Throw a warning if an adjusted covariate is also an outcome amd there is more than 1 outcome
-  if (length(intersect(adjvars, rcovs)) > 0 &&
-      length(rcovs) > length(adjvars)) {
-    vartoremove = intersect(adjvars, rcovs)
-    print(
-      paste0(
-        "WARNING: one of the adjusted covariates is also an outcome!!\n",
-        "The variable(s) ",
-        vartoremove,
-        " will be dropped from the list of outcomes"
-      )
-    )
-    rcovs = setdiff(rcovs, adjvars)
-  }
   # end if modelspec is "Interactive"
   }
 else if (modelspec == "Batch") {
@@ -209,7 +192,7 @@ else if (modelspec == "Batch") {
   mods <-
     dplyr::filter(as.data.frame(readData[["mods"]]), model == modlabel)
   if (nrow(mods) == 0) {
-    stop("The model provided does not exist in the input Excell file")
+    stop("The model name input does not exist in the input Excell file. Please check your Models sheet.")
   }
 
 

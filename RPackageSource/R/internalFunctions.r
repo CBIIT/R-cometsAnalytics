@@ -279,20 +279,21 @@ Harmonize<-function(dtalist){
     # The following code fixes a bug in the code below it. 
     #   The select statement was throwing an error, 
     #   and the chemical_id column was sometimes numeric.
+    ###########################################################
+
     # bring in the masterhmdb file to find further matches
     foundhmdb <- finharmlistg %>% filter(is.na(uid_01)) # only find match for unmatched metabolites
     foundhmdb <- foundhmdb[, 1:ncol(dtalist$metab), drop=FALSE] # keep only original columns before match
     foundhmdb <- foundhmdb %>% left_join(masterhmdb,suffix=c(".cohort",".comets"))
     foundhmdb[, "chemical_id"] <- as.character(foundhmdb[, "chemical_id"])
 
-if (0) {
     # bring in the masterhmdb file to find further matches
-    foundhmdb<-finharmlistg %>%
-      filter(is.na(uid_01)) %>% # only find match for unmatched metabolites
-      select(1:ncol(dtalist$metab)) %>%  # keep only original columns before match
-      left_join(masterhmdb,suffix=c(".cohort",".comets"))
-}
-##############################################################
+    #foundhmdb<-finharmlistg %>%
+    #  filter(is.na(uid_01)) %>% # only find match for unmatched metabolites
+    #  select(1:ncol(dtalist$metab)) %>%  # keep only original columns before match
+    #  left_join(masterhmdb,suffix=c(".cohort",".comets"))
+
+    ##############################################################
 
 
     # rename back so we can combine
@@ -621,210 +622,6 @@ checkModelDesign <- function (modeldata=NULL) {
      }
 }
 
-
-#--------------------------------------------------------
-#' Check model design and calculate correlation matrix. This is an internal function.  Use runCorr() instead (which is a wrapper to this function).
-#'
-#' @param modeldata list from function getModelData
-#' @param metabdata metabolite data list
-#' @param cohort cohort label (e.g DPP, NCI, Shanghai)
-#'
-#' @return data frame with each row representing the correlation for each combination of outcomes and exposures represented as specified in the
-#' model (*spec), label (*lab), and universal id (*_uid)
-#' with additional columns for n, pvalue, method of model specification (Interactive or Batch), universal id for outcomes () and exposures
-#' name of the cohort and adjustment variables. Attribute of dataframe includes ptime for processing time of model
-#' run.
-calcCorr <- function(modeldata, metabdata, cohort = "") {
-  .Machine$double.eps <- 1e-300
-
-  # Defining global variables to pass Rcheck()
-  #ptm <- proc.time() # start processing time
-  metabid = uid_01 = biochemical = outmetname = outcomespec = exposuren =
-    exposurep = metabolite_id = c()
-  cohortvariable = vardefinition = varreference = outcome = outcome_uid =
-    exposure = exposure_uid = c()
-  metabolite_name = expmetname = exposurespec = c()
-  adjname = adjvars = adj_uid = c()
-
-  # column indices of row/outcome covariates
-  col.rcovar <-
-    match(modeldata[["rcovs"]], names(modeldata[["gdta"]]))
-
-  # column indices of column/exposure covariates
-  col.ccovar <-
-    match(modeldata[["ccovs"]], names(modeldata[["gdta"]]))
-
-  # column indices of adj-var
-  col.adj <- match(modeldata[["acovs"]], names(modeldata[["gdta"]]))
-
-  # Defining global variable to remove R check warnings
-  corr = c()
-
-  # Check model design
-  designcheck <- checkModelDesign(modeldata)
-  if (length(names(designcheck)) == 0) {
-    return(designcheck)
-  }
-
-  newmodeldata <- designcheck$modeldata
-  #print(designcheck$warningmessage)
-  if (length(designcheck$warningmessage) > 0) {
-    print(designcheck$warningmessage)
-  }
-  if (length(designcheck$errormessage) > 0) {
-    print(designcheck$errormessage)
-    return(NULL)
-  }
-
-  # readjust exposure and adjustment covariates
-  col.adj <-
-    match(newmodeldata[["acovs"]], colnames(newmodeldata[["gdta"]]))
-  col.ccovar <-
-    match(newmodeldata[["ccovs"]], colnames(newmodeldata[["gdta"]]))
-  col.rcovar <-
-    match(newmodeldata[["rcovs"]], colnames(newmodeldata[["gdta"]]))
-
-
-  if (length(col.adj) == 0) {
-    print("running unadjusted")
-
-    data <- newmodeldata$gdta[ , unique(c(col.rcovar, col.ccovar))]
-    # calculate unadjusted spearman correlation matrix
-    corrhm <- Hmisc::rcorr(as.matrix(data), type = "spearman")
-
-    # Need to transpose pval and corrhm if there's only one row bc data.frame will switch the rows
-    # and columns when there's only one row. 
-    if(length(newmodeldata$rcovs)==1) {
-	corr <- t(data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs]))
-	n<-t(data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs]))
-    } else {
-    	corr <- data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs])
-        n <- data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs])
-    }
-    #    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
-    # Calculate p-values by hand to ensure that enough precision is printed:
-    	ttval <- sqrt(n-2) * corr / sqrt(1 - corr ** 2)
-    # From this t-statistic, loop through and calculate p-values
-    pval <- ttval
-    for (i in 1:length(newmodeldata$ccovs)) {
-      pval[, i] <-
-        as.vector(stats::pt(
-          as.matrix(abs(ttval[, i])),
-          df = n[, i] - 2,
-          lower.tail = FALSE
-        ) * 2)
-    }
-
-    #colnames(corr) <- colnames(corrhm$r)[-(1:length(col.rcovar))]
-    # Fix rownames when only one outcome is considered:
-    if (length(col.rcovar) == 1) {
-      rownames(corr) <- newmodeldata$rcovs
-      rownames(pval) <- newmodeldata$rcovs
-    }
-    if (length(col.ccovar) == 1) {
-      colnames(corr) <- newmodeldata$ccovs
-      colnames(pval) <- newmodeldata$ccovs
-    }
-    # no longer needed
-    #colnames(n) <- colnames(corrhm$n)[-(1:length(col.rcovar))]
-    #colnames(pval) <- colnames(corrhm$P)[-(1:length(col.rcovar))]
-
-
-    # If there are more than one exposure, then need to transpose - not sure why???
-#    if (length(col.ccovar) > 1 && length(col.rcovar) == 1) {
-#      corr = as.data.frame(t(corr))
-#      pval = as.data.frame(t(pval))
-#    }
-
-  }  else {
-    # calculate partial correlation matrix
-    print("running adjusted")
-
-    rcovs <- newmodeldata$rcovs
-    ccovs <- newmodeldata$ccovs
-    acovs <- newmodeldata$acovs
-
-    # Loop through and calculate cor, n, and p-values
-    pval <- corr <- n <- matrix(nrow = length(rcovs),
-             ncol = length(ccovs))
-    rownames(pval) = rownames(n) = rownames(corr) = rcovs
-    colnames(pval) = paste0(ccovs, ".p")
-    colnames(n) = paste0(ccovs, ".n")
-    colnames(corr) = ccovs
-
-    # Matrix of adjustments
-    z <- newmodeldata$gdta[, acovs, drop=FALSE] 
-
-    for (i in 1:length(rcovs)) {
-    #  print(newmodeldata$rcovs[i])
-      x    <- newmodeldata$gdta[, rcovs[i], drop=TRUE]
-      tmpx <- !is.na(x) 
-      for (j in 1:length(ccovs)) {
-        y      <- newmodeldata$gdta[, ccovs[j], drop=TRUE]
-        subset <- tmpx & !is.na(y)        
-        if (rcovs[i]!=ccovs[j]) {
-          temp <- try(ppcor::pcor.test(x[subset], y[subset], z[subset, , drop=FALSE], 
-                      method="spearman"), silent=TRUE)
-          if (!("try-error" %in% class(temp))) {
-            pval[i, j] <- round(temp$p.value,  digits = 20)
-            corr[i, j] <- round(temp$estimate, digits = 20)
-            n[i, j]    <- temp$n
-          } else {
-            pval[i, j] <- NA
-            corr[i, j] <- NA
-            n[i, j]    <- sum(subset)
-          }
-        } else {
-          # same variable
-          pval[i, j] <- 0
-          corr[i, j] <- 1
-          n[i, j]    <- sum(subset)
-        }
-      }
-    }
-    pval <- as.data.frame(pval)
-    n <- as.data.frame(n)
-    corr <- as.data.frame(corr)
-
-    # Rename the adjusted covariate now to original (without dummies)
-    #modeldata$acovs=oldcol.adj
-    print("finished adjustment")
-
-  } # End else adjusted mode (length(col.adj) is not zero)
-
-  # create long data with pairwise correlations  ----------------------------------------------------
-  mycols <- 1:length(col.ccovar)
-  corr.togather <- cbind(corr, outcomespec = rownames(corr))
-  if(class(corr.togather)=="matrix") {corr.togather<-as.data.frame(corr.togather)}
-  corrlong <-
-    suppressWarnings(fixData(
-      data.frame(
-        cohort = cohort,
-        spec = modeldata$modelspec,
-        model = modeldata$modlabel,
-        tidyr::gather(corr.togather,
-                      "exposurespec", "corr", -outcomespec),
-        tidyr::gather(as.data.frame(n), "exposuren", "n", colnames(n)[mycols]),
-        tidyr::gather(as.data.frame(pval), "exposurep", "pvalue", colnames(pval)[mycols]),
-        adjspec = ifelse(
-          length(col.adj) == 0,
-          "None",
-          paste(newmodeldata$acovs, collapse = " ")
-        ),
-        adjvars = ifelse(
-          length(col.adj) == 0,
-          "None",
-          paste(modeldata$acovs, collapse = " ")
-        )
-      )
-    ) %>%
-    dplyr::select(-exposuren,-exposurep))
-
-  corrlong <- addMetabInfo(corrlong, modeldata, metabdata)
-
-  return(corrlong)
-}
-
 # Common code for adding metabolite info
 addMetabInfo <- function(corrlong, modeldata, metabdata) {
 
@@ -983,27 +780,3 @@ addMetabInfo <- function(corrlong, modeldata, metabdata) {
 
 } # END: addMetabInfo
 
-checkVariableNames <- function(varnames, name, convertMissTo="", default=NULL, only.unique=0,
-                               stopOnMissError=1) {
-
-  if (!length(varnames)) return(default)
-  varnames <- try(as.vector(varnames), silent=TRUE)
-  if ("try-error" %in% class(varnames)) stop(paste(name, " must be a character vector", sep=""))
-  if (!is.character(varnames)) stop(paste(name, " must be a character vector", sep=""))
-  if (!is.vector(varnames)) stop(paste(name, " must be a character vector", sep=""))
-
-  if (!is.na(convertMissTo)) {
-    tmp <- is.na(varnames)
-    if (any(tmp)) varnames[tmp] <- convertMissTo
-  }
-  varnames <- tolower(trimws(varnames))
-  if (only.unique) varnames <- unique(varnames)
-  tmp <- nchar(varnames)
-  if (stopOnMissError && any(tmp < 1)) stop(paste("some variable names in ", name, " are not valid", sep=""))  
-  tmp <- varnames == "all metabolites"  
-  tmp[is.na(tmp)] <- FALSE
-  if (any(tmp)) varnames[tmp] <- "All metabolites"
-
-  varnames
-
-} # END: normalizeVarNames

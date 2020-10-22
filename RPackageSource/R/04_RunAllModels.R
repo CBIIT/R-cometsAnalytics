@@ -31,22 +31,28 @@ runAllModels <- function(readData, cohort="", writeTofile=T,
   results <- list()
 
   for (i in mymodels) {
-       print(paste("Running",i))
-	mymod <- getModelData(readData,modlabel=i)
-       myobj <- runModel(mymod, readData, cohort=cohort, model=model,
-                         family=family, link=link, ...)
-
-	results[[i]] <- myobj
-       if (writeTofile) {
-         # myobj will be a list for glm
-         d <- dim(myobj)
-         if (is.null(d)) {
-           OutputCSVResults(i,myobj,cohort=cohort)
-         } else {
-           nms <- paste(names(myobj), i, sep="")
-           for (j in 1:length(nms)) OutputCSVResults(nms[j],myobj[[j]],cohort=cohort)
-         }
-       }
+    errFlag <- 0
+    print(paste("Running",i))
+    mymod <- try(getModelData(readData,modlabel=i))
+    if (!("try-error" %in% class(mymod))) {
+      myobj <- try(runModel(mymod, readData, cohort=cohort, model=model,
+                            family=family, link=link, ...))
+      if ("try-error" %in% class(mymod)) errFlag <- 1
+    } else {
+      myobj   <- mymod
+      errFlag <- 1 
+    }
+    results[[i]] <- myobj
+    if (writeTofile && !errFlag) {
+      # myobj will be a list for glm
+      d <- dim(myobj)
+      if (is.null(d)) {
+        OutputCSVResults(i,myobj,cohort=cohort)
+      } else {
+        nms <- paste(names(myobj), i, sep="")
+        for (j in 1:length(nms)) OutputCSVResults(nms[j],myobj[[j]],cohort=cohort)
+      }
+    }
   }
   return(results)
 }

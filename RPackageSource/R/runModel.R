@@ -8,75 +8,231 @@ runModel <- function(modeldata, metabdata, cohort="",
   #          the canonical link.
   # ...      Additional arguments
 
-  model <- runModel.check.model(model)
-  if (model == "pcorr") {
-    ret <- runCorr(modeldata, metabdata, cohort=cohort)
-  } else {
-    family <- runModel.check.family(family)
-    link   <- runModel.check.link(link, family)
-    ret    <- runModel.runGLM(modeldata, metabdata, cohort=cohort, 
-                              family=family, link=link)
-  }
+  ptm <- base::proc.time() # start processing time
 
+  op        <- list(...)
+  op$cohort <- cohort
+  model     <- runModel.check.model(model)
+  op$model  <- model
+  op        <- runModel.checkOptions(op)
+  if (model != "pcorr") {
+    op$family <- runModel.check.family(family)
+    op$link   <- runModel.check.link(link, op$family)
+  }
+  ret       <- runModel.start(modeldata, metabdata, op)
+
+  # Stop the clock
+  ptm <- base::proc.time() - ptm
+  attr(ret, "ptime") <- paste("Processing time:", round(ptm[3], digits=3), "sec")
+       
   ret
 
 } # END: runModel 
 
-runModel.adjVars <- function(adjvars, metabdata) {
+runModel.varMap <- function(vars, varMap) {
 
-  if (!length(adjvars)) return(adjvars)
+  if (!length(vars)) return(vars)
 
-  metabs     <- metabdata$dict_metabnames
-  metabs_new <- names(metabdata$dict_metabnames)
-  rows       <- match(adjvars, metabs_new)
+  new        <- names(varMap)
+  rows       <- match(vars, new)
   tmp        <- !is.na(rows)
   if (any(tmp)) {
-    rows         <- rows[tmp]
-    adjvars[tmp] <- metabs[rows]
+    rows      <- rows[tmp]
+    vars[tmp] <- varMap[rows]
   }
 
-  adjvars
+  vars
 
-} # END: runModel.adjVars
+} # END: runModel.varMap
 
-runModel.runGLM <- function(modeldata, metabdata, cohort=cohort, 
-                            family=family, link=link) {
+runModel.setReturnDF <- function(x, varMap) {
 
-  famFun <- runModel.getFamilyFun(family, link)
-  op     <- NULL
+  if (!length(x)) return(x)
+
+  x    <- as.data.frame(x, stringsAsFactors=FALSE)
+  vars <- c("estimate", "std.error", "statistic", "p.value",
+            "null.deviance", "df.null", "logLik", "AIC",
+            "BIC", "deviance", "df.residual", "nobs", "corr", "run")
+  tmp  <- vars %in% colnames(x)
+  if (any(tmp)) {
+    for (v in vars[tmp]) x[, v] <- as.numeric(x[, v])
+  }
+
+  # Remove adj and exposure columns (duplicated information)
+  if ("adj" %in% colnames(x)) x$adj <- NULL
+  if ("exposure" %in% colnames(x)) x$exposure <- NULL
+
+  # Make sure terms and exposure columns that have metabolites have
+  #   the metabolite name instead of ...j
+  vars <- c("exposurespec", "term")
+  tmp  <- vars %in% colnames(x)
+  vars <- vars[tmp]
+  if (length(vars)) {
+    for (v in vars) x[, v] <- runModel.varMap(x[, v], varMap)
+  }
+
+  x
+
+} # END: runModel.setReturnDF
+
+runModel.combineResObjects <- function(base, new, strat) {
+
+  d <- dim(new)
+  if (!length(d)) return(base)
+  tmp <- colnames(new)
+  if (length(strat) != 1) stop("INTERNAL CODING ERROR 1")
+  new <- cbind(new, strat)
+  colnames(new) <- c(tmp, "strata")
+  if (!length(base)) {
+    ret <- new
+  } else {
+    if (!identical(colnames(base), colnames(new))) stop("INTERNAL CODING ERROR 2")
+    ret <- rbind(base, new)
+  }
+
+  ret
+
+} # END: runModel.combineResObjects
+
+runModel.combineResults <- function(base, new, strat) {
+
+  if (!length(base)) base <- list()
+  warn1 <- base[["Warnings", exact=TRUE]]
+  if (("try-error" %in% class(new)) || isString(new)) {
+    msg <- runModel.getErrorMsg(new)
+    tmp <- list()
+    tmp[[runModel.getWarningCol()]] <- "ERROR"
+    tmp[[runModel.getObjectCol()]]  <- ""
+    tmp[[runModel.getMessageCol()]] <- msg
+    obj2 <- runmodel.addWarning(NULL, tmp)
+    base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat) 
+    return(base)
+  }
+
+  obj1 <- base[["ModelSummary", exact=TRUE]]
+  obj2 <- new[["ModelSummary", exact=TRUE]]
+  base[["ModelSummary"]] <- runModel.combineResObjects(obj1, obj2, strat) 
+
+  obj1 <- base[["Effects", exact=TRUE]]
+  obj2 <- new[["Effects", exact=TRUE]]
+  base[["Effects"]] <- runModel.combineResObjects(obj1, obj2, strat) 
+
+  obj2 <- new[["Warnings", exact=TRUE]]
+  base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat)
+
+  base
+
+} # END: runModel.combineResults
+
+runModel.getStratVec <- function(gdta, scovs) {
+
+  n   <- length(scovs)
+  ret <- paste(scovs[1], "=", gdta[, scovs[1]], sep="")
+  if (n > 1) {
+    for (i in 2:n) {
+      tmp <- paste(scovs[i], "=", gdta[, scovs[i]], sep="")
+      ret <- paste(ret, tmp, sep=";")
+    }
+  }
+  
+  ret
+
+} # END: runModel.getStratVec
+
+runModel.start <- function(modeldata, metabdata, op) {
+
+  if (op$model == "glm") op$famFun <- runModel.getFamilyFun(op$family, op$link)   
+  if (op$DEBUG) print(op)
+
+  # Object for warning messages
+  warn.obj <- NULL
+
+  scovs  <- modeldata[["scovs", exact=TRUE]]
+  nscovs <- length(scovs)
+
+  if (!nscovs) return(runModel.main(modeldata, metabdata, op))
+  gdta      <- modeldata$gdta
+
+  stratvec  <- runModel.getStratVec(gdta, scovs)
+  stratlist <- unique(stratvec)
+  nstrata   <- length(stratlist)
+  if (nstrata > op$max.nstrata) {
+    msg <- paste("The stratification variable(s) ",
+                 paste(scovs, collapse=",", sep=""),
+                 " contains more than ", op$max.nstrata, 
+                 " unique values, which is too many for our software.",
+                 " Please check your stratification variable(s)",
+                 sep="")
+    stop(msg)        
+  }
+
+  c1      <- runModel.getWarningCol 
+  c2      <- runModel.getObjectCol  
+  c3      <- runModel.getMessageCol 
+  retList <- list()
+  for (i in 1:nstrata) {
+    strat <- stratlist[i]
+    tmp   <- stratvec %in% strat
+    n     <- sum(tmp)
+    if (n < op$check.nsubjects) {
+      # Too few subjects, do not run
+      tmp  <- "Stratum contains to few subjects"
+    } else {
+      modeldata$gdta <- gdta[tmp, , drop=FALSE]
+      tmp <- try(runModel.main(modeldata, metabdata, op), silent=TRUE)
+    }
+
+    # Combine results
+    retList <- runModel.combineResults(retList, tmp, strat)
+  }
+
+  retList
+
+} # END: runModel.start
+
+runModel.main <- function(modeldata, metabdata, op) {
 
   # Get the initial design matrix and other objects
-  modeldata <- runModel.checkModelDesign(modeldata, op=op)
+  modeldata <- runModel.checkModelDesign(modeldata, metabdata, op)
   if (!length(names(modeldata))) return(modeldata)
 
   # Check if any adjustment vars are metabolites
-  modeldata$designMatCols0 <- runModel.adjVars(modeldata$designMatCols0, metabdata)
+  modeldata$designMatCols0 <- runModel.varMap(modeldata$designMatCols0, modeldata$varMap)
+  if (op$DEBUG) print(modeldata)
 
   # Run all metabolite and exposures
-  tmp  <- runModel.runAllMetabs(modeldata, famFun, family) 
-  ret  <- tmp$fit
-  ret2 <- tmp$coef
+  tmp     <- runModel.runAllMetabs(modeldata, op) 
+  ret     <- tmp[["fit", exact=TRUE]]
+  ret2    <- tmp[["coef", exact=TRUE]]
+  rem.obj <- tmp$variables.removed
+  if (!length(ret)) {
+    return(list(ModelSummary=ret, Effects=ret2, Warnings=rem.obj))
+  }
 
   # Add on some additional cols to the fit df
-  ret[, "cohort"] <- cohort
+  ret[, "cohort"] <- op$cohort
   ret[, "spec"]   <- modeldata$modelspec
   ret[, "model"]  <- modeldata$modlabel
   tmp <- modeldata[["acovs", exact=TRUE]]
-  if (length(tmp)) {
-    adjspec <- paste(tmp, collapse = " ")
-  } else {
-    adjspec <- "None"
-  }
-  ret[, "adjspec"] <- adjspec
+  ret[, "adjspec"] <- runModel.getVarStr(tmp)
   ret <- fixData(ret)
-  #tmp <- ret[, "adjvars", drop=TRUE]
 
-  # Add metabolite info, fix bug in this function call with adjvars, adjspec
+  # Add metabolite info
   ret <- addMetabInfo(ret, modeldata, metabdata)
-  #ret[, "adjvars"] <- tmp
 
   # Let run, cohort, spec, model column be the first columns
   ret <- orderVars(ret, c("run", "cohort", "spec", "model"))
+
+  # Append adjvars variables removed from checkModelDesign
+  rem <- runModel.getVarsRemoved(rem.obj, type="adjvars")
+  if (length(rem)) {
+    sep <- runModel.getVarSep()
+    rem <- runModel.getVarStr(rem, collapse=sep, default="") 
+    v   <- "adjvars.removed"
+    tmp <- nchar(ret[, v]) > 0
+    if (any(tmp))  ret[tmp, v]  <- paste(rem, ret[tmp, v], sep=sep)
+    if (any(!tmp)) ret[!tmp, v] <- rem
+  }
 
   # Change outcomespec to correct name
   rows <- match(ret2[, "run"], ret[, "run"])
@@ -84,94 +240,23 @@ runModel.runGLM <- function(modeldata, metabdata, cohort=cohort,
   rows <- rows[tmp]
   ret2[tmp, "outcomespec"] <- ret[rows, "outcomespec"]
 
-  list(fit=ret, coef=ret2)
+  # Make sure certain columns in the retured data frames are numeric
+  ret  <- runModel.setReturnDF(ret, metabdata)
+  ret2 <- runModel.setReturnDF(ret2, metabdata)
 
-} # END: runModel.runGLM 
+  list(ModelSummary=ret, Effects=ret2, Warnings=rem.obj)
 
-runModel.callGLM <- function(x, y, famFun) {
+} # END: runModel.main
 
-  fit <- glm.fit(x, y, family=famFun)
-  class(fit) <- c("glm", "lm")
-  
-  fit
+runModel.defRetObj <- function(model, dmatCols0) {
 
-} # END: runModel.callGLM
-
-runModel.getErrorMsg <- function(obj) {
-
-  ret <- paste(as.character(obj), collapse=" ", sep="")
-  ret <- gsub("\n", " ", ret, fixed=TRUE)
-  ret <- gsub("\r", " ", ret, fixed=TRUE)
-
-  ret
-
-} # END: runModel.getErrorMsg
-
-runModel.tidyGLM <- function(fit, expVars, defObj, dmatCols0) {
-
-  if (!length(fit)) {
-    ret     <- defObj
-    ret$msg <- "too few subjects"
-  } else if ("try-error" %in% class(fit)) {
-    ret     <- defObj
-    ret$msg <- runModel.getErrorMsg(fit)
+  if (model == "pcorr") {
+    ret <- runModel.defRetObj.pcor(dmatCols0)
   } else {
-    obj2 <- as.numeric(glance(fit))
-    conv <- fit$converged
-    obj  <- tidy(fit)
-    msg  <- ""
-
-    # Get the rows and columns we need and convert to a named vector
-    terms <- obj[, 1, drop=TRUE]
-    tmp   <- terms %in% expVars
-    m     <- sum(tmp)
-    if (m) {    
-      terms  <- terms[tmp]
-      obj1   <- as.matrix(obj[tmp, ]) 
-    } else {
-      # No exposure names found in fitted object, return default 
-      obj1 <- defObj$coef.stats
-      msg  <- "exposure could not be estimated"
-    }
-    vec    <- fit$coefficients
-    nms    <- names(vec)
-    tmp    <- is.finite(vec) & (nms %in% names(dmatCols0))
-    tmp[1] <- FALSE
-    if (any(tmp)) {
-      nms  <- nms[tmp]
-      orig <- dmatCols0[nms]
-      adj  <- paste(orig, collapse=" ", sep="")
-    } else {
-      adj  <- "" 
-    }
-    
-    ret  <- list(converged=conv, coef.stats=obj1, fit.stats=obj2, 
-                 msg=msg, adj=adj)  
-  } 
-  ret
-
-} # END: runModel.tidyGLM
-
-runModel.defRetObj <- function(dmatCols0) {
-
-  vec               <- c("term", "estimate", "std.error", "statistic", "p.value")
-  coef.names        <- vec
-  fit.names         <- c("null.deviance", "df.null", "logLik", "AIC",
-                         "BIC", "deviance", "df.residual", "nobs")
-  coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
-  names(coef.stats) <- coef.names
-  fit.stats         <- rep(NA, length(fit.names))
-  names(fit.stats)  <- fit.names
-  adj               <- dmatCols0[-1]
-  if (length(adj)) {
-    adj <- paste(adj, collapse=" ", sep="")
-
-  } else {
-    adj <- ""
+    ret <- runModel.defRetObj.glm(dmatCols0)
   }
 
-  list(converged=FALSE, coef.stats=coef.stats, fit.stats=fit.stats, 
-       msg="", adj=adj)
+  ret
 
 } # END: runModel.defRetObj
 
@@ -188,11 +273,11 @@ runModel.getDesignSubs <- function(x) {
 
 runModel.getResponseSubs <- function(y, family) {
 
-  if (family == "gaussian") {
+  if ((family == "") || (family == "gaussian")) {
     ret <- rep(TRUE, length(y))
-  } else if (family == c("binomial", "quasibinomial")) {
+  } else if ((family == "binomial") || (family == "quasibinomial")) {
     ret <- (y >= 0) & (y <= 1) 
-  } else if (family %in% c("Gamma", "inverse.gaussian")) {
+  } else if ((family == "Gamma") || (family == "inverse.gaussian")) {
     ret <- y > 0
   } else if (family == "poisson") {
     ret <- ((y %% 1) == 0) & (y >= 0)
@@ -201,6 +286,7 @@ runModel.getResponseSubs <- function(y, family) {
   } else {
     ret <- rep(TRUE, length(y))
   }
+  ret             <- ret & is.finite(y)
   ret[is.na(ret)] <- FALSE 
 
   ret
@@ -214,6 +300,9 @@ runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
   subOrder   <- modeldata$designSubOrder
   designCols <- colnames(designMat)
 
+  # Initialize 
+  designMat[, modeldata$designMatExpCols] <- NA
+
   if (catvar) {
     # Get dummy variables
     mat              <- runModel.getDummyVars(modeldata$gdta, expVar)
@@ -226,10 +315,12 @@ runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
     # If subjects were removed when getting the dummy variables,
     #   then we ned to get the new subject order
     if (nrow(mat) != modeldata$gdta.nrow) {
-      subOrder <- match(rownames(designMat), rownames(mat))
-      subOrder <- subOrder[!is.na(subOrder)]
-    }   
-    designMat[, ids] <- mat[subOrder, , drop=FALSE]
+      subOrder            <- match(rownames(designMat), rownames(mat))
+      tmp                 <- !is.na(subOrder)
+      designMat[tmp, ids] <- mat[subOrder[tmp], , drop=FALSE]
+    } else { 
+      designMat[, ids] <- mat[subOrder, , drop=FALSE]
+    }
   } else {
     # continuous variable
     vec                    <- as.numeric(modeldata$gdta[[expVar]])
@@ -246,40 +337,70 @@ runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
 
 } # END: runModel.updateDesignMat
 
-runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
+runModel.callFunc <- function(x, y, expVars, op) {
 
-  # Minimum number of subjects to call glm
-  minNsubs    <- 1
-  rcovs       <- newmodeldata$rcovs
-  nrcovs      <- length(rcovs)
-  ccovs       <- newmodeldata$ccovs
-  nccovs      <- length(ccovs)
-  isfactor    <- newmodeldata$isfactor
-  allColNames <- colnames(newmodeldata$gdta)
-  k           <- 0
-  k1          <- 0
-  anyFactor   <- any(isfactor[ccovs])
-  nruns       <- nrcovs*nccovs
-  subOrder    <- newmodeldata$designSubOrder
-  dmatCols0   <- newmodeldata$designMatCols0
+  if (op$pcorrFlag) {
+    ret <- runModel.calcCorr(x, y, expVars, op$cor.method)
+  } else {
+    ret <- runModel.callGLM(x, y, op$famFun)
+  }
 
-  # Get the maximum number of rows in the return objects
+  ret
+
+} # END: runModel.callFunc
+
+runModel.tidy <- function(nsubs, fit, expVars, defObj, designMat, dmatCols0, op) {
+
+  if (op$pcorrFlag) {
+    ret <- runModel.tidyPcorr(nsubs, fit, expVars, defObj, designMat, dmatCols0)
+  } else {
+    ret <- runModel.tidyGLM(nsubs, fit, expVars, defObj, dmatCols0) 
+  }
+
+  ret
+
+} # END: runModel.tidy 
+
+runModel.runAllMetabs <- function(newmodeldata, op) {
+
+  # Minimum number of subjects required
+  minNsubs     <- op$check.nsubjects
+  rcovs        <- newmodeldata$rcovs
+  nrcovs       <- length(rcovs)
+  ccovs        <- newmodeldata$ccovs
+  nccovs       <- length(ccovs)
+  isfactor     <- newmodeldata$isfactor
+  k            <- 0
+  k1           <- 0
+  anyFactor    <- any(isfactor[ccovs])
+  nruns        <- nrcovs*nccovs
+  subOrder     <- newmodeldata$designSubOrder
+  dmatCols0    <- newmodeldata$designMatCols  
+  varMap       <- newmodeldata$varMap
+  checkDesign  <- op$check.design
+  family       <- op$family
+  rem.obj      <- newmodeldata$variables.removed
+  DEBUG        <- op$DEBUG
+  if (DEBUG) print(rem.obj)
+
+  # Get the maximum number of rows in the return object for effects
   N <- nrcovs*sum(newmodeldata$nlevels)
 
-  # Get a default summary object when glm fails 
-  defObj <- runModel.defRetObj(dmatCols0)
+  # Get a default summary object when model fails 
+  defObj <- runModel.defRetObj(op$model, dmatCols0)
 
   # objects to store results
-  conv     <- rep(FALSE, nruns)
   rname    <- rep("", N)
   cname    <- rep("", N)
   coefMat  <- matrix(data=NA, nrow=N, ncol=ncol(defObj$coef.stats))
-  fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
   runVec   <- rep(0, N)
   runRows  <- rep(0, nruns)
   msgVec   <- rep("", nruns)
   adjVec   <- rep("", nruns)
-
+  remVec   <- rep("", nruns)
+  fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
+  conv     <- rep(FALSE, nruns)
+    
   # Loop over each exposure in the outer loop
   for (j in 1:nccovs) {
     ccovj <- ccovs[j]
@@ -287,17 +408,38 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
     # Update the design matrix for this exposure var 
     tmp       <- runModel.updateDesignMat(newmodeldata, ccovj, isfactor[j])
     x         <- tmp$designMat
-    ccovNames <- tmp$expNames
+    ccovNames <- tmp$expNames  # ccovj or dummy variables for this exposure
     tmp       <- NULL
+    dcols     <- colnames(x)
 
     # Get the initial subset of subjects to use
     subset0 <- runModel.getDesignSubs(x)
+    n0      <- sum(subset0)
+
+    # Check for min number of subs
+    if (n0 < minNsubs) {
+      rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", 
+                      "too few subjects", varMap=varMap)
+      next
+    }
+
+    # Design matrix checks, returns design columns kept 
+    if (checkDesign) {
+      tmp   <- runModel.checkDesignWithExp(x[subset0, , drop=FALSE], op, ccovNames,
+                                           varMap=varMap)
+      dcols <- tmp[["cols", exact=TRUE]]
+      if (!length(dcols)) {
+        rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", tmp$msg, varMap=varMap)
+        next
+      }
+    }
 
     # Loop over each outcome
     for (i in 1:nrcovs) {
 
       # Get the outcome
       rcovi <- rcovs[i]
+      if (rcovi == ccovj) next
       tmp   <- as.numeric(newmodeldata$gdta[[rcovi]])  
       y     <- tmp[subOrder]
       
@@ -307,16 +449,30 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
       # Get the final subset of subjects to use 
       subset <- subset0 & subset
       nsubs  <- sum(subset)
+      fit    <- NULL
  
       if (nsubs >= minNsubs) {
-        fit  <- try(runModel.callGLM(x[subset, , drop=FALSE], y[subset], 
-                    famFun), silent=TRUE)
+        # Check design matrix if subjects were removed due to missing values
+        if (checkDesign && (nsubs < n0)) {
+          tmp    <- runModel.checkDesignWithExp(x[subset, , drop=FALSE], op, ccovNames,
+                                                varMap=varMap)
+          dcols  <- tmp[["cols", exact=TRUE]]
+          fit    <- tmp$msg 
+        } 
+        if (length(dcols)) {
+          fit  <- try(runModel.callFunc(x[subset, dcols, drop=FALSE], y[subset], 
+                      ccovNames, op), silent=TRUE)
+        }
       } else {
-        fit  <- NULL
+        fit <- "too few subjects"
+      }
+      if (DEBUG) {
+        print(fit)
+        print(summary(fit))
       } 
    
       # Get the results to save
-      tmp <- runModel.tidyGLM(fit, ccovNames, defObj, dmatCols0)
+      tmp <- runModel.tidy(nsubs, fit, ccovNames, defObj, dcols, dmatCols0, op)
 
       # Save results
       k              <- k + 1
@@ -325,152 +481,52 @@ runModel.runAllMetabs <- function(newmodeldata, famFun, family) {
       k2             <- k + nrow(coef) - 1
       vec            <- k:k2
       runRows[k1]    <- k
-      conv[k1]       <- tmp$converged
       rname[vec]     <- rcovi
       cname[vec]     <- ccovj
       coefMat[vec, ] <- coef
       runVec[vec]    <- k1
-      fitMat[k1,]    <- tmp$fit.stats
       msgVec[k1]     <- tmp$msg
       adjVec[k1]     <- tmp$adj
+      remVec[k1]     <- tmp$adj.rem
+      fitMat[k1,]    <- tmp$fit.stats
+      conv[k1]       <- tmp$converged
       k              <- k2
     }
   }
 
-  ret1 <- data.frame(1:k1, rname[runRows], cname[runRows], conv, fitMat, 
-                     msgVec, adjVec, stringsAsFactors=FALSE)
-  colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged",
-                     names(defObj$fit.stats), "message", "adjvars")
-  ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
-  colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
+  # Check for no results
+  ret1 <- ret2 <- NULL
+  if (k) {
+    tmp  <- 1:k1
+    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], conv[tmp], fitMat[tmp, , drop=FALSE], 
+                       msgVec[tmp], adjVec[tmp], remVec[tmp], stringsAsFactors=FALSE)
+    colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged",
+                       names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
+    ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
+    colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
                       names(defObj$coef.stats))
 
-  # Subset if needed
-  if (k < N) ret2 <- ret2[1:k, , drop=FALSE]
+    # Subset if needed
+    if (k < N) ret2 <- ret2[1:k, , drop=FALSE]
+    if (op$pcorrFlag) ret1$converged <- NULL
+  }
 
-  list(fit=ret1, coef=ret2)
+  list(fit=ret1, coef=ret2, variables.removed=rem.obj)
 
 } # END: runModel.runAllMetabs
 
-# Function to check an argument 
-runModel.check.str <- function(obj, valid, parm) {
-
-  # obj:   A character string (length 1)
-  # valid: Character vector of valid values
-  # parm:  The name of the argument being checked
-
-  errFlag <- 0
- 
-  # Check for errors
-  if (!isString(obj)) errFlag <- 1 
-  obj <- trimws(obj)
-  if (!(obj %in% valid)) errFlag <- 1
-
-  if (errFlag) {
-    msg <- paste(valid, collapse=", ")
-    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
-    stop(msg)
-  }
-
-  obj
-
-} # END: runModel.check.str
-
-runModel.check.model <- function(obj) {
-
-  valid <- c("pcorr", "glm")
-  obj   <- runModel.check.str(obj, valid, "model") 
+runModel.designMat <- function(data, vars, categorical=NULL) {
   
-  obj
-
-} # END: runModel.check.model
-
-runModel.check.family <- function(obj) {
-
-  valid <- c("binomial", "gaussian", "Gamma", "inverse.gaussian",
-             "poisson", "quasi", "quasibinomial", "quasipoisson")
-  obj   <- runModel.check.str(obj, valid, "family") 
-
-  obj
-
-} # END: runModel.check.family
-
-# Get the valid link functions for a family. From the R doc on "family"
-runModel.get.links <- function(family) {
-
-  if (family == "gaussian") {
-    ret <- c("identity", "log", "inverse")
-  } else if (family == "binomial") {
-    ret <- c("logit", "probit", "cauchit", "log", "cloglog")
-  } else if (family == "Gamma") {
-    ret <- c("inverse", "identity", "log")
-  } else if (family == "poisson") {
-    ret <- c("log", "identity", "sqrt")
-  } else if (family == "inverse.gaussian") {
-    ret <- c("1/mu^2", "inverse", "identity", "log")
-  } else {
-    ret <- c("logit", "probit", "cloglog", "identity", "inverse", 
-             "log", "1/mu^2", "sqrt")
-  }
-
-  ret
-
-} # END: runModel.get.links
-
-# Get the canonical link function for a family
-runModel.get.canonical <- function(family) {
-
-  # family mustbe checked before this function is called
-
-  if (family == "gaussian") {
-    ret <- "identity"
-  } else if (family == "binomial") {
-    ret <- "logit"
-  } else if (family == "Gamma") {
-    ret <- "inverse"
-  } else if (family == "poisson") {
-    ret <- "log"
-  } else if (family == "inverse.gaussian") {
-    ret <- "1/mu^2"
-  } else if (family == "quasi") {
-    ret <- "identity"
-  } else if (family == "quasibinomial") {
-    ret <- "logit"
-  } else if (family == "quasipoisson") {
-    ret <- "log"
-  } else {
-    ret <- "identity"
-  }
-
-  ret
-
-} # END: runModel.get.canonical
-
-runModel.check.link <- function(obj, family) {
-
-  # family must be checked before this function is called
-
-  if (isString(obj) && (nchar(trimws(obj)) < 1)) {
-    obj <- runModel.get.canonical(family) 
-  }
-  valid <- runModel.get.links(family)
-  obj   <- runModel.check.str(obj, valid, "link") 
-
-  obj
-
-} # END: runModel.check.link
-
-runModel.getFamilyFun <- function(family, link) {
-
-  str <- paste(family, "(link='", link, "')", sep="")
-  ret <- eval(parse(text=str))
-
-  ret
-
-} # END: runModel.getFamilyFun
-
-
-runModel.designMat <- function(data, vars) {
+  if (is.null(categorical)) categorical <- areCategorical(data, vars)
+  if (any(categorical)) {
+    # Add a "." to make dummy vars look nicer
+    catVars           <- vars[categorical] 
+    cx                <- colnames(data)
+    tmp               <- cx %in% catVars
+    cx[tmp]           <- paste(cx[tmp], ".", sep="")
+    vars[categorical] <- paste(catVars, ".", sep="")
+    colnames(data)    <- cx
+  }  
 
   nvars <- length(vars)
   if (nvars) {
@@ -495,7 +551,6 @@ runModel.getDummyVars <- function(data, var) {
 
 } # END: runModel.getDummyVars
 
-
 runModel.getNlevels <- function(data, ccovs, isfactor) {
 
   n    <- length(ccovs)
@@ -514,243 +569,29 @@ runModel.getNlevels <- function(data, ccovs, isfactor) {
 
 } # END: runModel.getNlevels
 
-runModel.checkFor1Val <- function(data, vars, nvals=2) {
+runModel.getVarSep <- function() { ";" }
 
-  n   <- length(vars)
-  ret <- rep(FALSE, n)
-  for (i in 1:n) {
-    vec <- data[, vars[i], drop=TRUE]
-    tmp <- !is.na(vec)
-    if (length(unique(vec[tmp])) < nvals) ret[i] <- TRUE
-  }
-  
-  ret
+runModel.getVarStr <- function(vars, collapse=";", default="") {
 
-} # END: runModel.checkFor1Val
-
-runModel.addRemVars <- function(obj, vars, type, reason) {
-
-  mat <- cbind(vars, type, reason)
-  colnames(mat) <- c("Variable", "Type", "Reason")
-  if (length(obj)) {
-    obj <- rbind(obj, mat)
+  if (length(vars)) {
+    ret <- paste(vars, collapse=collapse, sep="")
   } else {
-    obj <- mat
-  }
-
-  obj
-
-} # END: runModel.addRemVars
-
-runModel.checkModelDesign <- function (modeldata, op=NULL) {
-
-  if (is.null(modeldata)) stop("Please make sure that modeldata is defined")
-  op <- default.list(op, 
-                     c("min.nsubjects", "colNamePrefix", "rowNamePrefix", 
-                       "min.n.unique.vals"), 
-                     list(25, "...x", "r",
-                          2))
-
-  errObj <- data.frame()
-  attr(errObj,"ptime") <- "Processing time: 0 sec"
-  nunq <- op$min.n.unique.vals
-
-  # Object for variables removed
-  rem.obj <- NULL
-
-  acovs  <- modeldata[["acovs", exact=TRUE]]
-  nacovs <- length(acovs) 
-  ccovs  <- modeldata$ccovs
-  sFlag  <- !is.null(modeldata[["scovs", exact=TRUE]])
-  rcovs  <- modeldata$rcovs
-
-  # Set rownames to match subjects later
-  gdta   <- modeldata$gdta
-  rownames(gdta) <- paste(op$rowNamePrefix, 1:nrow(gdta), sep="")  
-
-  # Remove adjustment vars that have to few non-missing unique values
-  rem   <- runModel.checkFor1Val(gdta, acovs, nvals=nunq)
-  if (any(rem)) {
-    rem.obj <- runModel.addRemVars(rem.obj, acovs[rem], "adjvars", "too few unique non-missing values")
-    acovs   <- acovs[!rem]
-  }
-
-  # Get the design matrix of adjusted variables and intercept
-  dmat  <- runModel.designMat(gdta, acovs) 
-
-  # Check that there is at least a minimum number of subjects
-  if (nrow(dmat) < op$min.nsubjects){
-    if (sFlag) return(errObj)
-    stop(paste(modeldata$modlabel," has less than ", op$min.nsubjects, " observations and will not be run.", sep=""))
-  }
-
-  # Remove linearly dependent cols
-  rem <- caret::findLinearCombos(dmat)$remove
-  if (length(rem)) {
-    tmp     <- colnames(dmat)
-    rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], "adjvars", "linearly dependent")
-    dmat    <- dmat[, -rem, drop=FALSE]
-  }
-
-  # Change column names of the design matrix to prevent names colliding later
-  dmatCols <- colnames(dmat)
-  colnames(dmat)  <- paste(op$colNamePrefix, 0:(ncol(dmat)-1), sep="")
-  names(dmatCols) <- colnames(dmat)
-
-  # If subjects were removed, then update gdta
-  if (nrow(dmat) < nrow(gdta)) {
-    tmp  <- rownames(gdta) %in%  rownames(dmat)
-    gdta <- gdta[tmp, , drop=FALSE]
-  }  
-
-  # Remove exposures that have too few non-missing unique value
-  rem   <- runModel.checkFor1Val(gdta, ccovs, nvals=nunq)
-  if (any(rem)) {
-    rem.obj <- runModel.addRemVars(rem.obj, ccovs[rem], "colvars", "too few unique non-missing values")
-    ccovs   <- ccovs[!rem]
-  }
-  if (!length(ccovs)) {
-    if (sFlag) return(errObj)
-    stop(paste(modeldata$modlabel," has all exposure variables with too few unique values.", sep=""))
-  }
-
-  # Remove outcomes that have too few non-missing unique value
-  rem   <- runModel.checkFor1Val(gdta, rcovs, nvals=nunq)
-  if (any(rem)) {
-    rem.obj <- runModel.addRemVars(rem.obj, rcovs[rem], "rowvars", "too few unique non-missing values")
-    rcovs   <- rcovs[!rem]
-  }
-  if (!length(rcovs)) {
-    if (sFlag) return(errObj)
-    stop(paste(modeldata$modlabel," has all outcome variables with too few unique values.", sep=""))
-  }
-
-  # check if any of the exposures are factors
-  ckfactor <- sapply(dplyr::select(gdta,dplyr::one_of(ccovs)),class)
-  isfactor <- ckfactor %in% "factor"
-
-  # Get then number of levels (minus 1) for categorical exposures, 1 if continuous
-  nlevels <- runModel.getNlevels(gdta, ccovs, isfactor)
-  
-  # Get the maximum number of cols for any exposure variable
-  maxncols <- max(nlevels)
-  
-  # Add additional columns onto design matrix for the exposures
-  ncdmat <- ncol(dmat)
-  tmp    <- matrix(data=NA, nrow=nrow(dmat), ncol=maxncols)
-  colnames(tmp) <- paste("...e", 1:maxncols, sep="") # temporary names
-  dmat   <- cbind(dmat, tmp)
-  
-  # Get the order of subjects in design matrix
-  rows <- match(rownames(dmat), rownames(gdta))
-  tmp  <- !is.na(rows)
-  rows <- rows[tmp]
-
-  modeldata$acovs                <- acovs
-  modeldata$ccovs                <- ccovs
-  modeldata$rcovs                <- rcovs
-  modeldata$gdta                 <- gdta
-  modeldata$designMat            <- dmat
-  modeldata$isfactor             <- isfactor
-  modeldata$designMatCols0       <- dmatCols
-  modeldata$designSubOrder       <- rows
-  modeldata$nlevels              <- nlevels
-  modeldata$designMatExpStartCol <- ncdmat + 1
-  modeldata$gdta.nrow            <- nrow(gdta)
-  modeldata$variables.removed    <- rem.obj
-
-  modeldata
-
-} # END: runModel.checkModelDesign
-
-
-# Function to check that an object is a string
-isString <- function(obj) {
-
-  if ((length(obj) == 1) && is.character(obj)) {
-    ret <- TRUE
-  } else {
-    ret <- FALSE
+    ret <- default
   }
 
   ret
 
-} # END: isString
+} # END: runModel.getVarStr
 
-# Function to order columns in a matrix or data frame
-orderVars <- function(data, order) {
+runModel.getAdjVarStr <- function(nms, dmatCols0) {
 
-  # data     matrix or data frame with column names
-  # order    Character vector
-
-  if (ncol(data) == 1) return(data)
-  cnames <- colnames(data)
-  temp   <- order %in% cnames
-  order  <- order[temp]
-  temp   <- !(cnames %in% order)
-  if (any(temp)) order <- c(order, cnames[temp])
-    
-  data <- data[, order, drop=FALSE]
-  data
-
-} # END: orderVars
-
-# Function to assign a default value to an element in a list
-default.list <- function(inList, names, default, error=NULL,
-                         checkList=NULL) {
-
-  # inList      List
-  # names       Vector of names of items in inList
-  # default     List of default values to assign if a name is not found
-  #             The order of default must be the same as in names.
-  # error       Vector of TRUE/FALSE if it is an error not to have the
-  #             name in the list. 
-  #             The default is NULL
-  # checkList   List of valid values for each name.
-  #             Use NA to skip a list element.
-  #             The default is NULL
-
-  n1 <- length(names)
-  n2 <- length(default)
-  if (n1 != n2) stop("ERROR: in calling default.list")
-
-  if (is.null(error)) {
-    error <- rep(0, times=n1)
-  } else if (n1 != length(error)) {
-    stop("ERROR: in calling default.list")
-  }
-
-  if (!is.null(checkList)) {
-    if (n1 != length(checkList)) stop("ERROR: in calling default.list")
-    checkFlag <- 1
+  if (length(nms)) {
+    orig <- dmatCols0[nms]
   } else {
-    checkFlag <- 0
-  } 
-
-  if (is.null(inList)) inList <- list()
-
-  listNames <- names(inList)
-  for (i in 1:n1) {
-    if (!(names[i] %in% listNames)) {
-      if (!error[i]) {
-        inList[[names[i]]] <- default[[i]]
-      } else {
-        temp <- paste("ERROR: the name ", names[i], " was not found", sep="")
-        stop(temp)
-      }
-    } else if (checkFlag) {
-      temp <- checkList[[i]]
-      if (!all(is.na(temp))) {
-        if (!all(inList[[names[i]]] %in% checkList[[i]])) {
-          temp <- paste("ERROR: the name '", names[i], 
-                      "' has an invalid value", sep="")
-          stop(temp)
-        }
-      }
-    }
+    orig <- NULL
   }
+  ret <- runModel.getVarStr(orig)
 
-  inList
+  ret
 
-} # END: default.list
-
+} # END: runModel.getAdjVarStr 
