@@ -21,15 +21,21 @@ readCOMETSinput <- function(csvfilePath) {
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Metabolites")))
   print("Metabolites sheet is read in")
   #subject metabolite data
-  dta.smetab <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",skip=1,col_names=F)))
+  # The following call does not always work with skip=1, col_names=F
+  #dta.smetab <-
+  #  suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",skip=1,col_names=F)))
+
+  # New code
+  dta.smetab <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites")))
+  dict_metabnames      <- tolower(colnames(dta.smetab))
+  colnames(dta.smetab) <- paste("...", 1:ncol(dta.smetab), sep="")
   print("SubjectMetabolites sheet is read in")
 
   # Read in the first row (column names) of subject metabolite data (this is now the dictionary of metabolite names)
-  dict_metabnames <- 
-	tolower(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",col_names=F,n_max=1)))
+  #dict_metabnames <- 
+  #	tolower(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",col_names=F,n_max=1)))
   names(dict_metabnames) <- colnames(dta.smetab)
- 
+
   #subject data
   dta.sdata <-
     suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
@@ -134,7 +140,7 @@ readCOMETSinput <- function(csvfilePath) {
     tmp <- (cls != "numeric") & (names(cls) %in% mymets)
     tmp[is.na(tmp)] <- FALSE
     if (any(tmp)) {
-      for (v in names(cls[tmp])) dtalist$subjdata[, v] <- as.numeric(dtalist$subjdata[, v])
+      for (v in names(cls[tmp])) dtalist$subjdata[, v] <- unfactor(dtalist$subjdata[, v], fun=as.numeric)
     }
 
     # check to see which columns have non-missing values
@@ -259,60 +265,3 @@ runDescrip<- function(readData){
   return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
 }
 
-getNewWhereStr <- function(whereStr, operator) {
-
-  ret <- ""
-  vec <- strsplit(whereStr, operator, fixed=TRUE)[[1]]
-  len <- length(vec)
-  if (len) {
-    var <- tolower(trimws(vec[1]))
-    
-    # Remainder of where clause
-    if (len > 1) {
-      rem <- paste(vec[-1], collapse="", sep="")
-    } else {
-      rem <- ""
-    }
-    ret <- paste(var, operator, rem, sep="") 
-  }
-  
-  ret
-
-} # END: getNewWhereStr
-
-normalizeWhere <- function(vec) {
-
-  # vec : character vector of where conditions
-  
-  ret  <- vec
-  tmp  <- is.na(vec)
-  if (any(tmp)) vec[tmp] <- ""
-  rows <- 1:length(vec)
-  tmp1 <- grepl("<", vec, fixed=TRUE)
-  tmp2 <- grepl(">", vec, fixed=TRUE)
-  tmp3 <- grepl("==", vec, fixed=TRUE)
-  if (any(tmp1)) {
-    r2 <- rows[tmp1]
-    for (i in 1:length(r2)) {
-      row      <- r2[i]
-      ret[row] <- getNewWhereStr(vec[row], "<") 
-    }
-  } 
-  if (any(tmp2)) {
-    r2 <- rows[tmp2]
-    for (i in 1:length(r2)) {
-      row      <- r2[i]
-      ret[row] <- getNewWhereStr(vec[row], ">") 
-    }
-  } 
-  if (any(tmp3)) {
-    r2 <- rows[tmp3]
-    for (i in 1:length(r2)) {
-      row      <- r2[i]
-      ret[row] <- getNewWhereStr(vec[row], "==") 
-    }
-  } 
-
-  ret
-
-} # END: normalizeWhere
