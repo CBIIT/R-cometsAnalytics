@@ -19,18 +19,17 @@ Imports:
     rio,
     dplyr,
     plyr,
-    psych,
     plotly,
     tidyr,
     heatmaply,
     shiny,
-    Hmisc,
     stringr,
     data.table,
-    ppcor,
     caret,
     subselect,
-    broom
+    broom,
+    psych,
+    MASS
 Suggests:
     knitr, testthat
 VignetteBuilder: knitr
