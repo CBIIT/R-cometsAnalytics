@@ -176,11 +176,12 @@ if (modelspec == "Interactive") {
   }
 
   # Assign allvsall variable
-  if((colvars=="All metabolites") && (rowvars=="All metabolites")) {
-	allvsall=TRUE
-  } else {
-	allvsall=FALSE
-  }
+  allvsall <- FALSE
+  if ( (length(colvars) == 1) && (length(rowvars) == 1) ) {
+    if ( (colvars == "All metabolites") && (rowvars=="All metabolites") ) {
+      allvsall <- TRUE
+    }
+  } 
 
   # Check if adjusted variables are also exposures
   vartoremove <- intersect(adjvars, ccovs)
