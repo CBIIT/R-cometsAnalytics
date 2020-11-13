@@ -8,4 +8,5 @@ NEW FEATURES
 BUG FIXES
 
     o The t-statistic computation for unadjusted correlation analyses has been updated.
+    o Correlation analyses with categorical exposure variables have been updated.
 
