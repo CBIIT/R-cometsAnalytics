@@ -21,6 +21,6 @@ exmodeldata <- COMETS::getModelData(test_exmetabdata, modelspec="Interactive",
 # Compare result to the baseline
 test_that("COMETS::getModelData(exmetabdata,modelspec = Interactive, where=c(age>40, bmi_grp>2))",
 {
-  expect_identical(exmodeldata, test_exmodeldata)
+  expect_equal(exmodeldata, test_exmodeldata)
 })
 
