@@ -7,7 +7,7 @@
 readCOMETSinput(csvfilePath)
 }
 \arguments{
-\item{csvfilePath}{path of Excell file to be read in}
+\item{csvfilePath}{path of Excel file to be read in}
 }
 \value{
 a list comprising:

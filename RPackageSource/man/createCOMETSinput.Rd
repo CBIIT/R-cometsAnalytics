@@ -6,8 +6,12 @@
 Once the output Excell file is created, users will need to go in and complete
 the sheets 'VarMap' and 'Models'}
 \usage{
-createCOMETSinput(template = "age", filenames = NULL, varmap = NULL,
-  outputfile = NULL)
+createCOMETSinput(
+  template = "age",
+  filenames = NULL,
+  varmap = NULL,
+  outputfile = NULL
+)
 }
 \arguments{
 \item{template}{template file to be used with preset parameters (options: 'age' or 'basic')}

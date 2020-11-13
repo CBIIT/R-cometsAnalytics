@@ -2,12 +2,12 @@
 % Please edit documentation in R/plottingfunctions.R
 \name{showCorr}
 \alias{showCorr}
-\title{Function that returns top N lines of the runCorr() output}
+\title{Function that returns top N lines of the \code{\link{runCorr}} output}
 \usage{
 showCorr(corr, nlines = 50)
 }
 \arguments{
-\item{corr}{COMETScorr class (S3) from runCorr() output}
+\item{corr}{COMETScorr class (S3) from \code{\link{runCorr}} output}
 
 \item{nlines}{number of lines to return (default 50)}
 }
@@ -15,14 +15,13 @@ showCorr(corr, nlines = 50)
 first 50 lines of output
 }
 \description{
-Function that returns top N lines of the runCorr() output
+Function that returns top N lines of the \code{\link{runCorr}} output
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",
-	rowvars=c("lactose","lactate"))
+modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showCorr(corrmatrix)
 }
