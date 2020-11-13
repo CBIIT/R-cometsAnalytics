@@ -2,16 +2,19 @@
 % Please edit documentation in R/plottingfunctions.R
 \name{showHClust}
 \alias{showHClust}
-\title{Show interactive heatmap using d3heatmap with hierarchical clustering}
+\title{Show interactive heatmap using heatmaply_cor with hierarchical clustering}
 \usage{
-showHClust(ccorrmat, clust = TRUE, colscale = "RdYlBu")
+showHClust(ccorrList, strata.number = NULL, clust = TRUE, colscale = "RdYlBu")
 }
 \arguments{
-\item{ccorrmat}{correlation matrix (output of runCorr())}
+\item{ccorrList}{correlation object (output of \code{\link{runCorr}})}
+
+\item{strata.number}{Only valid if ccorrList is from a stratified analysis. 
+If NULL, then results from the first stratum will be used in the plot.}
 
 \item{clust}{Show hierarchical clustering}
 
-\item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}}
+\item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}}
 }
 \value{
 a heatmap with outcomes as rows and exposures in columns.
@@ -24,10 +27,10 @@ dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata, modelspec="Interactive",
-colvars=c("age","bmi_grp"),rowvars=c("lactose","lactate"))
+colvars=c("age","bmi_grp"))
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHClust(corrmatrix)
 }
 \references{
-For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
+For colorscale reference: \code{\link[heatmaply]{RColorBrewer_colors}}
 }
