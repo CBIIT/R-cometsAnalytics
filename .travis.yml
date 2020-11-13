@@ -1,7 +1,7 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-bioc_required: true
+bioc_required: false
 r:
   - bioc-release
   - bioc-devel
