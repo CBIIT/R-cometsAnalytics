@@ -1,6 +1,3 @@
-runModel.getWarningCol <- function() {"type"}
-runModel.getObjectCol  <- function() {"object"}
-runModel.getMessageCol <- function() {"message"}
 
 runmodel.addWarning <- function(obj, newList) {
 

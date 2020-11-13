@@ -1,55 +1,3 @@
-runModel.checkOptions <- function(op) {
-
-  # glm ops "weights", "start", "etastart", "mustart", "offset", "control",
-
-  valid <- c("glm.options", "cohort", "model", "family", "link",
-             "cor.method", "check.illCond", "check.cor.cutoff", 
-             "check.nearZeroVar.freqCut", "check.nsubjects", "check.design",
-             "DEBUG", "max.nstrata")
-  def   <- list(NULL, "", "pcorr", "gaussian", "",
-                "spearman", TRUE, 0.97,
-                0, 25, TRUE,
-                FALSE, 10)
-
-  if (!length(op)) op <- list()
-  if (!is.list(op)) stop("op must be a list")
-  op$modeldata <- NULL
-  op$metabdata <- NULL
-  nms <- trimws(names(op))
-  tmp <- (nchar(nms) > 0) & !(nms %in% c("modeldata", "metabdata"))
-  nms <- nms[tmp]
-  if (length(nms)) {
-    tmp  <- !(nms %in% valid)
-    err  <- nms[tmp]
-    nerr <- length(err)
-    if (nerr) {
-      if (nerr == 1) {
-        stop(paste("The option ", err, " is not a valid option name", sep=""))
-      } else {
-        err <- paste(err, collapse=", ", sep="")
-        stop(paste("The options ", err, " are not valid option names", sep=""))
-      }  
-    }
-  }
-
-  op$colNamePrefix       <- "...x"
-  op$rowNamePrefix       <- "r"
-  op$check.n.unique.vals <- 2
-  op$pcorrFlag           <- 0
-  if (op$model == "pcorr") {
-    op$pcorrFlag <- 1
-    op$family    <- ""
-    op$link      <- ""
-  } 
-
-  # Turn off this option
-  op$check.nearZeroVar.freqCut <- 0
-
-  op  <- default.list(op, valid, def)
-
-  op
-
-} # END: runModel.checkOptions
 
 # Function to check an argument 
 runModel.check.str <- function(obj, valid, parm) {
@@ -77,7 +25,7 @@ runModel.check.str <- function(obj, valid, parm) {
 
 runModel.check.model <- function(obj) {
 
-  valid <- c("pcorr", "glm")
+  valid <- getValidModelNames()
   obj   <- runModel.check.str(obj, valid, "model") 
   
   obj
@@ -134,29 +82,33 @@ runModel.checkDesignWithExp <- function(dmat, op, expVar, varMap=NULL) {
   cols <- colnames(tmp$designMat)
   rem  <- tmp$rem.obj
   msg  <- ""
+  tmp  <- expVar %in% cols
+  vars <- expVar[tmp]
 
   # Return NULL if exposure was removed
-  if (!any(expVar %in% cols)) {
+  if (!length(vars)) {
     cols <- NULL
     msg  <- runModel.getRemMessage(rem, expVar, collapse=";", varMap=varMap)
+    #msg  <- runModel.getExpRemFromDesign()
   }
 
-  list(cols=cols, msg=msg)
+  list(cols=cols, msg=msg, expVar=vars)
 
 } # END: runModel.checkDesignWithExp
 
-runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL) {
+runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL, 
+                               varSet="design matrix") {
 
   # First column of dmat will always be an intercept
 
   if (ncol(dmat) < 2) return(list(designMat=dmat, rem.obj=rem.obj))
-  method <- op$cor.method
+  method <- op$check.cor.method
 
   # Remove linearly dependent cols
   rem <- caret::findLinearCombos(dmat)$remove
   if (length(rem)) {
     tmp     <- colnames(dmat)
-    rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], "adjvars", "linearly dependent",
+    rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], varSet, "linearly dependent",
                                    varMap=varMap)
     dmat    <- dmat[, -rem, drop=FALSE]
   }
@@ -167,7 +119,7 @@ runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL) {
     rem <- caret::nearZeroVar(dmat[, -1, drop=FALSE], freqCut=freqCut)
     if (length(rem)) {
       tmp     <- colnames(dmat)[-1]
-      rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], "adjvars", "near zero variance",
+      rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], varSet, "near zero variance",
                                      varMap=varMap)
       dmat    <- dmat[, -(rem+1), drop=FALSE]
     }
@@ -181,7 +133,7 @@ runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL) {
     rem    <- caret::findCorrelation(corMat, cutoff=cor.cutoff)
     if (length(rem)) {
       tmp     <- colnames(dmat)[-1]
-      rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], "adjvars", 
+      rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], varSet, 
                         "correlated with another predictor", varMap=varMap)
       dmat    <- dmat[, -(rem+1), drop=FALSE]
       corMat  <- NULL
@@ -194,7 +146,7 @@ runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL) {
     rem <- subselect::trim.matrix(corMat)
     rem <- rem$names.discarded
     if (length(rem)) {
-      rem.obj <- runModel.addRemVars(rem.obj, rem, "adjvars", "ill conditioned",
+      rem.obj <- runModel.addRemVars(rem.obj, rem, varSet, "ill conditioned",
                                      varMap=varMap)
       tmp     <- !(colnames(dmat) %in% rem)
       dmat    <- dmat[, tmp, drop=FALSE]
@@ -213,9 +165,10 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
   nunq   <- op$check.n.unique.vals
   minN   <- op$check.nsubjects
   varMap <- metabdata$dict_metabnames
+  wr.nm  <- runModel.getWarningsListName()
 
   # Object for variables removed
-  rem.obj <- NULL
+  rem.obj <- modeldata[[wr.nm, exact=TRUE]]
 
   acovs  <- modeldata[["acovs", exact=TRUE]]
   ccovs  <- modeldata$ccovs
@@ -243,13 +196,14 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
   # Remove linearly dependent cols
   if (ncol(dmat) > 1) {
-    tmp     <- runModel.checkDesignMatCols(dmat, op, rem.obj=rem.obj, varMap=varMap)
+    tmp     <- runModel.checkDesignMatCols(dmat, op, rem.obj=rem.obj, varMap=varMap,
+                             varSet="adjvars")
     dmat    <- tmp$designMat
     rem.obj <- tmp$rem.obj
   }
 
   # Change column names of the design matrix to prevent names colliding later
-  if (ncol(dmat) < 1) stop("INTERNAL CODING ERROR 1")
+  if (ncol(dmat) < 1) stop("INTERNAL CODING ERROR in runModel.checkModelDesign")
   dmatCols        <- colnames(dmat)
   colnames(dmat)  <- paste(op$colNamePrefix, 0:(ncol(dmat)-1), sep="")
   names(dmatCols) <- colnames(dmat)
@@ -315,8 +269,9 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
   modeldata$designMatExpStartCol <- ncdmat + 1
   modeldata$designMatExpCols     <- (ncdmat + 1):ncol(dmat)
   modeldata$gdta.nrow            <- nrow(gdta)
-  modeldata$variables.removed    <- rem.obj
-  modeldata$varMap               <- c(metabdata$dict_metabnames, dmatCols)
+  modeldata$varMap               <- c(metabdata$dict_metabnames, dmatCols,
+                                      modeldata[["varMap", exact=TRUE]])
+  modeldata[[wr.nm]]             <- rem.obj
 
   modeldata
 

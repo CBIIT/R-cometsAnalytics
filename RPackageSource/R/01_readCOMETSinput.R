@@ -1,6 +1,6 @@
 #' Read in Excell file that contains metabolite abundances and metab data
 #'
-#' @param csvfilePath path of Excell file to be read in
+#' @param csvfilePath path of Excel file to be read in
 #' @return a list comprising:
 #'
 #' @examples
@@ -61,9 +61,21 @@ readCOMETSinput <- function(csvfilePath) {
   dta.models$exposure       <- checkVariableNames(dta.models$exposure, "Models sheet, EXPOSURE column") 
   dta.models$adjustment     <- checkVariableNames(dta.models$adjustment, "Models sheet, ADJUSTMENT column", convertMissTo=NA, stopOnMissError=0) 
   dta.models$stratification <- checkVariableNames(dta.models$stratification, "Models sheet, STRATIFICATION column", convertMissTo=NA, stopOnMissError=0) 
-  
+ 
   # We need a different function for the WHERE column
   dta.models$where <- normalizeWhere(dta.models$where) 
+
+  # Read in the options if models sheet has a MODELNAME column
+  dta.options <- NULL
+  modnm       <- getModelOptionsIdCol()
+  if (modnm %in% colnames(dta.models)) {
+    opnm        <- getOptionsSheetName()
+    dta.options <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, opnm),compbl=TRUE))
+
+    # Check the table
+    dta.options <- checkOptionsSheet(dta.options)
+    print(paste0(opnm, " sheet is read in"))
+  }  
 
   # Go through the varmap VARTYPE column and convert categorical entries into factors
   myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical" & dta.vmap$varreference!="metabolite_id")]
@@ -71,6 +83,11 @@ readCOMETSinput <- function(csvfilePath) {
   for (i in myfactors) {
 	dta.sdata[,i] <- factor(dta.sdata[,i])
   }
+
+  # Rename the variables in subject data to prevent errors in checkIntegrity
+  oldnames <- names(dta.sdata)
+  newnames <- renameSubjDataVars(oldnames, dta.vmap)
+  names(dta.sdata) <- newnames
 
   # Check file integrity:
   ckintegrity = checkIntegrity(
@@ -96,8 +113,8 @@ readCOMETSinput <- function(csvfilePath) {
   else {
     dta <- dplyr::inner_join(dta.sdata, dta.smetab)
 
-    idvar <-
-      base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
+    #idvar <- base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
+    idvar <- getVarRef_subjectId()  
     metabvar <-
       base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
 
@@ -136,12 +153,7 @@ readCOMETSinput <- function(csvfilePath) {
     mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
 
     # Make sure the metabololites are numeric
-    cls <- sapply(dtalist$subjdata, class)
-    tmp <- (cls != "numeric") & (names(cls) %in% mymets)
-    tmp[is.na(tmp)] <- FALSE
-    if (any(tmp)) {
-      for (v in names(cls[tmp])) dtalist$subjdata[, v] <- unfactor(dtalist$subjdata[, v], fun=as.numeric)
-    }
+    dtalist$subjdata <- convertVarsToNumeric(dtalist$subjdata, mymets)
 
     # check to see which columns have non-missing values
     havedata <-
@@ -207,6 +219,8 @@ readCOMETSinput <- function(csvfilePath) {
         "stratavar",
         "strata")
 
+    dtalist$options <- dta.options
+
     print(integritymessage)
     return(dtalist)
   }
@@ -265,3 +279,47 @@ runDescrip<- function(readData){
   return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
 }
 
+checkOptionsSheet <- function(x) {
+
+  sheet <- getOptionsSheetName()
+  if (!length(x)) stop(paste0("ERROR: ", sheet, " is empty"))
+  cols <- colnames(x)
+
+  # Required columns
+  req  <- c(getModelOptionsIdCol(), getModelFunctionCol(),
+            getOptionNameCol(), getOptionValueCol())
+  for (i in 1:length(req)) {
+    col <- req[i]
+    if (!(col %in% cols)) {
+      stop(paste0("ERROR: ", sheet, " sheet does not contain the ", col, " column"))
+    }
+
+    # Replace missing values with empty string
+    tmp <- is.na(x[, col, drop=TRUE])
+    if (any(tmp)) x[tmp, col] <- ""
+
+    # Remove quotation marks
+    if (i > 1) x[, col] <- setupOpStr(x[, col])
+  }
+
+  x
+
+} # END: checkOptionsSheet
+
+renameSubjDataVars <- function(oldnames, vmap) {
+
+  # list of variables named differently for cohort
+  tmp <- !is.na(vmap[["cohortvariable"]]) & vmap[["varreference"]] != getVarRef_metabId()
+  tmp[is.na(tmp)] <- FALSE
+  tst <- dplyr::filter(vmap, tmp)
+                  
+  # changes names string using mapvalues
+  newnames <- plyr::mapvalues(
+    oldnames,
+    from = c(base::tolower(tst$cohortvariable)),
+    to = c(base::tolower(tst$varreference))
+  )
+
+  newnames
+
+} # END: renameSubjDataVars

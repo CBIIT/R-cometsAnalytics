@@ -62,3 +62,41 @@ OutputXLSResults <- function (filename,datal,cohort=""){
   rio::export(datal, fname)
   return(fname)
 }
+
+#' Create an excel xlsx file from a list of data frames
+#'
+#' @param filename Name of file and can include path. It must have a ".xlsx" extension.
+#' @param obj List of data frames or matrices
+#'
+#' @return NULL
+#'
+#' @export
+OutputListToExcel <- function(filename, obj) {
+
+  N <- length(obj)
+  if (!N) return(NULL)
+
+  filename <- trimws(filename)
+  len      <- nchar(filename)
+  if (len < 5) stop("ERROR: filename is not valid")
+  str <- tolower(substr(filename, len-4, len))
+  if (str != ".xlsx") stop("ERROR: filename must have a .xlsx extension")
+  if (file.exists(filename)) file.remove(filename)
+
+  nms <- trimws(names(obj))
+  if (!length(nms)) nms <- paste("object ", 1:N, sep="")
+  tmp <- nchar(nms) < 1
+  if (any(tmp)) nms[tmp] <- paste("object ", (1:N)[tmp], sep="")
+
+  over <- TRUE
+  for (i in 1:N) {
+    tmp <- obj[[i]]
+    if (length(tmp) && (is.data.frame(tmp) || is.matrix(tmp))) {
+      rio::export(tmp, filename, which=nms[i], overwrite=over)
+      over <- FALSE
+    }
+  }
+  
+  NULL
+}
+

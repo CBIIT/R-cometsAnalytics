@@ -3,30 +3,44 @@
 #---------------------------------------------------------
 #' Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).
 #'
-#' @param readData list from readComets
-#' @param modelspec How model is specified (Interactive or Batch)
+#' @param readData list from \code{\link{readCOMETSinput}}
+#' @param modelspec How model is specified (Interactive or Batch). The default is Batch
 #' @param modlabel  if batch, chosen model specified by batch mode. If interactive model label.
-#' @param rowvars   if Interactive, a vector of outcome variables (usually metabolites rendered in rows, default is All metabolites)
-#' @param colvars   if Interactive, a vector of exposure variables (usually covariates rendered in columns)
-#' @param adjvars   If Interactive, a vector adjustment covariates
-#' @param strvars   If Interactive, stratification covariates
-#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.
+#' @param rowvars   if Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)
+#' @param colvars   if Interactive, a vector of exposure variables (see \code{details})
+#' @param adjvars   If Interactive, a vector adjustment covariates (see \code{details})
+#' @param strvars   If Interactive, stratification covariates (see \code{details})
+#' @param wgtvar    If Interactive, a variable of weights (see \code{details})
+#' @param offvar    If Interactive, an offset variable (see \code{details})
+#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 
+#'        'where' expects a vector of strings with a variable name, 
+#'        a comparison operator (e.g. "<", ">", "="), and a value.  
+#'        For example, "where = c("age>50","bmi > 22").  Note that rules must be separated by a comma.
 #'
-#' @return a list comprising:
-#' 1: subset data: gdta
-#' 2: column variables: ccovs
-#' 3: row variables: rcovs
-#' 4: adjustment variables: acovs
-#' 5: stratification variable: scovs
-#' 6: model specification: modspec
-#' 7: model label: modlab
-#' 8: whether all metabolites vs all metabolites is run: allvsall
+#' @details All metabolite variables specified should be listed in the \code{metabolite_name}
+#'   column of the \code{Metabolites} sheet of the Excel file. All non-metabolite
+#'   variables should be listed in the \code{VARREFERENCE} column of the
+#'   \code{VarMap} sheet. The \code{wgtvar} and \code{offvar} are only used when the
+#'   model function is \code{\link[stats]{glm}} or \code{\link[stats]{lm}}, see the
+#'   \code{model} option in \code{\link{options}}.
+#'
+#' @return a list comprising: \cr
+#' 1: subset data: gdta \cr
+#' 2: column variables: ccovs \cr
+#' 3: row variables: rcovs \cr
+#' 4: adjustment variables: acovs \cr
+#' 5: stratification variable: scovs \cr
+#' 6: model specification: modspec \cr
+#' 7: model label: modlab \cr
+#' 8: whether all metabolites vs all metabolites is run: allvsall \cr
+#' 9: weight variables: wgtcov \cr
+#' 10: offset variables: offcov
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
 #'
 #' @export
 
@@ -37,12 +51,18 @@ getModelData <-  function(readData,
                           colvars   = "",
                           adjvars   = NULL,
                           strvars   = NULL,
+                          wgtvar    = NULL,
+                          offvar    = NULL,
 			  where     = NULL) {
   if (is.na(match(modelspec, c("Interactive", "Batch")))) {
     stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
   }
 
-allvsall=F
+  allvsall <- FALSE
+  rem.obj  <- NULL
+  options  <- NULL
+  wgtcov   <- NULL
+  offcov   <- NULL
 
 # figure out the model specification based on type (Interactive or Batch)
 if (modelspec == "Interactive") {
@@ -53,29 +73,30 @@ if (modelspec == "Interactive") {
   colvars <- checkVariableNames(colvars, "colvars", default="", only.unique=1)
   adjvars <- checkVariableNames(adjvars, "adjvars", default=NULL, only.unique=1)
   strvars <- checkVariableNames(strvars, "strvars", default=NULL, only.unique=1)
+  wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",  default=NULL, only.unique=1, max.n=1)
+  offvar  <- checkVariableNames(offvar,  "offvar",  default=NULL, only.unique=1, max.n=1)
 
+  # Names changed in readCOMETSinput
   # list of variables named differently for cohort
-  tst <-
-    dplyr::filter(readData$vmap,
-                  !is.na(readData$vmap[["cohortvariable"]]) &
-                    readData$vmap[["varreference"]] != "metabolite_id")
-
+  #tst <-
+  #  dplyr::filter(readData$vmap,
+  #                !is.na(readData$vmap[["cohortvariable"]]) &
+  #                  readData$vmap[["varreference"]] != "metabolite_id")
   # changes names string using mapvalues
-  newnames <- plyr::mapvalues(
-    names(readData$subjdata),
-    from = c(base::tolower(tst$cohortvariable)),
-    to = c(base::tolower(tst$varreference))
-  )
-
+  #newnames <- plyr::mapvalues(
+  #  names(readData$subjdata),
+  #  from = c(base::tolower(tst$cohortvariable)),
+  #  to = c(base::tolower(tst$varreference))
+  #)
   # apply changes names to data frame
-  names(readData$subjdata) <- newnames
+  #names(readData$subjdata) <- newnames
 
 #  if(!is.null(rowvars) && rowvars != "All metabolite") {
 #	rowvars <- as.character(names(exmetabdata$dict_metabnames)[as.numeric(lapply(rowvars,function(x) 
 #		which(readData$dict_metabnames==x)))])
 #  }
   # Check that all variables that are input by user exist in the renamed data
-  allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars),"All metabolites"))
+  allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar),"All metabolites"))
   subjmetab <- as.character(lapply(colnames(readData$subjdata), function(x) {
         myind <- which(names(readData$dict_metabnames)==x)
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
@@ -99,8 +120,6 @@ if (modelspec == "Interactive") {
         myind <- which(readData$dict_metabnames==x)
         if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
         return(x) }))
-    #rcovs <- rowvars
-    #rcovs <- unlist(strsplit(rowvars, " "))
   }
 
   # rename the exposure variables
@@ -112,8 +131,6 @@ if (modelspec == "Interactive") {
         myind <- which(readData$dict_metabnames==x)
         if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
         return(x) }))
-    # ccovs <- colvars
-    #ccovs <- unlist(strsplit(colvars, " "))
   }
 
   # rename the adjustment variables
@@ -138,6 +155,26 @@ if (modelspec == "Interactive") {
     scovs <- strvars
   }
 
+  # rename the weight variable
+  if (!is.null(wgtvar)) {
+    wgtcov <- as.character(lapply(wgtvar, function(x) {
+        myind <- which(readData$dict_metabnames==x)
+        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
+        return(x) }))
+  } else {
+    wgtcov <- wgtvar
+  }
+
+  # rename the offset variable
+  if (!is.null(offvar)) {
+    offcov <- as.character(lapply(offvar, function(x) {
+        myind <- which(readData$dict_metabnames==x)
+        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
+        return(x) }))
+  } else {
+    offcov <- offvar
+  }
+
   # Assign allvsall variable
   if((colvars=="All metabolites") && (rowvars=="All metabolites")) {
 	allvsall=TRUE
@@ -158,6 +195,8 @@ if (modelspec == "Interactive") {
                     " will be dropped from the list of exposures")
       warning(msg)
     }
+    rem.obj <- runModel.addRemVars(rem.obj, vartoremove, "colvars", 
+                "are also adjvars", printWarning=0, varMap=NULL) 
   }
 
   # Check if adjusted variables are also outcomes
@@ -173,6 +212,8 @@ if (modelspec == "Interactive") {
                     " will be dropped from the list of outcomes")
       warning(msg)
     }
+    rem.obj <- runModel.addRemVars(rem.obj, vartoremove, "rowvars", 
+                "are also adjvars", printWarning=0, varMap=NULL) 
   }
 
   # end if modelspec is "Interactive"
@@ -195,51 +236,71 @@ else if (modelspec == "Batch") {
     stop("The model name input does not exist in the input Excell file. Please check your Models sheet.")
   }
 
-
   # rename variables to cohortvariable definitions -----------------------------
 
+  # Names changed in readCOMETSinput
   # list of variables named differently for cohort
-  tst <-
-    dplyr::filter(readData$vmap,
-                  !is.na(readData$vmap[["cohortvariable"]]) &
-                    readData$vmap[["varreference"]] != "metabolite_id")
-
+  #tst <-
+  #  dplyr::filter(readData$vmap,
+  #                !is.na(readData$vmap[["cohortvariable"]]) &
+  #                  readData$vmap[["varreference"]] != "metabolite_id")
   # changes names string using mapvalues
-  newnames <- plyr::mapvalues(
-    names(readData$subjdata),
-    from = c(base::tolower(tst$cohortvariable)),
-    to = c(base::tolower(tst$varreference))
-  )
-
+  #newnames <- plyr::mapvalues(
+  #  names(readData$subjdata),
+  #  from = c(base::tolower(tst$cohortvariable)),
+  #  to = c(base::tolower(tst$varreference))
+  #)
   # apply changes names to data frame
-  names(readData$subjdata) <- newnames
+  #names(readData$subjdata) <- newnames
 
   # assign outcome vars -------------------------
   if (length(mods) > 0 & mods$outcomes == "All metabolites") {
     rcovs <- c(readData[[2]])
-  } else
+  } else {
     rcovs <- as.vector(strsplit(mods$outcomes, " ")[[1]])
+    rcovs <- runModel.getNewVarName(trimws(rcovs), readData$dict_metabnames)
+  }
 
   # assign exposure vars -------------------------
   if (length(mods) > 0 & mods$exposure == "All metabolites") {
     ccovs <- c(readData[[2]])
-  } else
+  } else {
     ccovs <- as.vector(strsplit(mods$exposure, " ")[[1]])
+    ccovs <- runModel.getNewVarName(trimws(ccovs), readData$dict_metabnames)
+  }
 
   # assign adjustment vars -------------------------
   if (!is.na(mods$adjustment)) {
     acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
-  } else
+    acovs <- runModel.getNewVarName(trimws(acovs), readData$dict_metabnames)
+  } else {
     acovs <- NULL
+  }
 
   # assign stratification vars vars -------------------------
   if (!is.na(mods$stratification)) {
     scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
-  } else
+    scovs <- runModel.getNewVarName(trimws(scovs), readData$dict_metabnames)
+  } else {
     scovs <- NULL
+  }
+
+  # Get the options for this model
+  options <- getAllOptionsForModel(mods, readData)
+
+  # Get weight and offset variables
+  wgtvar <- NULL
+  offvar <- NULL
+  mop    <- options[[getModelOpsName(), exact=TRUE]]
+  if (length(mop)) {
+    wgtvar <- mop[["weights", exact=TRUE]]
+    if (length(wgtvar)) wgtcov <- runModel.getNewVarName(wgtvar, readData$dict_metabnames)
+    offcov <- mop[["offset", exact=TRUE]]
+    if (length(offvar)) offcov <- runModel.getNewVarName(offvar, readData$dict_metabnames)
+  }  
 
   # Check that all variables that are input by user exist in the renamed data
-  allvars <- c(setdiff(c(rcovs,ccovs,acovs,scovs),"All metabolites"))
+  allvars <- c(setdiff(c(rcovs,ccovs,acovs,scovs, wgtcov, offcov),"All metabolites"))
   if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
         stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
@@ -261,6 +322,12 @@ if (!is.null(acovs)) {
 if (!is.null(scovs)) {
   covlist <- c(covlist, scovs)
 }
+covlist <- c(covlist, wgtcov, offcov)
+varMap  <- NULL
+if (length(wgtvar) || length(offvar)) {
+  varMap        <- c(wgtvar, offvar)
+  names(varMap) <- c(wgtcov, offcov)
+}
 
 if(!is.null(where)) {
       numallsamps <- nrow(readData$subjdata)
@@ -270,9 +337,12 @@ if(!is.null(where)) {
 
 gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
 
-if(nrow(gdta) == 0) {
-        warning("The number of samples for this model is zero so the model will not be run")
+if(nrow(gdta) < 3) {
+  stop("Too few samples for this model, so the model will not be run")
 }
+
+# Outcomes must be numeric
+gdta <- convertVarsToNumeric(gdta, rcovs)
 
 # Create list for analyses  -------------------------------
 # list for subset data
@@ -282,18 +352,134 @@ if(nrow(gdta) == 0) {
 # 4: adjustment variables: acovs
 #    if (dobug)
 #      prdebug("End of getdata:", dim(gdta))
-list(
-  gdta = gdta,
-  ccovs = ccovs,
-  rcovs = rcovs,
-  acovs = acovs,
-  scovs = scovs,
+
+  ret <- list(
+  gdta            = gdta,
+  ccovs           = ccovs,
+  rcovs           = rcovs,
+  acovs           = acovs,
+  scovs           = scovs,
+  wgtcov          = wgtcov,
+  offcov          = offcov,
   dict_metabnames = readData$dict_metabnames,
-  modelspec = modelspec,
-  modlabel = modlabel,
-  where = where,
-  allvsall = allvsall
-)
+  modelspec       = modelspec,
+  modlabel        = modlabel,
+  where           = where,
+  allvsall        = allvsall,
+  varMap          = varMap,
+  options         = options
+  )
+  ret[[runModel.getWarningsListName()]] <- rem.obj
+
+  ret
 }
 
+getGlobalOptionsFromSheet <- function(opTable) {
+
+  modnm   <- getModelOptionsIdCol()
+  tmp     <- opTable[, modnm] %in% getGlobalOptionName()
+  opTable <- opTable[tmp, , drop=FALSE]
+  if (!nrow(opTable)) return(NULL)
+
+  opNameCol <- getOptionNameCol()
+  opValCol  <- getOptionValueCol()
+
+  # Remove rows with empty names and values
+  tmp       <- !nchar(opTable[, opNameCol]) & !nchar(opTable[, opValCol])
+  opTable   <- opTable[!tmp, , drop=FALSE]
+  if (!nrow(opTable)) return(NULL)
+
+  # Check the names and values and put them in a list
+  ret <- checkGlobalOpsFromCharVecs(opTable[, opNameCol], opTable[, opValCol])
+
+  ret
+
+} # END: getGlobalOptionsFromSheet
+
+getModelFunFromSheet <- function(opTable) {
+
+  col <- getModelFunctionCol()
+  vec <- tolower(unique(opTable[, col]))
+  tmp <- nchar(vec) > 0
+  vec <- vec[tmp]
+  n   <- length(vec)
+  if (!n) stop("ERROR: no model function specified")
+  if (n > 1) stop("ERROR: more than one model function specified")
+  
+  valid <- getValidModelNames()
+  ret   <- runModel.check.str(vec, valid, col)
+
+  ret
+
+} # END: getModelFunFromSheet
+
+getModelOptionsFromSheet <- function(opTable, modelFunc) {
+
+  opNameCol <- getOptionNameCol()
+  opValCol  <- getOptionValueCol()
+  opTable   <- unique(opTable[, c(opNameCol, opValCol), drop=FALSE])
+  opnames   <- opTable[, opNameCol, drop=TRUE]
+  opvalues  <- opTable[, opValCol, drop=TRUE]
+
+  # Remove ones with no name and no value
+  tmp <- (nchar(opnames) < 1) & (nchar(opvalues) < 1)
+  if (any(tmp)) {
+    opnames  <- opnames[!tmp]
+    opvalues <- opvalues[!tmp]
+  }
+  if (!length(opnames)) return(NULL)
+ 
+  # Check for missing names
+  if (any(nchar(opnames) < 1)) {
+    stop(paste0("ERROR: missing option names in ", getOptionsSheetName(), " sheet"))
+  }
+
+  # Check for duplicate names
+  tmp <- duplicated(opnames)
+  if (any(tmp)) {
+    str <- paste(opnames[tmp], collapse=", ", sep="")
+    msg <- paste0("ERROR: the options ", str, " appear more than once in the ",
+                  getOptionsSheetName(), " sheet")
+    stop(msg)
+  }
+
+  ret <- convertModelOptions(opnames, opvalues, modelFunc)
+
+  ret
+
+} # END: getModelOptionsFromSheet
+
+getAllOptionsForModel <- function(mods, readData) {
+
+  opTable <- readData[["options", exact=TRUE]]
+  if (!length(opTable)) return(NULL)
+
+  modnm   <- getModelOptionsIdCol()
+  modelID <- mods[[modnm,  exact=TRUE]]
+  if (length(modelID) != 1) stop("INTERNAL CODING ERROR 1 in getOptionsForModel")  
+
+  # Get global options
+  op <- getGlobalOptionsFromSheet(opTable)
+  if (is.null(op)) op <- list()
+
+  # Subset the sheet for the specific model id
+  tmp       <- opTable[, modnm] %in% modelID
+  opTable   <- opTable[tmp, , drop=FALSE]
+  if (!nrow(opTable)) {
+    msg <- paste0("ERROR: ", modnm, " = ", modelID, " not found in ", 
+                  getOptionsSheetName(), " sheet")
+    stop(msg)
+  }
+
+  # Get the model function
+  modelFunc <- getModelFunFromSheet(opTable)
+  op$model  <- modelFunc
+
+  # Get model options
+  mop <- getModelOptionsFromSheet(opTable, modelFunc)
+  op[[getModelOpsName()]] <- mop
+  
+  op
+
+} # END: getAllOptionsForModel
 
