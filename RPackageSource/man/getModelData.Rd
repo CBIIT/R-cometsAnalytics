@@ -4,45 +4,71 @@
 \alias{getModelData}
 \title{Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).}
 \usage{
-getModelData(readData, modelspec = "Batch", modlabel = "",
-  rowvars = "All metabolites", colvars = "", adjvars = NULL,
-  strvars = NULL, where = NULL)
+getModelData(
+  readData,
+  modelspec = "Batch",
+  modlabel = "",
+  rowvars = "All metabolites",
+  colvars = "",
+  adjvars = NULL,
+  strvars = NULL,
+  wgtvar = NULL,
+  offvar = NULL,
+  where = NULL
+)
 }
 \arguments{
-\item{readData}{list from readComets}
+\item{readData}{list from \code{\link{readCOMETSinput}}}
 
-\item{modelspec}{How model is specified (Interactive or Batch)}
+\item{modelspec}{How model is specified (Interactive or Batch). The default is Batch}
 
 \item{modlabel}{if batch, chosen model specified by batch mode. If interactive model label.}
 
-\item{rowvars}{if Interactive, a vector of outcome variables (usually metabolites rendered in rows, default is All metabolites)}
+\item{rowvars}{if Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)}
 
-\item{colvars}{if Interactive, a vector of exposure variables (usually covariates rendered in columns)}
+\item{colvars}{if Interactive, a vector of exposure variables (see \code{details})}
 
-\item{adjvars}{If Interactive, a vector adjustment covariates}
+\item{adjvars}{If Interactive, a vector adjustment covariates (see \code{details})}
 
-\item{strvars}{If Interactive, stratification covariates}
+\item{strvars}{If Interactive, stratification covariates (see \code{details})}
 
-\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector of strings with a variable name, a comparison operator (e.g. "<", ">", "="), and a value.  For example, "where = c("age>50","bmi > 22").  Note that rules must be separate by a comma.}
+\item{wgtvar}{If Interactive, a variable of weights (see \code{details})}
+
+\item{offvar}{If Interactive, an offset variable (see \code{details})}
+
+\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 
+'where' expects a vector of strings with a variable name, 
+a comparison operator (e.g. "<", ">", "="), and a value.  
+For example, "where = c("age>50","bmi > 22").  Note that rules must be separated by a comma.}
 }
 \value{
-a list comprising:
-1: subset data: gdta
-2: column variables: ccovs
-3: row variables: rcovs
-4: adjustment variables: acovs
-5: stratification variable: scovs
-6: model specification: modspec
-7: model label: modlab
-8: whether all metabolites vs all metabolites is run: allvsall
+a list comprising: \cr
+1: subset data: gdta \cr
+2: column variables: ccovs \cr
+3: row variables: rcovs \cr
+4: adjustment variables: acovs \cr
+5: stratification variable: scovs \cr
+6: model specification: modspec \cr
+7: model label: modlab \cr
+8: whether all metabolites vs all metabolites is run: allvsall \cr
+9: weight variables: wgtcov \cr
+10: offset variables: offcov
 }
 \description{
 Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).
+}
+\details{
+All metabolite variables specified should be listed in the \code{metabolite_name}
+  column of the \code{Metabolites} sheet of the Excel file. All non-metabolite
+  variables should be listed in the \code{VARREFERENCE} column of the
+  \code{VarMap} sheet. The \code{wgtvar} and \code{offvar} are only used when the
+  model function is \code{\link[stats]{glm}} or \code{\link[stats]{lm}}, see the
+  \code{model} option in \code{\link{options}}.
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted")
+modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
 
 }

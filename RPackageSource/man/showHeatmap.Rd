@@ -4,11 +4,20 @@
 \alias{showHeatmap}
 \title{Show interactive heatmap using plot_ly}
 \usage{
-showHeatmap(ccorrmat, rowsortby = "corr", plothgt = 700,
-  plotwid = 800, colscale = "RdYlBu")
+showHeatmap(
+  ccorrList,
+  strata.number = NULL,
+  rowsortby = "corr",
+  plothgt = 700,
+  plotwid = 800,
+  colscale = "RdYlBu"
+)
 }
 \arguments{
-\item{ccorrmat}{correlation matrix (output of runCorr())}
+\item{ccorrList}{correlation object (output of \code{\link{runCorr}})}
+
+\item{strata.number}{Only valid if ccorrList is from a stratified analysis. If NULL,
+then results from the first stratum will be used in the plot.}
 
 \item{rowsortby}{How row labels are sorted}
 
@@ -29,8 +38,7 @@ Show interactive heatmap using plot_ly
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted",
-	rowvars=c("lactose","lactate"))
+modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHeatmap(corrmatrix)
 }
