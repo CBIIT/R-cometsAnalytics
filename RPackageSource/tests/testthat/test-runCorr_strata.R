@@ -23,6 +23,6 @@ attr(excorrdata, "ptime")      <- NULL
 attr(test_excorrdata, "ptime") <- NULL
 test_that("COMETS::runCorr(exmodeldata,exmetabdata, DPP)",
 {
-  expect_identical(excorrdata, test_excorrdata)
+  expect_equal(excorrdata, test_excorrdata)
 })
 
