@@ -21,6 +21,6 @@ exmodeldata <- COMETS::getModelData(test_exmetabdata,modelspec="Interactive",row
 # Compare result to the baseline
 test_that("COMETS::getModelData(exmetabdata, ... ,strvars=race_grp)",
 {
-  expect_identical(exmodeldata, test_exmodeldata)
+  expect_equal(exmodeldata, test_exmodeldata)
 })
 

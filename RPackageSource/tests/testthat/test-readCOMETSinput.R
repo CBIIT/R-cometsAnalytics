@@ -14,6 +14,6 @@ load(rdafile)
 
 test_that("COMETS::readCOMETSinput(cometsInputAge.xlsx)",
 {
-  expect_identical(exmetabdata, test_exmetabdata)
+  expect_equal(exmetabdata, test_exmetabdata)
 })
 
