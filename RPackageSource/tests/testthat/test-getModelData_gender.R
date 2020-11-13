@@ -10,7 +10,7 @@ rdafile <- file.path(dir, "test_objects", "test_exmetabdata.rda")
 load(rdafile)
 
 # Load the baseline results
-rdafile <- file.path(dir, "test_objects", "test_exmodeldata_gender.rda")
+rdafile <- file.path(dir, "test_objects", "test_exmodeldata.rda")
 load(rdafile)
 
 # Call the function to test
