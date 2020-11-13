@@ -1,24 +1,50 @@
+#---------------------------------------------------------
+#' Main function for running the models
+#'
+#' @param modeldata list from function \code{\link{getModelData}}
+#' @param metabdata metabolite data list from \code{\link{readCOMETSinput}}
+#' @param cohort cohort label (e.g DPP, NCI, Shanghai)
+#' @param op list of options (see \code{\link{options}}).
+#'
+#' @return A list of objects with names \code{\link{ModelSummary}},
+#'        \code{\link{Effects}}, and \code{\link{Warnings}}. 
+#' Attribute of this list includes ptime for processing time of model run.
+#'
+#' @details This function will check for stratification variables, and if
+#'          present run within each stratum. The design matrix is
+#'          checked for validity (see \code{\link{options}}). 
+#'
+#' @examples
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
+#' 	rowvars=c("lactose","lactate"))
+#' obj <- runModel(modeldata,exmetabdata, "DPP")
+#' @export
 
-runModel <- function(modeldata, metabdata, cohort="", 
-                     model="pcorr", family="gaussian", link="", ...) {
+runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
 
-  # model    "pcorr" or "glm"
-  # family   String for the family to use
-  # link     String for the link function. The default will be to use
-  #          the canonical link.
-  # ...      Additional arguments
+  ptm       <- base::proc.time() # start processing time
 
-  ptm <- base::proc.time() # start processing time
-
-  op        <- list(...)
-  op$cohort <- cohort
-  model     <- runModel.check.model(model)
-  op$model  <- model
-  op        <- runModel.checkOptions(op)
-  if (model != "pcorr") {
-    op$family <- runModel.check.family(family)
-    op$link   <- runModel.check.link(link, op$family)
+  # Check if options were obtained in getModelData
+  if (!is.null(modeldata[["options", exact=TRUE]])) {
+    if (!is.null(op)) {
+      tmp <- list()
+      msg <- paste0("options for runModel were obtained from the excel options sheet,",
+                    " not from the op list passed in")
+      tmp[[runModel.getWarningCol()]] <- "WARNING"
+      tmp[[runModel.getObjectCol()]]  <- "op"
+      tmp[[runModel.getMessageCol()]] <- msg
+      warning(msg)
+      nm <- runModel.getWarningsListName()
+      modeldata[[nm]] <- runmodel.addWarning(modeldata[[nm, exact=TRUE]], tmp)
+    }
+    op <- modeldata$options 
   }
+
+  op        <- runModel.checkOptions(op, modeldata)
+  op$cohort <- cohort
   ret       <- runModel.start(modeldata, metabdata, op)
 
   # Stop the clock
@@ -44,6 +70,23 @@ runModel.varMap <- function(vars, varMap) {
   vars
 
 } # END: runModel.varMap
+
+runModel.getNewVarName <- function(vars, varMap) {
+
+  if (!length(vars)) return(vars)
+
+  new        <- varMap
+  rows       <- match(vars, new)
+  tmp        <- !is.na(rows)
+  if (any(tmp)) {
+    rows      <- rows[tmp]
+    vars[tmp] <- names(varMap)[rows]
+  }
+
+  vars
+
+} # END: runModel.getNewVarName
+
 
 runModel.setReturnDF <- function(x, varMap) {
 
@@ -75,18 +118,18 @@ runModel.setReturnDF <- function(x, varMap) {
 
 } # END: runModel.setReturnDF
 
-runModel.combineResObjects <- function(base, new, strat) {
+runModel.combineResObjects <- function(base, new, strat, stratNum) {
 
   d <- dim(new)
   if (!length(d)) return(base)
   tmp <- colnames(new)
-  if (length(strat) != 1) stop("INTERNAL CODING ERROR 1")
-  new <- cbind(new, strat)
-  colnames(new) <- c(tmp, "strata")
+  if (length(strat) != 1) stop("INTERNAL CODING ERROR 1 in runModel.combineResObjects")
+  new <- cbind(new, strat, stratNum)
+  colnames(new) <- c(tmp, runModel.getStrataColName(), runModel.getStrataNumColName())
   if (!length(base)) {
     ret <- new
   } else {
-    if (!identical(colnames(base), colnames(new))) stop("INTERNAL CODING ERROR 2")
+    if (!identical(colnames(base), colnames(new))) stop("INTERNAL CODING ERROR 2 in runModel.combineResObjects")
     ret <- rbind(base, new)
   }
 
@@ -94,7 +137,7 @@ runModel.combineResObjects <- function(base, new, strat) {
 
 } # END: runModel.combineResObjects
 
-runModel.combineResults <- function(base, new, strat) {
+runModel.combineResults <- function(base, new, strat, stratNum) {
 
   if (!length(base)) base <- list()
   warn1 <- base[["Warnings", exact=TRUE]]
@@ -105,20 +148,20 @@ runModel.combineResults <- function(base, new, strat) {
     tmp[[runModel.getObjectCol()]]  <- ""
     tmp[[runModel.getMessageCol()]] <- msg
     obj2 <- runmodel.addWarning(NULL, tmp)
-    base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat) 
+    base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum) 
     return(base)
   }
 
   obj1 <- base[["ModelSummary", exact=TRUE]]
   obj2 <- new[["ModelSummary", exact=TRUE]]
-  base[["ModelSummary"]] <- runModel.combineResObjects(obj1, obj2, strat) 
+  base[["ModelSummary"]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
 
   obj1 <- base[["Effects", exact=TRUE]]
   obj2 <- new[["Effects", exact=TRUE]]
-  base[["Effects"]] <- runModel.combineResObjects(obj1, obj2, strat) 
+  base[["Effects"]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
 
   obj2 <- new[["Warnings", exact=TRUE]]
-  base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat)
+  base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum)
 
   base
 
@@ -140,12 +183,11 @@ runModel.getStratVec <- function(gdta, scovs) {
 } # END: runModel.getStratVec
 
 runModel.start <- function(modeldata, metabdata, op) {
-
-  if (op$model == "glm") op$famFun <- runModel.getFamilyFun(op$family, op$link)   
-  if (op$DEBUG) print(op)
+   
+  if (op$DEBUG) print(op)  
 
   # Object for warning messages
-  warn.obj <- NULL
+  warn.obj <- modeldata[[runModel.getWarningsListName(), exact=TRUE]]
 
   scovs  <- modeldata[["scovs", exact=TRUE]]
   nscovs <- length(scovs)
@@ -183,7 +225,7 @@ runModel.start <- function(modeldata, metabdata, op) {
     }
 
     # Combine results
-    retList <- runModel.combineResults(retList, tmp, strat)
+    retList <- runModel.combineResults(retList, tmp, strat, i)
   }
 
   retList
@@ -200,13 +242,21 @@ runModel.main <- function(modeldata, metabdata, op) {
   modeldata$designMatCols0 <- runModel.varMap(modeldata$designMatCols0, modeldata$varMap)
   if (op$DEBUG) print(modeldata)
 
+  ms.nm <- getModelSummaryName()
+  ef.nm <- getEffectsName()
+  wr.nm <- runModel.getWarningsListName()
+
   # Run all metabolite and exposures
   tmp     <- runModel.runAllMetabs(modeldata, op) 
-  ret     <- tmp[["fit", exact=TRUE]]
-  ret2    <- tmp[["coef", exact=TRUE]]
-  rem.obj <- tmp$variables.removed
+  ret     <- tmp[[ms.nm, exact=TRUE]]
+  ret2    <- tmp[[ef.nm, exact=TRUE]]
+  rem.obj <- tmp[[wr.nm, exact=TRUE]]
   if (!length(ret)) {
-    return(list(ModelSummary=ret, Effects=ret2, Warnings=rem.obj))
+    retlist          <- list()
+    retlist[[ms.nm]] <- ret
+    retlist[[ef.nm]] <- ret2
+    retlist[[wr.nm]] <- rem.obj
+    return(retlist)
   }
 
   # Add on some additional cols to the fit df
@@ -214,6 +264,7 @@ runModel.main <- function(modeldata, metabdata, op) {
   ret[, "spec"]   <- modeldata$modelspec
   ret[, "model"]  <- modeldata$modlabel
   tmp <- modeldata[["acovs", exact=TRUE]]
+  if (length(tmp)) tmp <- runModel.varMap(tmp, modeldata$varMap)
   ret[, "adjspec"] <- runModel.getVarStr(tmp)
   ret <- fixData(ret)
 
@@ -241,19 +292,28 @@ runModel.main <- function(modeldata, metabdata, op) {
   ret2[tmp, "outcomespec"] <- ret[rows, "outcomespec"]
 
   # Make sure certain columns in the retured data frames are numeric
-  ret  <- runModel.setReturnDF(ret, metabdata)
-  ret2 <- runModel.setReturnDF(ret2, metabdata)
+  ret  <- runModel.setReturnDF(ret,  modeldata$varMap)
+  ret2 <- runModel.setReturnDF(ret2, modeldata$varMap)
 
-  list(ModelSummary=ret, Effects=ret2, Warnings=rem.obj)
+  retlist          <- list()
+  retlist[[ms.nm]] <- ret
+  retlist[[ef.nm]] <- ret2
+  retlist[[wr.nm]] <- rem.obj
+
+  retlist
 
 } # END: runModel.main
 
 runModel.defRetObj <- function(model, dmatCols0) {
 
-  if (model == "pcorr") {
+  if (model == getCorrModelName()) {
     ret <- runModel.defRetObj.pcor(dmatCols0)
-  } else {
+  } else if (model == getGlmModelName()) {
     ret <- runModel.defRetObj.glm(dmatCols0)
+  } else if (model == getLmModelName()) {
+    ret <- runModel.defRetObj.lm(dmatCols0)
+  } else {
+    stop("INTERNAL CODING ERROR in runModel.defRetObj")
   }
 
   ret
@@ -276,7 +336,7 @@ runModel.getResponseSubs <- function(y, family) {
   if ((family == "") || (family == "gaussian")) {
     ret <- rep(TRUE, length(y))
   } else if ((family == "binomial") || (family == "quasibinomial")) {
-    ret <- (y >= 0) & (y <= 1) 
+    ret <- (y == 0) | (y == 1) 
   } else if ((family == "Gamma") || (family == "inverse.gaussian")) {
     ret <- y > 0
   } else if (family == "poisson") {
@@ -340,9 +400,11 @@ runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
 runModel.callFunc <- function(x, y, expVars, op) {
 
   if (op$pcorrFlag) {
-    ret <- runModel.calcCorr(x, y, expVars, op$cor.method)
+    ret <- runModel.calcCorr(x, y, expVars, op)
+  } else if (op$glmFlag) {
+    ret <- runModel.callGLM(x, y, op)
   } else {
-    ret <- runModel.callGLM(x, y, op$famFun)
+    ret <- runModel.callLM(x, y, op)
   }
 
   ret
@@ -372,16 +434,14 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   isfactor     <- newmodeldata$isfactor
   k            <- 0
   k1           <- 0
-  anyFactor    <- any(isfactor[ccovs])
   nruns        <- nrcovs*nccovs
-  subOrder     <- newmodeldata$designSubOrder
   dmatCols0    <- newmodeldata$designMatCols  
   varMap       <- newmodeldata$varMap
   checkDesign  <- op$check.design
-  family       <- op$family
-  rem.obj      <- newmodeldata$variables.removed
+  rem.obj      <- newmodeldata[[runModel.getWarningsListName(), exact=TRUE]]
   DEBUG        <- op$DEBUG
   if (DEBUG) print(rem.obj)
+  tooFewSubs   <- runModel.getTooFewSubsStr()
 
   # Get the maximum number of rows in the return object for effects
   N <- nrcovs*sum(newmodeldata$nlevels)
@@ -400,6 +460,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   remVec   <- rep("", nruns)
   fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
   conv     <- rep(FALSE, nruns)
+  waldP    <- rep(NA, nruns)
     
   # Loop over each exposure in the outer loop
   for (j in 1:nccovs) {
@@ -419,7 +480,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
     # Check for min number of subs
     if (n0 < minNsubs) {
       rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", 
-                      "too few subjects", varMap=varMap)
+                      tooFewSubs, varMap=varMap)
       next
     }
 
@@ -427,29 +488,41 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
     if (checkDesign) {
       tmp   <- runModel.checkDesignWithExp(x[subset0, , drop=FALSE], op, ccovNames,
                                            varMap=varMap)
-      dcols <- tmp[["cols", exact=TRUE]]
+      dcols     <- tmp[["cols", exact=TRUE]]
+      ccovNames <- tmp$expVar
       if (!length(dcols)) {
         rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", tmp$msg, varMap=varMap)
         next
       }
     }
 
+    # Final check of exposure columns
+    ccovNames <- ccovNames[ccovNames %in% colnames(x)]
+    if (!length(ccovNames)) {
+      rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", 
+                    runModel.getExpRemFromDesign(), varMap=varMap)
+      next
+    } 
+    dcols0 <- dcols
+
     # Loop over each outcome
     for (i in 1:nrcovs) {
 
-      # Get the outcome
       rcovi <- rcovs[i]
       if (rcovi == ccovj) next
-      tmp   <- as.numeric(newmodeldata$gdta[[rcovi]])  
-      y     <- tmp[subOrder]
-      
-      # Determine the subset to use from the response
-      subset <- runModel.getResponseSubs(y, family)
+
+      # Get the outcome and other vars needed
+      tmp    <- runModel.getModelVectors(newmodeldata, rcovi, op)
+      y      <- tmp$response
+      subset <- tmp$subset
+      op     <- tmp$op 
 
       # Get the final subset of subjects to use 
       subset <- subset0 & subset
       nsubs  <- sum(subset)
       fit    <- NULL
+      ccovs2 <- ccovNames
+      dcols  <- dcols0
  
       if (nsubs >= minNsubs) {
         # Check design matrix if subjects were removed due to missing values
@@ -458,19 +531,20 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
                                                 varMap=varMap)
           dcols  <- tmp[["cols", exact=TRUE]]
           fit    <- tmp$msg 
+          ccovs2 <- tmp$expVar
         } 
         if (length(dcols)) {
           fit  <- try(runModel.callFunc(x[subset, dcols, drop=FALSE], y[subset], 
-                      ccovNames, op), silent=TRUE)
+                      ccovs2, op), silent=TRUE)
         }
       } else {
-        fit <- "too few subjects"
+        fit <- tooFewSubs
       }
       if (DEBUG) {
         print(fit)
         print(summary(fit))
       } 
-   
+
       # Get the results to save
       tmp <- runModel.tidy(nsubs, fit, ccovNames, defObj, dcols, dmatCols0, op)
 
@@ -490,6 +564,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       remVec[k1]     <- tmp$adj.rem
       fitMat[k1,]    <- tmp$fit.stats
       conv[k1]       <- tmp$converged
+      waldP[k1]      <- tmp$wald.pvalue
       k              <- k2
     }
   }
@@ -498,9 +573,10 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   ret1 <- ret2 <- NULL
   if (k) {
     tmp  <- 1:k1
-    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], conv[tmp], fitMat[tmp, , drop=FALSE], 
+    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], conv[tmp], waldP[tmp], 
+                       fitMat[tmp, , drop=FALSE], 
                        msgVec[tmp], adjVec[tmp], remVec[tmp], stringsAsFactors=FALSE)
-    colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged",
+    colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged", "wald.pvalue",
                        names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
     ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
     colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
@@ -508,12 +584,59 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
 
     # Subset if needed
     if (k < N) ret2 <- ret2[1:k, , drop=FALSE]
-    if (op$pcorrFlag) ret1$converged <- NULL
+    if (op$pcorrFlag) {
+      ret1$converged   <- NULL
+      ret1$wald.pvalue <- NULL
+    } else if (op$lmFlag) {
+      ret1$converged   <- NULL
+      ret1$statistic   <- NULL
+      ret1$df          <- NULL 
+      ret1$p.value     <- NULL 
+    }
   }
 
-  list(fit=ret1, coef=ret2, variables.removed=rem.obj)
+  ret                                   <- list()
+  ret[[getModelSummaryName()]]          <- ret1
+  ret[[getEffectsName()]]               <- ret2
+  ret[[runModel.getWarningsListName()]] <- rem.obj
+ 
+  ret
 
 } # END: runModel.runAllMetabs
+
+runModel.getModelVectors <- function(modeldata, yvar, op) {
+
+  subOrder <- modeldata$designSubOrder
+  nm       <- getModelOpsName()
+  mop      <- op[[nm]]
+
+  # response vector
+  tmp      <- as.numeric(modeldata$gdta[[yvar]])  
+  y        <- tmp[subOrder]
+
+  # Determine the subset to use from the response
+  subset <- runModel.getResponseSubs(y, mop$family)
+
+  # Get other vectors if needed and store them in op
+  if (mop$weightsFlag) {
+    tmp             <- as.numeric(modeldata$gdta[[modeldata$wgtcov]])  
+    vec             <- tmp[subOrder]
+    mop$weights.vec <- vec
+    subset          <- subset & (vec > 0) & is.finite(vec) 
+  }
+  if (mop$offsetFlag) {
+    tmp            <- as.numeric(modeldata$gdta[[modeldata$offcov]])  
+    vec            <- tmp[subOrder]
+    mop$offset.vec <- vec
+    subset         <- subset & is.finite(vec) 
+  }
+  tmp <- is.na(subset)
+  if (any(tmp)) subset[tmp] <- FALSE
+  op[[nm]] <- mop
+
+  list(response=y, subset=subset, op=op)
+
+} # END: runModel.getModelVectors 
 
 runModel.designMat <- function(data, vars, categorical=NULL) {
   
@@ -544,7 +667,7 @@ runModel.designMat <- function(data, vars, categorical=NULL) {
 runModel.getDummyVars <- function(data, var) {
 
   ret <- runModel.designMat(data, var)
-  if (ncol(ret) < 2) stop("INTERNAL CODING ERROR")
+  if (ncol(ret) < 2) stop("INTERNAL CODING ERROR in runModel.getDummyVars")
   ret <- ret[, -1, drop=FALSE]
 
   ret
@@ -568,8 +691,6 @@ runModel.getNlevels <- function(data, ccovs, isfactor) {
   ret
 
 } # END: runModel.getNlevels
-
-runModel.getVarSep <- function() { ";" }
 
 runModel.getVarStr <- function(vars, collapse=";", default="") {
 
@@ -595,3 +716,106 @@ runModel.getAdjVarStr <- function(nms, dmatCols0) {
   ret
 
 } # END: runModel.getAdjVarStr 
+
+# Function to compute the Wald test (2 - sided)
+runModel.getWaldTest <- function(fit, parmNames, sfit=NULL, whichCov=NULL) {
+
+  # fit        Return object from glm, list with names "coefficients"
+  #            and "cov.scaled", return object from snp.logistic or snp.matched.
+  # parmNames  Character vector of parameters to test  
+  # sfit       summary(fit)
+  # whichCov   For survival, robust or non-robust
+
+  tmp   <- runModel.getEstCov(fit, sfit=sfit, which=whichCov)
+  parms <- tmp[["estimates", exact=TRUE]]
+  cov   <- tmp[["cov", exact=TRUE]]
+  ret   <- runModel.waldTest.main(parms, cov, parmNames)
+
+  ret   
+  
+} # END: runModel.getWaldTest
+
+# Function to return point estimates and covariance matrix from an object
+runModel.getEstCov <- function(fit, sfit=NULL, which=NULL) {
+
+  clss <- class(fit)
+  
+  if (any(clss == "glm")) {
+    parms <- fit$coefficients
+    if (!length(sfit)) sfit <- summary(fit)
+    cov   <- sfit$cov.scaled
+  } else if (any(clss == "lm")) {
+    parms <- fit$coefficients
+    if (!length(sfit)) sfit <- summary(fit)
+    sigma <- sfit$sigma
+    cov   <- (sfit$cov.unscaled)*sigma*sigma
+  } else if (any(clss == "coxph")) {
+    parms         <- fit$coefficients
+    if (!is.null(which)) {
+      cov <- fit[["which", exact=TRUE]]
+    } else {
+      cov <- fit$var
+    }
+    vnames        <- names(parms)
+    rownames(cov) <- vnames
+    colnames(cov) <- vnames
+  } else {
+    parms <- NULL
+    cov   <- NULL
+  }
+
+  list(estimates=parms, cov=cov)
+
+} # END: runModel.getEstCov
+
+# Function to compute the Wald test (2 - sided) 
+runModel.waldTest.main <- function(parms, cov, varnames) {
+
+  # parms      Parameter vector
+  # cov        Covariance matrix
+  # varnames   Character vector of parameters to test
+
+  ret    <- list(pvalue=NA, df=0, test=NA)
+  if ((!length(varnames)) || (!length(parms)) || (!length(cov))) return(ret)
+
+  tmp <- (varnames %in% names(parms)) & (varnames %in% colnames(cov))
+  varnames <- varnames[tmp]
+  if (!length(varnames)) return(ret)
+
+  pvec   <- parms[varnames]
+  covmat <- cov[varnames, varnames, drop=FALSE]
+  tmp    <- is.finite(pvec) & is.finite(diag(covmat))
+  if (!all(tmp)) {
+    pvec   <- pvec[tmp]
+    covmat <- covmat[tmp, tmp]
+  }
+  df <- length(pvec)
+
+  if (df == 1) {
+    test   <- pvec/sqrt(as.numeric(covmat))
+    pvalue <- 2*pnorm(abs(test), lower.tail=FALSE) 
+  } else {
+    test   <- NA
+    pvalue <- NA
+
+    # See if matrix is invertible
+    inv <- try(solve(covmat), silent=TRUE)
+    if (!("try-error" %in% class(inv))) {
+      dim(pvec) <- c(df, 1)
+      test      <- as.numeric(t(pvec) %*% inv %*% pvec)
+      if (!is.finite(test)) test <- NA
+      if (test >= 0) pvalue <- pchisq(test, df=df, lower.tail=FALSE) 
+    }
+  } 
+
+  list(pvalue=pvalue, df=df, test=test)
+
+} # END: runModel.waldTest.main
+
+runModel.getFormulaStr <- function(yvar, dmatCols) {
+
+  str <- paste(dmatCols, collapse=" + ", sep="")
+  str <- paste(yvar, " ~ ", str, sep="")
+  str
+
+} # END: runModel.getFormulaStr

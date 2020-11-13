@@ -1,3 +1,48 @@
+#' A list of 1:
+#' \itemize{
+#' \item{\code{method}}{ Correlation method to use. It must be one of 
+#'                   "spearman", "pearson", "kendall".
+#'                         The default value is "spearman".}
+#' }
+#'
+#' @name correlation.options
+#' @title options list for \code{model="correlation"}
+#' 
+#' @examples 
+#' model.options <- list(method="pearson")
+NULL
+
+
+runModel.getDefaultPcorrOptions <- function() {
+
+  ret <- list(method="spearman")
+  ops.c <- c("method")
+
+  list(default=ret, ops.character=ops.c)
+
+
+} # END: runModel.getDefaultPcorrOptions
+
+runModel.checkPcorrOpList <- function(op, name="model.options") {
+
+  n       <- length(op)
+  if (n && !is.list(op)) stop(paste("ERROR: ", name, " must be a list", sep=""))
+
+  tmp   <- runModel.getDefaultPcorrOptions()
+  def   <- tmp$default
+  valid <- names(def)
+  ops.c <- tmp$ops.character
+  if (n) {
+    checkOptionListNames(op, valid, name)
+    checkOp_check.cor.method(op$method, name="method")
+  }
+  op <- default.list(op, valid, def)
+
+  op
+
+} # END: runModel.checkPcorrOpList
+
+
 runModel.defRetObj.pcor <- function(dmatCols0) {
 
   vec               <- c("term", "corr", "p.value")
@@ -10,7 +55,7 @@ runModel.defRetObj.pcor <- function(dmatCols0) {
   adj               <- runModel.getVarStr(dmatCols0[-1])
 
   list(converged=TRUE, coef.stats=coef.stats, fit.stats=fit.stats, 
-       msg="", adj=adj, adj.rem="")
+       msg="", adj=adj, adj.rem="", wald.pvalue=NA)
 
 } # END: runModel.defRetObj.pcor
 
@@ -18,7 +63,7 @@ runModel.tidyPcorr <- function(nsubs, fit, expVars, defObj, designMatCols, dmatC
 
   if (!length(fit)) {
     ret           <- defObj
-    ret$msg       <- "unknown error"
+    ret$msg       <- runModel.getUnknownErrorStr()
   } else if (isString(fit)) {
     ret           <- defObj
     ret$msg       <- fit
@@ -36,14 +81,17 @@ runModel.tidyPcorr <- function(nsubs, fit, expVars, defObj, designMatCols, dmatC
     adj.rem <- runModel.getAdjVarStr(nms0[rem], dmatCols0)
 
     ret  <- list(converged=TRUE, coef.stats=obj1, fit.stats=nsubs, 
-                 msg=msg, adj=adj, adj.rem=adj.rem)  
+                 msg=msg, adj=adj, adj.rem=adj.rem, wald.pvalue=NA)  
   } 
 
   ret
 
 } # END: runModel.tidyPcorr
 
-runModel.calcCorr <- function(designMat, y, expVars, method) {
+runModel.calcCorr <- function(designMat, y, expVars, op) {
+
+  mop    <- op[[getModelOpsName()]]
+  method <- mop$method
 
   # Use pcor.test for categorical exposure variables or if there are
   #   adjusted covariates
@@ -97,7 +145,9 @@ runModel.pcor.test <- function(designMat, y, expVars, method) {
   rvec     <- pvec
   msg      <- rep("", n)
   startCol <- ncol(designMat) - n
-  if (startCol < 2) stop("INTERNAL CODING ERROR")
+  if (startCol < 1) {
+    stop("INTERNAL CODING ERROR in runModel.pcor.test")
+  }
 
   # Loop over each dummy var
   for (i in 1:n) {

@@ -1,16 +1,23 @@
 checkVariableNames <- function(varnames, name, convertMissTo="", default=NULL, only.unique=0,
-                               stopOnMissError=1) {
+                               stopOnMissError=1, max.n=0) {
 
   if (!length(varnames)) return(default)
   varnames <- try(as.vector(varnames), silent=TRUE)
   if ("try-error" %in% class(varnames)) stop(paste(name, " must be a character vector", sep=""))
-  if (!is.character(varnames)) stop(paste(name, " must be a character vector", sep=""))
   if (!is.vector(varnames)) stop(paste(name, " must be a character vector", sep=""))
+  if (max.n && (length(varnames) > max.n)) stop(paste(name, " must have length ", max.n, sep=""))
 
+  # varnames could be all missing
   if (!is.na(convertMissTo)) {
     tmp <- is.na(varnames)
     if (any(tmp)) varnames[tmp] <- convertMissTo
   }
+  if (all(is.na(varnames)) && !stopOnMissError && !only.unique) {
+    return(varnames)
+  }
+
+  if (!is.character(varnames)) stop(paste(name, " must be a character vector", sep=""))
+  
   varnames <- tolower(trimws(varnames))
   if (only.unique) varnames <- unique(varnames)
   tmp <- nchar(varnames)
@@ -204,3 +211,35 @@ unfactor <- function(fac, fun=NULL) {
   ret
 
 } # END: unfactor
+
+# Function to parse string of options
+parseStr <- function(str, sep=";") {
+
+  ret <- trimws(unlist(strsplit(str, sep, fixed=TRUE)))
+  tmp <- nchar(ret) > 0
+  ret <- ret[tmp]
+  if (!length(ret)) ret <- NULL
+  ret
+
+} # END: parseStr
+
+convertVarsToNumeric <- function(data, vars) {
+
+  if (!length(vars)) return(data)
+  tmp  <- vars %in% colnames(data)
+  vars <- vars[tmp]
+  if (!length(vars)) return(data)
+
+  cls <- sapply(data[, vars, drop=FALSE], class)
+  tmp <- (cls != "numeric") & (names(cls) %in% vars)
+  tmp[is.na(tmp)] <- FALSE
+  if (any(tmp)) {
+    for (v in names(cls[tmp])) data[, v] <- unfactor(data[, v], fun=as.numeric)
+  }
+
+  data
+
+} # END: convertVarsToNumeric
+
+
+

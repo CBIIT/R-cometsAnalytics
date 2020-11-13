@@ -83,18 +83,46 @@ checkForSameVars <- function(v1, v2) {
 checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames) {
 
     print("Running Integrity Check...")
+
+    allVars.data   <- trimws(colnames(dta.sdata))
+    allVars.metabs <- trimws(dict_metabnames)  
+    allVars.common <- intersect(allVars.data, allVars.metabs)
+    allVars        <- c(allVars.data, allVars.metabs)
+    metabIdName    <- getVarRef_metabId()
+    subjidNew      <- getVarRef_subjectId()
+
     # get the cohort equivalent of metabolite_id and subject id
-    metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == "metabolite_id"])
-    subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == 'id'])
+    metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == metabIdName])
+    subjid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == subjidNew])
     subjid.smetab = names(dict_metabnames)[which(dict_metabnames==subjid)] # to access dta.smetab
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
     allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)]))
-    print(paste(dta.models$ccovs,dta.models$scovs))
+    #print(paste(dta.models$ccovs,dta.models$scovs))
 
     # take out multiple blanks and add _ to all metabolites to avoid splitting
     allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
+
+    # See if the variables exist in the data
+    params <- unique(allmodelparams[!(allmodelparams %in% c("All_metabolites", "all_metabolites"))])
+    tmp    <- !(params %in% allVars)
+    if (any(tmp)) {
+      tmp <- paste0(params[tmp], collapse=", ")
+      msg <- paste0("ERROR: the variable(s) ", tmp, 
+                    " do not exist in the data! Check the naming!")
+      stop(msg)
+    }
+
+    # See if any of the variables are in both sets of data
+    tmp <- params %in% allVars.common
+    if (any(tmp)) {
+      tmp <- paste0(params[tmp], collapse=", ")
+      msg <- paste0("ERROR: the variable(s) ", tmp, 
+                   " are on both the SubjectData and SubjectMetabolite sheets")
+      stop(msg)
+    }
+
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
@@ -104,19 +132,12 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     else if (checkForSameVars(dta.models$stratification, dta.models$exposure)) { 
         stop("Exposure and stratification parameters are the same!  This is not allowed.")
     }
-    else if (length(intersect(allmodelparams,
-         tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
-# tolower(c("All metabolites", colnames(dta.smetab), colnames(dta.sdata)))))!=length(allmodelparams))
-{
-         stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")
-    }
     else if (length(subjid) == 0) {
         stop("id (for subject id) is not found as a parameter in VarMap sheet!  Specify which column should be used for subject id")
     }
-    else if (length(intersect(subjid,colnames(dta.sdata))) != 1) {
+    else if (length(intersect(subjidNew,colnames(dta.sdata))) != 1) {
         stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectData' sheet. Check the input file.")
     }
-    #else if (length(intersect(subjid,colnames(dta.smetab))) != 1) {
      else if (length(intersect(subjid,dict_metabnames)) !=1) {
         stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectMetabolites' sheet. Check the input file.")
     }
@@ -126,15 +147,15 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     else {
       #print("Passed the checks")
       dta.metab[[metabid]] = tolower(dta.metab[[metabid]])
-      dta.sdata[[subjid]] = tolower(dta.sdata[[subjid]])
+      dta.sdata[[subjidNew]] = tolower(dta.sdata[[subjidNew]])
       dta.smetab[[subjid.smetab]] = tolower(dta.smetab[[subjid.smetab]])
       if (length(grep(metabid,colnames(dta.metab))) == 0) {
           stop("Error: Metabolite ID from 'VarMap Sheet' (",metabid,") does not match column name from 'Metabolites Sheet'")
       }
-      else if (length(grep(subjid,colnames(dta.sdata))) == 0) {
+      else if (length(grep(subjidNew,colnames(dta.sdata))) == 0) {
           stop("Error: Sample ID from 'VarMap Sheet' (",subjid,") does not match a column name in 'SubjectData Sheet'")
       }
-      else if (length(unique(dta.sdata[,subjid])) != length(unique(dta.smetab[,subjid.smetab]))) {
+      else if (length(unique(dta.sdata[,subjidNew])) != length(unique(dta.smetab[,subjid.smetab]))) {
         outmessage = c(
           outmessage,"Number of subjects in SubjectData sheet does not match number of subjects in SubjectMetabolites sheet"
         )
@@ -144,7 +165,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
           outmessage,"Metabolite abundances sheet (SubjectMetabolites) contains duplicate columns (metabolite names)"
         )
       }
-      else if (length(unique(unlist(dta.sdata[,subjid]))) != nrow(dta.sdata)) {
+      else if (length(unique(unlist(dta.sdata[,subjidNew]))) != nrow(dta.sdata)) {
         outmessage = c(
           outmessage,"Warning: Sample Information sheet (SubjectData) contains duplicate ids"
         )
@@ -160,7 +181,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
         numsamples = length(unique(dta.smetab[[subjid.smetab]]))
         if (length(intersect(as.character(unlist(dta.metab[,metabid])),colnames(dta.smetab)[-c(which(colnames(dta.smetab) ==
             subjid.smetab))])) == nummetab &&
-            length(intersect(as.character(unlist(dta.sdata[,subjid])),dta.smetab[[subjid.smetab]])) ==
+            length(intersect(as.character(unlist(dta.sdata[,subjidNew])),dta.smetab[[subjid.smetab]])) ==
             numsamples) {
           outmessage = c(
             outmessage,"Passed all integrity checks, analyses can proceed. If you are part of COMETS, please download metabolite list below and submit to the COMETS harmonization group."
@@ -173,7 +194,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
 		tolower(colnames(dta.smetab)))) != nummetab) {	
               stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
           }
-          if (length(intersect(dta.sdata[[subjid]],dta.smetab[[subjid.smetab]])) !=
+          if (length(intersect(dta.sdata[[subjidNew]],dta.smetab[[subjid.smetab]])) !=
               numsamples) {
               stop("Error: Sample ids in SubjectMetabolites DO NOT ALL match subject ids in SubjectData sheet")
           }
@@ -207,7 +228,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     }
 
     # rename subjid in dta.smetab sheet for merging later on
-    colnames(dta.smetab)[which(colnames(dta.smetab)==subjid.smetab)] <- subjid
+    colnames(dta.smetab)[which(colnames(dta.smetab)==subjid.smetab)] <- subjidNew
 
     return(
       list(
