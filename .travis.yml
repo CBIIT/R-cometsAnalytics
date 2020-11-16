@@ -4,7 +4,6 @@ language: r
 bioc_required: true
 r:
   - bioc-release
-  - bioc-devel
 
 sudo: false
 cache: packages
