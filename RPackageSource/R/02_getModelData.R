@@ -15,7 +15,10 @@
 #' @param where users can specify which subjects to perform the analysis by specifying this parameter. 
 #'        'where' expects a vector of strings with a variable name, 
 #'        a comparison operator (e.g. "<", ">", "="), and a value.  
-#'        For example, "where = c("age>50","bmi > 22").  Note that rules must be separated by a comma.
+#'        For example, \code{where = c("age>50","bmi > 22")} use all subjects
+#'        with age > 50 AND bmi > 22.  
+#'     Note that when running in Batch mode, rules in the \code{WHERE} column
+#'     of the \code{Models} sheet must be separated by a comma.
 #'
 #' @details All metabolite variables specified should be listed in the \code{metabolite_name}
 #'   column of the \code{Metabolites} sheet of the Excel file. All non-metabolite
@@ -102,13 +105,10 @@ if (modelspec == "Interactive") {
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
         return(x) }))
   
-
-
 #  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
   if(any(is.na(match(allvars,subjmetab)))) {
 	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
-
 
   # rename the variables (Assumed to be 'All metabolites' by default)
   if (!is.na(match("All metabolites", rowvars))) {
@@ -296,14 +296,18 @@ else if (modelspec == "Batch") {
   if (length(mop)) {
     wgtvar <- mop[["weights", exact=TRUE]]
     if (length(wgtvar)) wgtcov <- runModel.getNewVarName(wgtvar, readData$dict_metabnames)
-    offcov <- mop[["offset", exact=TRUE]]
+    offvar <- mop[["offset", exact=TRUE]]
     if (length(offvar)) offcov <- runModel.getNewVarName(offvar, readData$dict_metabnames)
   }  
 
   # Check that all variables that are input by user exist in the renamed data
   allvars <- c(setdiff(c(rcovs,ccovs,acovs,scovs, wgtcov, offcov),"All metabolites"))
-  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
-        stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+  tmp     <- is.na(match(allvars,colnames(readData$subjdata)))
+  if (any(tmp)) {
+    str <- paste(allvars[tmp], collapse=", ", sep="")
+    msg <- paste("Check that user-input variable(s) ", str,  
+             " exist (should match VARREFERENCE column in VarMap Sheet)", sep="")
+    stop(msg)
   }
 
   # assign where filtering -------------------------
@@ -311,6 +315,7 @@ else if (modelspec == "Batch") {
 	where <- mods$where
   } else
         where <- NULL
+
 
 } # end if modelspec == "Batch"
 
@@ -330,10 +335,19 @@ if (length(wgtvar) || length(offvar)) {
   names(varMap) <- c(wgtcov, offcov)
 }
 
-if(!is.null(where)) {
-      numallsamps <- nrow(readData$subjdata)
-      readData <- filterCOMETSinput(readData,where=where)
-      print(paste0("Filtering subjects according to the rule(s)",where,". ",nrow(readData$subjdata)," of ", numallsamps,"are retained"))
+if (!is.null(where)) {
+
+  # Update the where rule (variables names have changed)
+  where2      <- updateWhereStr(where, readData$dict_metabnames)
+  numallsamps <- nrow(readData$subjdata)
+  readData    <- try(filterCOMETSinput(readData,where=where2), silent=TRUE)
+  if ("try-error" %in% class(readData)) {
+    print(readData)
+    stop(paste("ERROR applying WHERE: ", where, sep=""))
+  }
+  msg         <- paste0("Filtering subjects according to the rule(s) ", where, ". ", 
+                        nrow(readData$subjdata)," of ", numallsamps," are retained")
+  print(msg)
 }
 
 gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))

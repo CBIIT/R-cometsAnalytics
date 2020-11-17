@@ -160,7 +160,7 @@ runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL,
 
 runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
-  if (is.null(modeldata)) stop("Please make sure that modeldata is defined")
+  if (is.null(modeldata)) stop("INTERNAL CODING ERROR in runModel.checkModelDesign")
 
   nunq   <- op$check.n.unique.vals
   minN   <- op$check.nsubjects

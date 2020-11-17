@@ -61,7 +61,7 @@ readCOMETSinput <- function(csvfilePath) {
   dta.models$exposure       <- checkVariableNames(dta.models$exposure, "Models sheet, EXPOSURE column") 
   dta.models$adjustment     <- checkVariableNames(dta.models$adjustment, "Models sheet, ADJUSTMENT column", convertMissTo=NA, stopOnMissError=0) 
   dta.models$stratification <- checkVariableNames(dta.models$stratification, "Models sheet, STRATIFICATION column", convertMissTo=NA, stopOnMissError=0) 
- 
+
   # We need a different function for the WHERE column
   dta.models$where <- normalizeWhere(dta.models$where) 
 
