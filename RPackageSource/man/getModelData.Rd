@@ -37,9 +37,12 @@ getModelData(
 \item{offvar}{If Interactive, an offset variable (see \code{details})}
 
 \item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 
-'where' expects a vector of strings with a variable name, 
-a comparison operator (e.g. "<", ">", "="), and a value.  
-For example, "where = c("age>50","bmi > 22").  Note that rules must be separated by a comma.}
+   'where' expects a vector of strings with a variable name, 
+   a comparison operator (e.g. "<", ">", "="), and a value.  
+   For example, \code{where = c("age>50","bmi > 22")} use all subjects
+   with age > 50 AND bmi > 22.  
+Note that when running in Batch mode, rules in the \code{WHERE} column
+of the \code{Models} sheet must be separated by a comma.}
 }
 \value{
 a list comprising: \cr
