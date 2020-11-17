@@ -67,10 +67,33 @@ getNewWhereStr <- function(whereStr, operator) {
 } # END: getNewWhereStr
 
 # Function to normalize the vector of where clauses
-normalizeWhere <- function(vec) {
+normalizeWhere <- function(whereVec, sep=",") {
 
-  # vec : character vector of where conditions
-  
+  # vec : character vector of where conditions.
+  #       Note that vec[i] could contain multiple rules
+  #        separated by a comma
+
+  ret <- whereVec
+  tmp <- is.na(whereVec)
+  if (any(tmp)) whereVec[tmp] <- ""
+  for (i in 1:length(whereVec)) {
+    str <- trimws(whereVec[i])
+    if (!nchar(str)) next
+    vec <- unlist(strsplit(str, sep, fixed=TRUE)) 
+    tmp <- normalizeWhere.main(vec)
+    if (length(tmp) < 2) {
+      ret[i] <- tmp
+    } else {
+      ret[i] <- paste(tmp, collapse=sep, sep="")
+    }
+  }
+
+  ret
+
+} # END: normalizeWhere
+
+normalizeWhere.main <- function(vec) {
+
   ret  <- vec
   tmp  <- is.na(vec)
   if (any(tmp)) vec[tmp] <- ""
@@ -102,7 +125,59 @@ normalizeWhere <- function(vec) {
 
   ret
 
-} # END: normalizeWhere
+} # END: normalizeWhere.main
+
+# Function to get the variables from where string
+getVarsFromWhereVec <- function(svec) {
+
+  N <- length(svec)
+  if (!N) return(NULL)
+  if (!is.character(svec)) stop("INTERNAL CODING ERROR in getVarFromWhereStr")
+  svec <- trimws(svec)
+  ret  <- rep("", N)
+  cvec <- c("<", ">", "=")
+  for (i in 1:N) {
+    str <- svec[i]
+    if (!nchar(str)) next 
+    for (c in cvec) {
+      if (grepl(c, str, fixed=TRUE)) {
+        vec    <- strsplit(str, c, fixed=TRUE)[[1]]
+        ret[i] <- trimws(vec[1])
+        break
+      }
+    }
+  }
+  
+  ret
+
+} # END: getVarsFromWhereVec
+
+updateWhereStr <- function(whereStr, varMap) {
+
+  N        <- length(whereStr)
+  whereStr <- trimws(whereStr)
+  ret      <- whereStr
+  whereVec <- whereStr
+  if (N == 1) {
+    # Break up string if it contains multiple rules 
+    if (grepl(",", whereStr, fixed=TRUE)) {
+      whereVec <- trimws(unlist(strsplit(whereStr, ",", fixed=TRUE)))
+    }
+  }
+
+  vars     <- getVarsFromWhereVec(whereVec)
+  new      <- runModel.getNewVarName(vars, varMap)
+  for (i in 1:length(whereVec)) {
+    v0 <- vars[i]
+    v1 <- new[i]
+    if (v0 != v1) whereVec[i] <- gsub(v0, v1, whereVec[i], fixed=TRUE)
+  } 
+  ret <- paste(whereVec, collapse=",", sep="")
+   
+
+  ret
+
+} # END: updateWhereStr
 
 # Function to check that an object is a string
 isString <- function(obj) {
@@ -241,5 +316,22 @@ convertVarsToNumeric <- function(data, vars) {
 
 } # END: convertVarsToNumeric
 
+updateStrWithNewVars <- function(str, old, new) {
+
+  ret <- str
+  n   <- length(old)
+  if (nchar(str) && n) {
+    tmp <- old != new
+    tmp[is.na(tmp)] <- FALSE
+    old <- old[tmp]
+    new <- new[tmp]
+    m   <- length(old)
+    if (m) { 
+      for (i in 1:m) ret <- gsub(old[i], new[i], ret, fixed=TRUE)
+    } 
+  }
+  ret
+
+} # END: updateStrWithNewVars
 
 
