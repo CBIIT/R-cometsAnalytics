@@ -187,7 +187,8 @@ runModel.start <- function(modeldata, metabdata, op) {
   if (op$DEBUG) print(op)  
 
   # Object for warning messages
-  warn.obj <- modeldata[[runModel.getWarningsListName(), exact=TRUE]]
+  wr.nm    <- runModel.getWarningsListName()
+  warn.obj <- modeldata[[wr.nm, exact=TRUE]]
 
   scovs  <- modeldata[["scovs", exact=TRUE]]
   nscovs <- length(scovs)
@@ -198,6 +199,10 @@ runModel.start <- function(modeldata, metabdata, op) {
   stratvec  <- runModel.getStratVec(gdta, scovs)
   stratlist <- unique(stratvec)
   nstrata   <- length(stratlist)
+
+  # Original strat var names
+  svars0    <- runModel.varMap(scovs, modeldata$dict_metabnames)
+
   if (nstrata > op$max.nstrata) {
     msg <- paste("The stratification variable(s) ",
                  paste(scovs, collapse=",", sep=""),
@@ -207,6 +212,9 @@ runModel.start <- function(modeldata, metabdata, op) {
                  sep="")
     stop(msg)        
   }
+
+  # Combine any warnings from getModelData() at the end
+  modeldata[[wr.nm]] <- NULL
 
   c1      <- runModel.getWarningCol 
   c2      <- runModel.getObjectCol  
@@ -218,14 +226,20 @@ runModel.start <- function(modeldata, metabdata, op) {
     n     <- sum(tmp)
     if (n < op$check.nsubjects) {
       # Too few subjects, do not run
-      tmp  <- "Stratum contains to few subjects"
+      tmp  <- runModel.getStratTooFewSubStr()
     } else {
       modeldata$gdta <- gdta[tmp, , drop=FALSE]
       tmp <- try(runModel.main(modeldata, metabdata, op), silent=TRUE)
     }
 
     # Combine results
-    retList <- runModel.combineResults(retList, tmp, strat, i)
+    strat2  <- updateStrWithNewVars(strat, scovs, svars0)
+    retList <- runModel.combineResults(retList, tmp, strat2, i)
+  }
+
+  if (length(warn.obj)) {
+    tmp              <- retList[[wr.nm, exact=TRUE]]
+    retList[[wr.nm]] <- runModel.combineResObjects(tmp, warn.obj, "getModelData", NA) 
   }
 
   retList
@@ -373,7 +387,7 @@ runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
     cols             <- 1:eEndCol
 
     # If subjects were removed when getting the dummy variables,
-    #   then we ned to get the new subject order
+    #   then we need to get the new subject order
     if (nrow(mat) != modeldata$gdta.nrow) {
       subOrder            <- match(rownames(designMat), rownames(mat))
       tmp                 <- !is.na(subOrder)
@@ -450,17 +464,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   defObj <- runModel.defRetObj(op$model, dmatCols0)
 
   # objects to store results
-  rname    <- rep("", N)
-  cname    <- rep("", N)
-  coefMat  <- matrix(data=NA, nrow=N, ncol=ncol(defObj$coef.stats))
-  runVec   <- rep(0, N)
-  runRows  <- rep(0, nruns)
-  msgVec   <- rep("", nruns)
-  adjVec   <- rep("", nruns)
-  remVec   <- rep("", nruns)
-  fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
-  conv     <- rep(FALSE, nruns)
-  waldP    <- rep(NA, nruns)
+  saveobj <- runModel.initSaveObj(N, nruns, defObj)
     
   # Loop over each exposure in the outer loop
   for (j in 1:nccovs) {
@@ -549,41 +553,101 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       tmp <- runModel.tidy(nsubs, fit, ccovNames, defObj, dcols, dmatCols0, op)
 
       # Save results
-      k              <- k + 1
-      k1             <- k1 + 1
-      coef           <- tmp$coef.stats
-      k2             <- k + nrow(coef) - 1
-      vec            <- k:k2
-      runRows[k1]    <- k
-      rname[vec]     <- rcovi
-      cname[vec]     <- ccovj
-      coefMat[vec, ] <- coef
-      runVec[vec]    <- k1
-      msgVec[k1]     <- tmp$msg
-      adjVec[k1]     <- tmp$adj
-      remVec[k1]     <- tmp$adj.rem
-      fitMat[k1,]    <- tmp$fit.stats
-      conv[k1]       <- tmp$converged
-      waldP[k1]      <- tmp$wald.pvalue
-      k              <- k2
+      saveobj <- runModel.updateSaveObj(tmp, saveobj, rcovi, ccovj) 
     }
   }
 
-  # Check for no results
-  ret1 <- ret2 <- NULL
+  # Get objects to return
+  tmp <- runModel.returnSaveObj(saveobj, defObj, op)
+
+  ret                                   <- list()
+  ret[[getModelSummaryName()]]          <- tmp[["ret1", exact=TRUE]]
+  ret[[getEffectsName()]]               <- tmp[["ret2", exact=TRUE]]
+  ret[[runModel.getWarningsListName()]] <- rem.obj
+ 
+  ret
+
+} # END: runModel.runAllMetabs
+
+runModel.initSaveObj <- function(N, nruns, defObj) {
+
+  ret          <- list(k=0, k1=0, N=N, nruns=nruns)
+  ret$rname    <- rep("", N)
+  ret$cname    <- rep("", N)
+  ret$coefMat  <- matrix(data=NA, nrow=N, ncol=ncol(defObj$coef.stats))
+  ret$runVec   <- rep(0, N)
+  ret$runRows  <- rep(0, nruns)
+  ret$msgVec   <- rep("", nruns)
+  ret$adjVec   <- rep("", nruns)
+  ret$remVec   <- rep("", nruns)
+  ret$fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
+  ret$conv     <- rep(FALSE, nruns)
+  ret$waldP    <- rep(NA, nruns)
+  
+  ret  
+
+} # END: runModel.initSaveObj
+
+runModel.updateSaveObj <- function(tmp, obj, rcovi, ccovj) {
+
+  # tmp  returned list from tidy call
+  # obj  list of saved objects to be updated
+  
+  # Get the current indices
+  k                  <- obj$k
+  k1                 <- obj$k1
+  
+  # Update objects
+  k                  <- k + 1
+  k1                 <- k1 + 1
+  coef               <- tmp$coef.stats
+  k2                 <- k + nrow(coef) - 1
+  vec                <- k:k2
+  obj$runRows[k1]    <- k
+  obj$rname[vec]     <- rcovi
+  obj$cname[vec]     <- ccovj
+  obj$coefMat[vec, ] <- coef
+  obj$runVec[vec]    <- k1
+  obj$msgVec[k1]     <- tmp$msg
+  obj$adjVec[k1]     <- tmp$adj
+  obj$remVec[k1]     <- tmp$adj.rem
+  obj$fitMat[k1,]    <- tmp$fit.stats
+  obj$conv[k1]       <- tmp$converged
+  obj$waldP[k1]      <- tmp$wald.pvalue
+  k                  <- k2
+
+  # Save k and k1
+  obj$k              <- k
+  obj$k1             <- k1
+
+  obj
+
+} # END: runModel.updateSaveObj
+
+runModel.returnSaveObj <- function(obj, defObj, op) {
+
+  ret1 <- NULL 
+  ret2 <- NULL
+  k    <- obj$k
+  
   if (k) {
+    k1      <- obj$k1  
+    runRows <- obj$runRows
+    rname   <- obj$rname  
+    cname   <- obj$cname	
+  
     tmp  <- 1:k1
-    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], conv[tmp], waldP[tmp], 
-                       fitMat[tmp, , drop=FALSE], 
-                       msgVec[tmp], adjVec[tmp], remVec[tmp], stringsAsFactors=FALSE)
+    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], obj$conv[tmp], obj$waldP[tmp], 
+                       obj$fitMat[tmp, , drop=FALSE], 
+                       obj$msgVec[tmp], obj$adjVec[tmp], obj$remVec[tmp], stringsAsFactors=FALSE)
     colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged", "wald.pvalue",
-                       names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
-    ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
+                        names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
+    ret2 <- data.frame(obj$runVec, rname, cname, obj$coefMat, stringsAsFactors=FALSE)
     colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
-                      names(defObj$coef.stats))
+                        names(defObj$coef.stats))
 
     # Subset if needed
-    if (k < N) ret2 <- ret2[1:k, , drop=FALSE]
+    if (k < obj$N) ret2 <- ret2[1:k, , drop=FALSE]
     if (op$pcorrFlag) {
       ret1$converged   <- NULL
       ret1$wald.pvalue <- NULL
@@ -595,14 +659,9 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
     }
   }
 
-  ret                                   <- list()
-  ret[[getModelSummaryName()]]          <- ret1
-  ret[[getEffectsName()]]               <- ret2
-  ret[[runModel.getWarningsListName()]] <- rem.obj
- 
-  ret
+  list(ret1=ret1, ret2=ret2)
 
-} # END: runModel.runAllMetabs
+} # END: runModel.returnSaveObj
 
 runModel.getModelVectors <- function(modeldata, yvar, op) {
 

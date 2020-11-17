@@ -360,9 +360,11 @@ prdebug<-function(lab,x){
 #' @return filtered list
 #'
 filterCOMETSinput <- function(readData,where=NULL) {
+
   if (!is.null(where)) {
 	samplesToKeep=c()
-	myfilts <- strsplit(where,",")
+	myfilts <- unlist(strsplit(where,","))
+
 	# create rules for each filter
 	for (i in 1:length(myfilts)) {
 		myrule <- myfilts[[i]]

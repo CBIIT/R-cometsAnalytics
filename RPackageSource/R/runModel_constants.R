@@ -6,12 +6,13 @@ runModel.getStrataColName    <- function() {"strata"}
 runModel.getStrataNumColName <- function() {"strata.num"}
 
 # For Warnings matrix
-runModel.getWarningCol       <- function() {"type"}
-runModel.getObjectCol        <- function() {"object"}
-runModel.getMessageCol       <- function() {"message"}
-runModel.getWarningsListName <- function() {"Warnings"}
-runModel.getUnknownErrorStr  <- function() {"unknown error"}
-runModel.getTooFewSubsStr    <- function() {"too few subjects"}
+runModel.getWarningCol        <- function() {"type"}
+runModel.getObjectCol         <- function() {"object"}
+runModel.getMessageCol        <- function() {"message"}
+runModel.getWarningsListName  <- function() {"Warnings"}
+runModel.getUnknownErrorStr   <- function() {"unknown error"}
+runModel.getTooFewSubsStr     <- function() {"too few subjects"}
+runModel.getStratTooFewSubStr <- function() {"Stratum contains to few subjects"}
 
 # Message when exposure has been removed from design matrix
 runModel.getExpRemFromDesign <- function() {"exposure removed from design matrix"}
