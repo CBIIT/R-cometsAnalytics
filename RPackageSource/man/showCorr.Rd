@@ -7,7 +7,7 @@
 showCorr(corr, nlines = 50)
 }
 \arguments{
-\item{corr}{COMETScorr class (S3) from \code{\link{runCorr}} output}
+\item{corr}{returned object from \code{\link{runCorr}}}
 
 \item{nlines}{number of lines to return (default 50)}
 }
@@ -22,6 +22,6 @@ dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
-corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
+corrmatrix <- runCorr(modeldata,exmetabdata,"DPP")
 showCorr(corrmatrix)
 }

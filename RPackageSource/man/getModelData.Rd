@@ -18,15 +18,16 @@ getModelData(
 )
 }
 \arguments{
-\item{readData}{list from \code{\link{readCOMETSinput}}}
+\item{readData}{List from \code{\link{readCOMETSinput}}}
 
 \item{modelspec}{How model is specified (Interactive or Batch). The default is Batch}
 
-\item{modlabel}{if batch, chosen model specified by batch mode. If interactive model label.}
+\item{modlabel}{If batch, chosen model specified by batch mode (the MODEL column in
+the Models sheet). If interactive, then the model label.}
 
-\item{rowvars}{if Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)}
+\item{rowvars}{If Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)}
 
-\item{colvars}{if Interactive, a vector of exposure variables (see \code{details})}
+\item{colvars}{If Interactive, a vector of exposure variables (see \code{details})}
 
 \item{adjvars}{If Interactive, a vector adjustment covariates (see \code{details})}
 
@@ -36,10 +37,10 @@ getModelData(
 
 \item{offvar}{If Interactive, an offset variable (see \code{details})}
 
-\item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 
+\item{where}{users can specify which subjects to perform the analysis on by specifying this parameter. 
    'where' expects a vector of strings with a variable name, 
    a comparison operator (e.g. "<", ">", "="), and a value.  
-   For example, \code{where = c("age>50","bmi > 22")} use all subjects
+   For example, \code{where = c("age>50","bmi > 22")} uses all subjects
    with age > 50 AND bmi > 22.  
 Note that when running in Batch mode, rules in the \code{WHERE} column
 of the \code{Models} sheet must be separated by a comma.}

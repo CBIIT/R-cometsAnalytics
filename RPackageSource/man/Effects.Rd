@@ -2,7 +2,7 @@
 % Please edit documentation in R/outputColumns.R
 \name{Effects}
 \alias{Effects}
-\title{Effects table columns}
+\title{Effects table}
 \description{
 The Effects data frame contains the estimates
  for each exposure, and  will contain multiple rows

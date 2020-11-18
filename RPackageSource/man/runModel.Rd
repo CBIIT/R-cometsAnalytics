@@ -13,11 +13,16 @@ runModel(modeldata, metabdata, cohort = "", op = NULL)
 
 \item{cohort}{cohort label (e.g DPP, NCI, Shanghai)}
 
-\item{op}{list of options (see \code{\link{options}}).}
+\item{op}{list of options when running in \code{Interactive} mode (see \code{\link{options}}).}
 }
 \value{
 A list of objects with names \code{\link{ModelSummary}},
-       \code{\link{Effects}}, and \code{\link{Warnings}}. 
+       \code{\link{Effects}}, and \code{\link{Warnings}}. \cr
+\bold{Important: check the \code{adjvars.removed} column in the
+ \code{\link{ModelSummary}} data frame to see if any adjustment variables
+ were dropped from the model, and use caution interpreting results
+ when variables are removed. The \code{\link{Warnings}} object may
+ also contain additional variables removed.} 
 Attribute of this list includes ptime for processing time of model run.
 }
 \description{
@@ -26,7 +31,9 @@ Main function for running the models
 \details{
 This function will check for stratification variables, and if
          present run within each stratum. The design matrix is
-         checked for validity (see \code{\link{options}}).
+         checked for validity (see \code{\link{options}}). 
+         When running in \code{Batch} mode, the options are obtained from
+         the \code{Options} sheet in the excel file. \cr
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
