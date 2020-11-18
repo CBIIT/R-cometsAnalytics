@@ -4,6 +4,7 @@ CHANGES IN VERSION 1.5.0.0
 NEW FEATURES
 
     o Generalized linear models are now included for analyses. 
+    o User-controlled options are now available.
 
 BUG FIXES
 
