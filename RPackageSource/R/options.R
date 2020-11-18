@@ -92,17 +92,20 @@ runModel.checkOptions <- function(op, modeldata) {
 
 convertModelOptions <- function(opnames, opvalues, model) {
 
-  n     <- length(opnames)
+  n      <- length(opnames)
   if (n != length(opvalues)) stop("INTERNAL CODING ERROR in convertModelOptions")
-  tmp   <- getDefaultModelOptions(model)
-  ops.c <- tmp[["ops.character", exact=TRUE]]
-  ops.l <- tmp[["ops.list", exact=TRUE]]
-  ret   <- list()
+  tmp    <- getDefaultModelOptions(model)
+  ops.c  <- tmp[["ops.character", exact=TRUE]]
+  ops.l  <- tmp[["ops.list", exact=TRUE]]
+  ops.TF <- tmp[["ops.logical", exact=TRUE]]
+  ret    <- list()
   for (i in 1:n) {
     nm  <- opnames[i]
     val <- opvalues[i]
     if (nm %in% ops.l) {
       val <- eval(parse(text=val))
+    } else if (nm %in% ops.TF) {
+      val <- getLogicalValueFromStr(val) 
     } else if (!(nm %in% ops.c)) {
       val <- as.numeric(val) 
     }
@@ -180,15 +183,14 @@ getAllOptionNames <- function() {
 
 getValidGlobalOps <- function() {
   ops.char <- c("model", "check.cor.method")
-  ops.num  <- c("check.illCond", "check.cor.cutoff",
-                "check.nsubjects", "check.design", "max.nstrata",
-                "DEBUG")
-  valid    <- c(ops.char, ops.num)
+  ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", "DEBUG")
+  ops.log  <- c("check.illCond", "check.design")
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
                    check.design=TRUE, max.nstrata=10,
                    model=getCorrModelName(), DEBUG=0)
-  list(ops.character=ops.char, ops.numeric=ops.num,
+  valid    <- names(default)
+  list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
        valid=valid, default=default)
 
 } # END: getValidGlobalOps 
@@ -199,6 +201,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
   tmp    <- getValidGlobalOps()
   def    <- tmp$default
   ops.n  <- tmp$ops.numeric
+  ops.l  <- tmp$ops.logical
   valid  <- names(def)
 
   n <- length(opnames)
@@ -217,7 +220,12 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
     if (!nchar(value)) stop(paste("ERROR: ", name, "=", value, " is not valid", sep=""))
     
     # value must be converted to the correct type
-    if (name %in% ops.n) value <- as.numeric(value)
+    if (name %in% ops.n) {
+      value <- as.numeric(value)
+    } else if (name %in% ops.l) {
+      # Logical value
+      value <- getLogicalValueFromStr(value) 
+    }
 
     ret[[name]] <- value
   }
@@ -240,7 +248,7 @@ checkOptionListNames <- function(op, valid, name) {
     if (any(tmp)) {
       print(op)
       stop(paste("ERROR: the above ", name, " list is not valid", sep="")) 
-    } 
+    }
     tmp <- !(nms %in% valid)
     if (any(tmp)) {
       err <- paste(nms[tmp], collapse=",", sep="")
@@ -262,8 +270,8 @@ checkGlobalOpList <- function(op, name="options") {
   tmp     <- getValidGlobalOps()
   default <- tmp$default
   valid   <- names(default)
-  ops.n   <- tmp$ops.numeric
-  
+  ops.n   <- c(tmp$ops.numeric, tmp$ops.logical)
+
   # Check the names and values
   if (n) {
     checkOptionListNames(op, valid, name)

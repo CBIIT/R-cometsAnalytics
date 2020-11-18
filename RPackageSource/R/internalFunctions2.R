@@ -334,4 +334,16 @@ updateStrWithNewVars <- function(str, old, new) {
 
 } # END: updateStrWithNewVars
 
+getLogicalValueFromStr <- function(str) {
 
+  str <- tolower(trimws(str))
+  if (str %in% c("true", "t")) {
+    ret <- TRUE
+  } else if (str %in% c("false", "f")) {
+    ret <- FALSE 
+  } else {
+    ret <- as.logical(as.numeric(str))
+  }
+  ret
+
+} # END: getLogicalValueFromStr
