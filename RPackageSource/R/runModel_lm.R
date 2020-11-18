@@ -15,10 +15,11 @@ NULL
 
 runModel.getDefaultLmOptions <- function() {
 
-  ret <- list(weights=NULL, offset=NULL, tol=1e-7, singular.ok=TRUE)
+  ret   <- list(weights=NULL, offset=NULL, tol=1e-7, singular.ok=TRUE)
   ops.c <- c("weights", "offset")
+  ops.l <- "singular.ok"
 
-  list(default=ret, ops.character=ops.c)
+  list(default=ret, ops.character=ops.c, ops.logical=ops.l)
 
 } # END: runModel.getDefaultLmOptions
 

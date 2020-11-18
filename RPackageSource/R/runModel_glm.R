@@ -26,8 +26,9 @@ runModel.getDefaultGlmOptions <- function() {
               singular.ok=TRUE)
   ops.c    <- c("family", "link", "weights", "offset")
   ops.list <- "control"
+  ops.log  <- "singular.ok"
 
-  list(default=ret, ops.character=ops.c, ops.list=ops.list)
+  list(default=ret, ops.character=ops.c, ops.list=ops.list, ops.logical=ops.log)
 
 } # END: runModel.getDefaultGlmOptions
 
@@ -36,9 +37,11 @@ runModel.convertGlmOp <- function(opName, opValue) {
   ret <- opValue
   if (opName %in% c("control")) {
     ret <- eval(parse(text=opValue))
-  } else if (opName %in% c("singular.ok", "tol")) {
+  } else if (opName %in% c("tol")) {
     ret <- as.numeric(opValue)
-  } 
+  } else if (opName %in% c("singular.ok")) {
+    ret <- getLogicalValueFromStr(opValue)
+  }
 
   ret
 
@@ -46,9 +49,9 @@ runModel.convertGlmOp <- function(opName, opValue) {
 
 runModel.parseAndCheckGlmOps <- function(str, model, modeldata) {
 
-  if (model == "glm") {
+  if (model == getGlmModelName()) {
     tmp   <- runModel.getDefaultGlmOptions()
-  } else if (model == "lm") {
+  } else if (model == getLmModelName()) {
     tmp   <- runModel.getDefaultLmOptions()
   } else {
     stop("INTERNAL CODING ERROR in runModel.parseAndCheckGlmOps")
