@@ -14,7 +14,7 @@ Data are not saved in the system but
 \details{
 \bold{Functions for analysis:} \cr
 \code{\link{runCorr}} (correlation analysis) \cr
-\code{\link{runModel}} (glm) \cr
+\code{\link{runModel}} (glm or lm) \cr
 \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
 \bold{Functions for graphics:} \cr
 \code{\link{plotVar}} (metabolite variance distribution plot) \cr
@@ -24,5 +24,5 @@ Data are not saved in the system but
 \bold{Functions for saving results to files:} \cr
 \code{\link{OutputCSVResults}} (write to .csv file) \cr
 \code{\link{OutputXLSResults}} (write to excel file) \cr
-\code{\link{OutputListToExcel}} (write list to excel file with multiple sheets) \cr
+\code{\link{OutputListToExcel}} (write list of data frames to excel file with multiple sheets) \cr
 }
