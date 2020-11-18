@@ -3,7 +3,7 @@
 #' @param readData list from \code{\link{readCOMETSinput}}
 #' @param cohort cohort label (e.g. DPP, NCI, Shanghai)
 #' @param writeTofile T/F (whether or not to write results for each model into
-#' separate xlsx files). Files are written to current directory. Default is True.
+#' separate xlsx files). Files are written to current directory. Default is TRUE.
 #' 
 #' @return A list of return objects from \code{\link{runModel}}.
 #'       The \code{ith} element in this list is the output from 
@@ -30,7 +30,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
     print(paste("Running",i))
     mymod <- try(getModelData(readData,modlabel=i))
     if (!("try-error" %in% class(mymod))) {
-      myobj <- try(runModel(mymod, readData, cohort=cohort, op=mymod[["options", exact=TRUE]]))
+      myobj <- try(runModel(mymod, readData, cohort=cohort, op=NULL))
       if ("try-error" %in% class(mymod)) errFlag <- 1
     } else {
       myobj   <- mymod

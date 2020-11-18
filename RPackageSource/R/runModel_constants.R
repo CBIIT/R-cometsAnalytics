@@ -36,7 +36,6 @@ getEffectsCorrEstName     <- function() {"corr"}
 # ModelSummary 
 getModelSummaryName       <- function() {"ModelSummary"}
 
-
 # For input excel file
 getModelOptionsIdCol <- function() {"modelname"}
 getOptionNameCol     <- function() {"option"}
@@ -47,4 +46,7 @@ getModelFunctionCol  <- function() {"function"}
 
 getVarRef_metabId    <- function() {"metabolite_id"}
 getVarRef_subjectId  <- function() {"id"}
+
+# Model options that specify variables
+runModel.getOptionsThatAreVars <- function() {c("weights", "offset")}
 

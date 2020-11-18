@@ -65,7 +65,7 @@ NULL
 #' }
 #'
 #' @name Effects
-#' @title Effects table columns
+#' @title Effects table 
 #' @details Missing values will appear if a model did not converge, produced an error,
 #'    or not run because of too many missing values in the outcome. 
 #' 

@@ -3,19 +3,20 @@
 #---------------------------------------------------------
 #' Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).
 #'
-#' @param readData list from \code{\link{readCOMETSinput}}
+#' @param readData List from \code{\link{readCOMETSinput}}
 #' @param modelspec How model is specified (Interactive or Batch). The default is Batch
-#' @param modlabel  if batch, chosen model specified by batch mode. If interactive model label.
-#' @param rowvars   if Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)
-#' @param colvars   if Interactive, a vector of exposure variables (see \code{details})
+#' @param modlabel  If batch, chosen model specified by batch mode (the MODEL column in
+#'                  the Models sheet). If interactive, then the model label.
+#' @param rowvars   If Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)
+#' @param colvars   If Interactive, a vector of exposure variables (see \code{details})
 #' @param adjvars   If Interactive, a vector adjustment covariates (see \code{details})
 #' @param strvars   If Interactive, stratification covariates (see \code{details})
 #' @param wgtvar    If Interactive, a variable of weights (see \code{details})
 #' @param offvar    If Interactive, an offset variable (see \code{details})
-#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 
+#' @param where users can specify which subjects to perform the analysis on by specifying this parameter. 
 #'        'where' expects a vector of strings with a variable name, 
 #'        a comparison operator (e.g. "<", ">", "="), and a value.  
-#'        For example, \code{where = c("age>50","bmi > 22")} use all subjects
+#'        For example, \code{where = c("age>50","bmi > 22")} uses all subjects
 #'        with age > 50 AND bmi > 22.  
 #'     Note that when running in Batch mode, rules in the \code{WHERE} column
 #'     of the \code{Models} sheet must be separated by a comma.
@@ -459,6 +460,15 @@ getModelOptionsFromSheet <- function(opTable, modelFunc) {
   }
 
   ret <- convertModelOptions(opnames, opvalues, modelFunc)
+
+  # For options that specify variables, make sure they are lower case
+  vop <- runModel.getOptionsThatAreVars() 
+  if (length(vop) && length(ret)) {
+    for (v in vop) {
+      var <- ret[[v, exact=TRUE]]
+      if (!is.null(var)) ret[[v]] <- tolower(var) 
+    }
+  }
 
   ret
 

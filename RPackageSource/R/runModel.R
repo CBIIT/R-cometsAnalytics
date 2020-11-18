@@ -4,15 +4,22 @@
 #' @param modeldata list from function \code{\link{getModelData}}
 #' @param metabdata metabolite data list from \code{\link{readCOMETSinput}}
 #' @param cohort cohort label (e.g DPP, NCI, Shanghai)
-#' @param op list of options (see \code{\link{options}}).
+#' @param op list of options when running in \code{Interactive} mode (see \code{\link{options}}).
 #'
 #' @return A list of objects with names \code{\link{ModelSummary}},
-#'        \code{\link{Effects}}, and \code{\link{Warnings}}. 
-#' Attribute of this list includes ptime for processing time of model run.
+#'        \code{\link{Effects}}, and \code{\link{Warnings}}. \cr
+#' \bold{Important: check the \code{adjvars.removed} column in the
+#'  \code{\link{ModelSummary}} data frame to see if any adjustment variables
+#'  were dropped from the model, and use caution interpreting results
+#'  when variables are removed. The \code{\link{Warnings}} object may
+#'  also contain additional variables removed.} 
+#' Attribute of this list includes ptime for processing time of model run. 
 #'
 #' @details This function will check for stratification variables, and if
 #'          present run within each stratum. The design matrix is
 #'          checked for validity (see \code{\link{options}}). 
+#'          When running in \code{Batch} mode, the options are obtained from
+#'          the \code{Options} sheet in the excel file. \cr
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
@@ -37,7 +44,7 @@ runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
       tmp[[runModel.getObjectCol()]]  <- "op"
       tmp[[runModel.getMessageCol()]] <- msg
       warning(msg)
-      nm <- runModel.getWarningsListName()
+      nm              <- runModel.getWarningsListName()
       modeldata[[nm]] <- runmodel.addWarning(modeldata[[nm, exact=TRUE]], tmp)
     }
     op <- modeldata$options 
@@ -139,8 +146,12 @@ runModel.combineResObjects <- function(base, new, strat, stratNum) {
 
 runModel.combineResults <- function(base, new, strat, stratNum) {
 
+  ms.nm <- getModelSummaryName()
+  ef.nm <- getEffectsName()
+  wr.nm <- runModel.getWarningsListName()
+
   if (!length(base)) base <- list()
-  warn1 <- base[["Warnings", exact=TRUE]]
+  warn1 <- base[[wr.nm, exact=TRUE]]
   if (("try-error" %in% class(new)) || isString(new)) {
     msg <- runModel.getErrorMsg(new)
     tmp <- list()
@@ -148,20 +159,20 @@ runModel.combineResults <- function(base, new, strat, stratNum) {
     tmp[[runModel.getObjectCol()]]  <- ""
     tmp[[runModel.getMessageCol()]] <- msg
     obj2 <- runmodel.addWarning(NULL, tmp)
-    base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum) 
+    base[[wr.nm]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum) 
     return(base)
   }
 
-  obj1 <- base[["ModelSummary", exact=TRUE]]
-  obj2 <- new[["ModelSummary", exact=TRUE]]
-  base[["ModelSummary"]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
+  obj1 <- base[[ms.nm, exact=TRUE]]
+  obj2 <- new[[ms.nm, exact=TRUE]]
+  base[[ms.nm]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
 
-  obj1 <- base[["Effects", exact=TRUE]]
-  obj2 <- new[["Effects", exact=TRUE]]
-  base[["Effects"]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
+  obj1 <- base[[ef.nm, exact=TRUE]]
+  obj2 <- new[[ef.nm, exact=TRUE]]
+  base[[ef.nm]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
 
-  obj2 <- new[["Warnings", exact=TRUE]]
-  base[["Warnings"]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum)
+  obj2 <- new[[wr.nm, exact=TRUE]]
+  base[[wr.nm]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum)
 
   base
 
@@ -464,7 +475,17 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   defObj <- runModel.defRetObj(op$model, dmatCols0)
 
   # objects to store results
-  saveobj <- runModel.initSaveObj(N, nruns, defObj)
+  rname    <- rep("", N)
+  cname    <- rep("", N)
+  coefMat  <- matrix(data=NA, nrow=N, ncol=ncol(defObj$coef.stats))
+  runVec   <- rep(0, N)
+  runRows  <- rep(0, nruns)
+  msgVec   <- rep("", nruns)
+  adjVec   <- rep("", nruns)
+  remVec   <- rep("", nruns)
+  fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
+  conv     <- rep(FALSE, nruns)
+  waldP    <- rep(NA, nruns)
     
   # Loop over each exposure in the outer loop
   for (j in 1:nccovs) {
@@ -553,12 +574,30 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       tmp <- runModel.tidy(nsubs, fit, ccovNames, defObj, dcols, dmatCols0, op)
 
       # Save results
-      saveobj <- runModel.updateSaveObj(tmp, saveobj, rcovi, ccovj) 
+      k              <- k + 1
+      k1             <- k1 + 1
+      coef           <- tmp$coef.stats
+      k2             <- k + nrow(coef) - 1
+      vec            <- k:k2
+      runRows[k1]    <- k
+      rname[vec]     <- rcovi
+      cname[vec]     <- ccovj
+      coefMat[vec, ] <- coef
+      runVec[vec]    <- k1
+      msgVec[k1]     <- tmp$msg
+      adjVec[k1]     <- tmp$adj
+      remVec[k1]     <- tmp$adj.rem
+      fitMat[k1,]    <- tmp$fit.stats
+      conv[k1]       <- tmp$converged
+      waldP[k1]      <- tmp$wald.pvalue
+      k              <- k2
     }
   }
 
   # Get objects to return
-  tmp <- runModel.returnSaveObj(saveobj, defObj, op)
+  tmp <- runModel.returnSaveObj(k, k1, N, rname, cname, coefMat, runVec, runRows,
+                                msgVec, adjVec, remVec, fitMat, conv, waldP, 
+                                defObj, op)
 
   ret                                   <- list()
   ret[[getModelSummaryName()]]          <- tmp[["ret1", exact=TRUE]]
@@ -624,7 +663,42 @@ runModel.updateSaveObj <- function(tmp, obj, rcovi, ccovj) {
 
 } # END: runModel.updateSaveObj
 
-runModel.returnSaveObj <- function(obj, defObj, op) {
+runModel.returnSaveObj <- function(k, k1, N, rname, cname, coefMat, runVec, runRows,
+                                   msgVec, adjVec, remVec, fitMat, conv, waldP, 
+                                   defObj, op) {
+
+  ret1 <- NULL 
+  ret2 <- NULL
+  
+  if (k) {
+    tmp  <- 1:k1
+    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], conv[tmp], waldP[tmp], 
+                       fitMat[tmp, , drop=FALSE], 
+                       msgVec[tmp], adjVec[tmp], remVec[tmp], stringsAsFactors=FALSE)
+    colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged", "wald.pvalue",
+                        names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
+    ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
+    colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
+                        names(defObj$coef.stats))
+
+    # Subset if needed
+    if (k < N) ret2 <- ret2[1:k, , drop=FALSE]
+    if (op$pcorrFlag) {
+      ret1$converged   <- NULL
+      ret1$wald.pvalue <- NULL
+    } else if (op$lmFlag) {
+      ret1$converged   <- NULL
+      ret1$statistic   <- NULL
+      ret1$df          <- NULL 
+      ret1$p.value     <- NULL 
+    }
+  }
+
+  list(ret1=ret1, ret2=ret2)
+
+} # END: runModel.returnSaveObj
+
+runModel.returnSaveObj.old <- function(obj, defObj, op) {
 
   ret1 <- NULL 
   ret2 <- NULL
@@ -878,3 +952,7 @@ runModel.getFormulaStr <- function(yvar, dmatCols) {
   str
 
 } # END: runModel.getFormulaStr
+
+
+
+

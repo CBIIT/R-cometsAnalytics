@@ -86,7 +86,7 @@ plotMinvalues <- function(cometsdata,
 # showCorr
 #---------------------------------------------------------
 #' Function that returns top N lines of the \code{\link{runCorr}} output
-#' @param corr COMETScorr class (S3) from \code{\link{runCorr}} output
+#' @param corr  returned object from \code{\link{runCorr}} 
 #' @param nlines number of lines to return (default 50)
 #' @return first 50 lines of output
 #' @examples
@@ -94,7 +94,7 @@ plotMinvalues <- function(cometsdata,
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
-#' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
+#' corrmatrix <- runCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
 showCorr <- function(corr, nlines=50) {
