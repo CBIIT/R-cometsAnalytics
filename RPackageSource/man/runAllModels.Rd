@@ -13,7 +13,7 @@ runAllModels(readData, cohort = "", writeTofile = T)
 \item{cohort}{cohort label (e.g. DPP, NCI, Shanghai)}
 
 \item{writeTofile}{T/F (whether or not to write results for each model into
-separate xlsx files). Files are written to current directory. Default is True.}
+separate xlsx files). Files are written to current directory. Default is TRUE.}
 }
 \value{
 A list of return objects from \code{\link{runModel}}.
