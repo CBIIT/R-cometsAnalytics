@@ -105,7 +105,7 @@ showCorr <- function(corr, nlines=50) {
 #' Show interactive heatmap using plot_ly
 #'
 #' @param ccorrList correlation object (output of \code{\link{runCorr}})
-#' @param strata.number Only valid if ccorrList is from a stratified analysis. If NULL,
+#' @param strata.num Only valid if ccorrList is from a stratified analysis. If NULL,
 #'    then results from the first stratum will be used in the plot. 
 #' @param rowsortby How row labels are sorted
 #' @param plothgt Plot height default 700
@@ -127,7 +127,7 @@ showCorr <- function(corr, nlines=50) {
 #' }
 #' @export
 
-showHeatmap <- function (ccorrList, strata.number=NULL,
+showHeatmap <- function (ccorrList, strata.num=NULL,
        rowsortby = "corr",
        plothgt=700,
        plotwid=800,
@@ -140,7 +140,7 @@ showHeatmap <- function (ccorrList, strata.number=NULL,
   if (!length(ccorrmat)) stop("Effects data frame not found in ccorList")  
     
   # Check if from a stratified analysis
-  ccorrmat <- subset_ccorrmat(ccorrmat, strata.number, print=1)
+  ccorrmat <- subset_ccorrmat(ccorrmat, strata.num, print=1)
 
   # order the rows according to sort by
   if (rowsortby == "metasc") {
@@ -198,7 +198,7 @@ showHeatmap <- function (ccorrList, strata.number=NULL,
 #' This function outputs a heatmap with hierarchical clustering.  It thus requires you to have at least 2 outcome and 2 exposure variables in your models.
 #'
 #' @param ccorrList correlation object (output of \code{\link{runCorr}})
-#' @param strata.number Only valid if ccorrList is from a stratified analysis. 
+#' @param strata.num Only valid if ccorrList is from a stratified analysis. 
 #'   If NULL, then results from the first stratum will be used in the plot. 
 #' @param clust Show hierarchical clustering
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}
@@ -216,7 +216,7 @@ showHeatmap <- function (ccorrList, strata.number=NULL,
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
-showHClust <- function (ccorrList, strata.number=NULL,
+showHClust <- function (ccorrList, strata.num=NULL,
                         clust = TRUE,
                         colscale = "RdYlBu") {
 
@@ -227,7 +227,7 @@ showHClust <- function (ccorrList, strata.number=NULL,
   if (!length(ccorrmat)) stop(paste0(nm, " data frame not found in ccorList"))  
 
   # Check if from a stratified analysis and remove missing values
-  ccorrmat <- subset_ccorrmat(ccorrmat, strata.number, print=1)
+  ccorrmat <- subset_ccorrmat(ccorrmat, strata.num, print=1)
 
   # Get the column names we need
   tname <- getEffectsTermName()
@@ -266,8 +266,8 @@ showHClust <- function (ccorrList, strata.number=NULL,
 }
 
 check_strata.number <- function(strata.number) {
-  if (length(strata.number) > 1) stop("strata.number must be length 1")
-  if (!is.numeric(strata.number)) stop("strata.number must be an integer")
+  if (length(strata.number) > 1) stop("strata.num must be length 1")
+  if (!is.numeric(strata.number)) stop("strata.num must be an integer")
 }
 
 subset_ccorrmat <- function(ccorrmat, strata.number, print=1) {

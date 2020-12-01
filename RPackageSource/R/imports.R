@@ -22,7 +22,7 @@
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runCorr}} (correlation analysis) \cr
-#' \code{\link{runModel}} (glm or lm) \cr
+#' \code{\link{runModel}} (correlation, glm or lm) \cr
 #' \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
 #' \bold{Functions for graphics:} \cr
 #' \code{\link{plotVar}} (metabolite variance distribution plot) \cr

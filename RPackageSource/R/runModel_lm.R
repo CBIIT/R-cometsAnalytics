@@ -38,7 +38,7 @@ runModel.defRetObj.lm <- function(dmatCols0) {
                          "p.value", "df", "logLik", "AIC",
                          "BIC", "deviance", "df.residual", "nobs")
   coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
-  names(coef.stats) <- coef.names
+  colnames(coef.stats) <- coef.names
   fit.stats         <- rep(NA, length(fit.names))
   names(fit.stats)  <- fit.names
   adj               <- runModel.getVarStr(dmatCols0[-1])
@@ -52,17 +52,17 @@ runModel.defRetObj.lm <- function(dmatCols0) {
 runModel.callLM <- function(x, y, op) {
 
   # first column in design matrix will be for response
-  x[, 1] <- y
-  cx     <- colnames(x)
-  yvar   <- "...y"
-  cx[1]  <- yvar
+  x[, 1]      <- y
+  cx          <- colnames(x)
+  yvar        <- "...y"
+  cx[1]       <- yvar
   colnames(x) <- cx
-  mop    <- op[[getModelOpsName()]]
-  form   <- as.formula(runModel.getFormulaStr(yvar, cx[-1]))
-  fit    <- lm(form, data=as.data.frame(x), 
-               weights=mop[["weights.vec", exact=TRUE]],
-               offset=mop[["offset.vec", exact=TRUE]],
-               singular.ok=mop$singular.ok, tol=mop$tol)
+  mop         <- op[[getModelOpsName()]]
+  form        <- as.formula(runModel.getFormulaStr(yvar, cx[-1]))
+  fit         <- lm(form, data=as.data.frame(x), 
+                    weights=mop[["weights.vec", exact=TRUE]],
+                    offset=mop[["offset.vec", exact=TRUE]],
+                    singular.ok=mop$singular.ok, tol=mop$tol)
 
   fit
 
