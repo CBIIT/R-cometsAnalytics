@@ -6,7 +6,7 @@
 \usage{
 showHeatmap(
   ccorrList,
-  strata.number = NULL,
+  strata.num = NULL,
   rowsortby = "corr",
   plothgt = 700,
   plotwid = 800,
@@ -16,7 +16,7 @@ showHeatmap(
 \arguments{
 \item{ccorrList}{correlation object (output of \code{\link{runCorr}})}
 
-\item{strata.number}{Only valid if ccorrList is from a stratified analysis. If NULL,
+\item{strata.num}{Only valid if ccorrList is from a stratified analysis. If NULL,
 then results from the first stratum will be used in the plot.}
 
 \item{rowsortby}{How row labels are sorted}
