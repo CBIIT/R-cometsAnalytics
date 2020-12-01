@@ -48,7 +48,7 @@ runModel.defRetObj.pcor <- function(dmatCols0) {
   vec               <- c("term", "corr", "p.value")
   coef.names        <- vec
   coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
-  names(coef.stats) <- coef.names
+  colnames(coef.stats) <- coef.names
   fit.names         <- "nobs"
   fit.stats         <- rep(NA, length(fit.names))
   names(fit.stats)  <- fit.names
@@ -197,4 +197,56 @@ runModel.pcor <- function(x, method) {
         n = n, gp = gp, method = method)
 
 } # END: runModel.pcor
+
+# Special case of correlation for continuous exposure variables with
+#   no adjusted covariates. 
+runModel.pcor.special <- function(newmodeldata, op) {
+
+  rcovs  <- newmodeldata$rcovs
+  nrcovs <- length(rcovs)
+  ccovs  <- (newmodeldata$ccovs)[!(newmodeldata$isfactor)]
+  nccovs <- length(ccovs)
+  if (!nccovs) stop("INTERNAL CODING ERROR in runModel.pcor.special")
+  N      <- nrcovs*nccovs
+  nvec   <- rep(NA, N)
+  cvec   <- nvec  
+  pvec   <- nvec    
+  mop    <- op[[getModelOpsName()]]
+  method <- mop$method
+  use    <- "pairwise.complete.obs"
+  b      <- 0
+  minN   <- op$check.nsubjects
+
+  # For each continuous exposure, compute the correlation for
+  #   all outcomes at once. 
+  for (i in 1:nccovs) {
+    expv  <- ccovs[i]
+    vec   <- as.numeric(newmodeldata$gdta[, expv, drop=TRUE])
+    ymat  <- as.matrix(newmodeldata$gdta[, rcovs, drop=FALSE])
+    tmp0  <- !is.finite(vec)
+    if (any(tmp0)) vec[tmp0] <- NA
+    tmp   <- !is.finite(ymat)
+    if (any(tmp)) ymat[tmp] <- NA
+    nsubs      <- colSums(!tmp & !tmp0)    
+    a          <- b + 1
+    b          <- a + nrcovs - 1
+    tmp0       <- a:b
+    nvec[tmp0] <- nsubs
+    tmp        <- nsubs >= minN
+    tmp[is.na(tmp)] <- FALSE
+    if (any(tmp)) {
+      corr      <- cor(vec, ymat[, tmp, drop=FALSE], method=method, use=use) 
+      df        <- nsubs[tmp] - 2
+      test      <- sqrt(df)*corr/sqrt(1 - corr*corr)
+      pval      <- 2*stats::pt(abs(test), df=df, lower.tail=FALSE)
+      vec       <- tmp0[tmp]
+      cvec[vec] <- corr
+      pvec[vec] <- pval
+    }
+  }
+
+  list(corr=cvec, pvalue=pvec, nobs=nvec, ccovs=ccovs)
+
+} # END: runModel.pcor.special
+
 

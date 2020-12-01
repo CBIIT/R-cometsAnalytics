@@ -219,7 +219,7 @@ readCOMETSinput <- function(csvfilePath) {
         "stratavar",
         "strata")
 
-    dtalist$options <- dta.options
+    dtalist[[getMetabDataOpsName()]] <- dta.options
 
     print(integritymessage)
     return(dtalist)

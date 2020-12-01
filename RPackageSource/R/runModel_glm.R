@@ -210,7 +210,7 @@ runModel.get.families <- function() {
 runModel.check.family <- function(obj) {
 
   valid <- runModel.get.families()
-  obj   <- runModel.check.str(obj, valid, "family") 
+  obj   <- check.string(obj, valid, "family") 
 
   obj
 
@@ -272,7 +272,7 @@ runModel.check.link <- function(obj, family) {
   # family must be checked before this function is called
 
   valid <- runModel.get.links(family)
-  obj   <- runModel.check.str(obj, valid, "link") 
+  obj   <- check.string(obj, valid, "link") 
 
   obj
 
@@ -294,7 +294,7 @@ runModel.defRetObj.glm <- function(dmatCols0) {
   fit.names         <- c("null.deviance", "df.null", "logLik", "AIC",
                          "BIC", "deviance", "df.residual", "nobs")
   coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
-  names(coef.stats) <- coef.names
+  colnames(coef.stats) <- coef.names
   fit.stats         <- rep(NA, length(fit.names))
   names(fit.stats)  <- fit.names
   adj               <- runModel.getVarStr(dmatCols0[-1])

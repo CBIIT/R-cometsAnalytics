@@ -7,10 +7,10 @@
 #' @param op list of options (see \code{\link{options}}).
 #'
 #' @details This function is a special case of \code{\link{runModel}}
-#'          with the option \code{op$model = "pcorr"}
+#'          with the option \code{op$model = "correlation"}
 #'
 #' @return A list of objects with names \code{\link{ModelSummary}},
-#'        \code{\link{Effects}}, and \code{\link{Warnings}}. 
+#'        \code{\link{Effects}}, and \code{\link{Errors_Warnings}}. 
 #' Attribute of this list includes ptime for processing time of model run.
 #'
 #' @examples

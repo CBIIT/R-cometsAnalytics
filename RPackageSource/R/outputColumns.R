@@ -71,7 +71,7 @@ NULL
 #' 
 NULL
 
-#' Columns in the Warnings matrix. 
+#' Columns in the Errors_Warnings table. 
 #' \itemize{
 #' \item{\code{type}}{ WARNING or ERROR}
 #' \item{\code{object}}{ The object that produced the warning or error. This is
@@ -79,8 +79,8 @@ NULL
 #' \item{\code{message}}{ Message describing the warning or error}
 #' }
 #'
-#' @name Warnings
-#' @title Warnings table columns
+#' @name Errors_Warnings
+#' @title Errors and Warnings table 
 #' @details The kinds of warnings and errors stored in this matrix are ones that
 #'    apply to all models or all outcomes for an exposure variable. An error
 #'    message for a particular exposure-outcome pair will be stored in the

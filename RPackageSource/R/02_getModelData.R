@@ -235,7 +235,7 @@ else if (modelspec == "Batch") {
   mods <-
     dplyr::filter(as.data.frame(readData[["mods"]]), model == modlabel)
   if (nrow(mods) == 0) {
-    stop("The model name input does not exist in the input Excell file. Please check your Models sheet.")
+    stop("The model name input does not exist in the input Excel file. Please check your Models sheet.")
   }
 
   # rename variables to cohortvariable definitions -----------------------------
@@ -344,16 +344,17 @@ if (!is.null(where)) {
   readData    <- try(filterCOMETSinput(readData,where=where2), silent=TRUE)
   if ("try-error" %in% class(readData)) {
     print(readData)
-    stop(paste("ERROR applying WHERE: ", where, sep=""))
+    stop(paste("ERROR applying WHERE: ", paste(where, collapse=" & ", sep=""), sep=""))
   }
-  msg         <- paste0("Filtering subjects according to the rule(s) ", where, ". ", 
+  msg         <- paste0("Filtering subjects according to the rule(s) ", 
+                        paste(where, collapse=" & ", sep=""), ". ", 
                         nrow(readData$subjdata)," of ", numallsamps," are retained")
   print(msg)
 }
 
 gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
 
-if(nrow(gdta) < 3) {
+if(nrow(gdta) < 2) {
   stop("Too few samples for this model, so the model will not be run")
 }
 
@@ -423,7 +424,7 @@ getModelFunFromSheet <- function(opTable) {
   if (n > 1) stop("ERROR: more than one model function specified")
   
   valid <- getValidModelNames()
-  ret   <- runModel.check.str(vec, valid, col)
+  ret   <- check.string(vec, valid, col)
 
   ret
 
@@ -476,7 +477,7 @@ getModelOptionsFromSheet <- function(opTable, modelFunc) {
 
 getAllOptionsForModel <- function(mods, readData) {
 
-  opTable <- readData[["options", exact=TRUE]]
+  opTable <- readData[[getMetabDataOpsName(), exact=TRUE]]
   if (!length(opTable)) return(NULL)
 
   modnm   <- getModelOptionsIdCol()

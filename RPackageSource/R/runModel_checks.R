@@ -1,37 +1,4 @@
 
-# Function to check an argument 
-runModel.check.str <- function(obj, valid, parm) {
-
-  # obj:   A character string (length 1)
-  # valid: Character vector of valid values
-  # parm:  The name of the argument being checked
-
-  errFlag <- 0
- 
-  # Check for errors
-  if (!isString(obj)) errFlag <- 1 
-  obj <- trimws(obj)
-  if (!(obj %in% valid)) errFlag <- 1
-
-  if (errFlag) {
-    msg <- paste(valid, collapse=", ")
-    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
-    stop(msg)
-  }
-
-  obj
-
-} # END: runModel.check.str
-
-runModel.check.model <- function(obj) {
-
-  valid <- getValidModelNames()
-  obj   <- runModel.check.str(obj, valid, "model") 
-  
-  obj
-
-} # END: runModel.check.model
-
 runModel.checkFor1Val <- function(data, vars, nvals=2, min.nsubs=25) {
 
   n    <- length(vars)
