@@ -316,10 +316,44 @@ checkOp_check.cor.method <- function(str, name="check.cor.method") {
   if (!isString(str)) stop("INTERNAL CODING ERROR in checkOp_check.cor.method")
   valid <- c("spearman", "pearson", "kendall")
   str   <- tolower(str)
-  str   <- runModel.check.str(str, valid, name)
+  str   <- check.string(str, valid, name)
   str
 
 } 
+
+runModel.check.model <- function(obj) {
+
+  valid <- getValidModelNames()
+  obj   <- check.string(obj, valid, "model") 
+  
+  obj
+
+} # END: runModel.check.model
+
+# Function to check an argument 
+check.string <- function(obj, valid, parm) {
+
+  # obj:   A character string (length 1)
+  # valid: Character vector of valid values
+  # parm:  The name of the argument being checked
+
+  errFlag <- 0
+ 
+  # Check for errors
+  if (!isString(obj)) errFlag <- 1 
+  obj <- trimws(obj)
+  if (!(obj %in% valid)) errFlag <- 1
+
+  if (errFlag) {
+    msg <- paste(valid, collapse=", ")
+    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
+    stop(msg)
+  }
+
+  obj
+
+} # END: check.string
+
 
 check.logical <- function(x, name) {
 
