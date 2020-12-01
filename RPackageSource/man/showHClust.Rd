@@ -4,12 +4,12 @@
 \alias{showHClust}
 \title{Show interactive heatmap using heatmaply_cor with hierarchical clustering}
 \usage{
-showHClust(ccorrList, strata.number = NULL, clust = TRUE, colscale = "RdYlBu")
+showHClust(ccorrList, strata.num = NULL, clust = TRUE, colscale = "RdYlBu")
 }
 \arguments{
 \item{ccorrList}{correlation object (output of \code{\link{runCorr}})}
 
-\item{strata.number}{Only valid if ccorrList is from a stratified analysis. 
+\item{strata.num}{Only valid if ccorrList is from a stratified analysis. 
 If NULL, then results from the first stratum will be used in the plot.}
 
 \item{clust}{Show hierarchical clustering}

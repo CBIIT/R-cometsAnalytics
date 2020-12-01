@@ -17,7 +17,7 @@ runCorr(modeldata, metabdata, cohort = "", op = NULL)
 }
 \value{
 A list of objects with names \code{\link{ModelSummary}},
-       \code{\link{Effects}}, and \code{\link{Warnings}}. 
+       \code{\link{Effects}}, and \code{\link{Errors_Warnings}}. 
 Attribute of this list includes ptime for processing time of model run.
 }
 \description{
@@ -25,7 +25,7 @@ Calculate correlation matrix for input model.
 }
 \details{
 This function is a special case of \code{\link{runModel}}
-         with the option \code{op$model = "pcorr"}
+         with the option \code{op$model = "correlation"}
 }
 \examples{
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
