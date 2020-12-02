@@ -95,7 +95,7 @@ To display the hierarchical clustering of the resulting correlation matrix, use 
 
 ```{r, eval=T}
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
-excorrdata  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
+excorrdata  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata)
 ```
 
@@ -121,6 +121,7 @@ Run a linear regression using the lm function adjusting for age group with age a
   exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    rowvars=c("lactose","lactate"), colvars=c("age","bmi_grp"))
   lm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="lm"))
+  print(lm_results)
 ```
 
 ### 6. Linear regression with glm
