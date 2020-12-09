@@ -202,37 +202,45 @@ runModel.pcor <- function(x, method) {
 #   no adjusted covariates. 
 runModel.pcor.special <- function(newmodeldata, op) {
 
-  rcovs  <- newmodeldata$rcovs
-  nrcovs <- length(rcovs)
-  ccovs  <- (newmodeldata$ccovs)[!(newmodeldata$isfactor)]
-  nccovs <- length(ccovs)
+  rcovs   <- newmodeldata$rcovs
+  nrcovs  <- length(rcovs)
+  ccovs   <- (newmodeldata$ccovs)[!(newmodeldata$isfactor)] # Get cont exposures
+  nccovs  <- length(ccovs)
   if (!nccovs) stop("INTERNAL CODING ERROR in runModel.pcor.special")
-  N      <- nrcovs*nccovs
-  nvec   <- rep(NA, N)
-  cvec   <- nvec  
-  pvec   <- nvec    
-  mop    <- op[[getModelOpsName()]]
-  method <- mop$method
-  use    <- "pairwise.complete.obs"
-  b      <- 0
-  minN   <- op$check.nsubjects
+  N       <- nrcovs*nccovs
+  nvec    <- rep(NA, N)
+  cvec    <- nvec  
+  pvec    <- nvec    
+  ccovVec <- rep("", N)
+  rcovVec <- ccovVec
+  mop     <- op[[getModelOpsName()]]
+  method  <- mop$method
+  use     <- "pairwise.complete.obs"
+  b       <- 0
+  minN    <- op$check.nsubjects
 
   # For each continuous exposure, compute the correlation for
   #   all outcomes at once. 
   for (i in 1:nccovs) {
-    expv  <- ccovs[i]
-    vec   <- as.numeric(newmodeldata$gdta[, expv, drop=TRUE])
-    ymat  <- as.matrix(newmodeldata$gdta[, rcovs, drop=FALSE])
+    expv    <- ccovs[i]
+    vec     <- as.numeric(newmodeldata$gdta[, expv, drop=TRUE])
+    tmp     <- rcovs != expv
+    rcovs2  <- rcovs[tmp]
+    nrcovs2 <- length(rcovs2)
+    if (!nrcovs2) next
+    ymat  <- as.matrix(newmodeldata$gdta[, rcovs2, drop=FALSE])
     tmp0  <- !is.finite(vec)
     if (any(tmp0)) vec[tmp0] <- NA
     tmp   <- !is.finite(ymat)
     if (any(tmp)) ymat[tmp] <- NA
-    nsubs      <- colSums(!tmp & !tmp0)    
-    a          <- b + 1
-    b          <- a + nrcovs - 1
-    tmp0       <- a:b
-    nvec[tmp0] <- nsubs
-    tmp        <- nsubs >= minN
+    nsubs           <- colSums(!tmp & !tmp0)    
+    a               <- b + 1
+    b               <- a + nrcovs2 - 1
+    tmp0            <- a:b
+    nvec[tmp0]      <- nsubs
+    rcovVec[tmp0]   <- rcovs2
+    ccovVec[tmp0]   <- expv
+    tmp             <- nsubs >= minN
     tmp[is.na(tmp)] <- FALSE
     if (any(tmp)) {
       corr      <- cor(vec, ymat[, tmp, drop=FALSE], method=method, use=use) 
@@ -244,8 +252,16 @@ runModel.pcor.special <- function(newmodeldata, op) {
       pvec[vec] <- pval
     }
   }
+  if (b < N) {
+    vec     <- 1:b
+    cvec    <- cvec[vec]
+    pvec    <- pvec[vec]
+    nvec    <- nvec[vec]
+    ccovVec <- ccovVec[vec]
+    rcovVec <- rcovVec[vec] 
+  }
 
-  list(corr=cvec, pvalue=pvec, nobs=nvec, ccovs=ccovs)
+  list(corr=cvec, pvalue=pvec, nobs=nvec, ccovVec=ccovVec, rcovVec=rcovVec)
 
 } # END: runModel.pcor.special
 

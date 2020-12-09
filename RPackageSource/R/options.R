@@ -263,6 +263,23 @@ checkOptionListNames <- function(op, valid, name) {
 
 } # END: checkOptionListNames
 
+checkRequiredListNames <- function(x, req, name) {
+
+  if (!length(x)) stop(paste0(name, " has length 0"))
+  if (!is.list(x)) stop(paste0(name, " must be a list"))
+
+  tmp  <- !(req %in% names(x))
+  miss <- req[tmp]
+  if (length(miss)) {
+    tmp <- paste0(miss, collapse=", ")
+    msg <- paste0("ERROR: the objects ", tmp, " are not in ", name)
+    stop(msg)  
+  }
+  
+  NULL
+
+} # END: checkRequiredListNames
+
 checkGlobalOpList <- function(op, name="options") {
 
   n       <- length(op)
