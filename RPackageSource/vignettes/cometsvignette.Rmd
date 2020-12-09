@@ -4,7 +4,7 @@ author: "Ewy Mathé, Ella Temprosa"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Running COMETS Analytics locally}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -54,27 +54,34 @@ COMETS::plotMinvalues(exmetabdata,titlesize=12)
 ### 2. Get Model Data
 
 There are 2 ways to specify your model, batch or interactive.
-In Batch mode, models are specified in your input file. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
+In Batch mode, models are specified in your input file Models sheet. 
+The model information needs to be read in with the function *getModelData()* and 
+processed so the software knows which models to run.
+The following call defines the "1 Gender adjusted" model from the Models
+sheet in the input file to be run.
 
 ```{r}
 exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 ```
-In Interactive mode, models are specified as parameters. The model information needs to be read in with the function *getModelData()* and processed so the software knows which models to run.  Input for this function is the data input in the previous step:
-
+In Interactive mode, models are specified as parameters. 
+The model information needs to be read in with the function *getModelData()* and 
+processed so the software knows which models to run.  
+The following call defines the model with age and bmi_grp as the exposure variables,
+ and includes only the subjects with age > 40 and bmi_grp > 2.
 ```{r}
-exmodeldata <- COMETS::getModelData(exmetabdata, modelspec="Interactive",
+exmodeldata2 <- COMETS::getModelData(exmetabdata, modelspec="Interactive",
 	colvars=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
 ```
 
-### 3. Run Simple Correlation Analysis
-
-The unstratified correlation analysis is run by calling the function *runModel()*.  This function runs the model(s) that is(are) defined in the input data (Models tab).  
-
+### 3. Run Simple Unstratified Correlation Analysis
+The *runModel()* function is the main function for running a single model, and by
+default, a correlation analysis is performed. 
 ```{r}
-excorrdata  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
+excorrdata  <- COMETS::runModel(exmodeldata2,exmetabdata,"DPP")
 ```
 
-The output of the correlation analysis can then be compiled and output to an Excel file with the following function:
+The output of the correlation analysis can then be compiled and output to an Excel file
+ with the following function:
 ```{r, eval=F}
 COMETS::OutputListToExcel(filename="DPP_corr.xlsx", excorrdata)
 ```
@@ -91,12 +98,14 @@ COMETS::showHeatmap(excorrdata)
 \
 \
 \
-To display the hierarchical clustering of the resulting correlation matrix, use the showHClust function. This diplay requires at least 2 rows and 2 columns in the correlation matrix.
+To display the hierarchical clustering of the resulting correlation matrix, 
+use the showHClust function. 
+This diplay requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r, eval=T}
 exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
 excorrdata  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
-COMETS::showHClust(excorrdata)
+COMETS::showHClust(excorrdata, showticklabels=FALSE)
 ```
 
 Results can be written to an output Excel file with the following command:
@@ -106,46 +115,69 @@ COMETS::OutputListToExcel("Model1.xlsx", excorrdata)
 ```
 
 ### 4. Run Stratified Correlation Analysis
-
-The stratified correlation analysis is run by calling the function *runModel()*.  This function runs the model(s) that is(are) defined in the input data (Models tab) or in interactive mode. In this example, exmodeldata includes an object scovs that specifies the stratification variable.        
-
+A stratified correlation analysis can be performed by specifiying stratification
+variables in the call to *getModelData()*. If more than one stratification variable
+is specified, then the strata will be defined by all unique combinations of the
+stratification variables. The following call will define a model stratified 
+by race_grp.
 ```{r}
-  exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",rowvars=c("lactose","lactate"),
-	colvars=c("age","bmi_grp"),strvars="race_grp")
+  exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",
+                   rowvars=c("lactose","lactate"),
+	            colvars=c("age","bmi_grp"),strvars="race_grp")
+```
+
+The stratified correlation analysis is run by calling the *runModel()* function.          
+```{r}
   excorrdata2  <- COMETS::runModel(exmodeldata2,exmetabdata,"DPP")
 ```
 
-### 5. Linear regression
-Run a linear regression using the lm function adjusting for age group with age and bmi group as the exposures.
+### 5. Linear regression with lm
+Call *getModelData()* to define a model which adjusts for age group, 
+has lactose and lactate as outcome variables, and has age and bmi group 
+as the exposure variables.
 ```{r}
   exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    rowvars=c("lactose","lactate"), colvars=c("age","bmi_grp"))
+```
+To run a linear regression using the lm function, a list of options must be passed into
+*runModel()* with the model option set to "lm".
+```{r}
   lm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="lm"))
   print(lm_results)
 ```
 
 ### 6. Linear regression with glm
 Run a linear regression using the glm function for the same variables as above.
+The default family used with glm is "gaussian", which corresponds to a
+linear regression.
 The Effects data frame will be the same as with lm, but the ModelSummary data frame
 will contain some different columns.
 ```{r}
   glm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="glm"))
   print(all.equal(lm_results$Effects, glm_results$Effects))
+  print(glm_results$ModelSummary)
 ```
+
 ### 7. Logistic regression with glm
-Run a logistic regression using the glm function with the binary variable nested_case
-as the outcome. Here we must specify model.options in the op list to ensure the
-correct family is used.
+Call *getModelData()* to define a model which adjusts for age group, 
+has nested_case as the outcome variable, and has lactose and lactate
+as the exposure variables. The variable nested_case must be a binary 0-1 variable.
 ```{r}
   exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    rowvars="nested_case", colvars=c("lactose","lactate"))
+```
+To run a logistic regression, the list of options op must also include a model.options 
+list with family set to "binomial".
+```{r}
   op <- list(model="glm", model.options=list(family="binomial"))
   glm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=op)
 ```
 
 ### 8. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
 
-All models desginated in the input file can be run with one command, and individual output Excel files or correlation results will be written in the current directory by default. The function returns a list of objects.
+All models desginated in the input file can be run with one command, 
+and individual output Excel files or correlation results will be written
+ in the current directory by default. The function returns a list of objects.
 
 ```{r eval=F}
  allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
