@@ -4,7 +4,13 @@
 \alias{showHClust}
 \title{Show interactive heatmap using heatmaply_cor with hierarchical clustering}
 \usage{
-showHClust(ccorrList, strata.num = NULL, clust = TRUE, colscale = "RdYlBu")
+showHClust(
+  ccorrList,
+  strata.num = NULL,
+  clust = TRUE,
+  colscale = "RdYlBu",
+  showticklabels = TRUE
+)
 }
 \arguments{
 \item{ccorrList}{correlation object (output of \code{\link{runCorr}})}
@@ -12,9 +18,11 @@ showHClust(ccorrList, strata.num = NULL, clust = TRUE, colscale = "RdYlBu")
 \item{strata.num}{Only valid if ccorrList is from a stratified analysis. 
 If NULL, then results from the first stratum will be used in the plot.}
 
-\item{clust}{Show hierarchical clustering}
+\item{clust}{TRUE or FALSE to show hierarchical clustering. The default is TRUE.}
 
 \item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}}
+
+\item{showticklabels}{TRUE or FALSE to show axis labels. The default is TRUE.}
 }
 \value{
 a heatmap with outcomes as rows and exposures in columns.
