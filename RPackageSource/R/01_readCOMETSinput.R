@@ -219,6 +219,11 @@ readCOMETSinput <- function(csvfilePath) {
         "stratavar",
         "strata")
 
+    # Return a map between the old and new variable names for all variables
+    #varMap         <- c(oldnames, dict_metabnames)
+    #names(varMap)  <- c(newnames, names(dict_metabnames))
+    #dtalist$varMap <- varMap
+
     dtalist[[getMetabDataOpsName()]] <- dta.options
 
     print(integritymessage)

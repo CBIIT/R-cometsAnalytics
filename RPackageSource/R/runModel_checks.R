@@ -244,4 +244,27 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
 } # END: runModel.checkModelDesign
 
+runModel.checkModeldata <- function(x, name="modeldata") {
+
+  req  <- c("gdta", "rcovs", "ccovs", "modelspec", "modlabel", 
+            "dict_metabnames")
+  checkRequiredListNames(x, req, name)
+  if (!is.data.frame(x$gdta)) stop(paste0(name, "$gdta must be a data frame"))
+  tmp <- c(getMode_batch(), getMode_interactive())
+  if (!(x$modelspec %in% tmp)) {
+    stop(paste0("ERROR: ", name, "$modelspec must be ", tmp[1], " or ", tmp[2])) 
+  }
+
+  NULL
+
+} # END: runModel.checkModeldata
+
+runModel.checkMetabdata <- function(x, name="metabdata") {
+
+  req  <- c("dict_metabnames", "metab", "metabId")
+  checkRequiredListNames(x, req, name)
+  
+  NULL
+
+} # END: runModel.checkMetabdata
 
