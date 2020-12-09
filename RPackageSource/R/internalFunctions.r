@@ -394,8 +394,12 @@ filterCOMETSinput <- function(readData,where=NULL) {
                            which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(gsub(" ","",mysplit[2]))) )
 		} else if (length(grep("=",myfilts[i]))>0) {
 			mysplit <- strsplit(myrule,"=")[[1]]
+                     # Watch out for "=" or "=="
+                     tmp     <- nchar(trimws(mysplit)) > 0
+                     mysplit <- mysplit[tmp]
+
 			# myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
-                        myvar = gsub(" ","",mysplit[1])
+                     myvar = gsub(" ","",mysplit[1])
 			samplesToKeep <- c(samplesToKeep,
                            which(as.numeric(as.character(readData$subjdata[,myvar])) == gsub(" ","",as.numeric(mysplit[2]))) )
         	} else
@@ -737,7 +741,7 @@ addMetabInfo <- function(corrlong, modeldata, metabdata) {
     )
 
   # get good labels for the display of outcome and exposure
-  if (modeldata$modelspec == "Interactive") {
+  if (modeldata$modelspec == getMode_interactive()) {
     # fill in outcome vars from varmap if not a metabolite:
     if(length(suppressWarnings(grep(corrlong$outcomespec,vmap$cohortvariable)) != 0)) {
     	corrlong <-
@@ -764,7 +768,7 @@ addMetabInfo <- function(corrlong, modeldata, metabdata) {
     	  dplyr::select(-vardefinition, -varreference)
        }
   }
-  else if (modeldata$modelspec == "Batch") {
+  else if (modeldata$modelspec == getMode_batch()) {
     # fill in outcome vars from varmap if not a metabolite
     if(length(suppressWarnings(grep(corrlong$outcomespec,vmap$cohortvariable)) != 0)) {
     	corrlong <-

@@ -200,8 +200,9 @@ showHeatmap <- function (ccorrList, strata.num=NULL,
 #' @param ccorrList correlation object (output of \code{\link{runCorr}})
 #' @param strata.num Only valid if ccorrList is from a stratified analysis. 
 #'   If NULL, then results from the first stratum will be used in the plot. 
-#' @param clust Show hierarchical clustering
+#' @param clust TRUE or FALSE to show hierarchical clustering. The default is TRUE.
 #' @param colscale colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}
+#' @param showticklabels TRUE or FALSE to show axis labels. The default is TRUE.
 #'
 #' @return a heatmap with outcomes as rows and exposures in columns.
 #'
@@ -217,8 +218,8 @@ showHeatmap <- function (ccorrList, strata.num=NULL,
 #' showHClust(corrmatrix)
 #' @export
 showHClust <- function (ccorrList, strata.num=NULL,
-                        clust = TRUE,
-                        colscale = "RdYlBu") {
+                        clust = TRUE, colscale = "RdYlBu",
+                        showticklabels=TRUE) {
 
   if (!length(colscale)) colscale <- "RdYlBu"  
   if (!is.list(ccorrList)) stop("ccorrList must be a list")
@@ -260,7 +261,8 @@ showHClust <- function (ccorrList, strata.num=NULL,
   }
 
   heatmaply::heatmaply(excorr[, 2:ncols],
-            colors=colors, show_grid=FALSE, dendrogram=dend)
+            colors=colors, show_grid=FALSE, dendrogram=dend,
+            showticklabels=showticklabels)
 
 
 }

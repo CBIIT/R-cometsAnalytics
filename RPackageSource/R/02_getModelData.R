@@ -58,10 +58,9 @@ getModelData <-  function(readData,
                           wgtvar    = NULL,
                           offvar    = NULL,
 			  where     = NULL) {
-  if (is.na(match(modelspec, c("Interactive", "Batch")))) {
-    stop("modelspec is not an allowable value.  Use 'Interactive' or 'Batch'")
-  }
 
+  modelspec <- check.string(modelspec, c(getMode_interactive(), getMode_batch()), "modelspec")
+  
   allvsall <- FALSE
   rem.obj  <- NULL
   options  <- NULL
@@ -69,7 +68,7 @@ getModelData <-  function(readData,
   offcov   <- NULL
 
 # figure out the model specification based on type (Interactive or Batch)
-if (modelspec == "Interactive") {
+if (modelspec == getMode_interactive()) {
   if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
 
   # Normalize variables so that it is consistent with readCOMETSinput
@@ -220,12 +219,14 @@ if (modelspec == "Interactive") {
 
   # end if modelspec is "Interactive"
   }
-else if (modelspec == "Batch") {
+else if (modelspec == getMode_batch()) {
   # here we need to get the covariates defined from the excel sheet
   # step 1. get the chosen model first
 
   if (modlabel == "") {
-    stop("modelspec is set to 'Batch' yet model label (modlabel) is empty.  Please set modlabel.")
+    msg <- paste0("modelspec is set to '", getMode_batch(), 
+             "' yet model label (modlabel) is empty.  Please set modlabel.")
+    stop(msg)
   }
 
   # defining global variable to remove Rcheck warnings
@@ -235,7 +236,8 @@ else if (modelspec == "Batch") {
   mods <-
     dplyr::filter(as.data.frame(readData[["mods"]]), model == modlabel)
   if (nrow(mods) == 0) {
-    stop("The model name input does not exist in the input Excel file. Please check your Models sheet.")
+    tmp <- paste0("The model name '", modlabel, "' does not exist in the input Excel file. Please check your Models sheet.")
+    stop(tmp)
   }
 
   # rename variables to cohortvariable definitions -----------------------------
@@ -289,6 +291,7 @@ else if (modelspec == "Batch") {
 
   # Get the options for this model
   options <- getAllOptionsForModel(mods, readData)
+  if (is.null(options)) options <- list()
 
   # Get weight and offset variables
   wgtvar <- NULL
@@ -393,6 +396,8 @@ gdta <- convertVarsToNumeric(gdta, rcovs)
 
 getGlobalOptionsFromSheet <- function(opTable) {
 
+  # Global options can now also be in the model options part of the table
+
   modnm   <- getModelOptionsIdCol()
   tmp     <- opTable[, modnm] %in% getGlobalOptionName()
   opTable <- opTable[tmp, , drop=FALSE]
@@ -430,7 +435,10 @@ getModelFunFromSheet <- function(opTable) {
 
 } # END: getModelFunFromSheet
 
-getModelOptionsFromSheet <- function(opTable, modelFunc) {
+getModelOptionsFromSheet <- function(op, opTable, modelFunc) {
+
+  # Function will return complete list of options, since we now allow
+  #  a model label to override the global options
 
   opNameCol <- getOptionNameCol()
   opValCol  <- getOptionValueCol()
@@ -444,7 +452,7 @@ getModelOptionsFromSheet <- function(opTable, modelFunc) {
     opnames  <- opnames[!tmp]
     opvalues <- opvalues[!tmp]
   }
-  if (!length(opnames)) return(NULL)
+  if (!length(opnames)) return(op)
  
   # Check for missing names
   if (any(nchar(opnames) < 1)) {
@@ -460,6 +468,21 @@ getModelOptionsFromSheet <- function(opTable, modelFunc) {
     stop(msg)
   }
 
+  # See if any options are global options. If so, then put them in op and
+  #  remove them from the vectors
+  tmp <- opnames %in% getValidGlobalOps()$valid
+  if (any(tmp)) {
+    g.opnames  <- opnames[tmp]
+    g.opvalues <- opvalues[tmp]
+    opnames    <- opnames[!tmp]
+    opvalues   <- opvalues[!tmp]
+    tmp        <- checkGlobalOpsFromCharVecs(g.opnames, g.opvalues)
+    if ("try-error" %in% class(tmp)) stop(tmp)
+    for (nm in g.opnames) op[[nm]] <- tmp[[nm, exact=TRUE]]
+  }
+  if (!length(opnames)) return(op)
+
+  # Convert model specific options to correct form
   ret <- convertModelOptions(opnames, opvalues, modelFunc)
 
   # For options that specify variables, make sure they are lower case
@@ -470,8 +493,9 @@ getModelOptionsFromSheet <- function(opTable, modelFunc) {
       if (!is.null(var)) ret[[v]] <- tolower(var) 
     }
   }
+  op[[getModelOpsName()]] <- ret
 
-  ret
+  op
 
 } # END: getModelOptionsFromSheet
 
@@ -501,10 +525,9 @@ getAllOptionsForModel <- function(mods, readData) {
   modelFunc <- getModelFunFromSheet(opTable)
   op$model  <- modelFunc
 
-  # Get model options
-  mop <- getModelOptionsFromSheet(opTable, modelFunc)
-  op[[getModelOpsName()]] <- mop
-  
+  # Get model options and include them in op
+  op <- getModelOptionsFromSheet(op, opTable, modelFunc)
+
   op
 
 } # END: getAllOptionsForModel

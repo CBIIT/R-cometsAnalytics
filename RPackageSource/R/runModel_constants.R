@@ -1,6 +1,11 @@
 # Delimiter in output lists of variable names
 runModel.getVarSep <- function() {";"}
 
+# Batch or interactive
+getMode_batch       <- function() {"Batch"}
+getMode_interactive <- function() {"Interactive"}
+
+
 # For appending stratification columns
 runModel.getStrataColName    <- function() {"strata"}
 runModel.getStrataNumColName <- function() {"strata.num"}
@@ -40,7 +45,6 @@ getEffectsRunName          <- function() {"run"}
 # ModelSummary 
 getModelSummaryName       <- function() {"ModelSummary"}
 getModelSummaryNobsName   <- function() {"nobs"}
-
 
 # For input excel file
 getModelOptionsIdCol <- function() {"modelname"}

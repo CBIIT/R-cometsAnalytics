@@ -32,10 +32,15 @@
 
 runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
 
-  ptm       <- base::proc.time() # start processing time
+  ptm <- base::proc.time() # start processing time
+
+  # Error checks
+  runModel.checkModeldata(modeldata)
+  runModel.checkMetabdata(metabdata)
+  if (!isString(cohort)) stop("ERROR: cohort must be a string")
 
   # Check if options were obtained in getModelData
-  if (!is.null(modeldata[["options", exact=TRUE]])) {
+  if (modeldata$modelspec == getMode_batch()) {
     if (!is.null(op)) {
       tmp <- list()
       msg <- paste0("options for runModel were obtained from the excel options sheet,",
@@ -902,26 +907,24 @@ runModel.initSaveObjects <- function(N, nruns, defObj, modeldata, op) {
   isfac0   <- modeldata$isfactor
   nlev0    <- modeldata$nlevels
 
-  # Check for a special case of the correlation
-  if (0 && op$pcorrFlag && !length(modeldata[["acovs", exact=TRUE]]) &&
+  # Check for a special case of the correlation: no covariate adjustments
+  #   and some continuous exposure variables
+  if (1 && op$pcorrFlag && !length(modeldata[["acovs", exact=TRUE]]) &&
       any(!(modeldata$isfactor))) {
     tmp               <- runModel.pcor.special(modeldata, op) 
-    ccovs             <- tmp$ccovs
-    nc                <- length(ccovs)
-    rcovs             <- modeldata$rcovs
-    nr                <- length(rcovs)
+    ccovs             <- tmp$ccovVec
     colnames(coefMat) <- colnames(defObj$coef.stats)
     colnames(fitMat)  <- names(defObj$fit.stats)
-    nruns             <- nc*nr
+    nruns             <- length(ccovs)
     vec               <- 1:nruns
-    rname[vec]        <- rep(rcovs, times=nc)
-    cname[vec]        <- rep(ccovs, each=nr)
+    rname[vec]        <- tmp$rcovVec
+    cname[vec]        <- ccovs
     v                 <- getEffectsCorrEstName()
     coefMat[vec, v]   <- tmp$corr
     v                 <- getEffectsPvalueName()
     coefMat[vec, v]   <- tmp$pvalue
     v                 <- getEffectsTermName()
-    coefMat[vec, v]   <- rep(ccovs, each=nr)
+    coefMat[vec, v]   <- ccovs
     runVec[vec]       <- vec
     runRows[vec]      <- vec
     v                 <- getModelSummaryNobsName()
@@ -933,7 +936,7 @@ runModel.initSaveObjects <- function(N, nruns, defObj, modeldata, op) {
      
     k         <- nruns
     k1        <- nruns
-    tmp       <- !(ccovs0 %in% ccovs)
+    tmp       <- !(ccovs0 %in% unique(ccovs))
     ccovs0    <- ccovs0[tmp]  
     isfac0    <- isfac0[tmp]
     nlev0     <- nlev0[tmp]
