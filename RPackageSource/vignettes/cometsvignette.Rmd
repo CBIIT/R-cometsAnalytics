@@ -15,7 +15,7 @@ COMETS Analytics support all cohort-specific analyses of the COMETS consortium. 
 
 ## Data Input Format
 
-The required input file shoud be in excel format with the following 5 sheets: 
+The required input file shoud be in excel format with the following 6 sheets: 
 
   1. Metabolites - from harmonized metabolites output
   2. SubjectMetabolites - abundances in columns and subject in rows
