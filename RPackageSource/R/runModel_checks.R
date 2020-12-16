@@ -268,3 +268,87 @@ runModel.checkMetabdata <- function(x, name="metabdata") {
 
 } # END: runModel.checkMetabdata
 
+check2VariableSets <- function(rem.obj, baseSet, set2, baseName, set2Name, rem.str1, rem.str2) {
+
+  ret <- NULL
+  if (!length(baseSet) || !length(set2)) return(ret)
+
+  tmp         <- set2 %in% baseSet
+  varToRemove <- set2[tmp]
+  if (length(varToRemove)) {
+    set2 <- set2[!tmp]
+    if (!length(set2)) {
+      msg <- paste0("ERROR: all of the ", set2Name, " are also ", baseName, "!! ",
+                    "Please make sure ", set2Name, " are not ", baseName, ".")
+      stop(msg)
+    } else {
+      msg <- paste0("Some of the ", baseName, " are also exposure variables!!\n",
+                    "The variable(s) ", paste0(varToRemove, collapse=", "),
+                    " will be dropped from the list of ", set2Name, ".")
+      warning(msg)
+    }
+    rem.obj <- runModel.addRemVars(rem.obj, varToRemove, rem.str1, 
+                                   rem.str2, printWarning=0, varMap=NULL) 
+    ret <- list(rem.obj=rem.obj, set2=set2)
+  }
+
+  ret
+
+} # END: checkVariableSets
+
+check2VariableSets_error <- function(baseSet, set2, baseName, set2Name) {
+
+  if (!length(baseSet) || !length(set2)) return(NULL)
+
+  tmp  <- set2 %in% baseSet
+  if (any(tmp)) {
+    varstr <- paste0(set2[tmp], collapse=", ")
+    msg    <- paste0("ERROR: the variable(s) ", varstr, " are both ", baseName,
+                     " and ", set2Name, " variables!  This is not allowed.")
+    stop(msg)  
+  }
+
+  NULL
+
+} # END: check2VariableSets_error
+
+checkAllVariables <- function(rem.obj, outcomes, exposures, adjvars=NULL, 
+                              stratvars=NULL) {
+
+  ny <- length(outcomes)
+  ne <- length(exposures)
+  if (!ny) stop("ERROR: outcome variables must be specified")
+  if (!ne) stop("ERROR: exposure variables must be specified")
+
+  # Special case when outcome=exposure. Be careful if you try to generalize
+  #  this to more than one variable (allVsAll analysis).
+  if ((ny == 1) && (ne == 1) && (outcomes == exposures)) {
+    stop("ERROR: only one outcome variable and it is also the exposure variable")
+  }
+
+  if (length(adjvars)) {
+    tmp <- check2VariableSets(rem.obj, adjvars, outcomes, "adjusted covariates", 
+                            "outcome variables", "rowvars", "are also adjvars") 
+    if (length(tmp)) {
+      rem.obj  <- tmp[["rem.obj", exact=TRUE]]
+      outcomes <- tmp[["set2", exact=TRUE]]
+    }
+    tmp <- check2VariableSets(rem.obj, adjvars, exposures, "adjusted covariates", 
+                            "exposure variables", "colvars", "are also adjvars") 
+    if (length(tmp)) {
+      rem.obj   <- tmp[["rem.obj", exact=TRUE]]
+      exposures <- tmp[["set2", exact=TRUE]]
+    }
+  }
+
+  if (length(stratvars)) {
+    # Error if strat var is an exposure, outcome, adj
+    check2VariableSets_error(outcomes, stratvars, "outcome", "stratification") 
+    check2VariableSets_error(exposures, stratvars, "exposure", "stratification") 
+    check2VariableSets_error(adjvars, stratvars, "adjustment", "stratification") 
+  }
+
+  list(rem.obj=rem.obj, outcomes=outcomes, exposures=exposures,
+       adjvars=adjvars, stratvars=stratvars)
+
+} # END: checkAllVariables

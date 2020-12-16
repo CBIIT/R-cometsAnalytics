@@ -113,8 +113,8 @@ readCOMETSinput <- function(csvfilePath) {
   else {
     dta <- dplyr::inner_join(dta.sdata, dta.smetab)
 
-    #idvar <- base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
-    idvar <- getVarRef_subjectId()  
+    idvar0 <- base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
+    idvar  <- getVarRef_subjectId()  
     metabvar <-
       base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
 
@@ -128,7 +128,7 @@ readCOMETSinput <- function(csvfilePath) {
       # subject meta data
       allSubjects = dta.sdata[, idvar],
       # subject names
-      subjId = idvar,
+      subjId = idvar, subjId0 = idvar0,
       # id used for subject names
       metabId = metabvar,
       # id used for metabolite names

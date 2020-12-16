@@ -347,3 +347,34 @@ getLogicalValueFromStr <- function(str) {
   ret
 
 } # END: getLogicalValueFromStr
+
+defFunctionString <- function(str) {
+
+  if (!isString(str)) stop("ERROR: str must be a string")
+  str <- trimws(str)
+  len <- nchar(str)
+  if (len < 1) stop(paste("ERROR: the function string ", str, " is not valid", sep=""))
+  if (substr(str, len, len) == ")") str <- substr(str, len-1)
+  vec  <- strsplit(str, "(", fixed=TRUE)[[1]]
+  fnc  <- vec[1]
+  vec  <- vec[-1]
+  args <- NULL
+  if (length(vec)) args <- paste(vec, collapse="(", sep="")
+  ret <- paste("function(x){", fnc, "(x", sep="")
+  if (length(args)) ret <- paste(ret, ", ", args, sep="")
+  ret <- paste(ret, ")}", sep="")
+
+  ret
+
+} # END: defFunctionString
+
+transformDataFromString <- function(data, vars, funcStr) {
+
+  str <- defFunctionString(funcStr)
+  fnc <- eval(parse(text=str))
+  for (v in vars) data[, v] <- fnc(data[, v, drop=TRUE])
+
+  data 
+
+} # END: transformDataFromString
+

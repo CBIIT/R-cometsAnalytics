@@ -4,7 +4,7 @@ runModel.getVarSep <- function() {";"}
 # Batch or interactive
 getMode_batch       <- function() {"Batch"}
 getMode_interactive <- function() {"Interactive"}
-
+getAllMetabsName    <- function() {"All metabolites"}
 
 # For appending stratification columns
 runModel.getStrataColName    <- function() {"strata"}
