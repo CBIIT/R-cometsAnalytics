@@ -98,6 +98,8 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
     allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)]))
+    allmodelparams=gsub("all metabolites","All_metabolites", allmodelparams, fixed=TRUE)
+
     #print(paste(dta.models$ccovs,dta.models$scovs))
 
     # take out multiple blanks and add _ to all metabolites to avoid splitting

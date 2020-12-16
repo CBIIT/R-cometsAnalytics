@@ -57,321 +57,218 @@ getModelData <-  function(readData,
                           strvars   = NULL,
                           wgtvar    = NULL,
                           offvar    = NULL,
-			  where     = NULL) {
+			     where     = NULL) {
 
   modelspec <- check.string(modelspec, c(getMode_interactive(), getMode_batch()), "modelspec")
   
   allvsall <- FALSE
   rem.obj  <- NULL
   options  <- NULL
+  acovs    <- NULL
+  scovs    <- NULL
   wgtcov   <- NULL
   offcov   <- NULL
 
-# figure out the model specification based on type (Interactive or Batch)
-if (modelspec == getMode_interactive()) {
-  if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
+  # All original metabolite names
+  allmetabs   <- readData$dict_metabnames
+  tmp         <- !(allmetabs %in% readData$subjId0)
+  allmetabs   <- allmetabs[tmp]
+  allmetabStr <- getAllMetabsName()
 
-  # Normalize variables so that it is consistent with readCOMETSinput
-  rowvars <- checkVariableNames(rowvars, "rowvars", default="All metabolites", only.unique=1)
-  colvars <- checkVariableNames(colvars, "colvars", default="", only.unique=1)
-  adjvars <- checkVariableNames(adjvars, "adjvars", default=NULL, only.unique=1)
-  strvars <- checkVariableNames(strvars, "strvars", default=NULL, only.unique=1)
-  wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",  default=NULL, only.unique=1, max.n=1)
-  offvar  <- checkVariableNames(offvar,  "offvar",  default=NULL, only.unique=1, max.n=1)
+  # figure out the model specification based on type (Interactive or Batch)
+  if (modelspec == getMode_interactive()) {
+    if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
 
-  # Names changed in readCOMETSinput
-  # list of variables named differently for cohort
-  #tst <-
-  #  dplyr::filter(readData$vmap,
-  #                !is.na(readData$vmap[["cohortvariable"]]) &
-  #                  readData$vmap[["varreference"]] != "metabolite_id")
-  # changes names string using mapvalues
-  #newnames <- plyr::mapvalues(
-  #  names(readData$subjdata),
-  #  from = c(base::tolower(tst$cohortvariable)),
-  #  to = c(base::tolower(tst$varreference))
-  #)
-  # apply changes names to data frame
-  #names(readData$subjdata) <- newnames
+    # Normalize variables so that it is consistent with readCOMETSinput
+    rowvars <- checkVariableNames(rowvars, "rowvars", default=allmetabStr, only.unique=1)
+    colvars <- checkVariableNames(colvars, "colvars", default="", only.unique=1)
+    adjvars <- checkVariableNames(adjvars, "adjvars", default=NULL, only.unique=1)
+    strvars <- checkVariableNames(strvars, "strvars", default=NULL, only.unique=1)
+    wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",  default=NULL, only.unique=1, max.n=1)
+    offvar  <- checkVariableNames(offvar,  "offvar",  default=NULL, only.unique=1, max.n=1)
 
-#  if(!is.null(rowvars) && rowvars != "All metabolite") {
-#	rowvars <- as.character(names(exmetabdata$dict_metabnames)[as.numeric(lapply(rowvars,function(x) 
-#		which(readData$dict_metabnames==x)))])
-#  }
-  # Check that all variables that are input by user exist in the renamed data
-  allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar),"All metabolites"))
-  subjmetab <- as.character(lapply(colnames(readData$subjdata), function(x) {
+    # Check that all variables that are input by user exist in the renamed data
+    allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar),allmetabStr))
+    subjmetab <- as.character(lapply(colnames(readData$subjdata), function(x) {
         myind <- which(names(readData$dict_metabnames)==x)
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
         return(x) }))
-  
-#  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
-  if(any(is.na(match(allvars,subjmetab)))) {
+
+    if(any(is.na(match(allvars,subjmetab)))) {
 	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
-  }
-
-  # rename the variables (Assumed to be 'All metabolites' by default)
-  if (!is.na(match("All metabolites", rowvars))) {
-    print("Analysis will run on 'All metabolites'")
-    rcovs <-
-      unique(c(rowvars[rowvars != "All metabolites"], c(readData$allMetabolites)))
-  }  else {
-    rcovs <- as.character(lapply(rowvars, function(x) {
-        myind <- which(readData$dict_metabnames==x)
-        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
-        return(x) }))
-  }
-
-  # rename the exposure variables
-  if (!is.na(match("All metabolites", colvars))) {
-    ccovs <-
-      unique(c(colvars[colvars != "All metabolites"], c(readData$allMetabolites)))
-  } else {
-    ccovs <- as.character(lapply(colvars, function(x) {
-        myind <- which(readData$dict_metabnames==x)
-        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
-        return(x) }))
-  }
-
-  # rename the adjustment variables
-  if (!is.null(adjvars)) {
-    tempacovs <- unlist(strsplit(adjvars, " "))
-    acovs <- as.character(lapply(tempacovs, function(x) {
-        myind <- which(readData$dict_metabnames==x)
-        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
-        return(x) }))
-  } else {
-    acovs <- adjvars
-  }
-
-  # rename the stratification variables
-  if (!is.null(strvars)) {
-    tempscovs <- unlist(strsplit(strvars, " "))
-    scovs <- as.character(lapply(tempscovs, function(x) {
-        myind <- which(readData$dict_metabnames==x)
-        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
-        return(x) }))
-  } else {
-    scovs <- strvars
-  }
-
-  # rename the weight variable
-  if (!is.null(wgtvar)) {
-    wgtcov <- as.character(lapply(wgtvar, function(x) {
-        myind <- which(readData$dict_metabnames==x)
-        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
-        return(x) }))
-  } else {
-    wgtcov <- wgtvar
-  }
-
-  # rename the offset variable
-  if (!is.null(offvar)) {
-    offcov <- as.character(lapply(offvar, function(x) {
-        myind <- which(readData$dict_metabnames==x)
-        if(length(myind==1)) {x=names(readData$dict_metabnames)[myind]}
-        return(x) }))
-  } else {
-    offcov <- offvar
-  }
-
-  # Assign allvsall variable
-  allvsall <- FALSE
-  if ( (length(colvars) == 1) && (length(rowvars) == 1) ) {
-    if ( (colvars == "All metabolites") && (rowvars=="All metabolites") ) {
-      allvsall <- TRUE
     }
-  } 
 
-  # Check if adjusted variables are also exposures
-  vartoremove <- intersect(adjvars, ccovs)
-  if (length(vartoremove)) {
-    ccovs <- setdiff(ccovs, adjvars)
-    if (!length(ccovs)) {
-      stop("ERROR: all of the exposure variables are also adjusted covariates!!
-           Please make sure adjusted covariates are not exposures.")
+    # Rename outcome variables
+    tmp <- rowvars %in% allmetabStr
+    if (any(tmp)) rowvars <- unique(c(rowvars[!tmp], allmetabs))
+    rcovs <- runModel.getNewVarName(rowvars, readData$dict_metabnames)
+   
+    # Rename exposure variables
+    tmp <- colvars %in% allmetabStr
+    if (any(tmp)) colvars <- unique(c(colvars[!tmp], allmetabs))
+    ccovs <- runModel.getNewVarName(colvars, readData$dict_metabnames)
+
+    # rename the adjustment variables
+    if (!is.null(adjvars)) {
+      tmp   <- unlist(strsplit(adjvars, " "))
+      acovs <- runModel.getNewVarName(tmp, readData$dict_metabnames)
+    } 
+
+    # rename the stratification variables
+    if (!is.null(strvars)) {
+      tmp   <- unlist(strsplit(strvars, " "))
+      scovs <- runModel.getNewVarName(tmp, readData$dict_metabnames)
+    } 
+
+    # rename the weight variable
+    if (!is.null(wgtvar)) {
+      wgtcov <- runModel.getNewVarName(wgtvar, readData$dict_metabnames)
+    } 
+
+    # rename the offset variable
+    if (!is.null(offvar)) {
+      offcov <- runModel.getNewVarName(offvar, readData$dict_metabnames)
+    } 
+
+    # Assign allvsall variable
+    allvsall <- FALSE
+    if ( (length(colvars) == 1) && (length(rowvars) == 1) ) {
+      if ( (colvars == allmetabStr) && (rowvars==allmetabStr) ) {
+        allvsall <- TRUE
+      }
+    } 
+
+    # end if modelspec is "Interactive"
+
+  } else if (modelspec == getMode_batch()) {
+    # here we need to get the covariates defined from the excel sheet
+    # step 1. get the chosen model first
+
+    if (modlabel == "") {
+      msg <- paste0("modelspec is set to '", getMode_batch(), 
+               "' yet model label (modlabel) is empty.  Please set modlabel.")
+      stop(msg)
+    }
+
+    # defining global variable to remove Rcheck warnings
+    model = c()
+
+    # integrity check for unmatch modlabel -------------------------------------
+    mods <- dplyr::filter(as.data.frame(readData[["mods"]]), model == modlabel)
+    if (nrow(mods) == 0) {
+      tmp <- paste0("The model name '", modlabel, "' does not exist in the input Excel file. Please check your Models sheet.")
+      stop(tmp)
+    }
+
+    # rename variables to cohortvariable definitions -----------------------------
+
+    # assign outcome vars -------------------------
+    rcovs <- getCovNames_allMetabs(mods$outcomes, allmetabs, readData$dict_metabnames)
+
+    # assign exposure vars -------------------------
+    ccovs <- getCovNames_allMetabs(mods$exposure, allmetabs, readData$dict_metabnames)
+
+    # assign adjustment vars -------------------------
+    if (!is.na(mods$adjustment)) {
+      acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
+      acovs <- runModel.getNewVarName(trimws(acovs), readData$dict_metabnames)
+    } 
+
+    # assign stratification vars vars -------------------------
+    if (!is.na(mods$stratification)) {
+      scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
+      scovs <- runModel.getNewVarName(trimws(scovs), readData$dict_metabnames)
+    } 
+
+    # Get the options for this model
+    options <- getAllOptionsForModel(mods, readData)
+    if (is.null(options)) options <- list()
+
+    # Get weight and offset variables
+    wgtvar <- NULL
+    offvar <- NULL
+    mop    <- options[[getModelOpsName(), exact=TRUE]]
+    if (length(mop)) {
+      wgtvar <- mop[["weights", exact=TRUE]]
+      if (length(wgtvar)) wgtcov <- runModel.getNewVarName(wgtvar, readData$dict_metabnames)
+      offvar <- mop[["offset", exact=TRUE]]
+      if (length(offvar)) offcov <- runModel.getNewVarName(offvar, readData$dict_metabnames)
+    }  
+
+    # assign where filtering -------------------------
+    if (!is.na(mods$where)) {
+      where <- mods$where
     } else {
-      msg <- paste0("Some of the adjusted covariates are also exposure variables!!\n",
-                    "The variable(s) ", paste0(vartoremove, collapse=", "),
-                    " will be dropped from the list of exposures")
-      warning(msg)
+      where <- NULL
     }
-    rem.obj <- runModel.addRemVars(rem.obj, vartoremove, "colvars", 
-                "are also adjvars", printWarning=0, varMap=NULL) 
-  }
 
-  # Check if adjusted variables are also outcomes
-  vartoremove <- intersect(adjvars, rcovs)
-  if (length(vartoremove)) {
-    rcovs <- setdiff(rcovs, adjvars)
-    if (!length(rcovs)) {
-      stop("ERROR: all of the exposure variables are also outcomes!!
-           Please make sure adjusted covariates are not outcomes.")
-    } else {
-      msg <- paste0("Some of the adjusted covariates are also outcome variables!!\n",
-                    "The variable(s) ", paste0(vartoremove, collapse=", "),
-                    " will be dropped from the list of outcomes")
-      warning(msg)
-    }
-    rem.obj <- runModel.addRemVars(rem.obj, vartoremove, "rowvars", 
-                "are also adjvars", printWarning=0, varMap=NULL) 
-  }
+  } # end if modelspec == "Batch"
 
-  # end if modelspec is "Interactive"
-  }
-else if (modelspec == getMode_batch()) {
-  # here we need to get the covariates defined from the excel sheet
-  # step 1. get the chosen model first
-
-  if (modlabel == "") {
-    msg <- paste0("modelspec is set to '", getMode_batch(), 
-             "' yet model label (modlabel) is empty.  Please set modlabel.")
-    stop(msg)
-  }
-
-  # defining global variable to remove Rcheck warnings
-  model = c()
-
-  # integrity check for unmatch modlabel -------------------------------------
-  mods <-
-    dplyr::filter(as.data.frame(readData[["mods"]]), model == modlabel)
-  if (nrow(mods) == 0) {
-    tmp <- paste0("The model name '", modlabel, "' does not exist in the input Excel file. Please check your Models sheet.")
-    stop(tmp)
-  }
-
-  # rename variables to cohortvariable definitions -----------------------------
-
-  # Names changed in readCOMETSinput
-  # list of variables named differently for cohort
-  #tst <-
-  #  dplyr::filter(readData$vmap,
-  #                !is.na(readData$vmap[["cohortvariable"]]) &
-  #                  readData$vmap[["varreference"]] != "metabolite_id")
-  # changes names string using mapvalues
-  #newnames <- plyr::mapvalues(
-  #  names(readData$subjdata),
-  #  from = c(base::tolower(tst$cohortvariable)),
-  #  to = c(base::tolower(tst$varreference))
-  #)
-  # apply changes names to data frame
-  #names(readData$subjdata) <- newnames
-
-  # assign outcome vars -------------------------
-  if (length(mods) > 0 & mods$outcomes == "All metabolites") {
-    rcovs <- c(readData[[2]])
-  } else {
-    rcovs <- as.vector(strsplit(mods$outcomes, " ")[[1]])
-    rcovs <- runModel.getNewVarName(trimws(rcovs), readData$dict_metabnames)
-  }
-
-  # assign exposure vars -------------------------
-  if (length(mods) > 0 & mods$exposure == "All metabolites") {
-    ccovs <- c(readData[[2]])
-  } else {
-    ccovs <- as.vector(strsplit(mods$exposure, " ")[[1]])
-    ccovs <- runModel.getNewVarName(trimws(ccovs), readData$dict_metabnames)
-  }
-
-  # assign adjustment vars -------------------------
-  if (!is.na(mods$adjustment)) {
-    acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
-    acovs <- runModel.getNewVarName(trimws(acovs), readData$dict_metabnames)
-  } else {
-    acovs <- NULL
-  }
-
-  # assign stratification vars vars -------------------------
-  if (!is.na(mods$stratification)) {
-    scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
-    scovs <- runModel.getNewVarName(trimws(scovs), readData$dict_metabnames)
-  } else {
-    scovs <- NULL
-  }
-
-  # Get the options for this model
-  options <- getAllOptionsForModel(mods, readData)
-  if (is.null(options)) options <- list()
-
-  # Get weight and offset variables
-  wgtvar <- NULL
-  offvar <- NULL
-  mop    <- options[[getModelOpsName(), exact=TRUE]]
-  if (length(mop)) {
-    wgtvar <- mop[["weights", exact=TRUE]]
-    if (length(wgtvar)) wgtcov <- runModel.getNewVarName(wgtvar, readData$dict_metabnames)
-    offvar <- mop[["offset", exact=TRUE]]
-    if (length(offvar)) offcov <- runModel.getNewVarName(offvar, readData$dict_metabnames)
-  }  
-
-  # Check that all variables that are input by user exist in the renamed data
-  allvars <- c(setdiff(c(rcovs,ccovs,acovs,scovs, wgtcov, offcov),"All metabolites"))
+  # Check that the variables exist in the renamed data
+  allvars <- c(rcovs,ccovs,acovs,scovs, wgtcov, offcov)
   tmp     <- is.na(match(allvars,colnames(readData$subjdata)))
   if (any(tmp)) {
     str <- paste(allvars[tmp], collapse=", ", sep="")
     msg <- paste("Check that user-input variable(s) ", str,  
-             " exist (should match VARREFERENCE column in VarMap Sheet)", sep="")
+               " exist (should match VARREFERENCE column in VarMap Sheet)", sep="")
     stop(msg)
   }
 
-  # assign where filtering -------------------------
-  if (!is.na(mods$where)) {
-	where <- mods$where
-  } else
-        where <- NULL
+  # Check variables
+  tmp     <- checkAllVariables(rem.obj, rcovs, ccovs, adjvars=acovs, stratvars=scovs)
+  rem.obj <- tmp[["rem.obj", exact=TRUE]]
+  rcovs   <- tmp[["outcomes", exact=TRUE]]
+  ccovs   <- tmp[["exposures", exact=TRUE]]
 
-
-} # end if modelspec == "Batch"
-
-# Keep only needed variables for the data -------------------------------
-# build list of variables
-covlist <- c(ccovs, rcovs)
-if (!is.null(acovs)) {
-  covlist <- c(covlist, acovs)
-}
-if (!is.null(scovs)) {
-  covlist <- c(covlist, scovs)
-}
-covlist <- c(covlist, wgtcov, offcov)
-varMap  <- NULL
-if (length(wgtvar) || length(offvar)) {
-  varMap        <- c(wgtvar, offvar)
-  names(varMap) <- c(wgtcov, offcov)
-}
-
-if (!is.null(where)) {
-
-  # Update the where rule (variables names have changed)
-  where2      <- updateWhereStr(where, readData$dict_metabnames)
-  numallsamps <- nrow(readData$subjdata)
-  readData    <- try(filterCOMETSinput(readData,where=where2), silent=TRUE)
-  if ("try-error" %in% class(readData)) {
-    print(readData)
-    stop(paste("ERROR applying WHERE: ", paste(where, collapse=" & ", sep=""), sep=""))
+  # Keep only needed variables for the data -------------------------------
+  # build list of variables
+  covlist <- c(ccovs, rcovs)
+  if (!is.null(acovs)) {
+    covlist <- c(covlist, acovs)
   }
-  msg         <- paste0("Filtering subjects according to the rule(s) ", 
+  if (!is.null(scovs)) {
+    covlist <- c(covlist, scovs)
+  }
+  covlist <- c(covlist, wgtcov, offcov)
+  varMap  <- NULL
+  if (length(wgtvar) || length(offvar)) {
+    varMap        <- c(wgtvar, offvar)
+    names(varMap) <- c(wgtcov, offcov)
+  }
+
+  if (!is.null(where)) {
+
+    # Update the where rule (variables names have changed)
+    where2      <- updateWhereStr(where, readData$dict_metabnames)
+    numallsamps <- nrow(readData$subjdata)
+    readData    <- try(filterCOMETSinput(readData,where=where2), silent=TRUE)
+    if ("try-error" %in% class(readData)) {
+      print(readData)
+      stop(paste("ERROR applying WHERE: ", paste(where, collapse=" & ", sep=""), sep=""))
+    }
+    msg         <- paste0("Filtering subjects according to the rule(s) ", 
                         paste(where, collapse=" & ", sep=""), ". ", 
                         nrow(readData$subjdata)," of ", numallsamps," are retained")
-  print(msg)
-}
+    print(msg)
+  }
 
-gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
+  gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
 
-if(nrow(gdta) < 2) {
-  stop("Too few samples for this model, so the model will not be run")
-}
+  if(nrow(gdta) < 2) {
+    stop("Too few samples for this model, so the model will not be run")
+  }
 
-# Outcomes must be numeric
-gdta <- convertVarsToNumeric(gdta, rcovs)
+  # Outcomes must be numeric
+  gdta <- convertVarsToNumeric(gdta, rcovs)
 
-# Create list for analyses  -------------------------------
-# list for subset data
-# 1: subset data: gdta
-# 2: column variables: ccovs
-# 3: row variables: rcovs
-# 4: adjustment variables: acovs
-#    if (dobug)
-#      prdebug("End of getdata:", dim(gdta))
+  # Create list for analyses  -------------------------------
+  # list for subset data
+  # 1: subset data: gdta
+  # 2: column variables: ccovs
+  # 3: row variables: rcovs
+  # 4: adjustment variables: acovs
+  #    if (dobug)
+  #      prdebug("End of getdata:", dim(gdta))
 
   ret <- list(
   gdta            = gdta,
@@ -393,6 +290,24 @@ gdta <- convertVarsToNumeric(gdta, rcovs)
 
   ret
 }
+
+getCovNames_allMetabs <- function(varString, allmetabs, varMap) {
+
+  varString   <- trimws(tolower(varString))
+  allmetabStr <- tolower(getAllMetabsName())
+  allFlag     <- grepl(allmetabStr, varString, fixed=TRUE)
+  if (allFlag) varString <- gsub(allmetabStr, "", varString, fixed=TRUE)
+  vars        <- trimws(as.vector(strsplit(varString, " ")[[1]]))
+  if (length(vars)) {
+    tmp  <- vars != ""
+    vars <- vars[tmp] 
+  }
+  if (allFlag) vars <- unique(c(vars, allmetabs))
+  covs <- runModel.getNewVarName(vars, varMap)
+
+  covs
+
+} # END: getCovNames_allMetabs
 
 getGlobalOptionsFromSheet <- function(opTable) {
 
