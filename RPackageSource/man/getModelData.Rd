@@ -8,8 +8,8 @@ getModelData(
   readData,
   modelspec = "Batch",
   modlabel = "",
-  rowvars = "All metabolites",
-  colvars = "",
+  outcomes = "All metabolites",
+  exposures = "",
   adjvars = NULL,
   strvars = NULL,
   wgtvar = NULL,
@@ -25,9 +25,9 @@ getModelData(
 \item{modlabel}{If batch, chosen model specified by batch mode (the MODEL column in
 the Models sheet). If interactive, then the model label.}
 
-\item{rowvars}{If Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)}
+\item{outcomes}{If Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)}
 
-\item{colvars}{If Interactive, a vector of exposure variables (see \code{details})}
+\item{exposures}{If Interactive, a vector of exposure variables (see \code{details})}
 
 \item{adjvars}{If Interactive, a vector adjustment covariates (see \code{details})}
 
@@ -39,7 +39,7 @@ the Models sheet). If interactive, then the model label.}
 
 \item{where}{users can specify which subjects to perform the analysis on by specifying this parameter. 
    'where' expects a vector of strings with a variable name, 
-   a comparison operator (e.g. "<", ">", "="), and a value.  
+   a comparison operator (e.g. "<", ">", "<=", ">=", "!=", "="), and a value.  
    For example, \code{where = c("age>50","bmi > 22")} uses all subjects
    with age > 50 AND bmi > 22.  
 Note that when running in Batch mode, rules in the \code{WHERE} column
@@ -48,8 +48,8 @@ of the \code{Models} sheet must be separated by a comma.}
 \value{
 a list comprising: \cr
 1: subset data: gdta \cr
-2: column variables: ccovs \cr
-3: row variables: rcovs \cr
+2: exposure variables: ccovs \cr
+3: outcome variables: rcovs \cr
 4: adjustment variables: acovs \cr
 5: stratification variable: scovs \cr
 6: model specification: modspec \cr
