@@ -1,6 +1,6 @@
 ---
 title: "Running COMETS Analytics locally"
-author: "Ewy Mathé, Ella Temprosa"
+author: "Ewy Mathé, Ella Temprosa, Bill Wheeler"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -70,7 +70,7 @@ The following call defines the model with age and bmi_grp as the exposure variab
  and includes only the subjects with age > 40 and bmi_grp > 2.
 ```{r}
 exmodeldata2 <- COMETS::getModelData(exmetabdata, modelspec="Interactive",
-	colvars=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
+	exposures=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
 ```
 
 ### 3. Run Simple Unstratified Correlation Analysis
@@ -88,7 +88,7 @@ COMETS::OutputListToExcel(filename="DPP_corr.xlsx", excorrdata)
 
 To view the first 3 lines of the correlation analysis output, simply type:
 ```{r}
-COMETS::showCorr(excorrdata,nlines=3)
+COMETS::showModel(excorrdata,nlines=3)
 ```
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
@@ -103,7 +103,7 @@ use the showHClust function.
 This diplay requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r, eval=T}
-exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
+exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",exposures = c("bmi_grp","age"))
 excorrdata  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
 COMETS::showHClust(excorrdata, showticklabels=FALSE)
 ```
@@ -122,8 +122,8 @@ stratification variables. The following call will define a model stratified
 by race_grp.
 ```{r}
   exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",
-                   rowvars=c("lactose","lactate"),
-	            colvars=c("age","bmi_grp"),strvars="race_grp")
+                   outcomes=c("lactose","lactate"),
+	            exposures=c("age","bmi_grp"),strvars="race_grp")
 ```
 
 The stratified correlation analysis is run by calling the *runModel()* function.          
@@ -137,7 +137,7 @@ has lactose and lactate as outcome variables, and has age and bmi group
 as the exposure variables.
 ```{r}
   exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
-                   rowvars=c("lactose","lactate"), colvars=c("age","bmi_grp"))
+                   outcomes=c("lactose","lactate"), exposures=c("age","bmi_grp"))
 ```
 To run a linear regression using the lm function, a list of options must be passed into
 *runModel()* with the model option set to "lm".
@@ -164,13 +164,14 @@ has nested_case as the outcome variable, and has lactose and lactate
 as the exposure variables. The variable nested_case must be a binary 0-1 variable.
 ```{r}
   exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
-                   rowvars="nested_case", colvars=c("lactose","lactate"))
+                   outcomes="nested_case", exposures=c("lactose","lactate"))
 ```
 To run a logistic regression, the list of options op must also include a model.options 
 list with family set to "binomial".
 ```{r}
   op <- list(model="glm", model.options=list(family="binomial"))
   glm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=op)
+  print(glm_results)
 ```
 
 ### 8. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
