@@ -1,4 +1,4 @@
-# Test the call COMETS::getModelData(test_exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
+# Test the call COMETS::getModelData(test_exmetabdata,modelspec = "Interactive",exposures = c("bmi_grp","age"))
 #   from the vignette
 
 context("getModelData bmi age")
@@ -14,10 +14,10 @@ rdafile <- file.path(dir, "test_objects", "test_exmodeldata_bmi_age.rda")
 load(rdafile)
 
 # Call the function to test
-exmodeldata <- COMETS::getModelData(test_exmetabdata,modelspec = "Interactive",colvars = c("bmi_grp","age"))
+exmodeldata <- COMETS::getModelData(test_exmetabdata,modelspec = "Interactive",exposures = c("bmi_grp","age"))
 
 # Compare result to the baseline
-test_that("COMETS::getModelData(exmetabdata,modelspec = Interactive,colvars = c(bmi_grp,age))",
+test_that("COMETS::getModelData(exmetabdata,modelspec = Interactive,exposures = c(bmi_grp,age))",
 {
   expect_equal(exmodeldata, test_exmodeldata)
 })

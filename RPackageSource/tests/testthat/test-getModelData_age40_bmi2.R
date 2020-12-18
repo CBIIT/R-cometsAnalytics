@@ -1,5 +1,5 @@
 # Test the call COMETS::getModelData(exmetabdata, modelspec="Interactive",
-#	colvars=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
+#	exposures=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
 #   from the vignette
 
 context("getModelData age>40 bmi_grp>2")
@@ -16,7 +16,7 @@ load(rdafile)
 
 # Call the function to test
 exmodeldata <- COMETS::getModelData(test_exmetabdata, modelspec="Interactive",
-	            colvars=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
+	            exposures=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
 
 # Compare result to the baseline
 test_that("COMETS::getModelData(exmetabdata,modelspec = Interactive, where=c(age>40, bmi_grp>2))",

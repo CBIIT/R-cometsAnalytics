@@ -1,5 +1,5 @@
-# Test the call COMETS::getModelData(test_exmetabdata,modelspec="Interactive",rowvars=c("lactose","lactate"),
-#	colvars=c("age","bmi_grp"),strvars="race_grp")
+# Test the call COMETS::getModelData(test_exmetabdata,modelspec="Interactive",outcomes=c("lactose","lactate"),
+#	exposures=c("age","bmi_grp"),strvars="race_grp")
 #  from the vignette
 
 context("getModelData strata")
@@ -15,8 +15,8 @@ rdafile <- file.path(dir, "test_objects", "test_exmodeldata_strata.rda")
 load(rdafile)
 
 # Call the function to test
-exmodeldata <- COMETS::getModelData(test_exmetabdata,modelspec="Interactive",rowvars=c("lactose","lactate"),
-	colvars=c("age","bmi_grp"),strvars="race_grp")
+exmodeldata <- COMETS::getModelData(test_exmetabdata,modelspec="Interactive",outcomes=c("lactose","lactate"),
+	exposures=c("age","bmi_grp"),strvars="race_grp")
 
 # Compare result to the baseline
 test_that("COMETS::getModelData(exmetabdata, ... ,strvars=race_grp)",
