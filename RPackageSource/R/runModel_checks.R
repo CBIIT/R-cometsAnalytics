@@ -187,7 +187,7 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
   # Remove exposures that have too few non-missing unique value or too many missing values
   tmp     <- runModel.checkFor1Val(gdta, ccovs, nvals=nunq, min.nsubs=minN)
-  tmp     <- runModel.updateFor1Val(tmp, ccovs, "colvars", rem.obj, varMap=varMap)
+  tmp     <- runModel.updateFor1Val(tmp, ccovs, "exposures", rem.obj, varMap=varMap)
   ccovs   <- tmp$vars
   rem.obj <- tmp$rem.obj
   if (!length(ccovs)) {
@@ -196,7 +196,7 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
   # Remove outcomes that have too few non-missing unique value
   tmp     <- runModel.checkFor1Val(gdta, rcovs, nvals=nunq, min.nsubs=minN)
-  tmp     <- runModel.updateFor1Val(tmp, rcovs, "rowvars", rem.obj, varMap=varMap)
+  tmp     <- runModel.updateFor1Val(tmp, rcovs, "outcomes", rem.obj, varMap=varMap)
   rcovs   <- tmp$vars
   rem.obj <- tmp$rem.obj
   if (!length(rcovs)) {
@@ -328,13 +328,13 @@ checkAllVariables <- function(rem.obj, outcomes, exposures, adjvars=NULL,
 
   if (length(adjvars)) {
     tmp <- check2VariableSets(rem.obj, adjvars, outcomes, "adjusted covariates", 
-                            "outcome variables", "rowvars", "are also adjvars") 
+                            "outcome variables", "outcomes", "are also adjvars") 
     if (length(tmp)) {
       rem.obj  <- tmp[["rem.obj", exact=TRUE]]
       outcomes <- tmp[["set2", exact=TRUE]]
     }
     tmp <- check2VariableSets(rem.obj, adjvars, exposures, "adjusted covariates", 
-                            "exposure variables", "colvars", "are also adjvars") 
+                            "exposure variables", "exposures", "are also adjvars") 
     if (length(tmp)) {
       rem.obj   <- tmp[["rem.obj", exact=TRUE]]
       exposures <- tmp[["set2", exact=TRUE]]

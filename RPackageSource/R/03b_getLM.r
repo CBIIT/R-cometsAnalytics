@@ -9,11 +9,12 @@
 #'
 #' @return data frame 
 #'
-# #' @examples
+#' @examples
 # #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 # #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 # #' exmetabdata <- readCOMETSinput(csvfile)
-# #' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",rowvars=c("lactose","lactate"))
+# #' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
+# #'                   outcomes=c("lactose","lactate"))
 # #' lmmatrix <- getLM(modeldata,exmetabdata, "DPP")
 
 

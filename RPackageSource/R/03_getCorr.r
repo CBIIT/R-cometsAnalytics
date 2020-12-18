@@ -17,8 +17,8 @@
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
-#' 	rowvars=c("lactose","lactate"), modelspec="Interactive")
+#' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
+#' 	outcomes=c("lactose","lactate"), modelspec="Interactive")
 #' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
 runCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
