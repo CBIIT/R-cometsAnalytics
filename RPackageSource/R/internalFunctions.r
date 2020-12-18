@@ -363,13 +363,22 @@ prdebug<-function(lab,x){
 #'
 filterCOMETSinput <- function(readData,where=NULL) {
 
-  if (!is.null(where)) {
-	samplesToKeep=c()
-	myfilts <- unlist(strsplit(where,","))
+  if (!length(where)) {
+    warning("No filtering was performed because 'where' parameter is NULL")
+    return(readData)
+  }
 
-	# create rules for each filter
-	for (i in 1:length(myfilts)) {
-		myrule <- myfilts[[i]]
+  samplesToKeep <- c()
+  myfilts       <- trimws(unlist(strsplit(where,",")))
+  myfilts       <- myfilts[nchar(myfilts) > 0]  
+  if (!length(myfilts)) {
+    warning("No filtering was performed because 'where' parameter contains no filters")
+    return(readData)
+  }
+
+  # create rules for each filter
+  for (i in 1:length(myfilts)) {
+		myrule <- myfilts[i]
                 if(length(grep("<=",myrule))>0) {
                         mysplit <- strsplit(myrule,"<=")[[1]]
 			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
@@ -388,36 +397,64 @@ filterCOMETSinput <- function(readData,where=NULL) {
 			myvar = gsub(" ","",mysplit[1])
                		samplesToKeep <- c(samplesToKeep,
                            which(as.numeric(as.character(readData$subjdata[,myvar])) < gsub(" ","",as.numeric(mysplit[2]))) )
-        	} else if(length(grep(">",myfilts[i]))>0) {
+        	} else if(length(grep(">",myrule))>0) {
 	        	mysplit <- strsplit(myrule,">")[[1]]
 			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
 			myvar = gsub(" ","",mysplit[1])
                         samplesToKeep <- c(samplesToKeep,
                            which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(gsub(" ","",mysplit[2]))) )
-		} else if (length(grep("=",myfilts[i]))>0) {
-			mysplit <- strsplit(myrule,"=")[[1]]
-                     # Watch out for "=" or "=="
-                     tmp     <- nchar(trimws(mysplit)) > 0
-                     mysplit <- mysplit[tmp]
-
-			# myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
-                     myvar = gsub(" ","",mysplit[1])
-			samplesToKeep <- c(samplesToKeep,
-                           which(as.numeric(as.character(readData$subjdata[,myvar])) == gsub(" ","",as.numeric(mysplit[2]))) )
+		} else if (length(grep("!=",myrule))>0) {
+                tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=1)   
+                samplesToKeep <- c(samplesToKeep, tmp)  
+              } else if (length(grep("=",myrule))>0) {
+                tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=0)   
+                samplesToKeep <- c(samplesToKeep, tmp)  
         	} else
                 stop("Make sure your 'where' filters contain logicals '>', '<', or '='")
-        }
-	mycounts <- as.numeric(lapply(unique(samplesToKeep),function(x)
-		length(which(samplesToKeep==x))))
-	fincounts <- which(mycounts == length(myfilts))
-        readData$subjdata <- readData$subjdata[unique(samplesToKeep)[fincounts],]
   }
-  else {(warning("No filtering was performed because 'where' parameter is NULL"))}
-return(readData)
+  mycounts          <- as.numeric(lapply(unique(samplesToKeep),function(x)
+                                            length(which(samplesToKeep==x))))
+  fincounts         <- which(mycounts == length(myfilts))
+  readData$subjdata <- readData$subjdata[unique(samplesToKeep)[fincounts],]
+  
+  return(readData)
 }
 
+# Function to identify subjects from a != or == where condition
+getSubsFromEqWhere <- function(data, myrule, notEqual=1) {
 
+  if (notEqual) {
+    op <- "!="
+  } else {
+    op <- "="
+  }
+  mysplit <- strsplit(myrule, op, fixed=TRUE)[[1]]
+  tmp     <- nchar(trimws(mysplit)) > 0  # Takes care of cases == and =
+  mysplit <- mysplit[tmp]
+  myvar   <- mysplit[1]
+  
+  # Take missing values into account
+  missFlag <- length(mysplit) < 2
 
+  # Variable could be a character variable
+  vec <- data[, myvar, drop=TRUE]
+  if (is.factor(vec)) vec <- unfactor(vec)
+  if (!missFlag) {
+    if (is.character(vec)) {
+      value <- mysplit[2]
+    } else {
+      value <- as.numeric(mysplit[2])
+    }
+    tmp <- vec %in% value
+  } else {
+    tmp <- is.na(vec)
+  }
+  if (notEqual) tmp <- !tmp
+  ret <- which(tmp)
+
+  ret
+
+} # END: getSubsFromEqWhere
 
 #' Ensures that models will run without errors.  Preprocesses design matrix for 
 #' zero variance, linear combinations, and dummies.

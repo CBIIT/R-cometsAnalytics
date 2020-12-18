@@ -100,7 +100,9 @@ normalizeWhere.main <- function(vec) {
   rows <- 1:length(vec)
   tmp1 <- grepl("<", vec, fixed=TRUE)
   tmp2 <- grepl(">", vec, fixed=TRUE)
-  tmp3 <- grepl("==", vec, fixed=TRUE)
+  tmp3 <- grepl("!=", vec, fixed=TRUE)
+  tmp4 <- grepl("=", vec, fixed=TRUE) & !tmp1 &!tmp2 & !tmp3
+
   if (any(tmp1)) {
     r2 <- rows[tmp1]
     for (i in 1:length(r2)) {
@@ -119,7 +121,14 @@ normalizeWhere.main <- function(vec) {
     r2 <- rows[tmp3]
     for (i in 1:length(r2)) {
       row      <- r2[i]
-      ret[row] <- getNewWhereStr(vec[row], "==") 
+      ret[row] <- getNewWhereStr(vec[row], "!=") 
+    }
+  } 
+  if (any(tmp4)) {
+    r2 <- rows[tmp4]
+    for (i in 1:length(r2)) {
+      row      <- r2[i]
+      ret[row] <- getNewWhereStr(vec[row], "=") 
     }
   } 
 
@@ -135,7 +144,7 @@ getVarsFromWhereVec <- function(svec) {
   if (!is.character(svec)) stop("INTERNAL CODING ERROR in getVarFromWhereStr")
   svec <- trimws(svec)
   ret  <- rep("", N)
-  cvec <- c("<", ">", "=")
+  cvec <- c("<", ">", "!", "=")
   for (i in 1:N) {
     str <- svec[i]
     if (!nchar(str)) next 

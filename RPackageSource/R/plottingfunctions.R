@@ -102,6 +102,45 @@ showCorr <- function(corr, nlines=50) {
 }
 
 #---------------------------------------------------------
+# showModel
+#---------------------------------------------------------
+#' Function that displays the first N rows of each data frame 
+#'  in the the \code{\link{runModel}} output.
+#' @param obj  returned object from \code{\link{runModel}} 
+#' @param nlines number of lines to display (default 10)
+#' @return NULL
+#' @examples
+#' dir         <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' csvfile     <- file.path(dir, "cometsInputAge.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' result      <- runModel(modeldata,exmetabdata,"DPP")
+#' showModel(result)
+#' @export
+showModel <- function(obj, nlines=10) {
+  
+  if (!length(obj)) return(NULL)
+  if (is.list(obj)) {
+    nms <- names(obj)
+    if (!length(nms)) return(NULL)
+    for (i in 1:length(nms)) {
+      nm  <- nms[i]
+      str <- paste0("\n", nm, ":\n")
+      cat(str)
+      x   <- obj[[nm, exact=TRUE]] 
+      if (!is.data.frame(x)) stop("ERROR: obj must be an object returned from runModel")
+      nr <- min(nrow(x), nlines)
+      if (nr) print(x[1:nr, , drop=FALSE]) 
+    }
+  } else if ("try-error" %in% class(obj)) {
+    print(obj)
+  } else {
+    stop("ERROR: obj must be an object returned from runModel")
+  }
+  NULL
+}
+
+#---------------------------------------------------------
 #' Show interactive heatmap using plot_ly
 #'
 #' @param ccorrList correlation object (output of \code{\link{runCorr}})
@@ -213,7 +252,7 @@ showHeatmap <- function (ccorrList, strata.num=NULL,
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata, modelspec="Interactive",
-#'	colvars=c("age","bmi_grp"))
+#'	exposures=c("age","bmi_grp"))
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHClust(corrmatrix)
 #' @export
