@@ -25,8 +25,8 @@
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
-#' 	rowvars=c("lactose","lactate"))
+#' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
+#' 	outcomes=c("lactose","lactate"))
 #' obj <- runModel(modeldata,exmetabdata, "DPP")
 #' @export
 
@@ -531,7 +531,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
 
     # Check for min number of subs
     if (n0 < minNsubs) {
-      rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", 
+      rem.obj <- runModel.addRemVars(rem.obj, ccovj, "exposures", 
                       tooFewSubs, varMap=varMap)
       next
     }
@@ -543,7 +543,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       dcols     <- tmp[["cols", exact=TRUE]]
       ccovNames <- tmp$expVar
       if (!length(dcols)) {
-        rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", tmp$msg, varMap=varMap)
+        rem.obj <- runModel.addRemVars(rem.obj, ccovj, "exposures", tmp$msg, varMap=varMap)
         next
       }
     }
@@ -551,7 +551,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
     # Final check of exposure columns
     ccovNames <- ccovNames[ccovNames %in% colnames(x)]
     if (!length(ccovNames)) {
-      rem.obj <- runModel.addRemVars(rem.obj, ccovj, "colvars", 
+      rem.obj <- runModel.addRemVars(rem.obj, ccovj, "exposures", 
                     runModel.getExpRemFromDesign(), varMap=varMap)
       next
     } 

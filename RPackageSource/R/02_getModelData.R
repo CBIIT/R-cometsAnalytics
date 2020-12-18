@@ -7,15 +7,15 @@
 #' @param modelspec How model is specified (Interactive or Batch). The default is Batch
 #' @param modlabel  If batch, chosen model specified by batch mode (the MODEL column in
 #'                  the Models sheet). If interactive, then the model label.
-#' @param rowvars   If Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)
-#' @param colvars   If Interactive, a vector of exposure variables (see \code{details})
+#' @param outcomes   If Interactive, a vector of outcome variables (see \code{details}), the default is All metabolites)
+#' @param exposures  If Interactive, a vector of exposure variables (see \code{details})
 #' @param adjvars   If Interactive, a vector adjustment covariates (see \code{details})
 #' @param strvars   If Interactive, stratification covariates (see \code{details})
 #' @param wgtvar    If Interactive, a variable of weights (see \code{details})
 #' @param offvar    If Interactive, an offset variable (see \code{details})
 #' @param where users can specify which subjects to perform the analysis on by specifying this parameter. 
 #'        'where' expects a vector of strings with a variable name, 
-#'        a comparison operator (e.g. "<", ">", "="), and a value.  
+#'        a comparison operator (e.g. "<", ">", "<=", ">=", "!=", "="), and a value.  
 #'        For example, \code{where = c("age>50","bmi > 22")} uses all subjects
 #'        with age > 50 AND bmi > 22.  
 #'     Note that when running in Batch mode, rules in the \code{WHERE} column
@@ -30,8 +30,8 @@
 #'
 #' @return a list comprising: \cr
 #' 1: subset data: gdta \cr
-#' 2: column variables: ccovs \cr
-#' 3: row variables: rcovs \cr
+#' 2: exposure variables: ccovs \cr
+#' 3: outcome variables: rcovs \cr
 #' 4: adjustment variables: acovs \cr
 #' 5: stratification variable: scovs \cr
 #' 6: model specification: modspec \cr
@@ -51,14 +51,16 @@
 getModelData <-  function(readData,
                           modelspec = "Batch",
                           modlabel  = "",
-                          rowvars   = "All metabolites",
-                          colvars   = "",
+                          outcomes  = "All metabolites",
+                          exposures = "",
                           adjvars   = NULL,
                           strvars   = NULL,
                           wgtvar    = NULL,
                           offvar    = NULL,
 			     where     = NULL) {
 
+  rowvars   <- outcomes
+  colvars   <- exposures
   modelspec <- check.string(modelspec, c(getMode_interactive(), getMode_batch()), "modelspec")
   
   allvsall <- FALSE
@@ -77,15 +79,15 @@ getModelData <-  function(readData,
 
   # figure out the model specification based on type (Interactive or Batch)
   if (modelspec == getMode_interactive()) {
-    if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
+    if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables")}
 
     # Normalize variables so that it is consistent with readCOMETSinput
-    rowvars <- checkVariableNames(rowvars, "rowvars", default=allmetabStr, only.unique=1)
-    colvars <- checkVariableNames(colvars, "colvars", default="", only.unique=1)
-    adjvars <- checkVariableNames(adjvars, "adjvars", default=NULL, only.unique=1)
-    strvars <- checkVariableNames(strvars, "strvars", default=NULL, only.unique=1)
-    wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",  default=NULL, only.unique=1, max.n=1)
-    offvar  <- checkVariableNames(offvar,  "offvar",  default=NULL, only.unique=1, max.n=1)
+    rowvars <- checkVariableNames(rowvars, "outcomes",  default=allmetabStr, only.unique=1)
+    colvars <- checkVariableNames(colvars, "exposures", default="",   only.unique=1)
+    adjvars <- checkVariableNames(adjvars, "adjvars",   default=NULL, only.unique=1)
+    strvars <- checkVariableNames(strvars, "strvars",   default=NULL, only.unique=1)
+    wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",    default=NULL, only.unique=1, max.n=1)
+    offvar  <- checkVariableNames(offvar,  "offvar",    default=NULL, only.unique=1, max.n=1)
 
     # Check that all variables that are input by user exist in the renamed data
     allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar),allmetabStr))
@@ -158,6 +160,9 @@ getModelData <-  function(readData,
     if (nrow(mods) == 0) {
       tmp <- paste0("The model name '", modlabel, "' does not exist in the input Excel file. Please check your Models sheet.")
       stop(tmp)
+    } else if (nrow(mods) > 1) {
+      tmp <- paste0("The model name '", modlabel, "' corresponds to more than one row in the input Excel file. Please check your Models sheet.")
+      stop(tmp)
     }
 
     # rename variables to cohortvariable definitions -----------------------------
@@ -171,13 +176,13 @@ getModelData <-  function(readData,
     # assign adjustment vars -------------------------
     if (!is.na(mods$adjustment)) {
       acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
-      acovs <- runModel.getNewVarName(trimws(acovs), readData$dict_metabnames)
+      acovs <- runModel.getNewVarName(unique(trimws(acovs)), readData$dict_metabnames)
     } 
 
     # assign stratification vars vars -------------------------
     if (!is.na(mods$stratification)) {
       scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
-      scovs <- runModel.getNewVarName(trimws(scovs), readData$dict_metabnames)
+      scovs <- runModel.getNewVarName(unique(trimws(scovs)), readData$dict_metabnames)
     } 
 
     # Get the options for this model
@@ -247,15 +252,15 @@ getModelData <-  function(readData,
       stop(paste("ERROR applying WHERE: ", paste(where, collapse=" & ", sep=""), sep=""))
     }
     msg         <- paste0("Filtering subjects according to the rule(s) ", 
-                        paste(where, collapse=" & ", sep=""), ". ", 
-                        nrow(readData$subjdata)," of ", numallsamps," are retained")
+                        paste(where, collapse=" & ", sep=""), " . ", 
+                        nrow(readData$subjdata)," of ", numallsamps," are retained.")
     print(msg)
   }
 
   gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
 
   if(nrow(gdta) < 2) {
-    stop("Too few samples for this model, so the model will not be run")
+    stop("Too few samples for this model, so the model will not be run.")
   }
 
   # Outcomes must be numeric
@@ -302,8 +307,8 @@ getCovNames_allMetabs <- function(varString, allmetabs, varMap) {
     tmp  <- vars != ""
     vars <- vars[tmp] 
   }
-  if (allFlag) vars <- unique(c(vars, allmetabs))
-  covs <- runModel.getNewVarName(vars, varMap)
+  if (allFlag) vars <- c(vars, allmetabs)
+  covs <- runModel.getNewVarName(unique(vars), varMap)
 
   covs
 
