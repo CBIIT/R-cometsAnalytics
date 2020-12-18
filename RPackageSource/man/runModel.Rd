@@ -39,7 +39,7 @@ This function will check for stratification variables, and if
 dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,colvars="age",modlabel="1 Gender adjusted",
-	rowvars=c("lactose","lactate"))
+modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
+	outcomes=c("lactose","lactate"))
 obj <- runModel(modeldata,exmetabdata, "DPP")
 }
