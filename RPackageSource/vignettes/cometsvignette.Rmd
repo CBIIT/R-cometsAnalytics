@@ -2,7 +2,11 @@
 title: "Running COMETS Analytics locally"
 author: "Ewy Mathé, Ella Temprosa, Bill Wheeler"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
 vignette: >
   %\VignetteIndexEntry{Running COMETS Analytics locally}
   %\VignetteEngine{knitr::rmarkdown}
@@ -22,7 +26,7 @@ The required input file shoud be in excel format with the following 6 sheets:
   3. SubjectData - other exposure and adjustment variables
   4. VarMap - maps the variables needed to conduct the cohort specific analysis. Specify the name of variables under CohortVariable column. if the VarReference has the same name in the cohort, leave blank
   5. Models - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
-  6. Options - optional sheet containing model specific options
+  6. ModelOptions - optional sheet containing model specific options
 
 An example input file is available [**HERE**](https://www.comets-analytics.org/examples/cometsInput.xlsx).
 
@@ -174,7 +178,23 @@ list with family set to "binomial".
   print(glm_results)
 ```
 
-### 8. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
+### 8. Poisson regression with glm
+Call *getModelData()* to define a model which adjusts for age group, 
+has n_visits as the outcome variable, and has lactose and lactate
+as the exposure variables. The variable n_visits must be a non-negative integer valued variable.
+```{r}
+  exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+                   outcomes="n_visits", exposures=c("lactose","lactate"))
+```
+To run a Poisson regression, the list of options op must also include a model.options 
+list with family set to "poisson".
+```{r}
+  op <- list(model="glm", model.options=list(family="poisson"))
+  poisson_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=op)
+  print(poisson_results)
+```
+
+### 9. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
 
 All models desginated in the input file can be run with one command, 
 and individual output Excel files or correlation results will be written
