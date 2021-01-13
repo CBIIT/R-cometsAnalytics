@@ -1,7 +1,52 @@
-#' Read in Excell file that contains metabolite abundances and metab data
+#' Read in Excel file that contains metabolite data, covariate data, 
+#' models, and model options.
 #'
-#' @param csvfilePath path of Excel file to be read in
-#' @return a list comprising:
+#' @param file path of Excel file to be read in. This file must contain sheets
+#' with names \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, \bold{Models},
+#' and \bold{ModelOptions} (see details).
+#' @return a list comprising of data and information needed for \code{\link{getModelData}}.
+#'
+#' @details Additional information regarding each sheet in the input Excel file is given below. 
+#'
+#' \bold{SubjectMetabolites} \cr
+#' A table with the subject ids in the first column and metabolites as the other columns. \cr
+
+#' \bold{SubjectData} \cr
+#' A table with the subject ids in the first column and covariates as the other columns. \cr
+
+#' \bold{VarMap} \cr
+#' A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
+#' and \code{VARTYPE}. The \code{COHORTVARIABLE} column must contain names that match the
+#' column names in the \bold{SubjectData} table. These names will be renamed to their
+#' corresponding name in the \code{VARREFERENCE} column. The \code{VARTYPE} column 
+#' should have values \code{continuous} or \code{categorical} for each row. \cr
+
+#' \bold{Models} \cr
+#' A table where each row represents a model to be run, and with columns \code{MODEL}, 
+#' \code{OUTCOMES}, \code{EXPOSURE}, \code{ADJUSTMENT},
+#'  \code{STRATIFICATION}, \code{WHERE}, and \code{MODELSPEC}. All variable names in this
+#' table must match variable names in the \code{VARREFERENCE} column of the \bold{VarMap} sheet.
+#' The \code{MODEL} column is a label for the model. The \code{OUTCOMES} and \code{EXPOSURE} columns define the 
+#' outcome and exposure variables for the model. Use \code{All metabolites} to specify
+#' that all metabolite variables are to be included as outcomes or exposures, otherwise 
+#' use a space separated list of variable names. The \code{ADJUSTMENT} column contains a
+#' space separated list of covariate adjustment variables; use an empty cell for no covariate adjustment.
+#' The \code{STRATIFICATION} column is used for stratified analyses, with a space separated list
+#' of stratification variables. If more than one stratification variable is specified, then the strata
+#' are defined by all unique combinations of the stratification variables that appear in the data.
+#' The \code{WHERE} column is used to define a subset of subjects to include in the analysis,
+#' and has the form \code{variable operator value}, where \code{operator} can be one of the
+#' following \code{>, <, >=, <= !=, =}.
+#' An example \code{WHERE} condition is \code{age > 50}, which will include all subjects older
+#' than 50 in the analysis. Multiple \code{WHERE} conditions must be separated by a \code{&}. 
+#' For example, \code{age > 50 & bmi >= 22} will include the subjects older than 50 AND with
+#' bmi >= 22. Values in the \code{MODELSPEC} column must match with the \code{MODELSPEC} column
+#' in the \bold{ModelOptions} sheet. \cr
+
+#' \bold{ModelOptions} \cr
+#' A table where each row specifies an option and has columns \code{MODELSPEC}, \code{FUNCTION},
+#' \code{OPTION}, and \code{VALUE}. For an example sheet and additional information about this
+#' sheet, see the Excel file \code{/extdata/cometsInput.xlsx}.
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
@@ -10,7 +55,9 @@
 #'
 #' @export
 
-readCOMETSinput <- function(csvfilePath) {
+readCOMETSinput <- function(file) {
+
+  csvfilePath <- file
   stopifnot(is.character(csvfilePath))
   if (!file.exists(csvfilePath)) {
     stop("CSV input file does not exist")
@@ -65,10 +112,13 @@ readCOMETSinput <- function(csvfilePath) {
   # We need a different function for the WHERE column
   dta.models$where <- normalizeWhere(dta.models$where) 
 
-  # Read in the options if models sheet has a MODELNAME column
+  # Read in the options if models sheet has a MODELSPEC column
   dta.options <- NULL
   modnm       <- getModelOptionsIdCol()
   if (modnm %in% colnames(dta.models)) {
+    # Check that this column does not contain reserved words
+    checkModelspecCol(dta.models[, modnm, drop=TRUE])
+    
     opnm        <- getOptionsSheetName()
     dta.options <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, opnm),compbl=TRUE))
 
@@ -328,3 +378,16 @@ renameSubjDataVars <- function(oldnames, vmap) {
   newnames
 
 } # END: renameSubjDataVars
+
+checkModelspecCol <- function(vec) {
+
+  reserved <- getGlobalOptionName()  
+  tmp      <- trimws(vec) %in% reserved
+  if (any(tmp)) {
+    msg <- paste0("ERROR: the ", getModelOptionsIdCol(), 
+                  " in the Models sheet contains the reseved word ", reserved)
+    stop(msg)
+  }
+  
+} # END: checkModelspecCol
+

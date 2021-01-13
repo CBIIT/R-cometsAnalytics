@@ -47,10 +47,10 @@ getModelSummaryName       <- function() {"ModelSummary"}
 getModelSummaryNobsName   <- function() {"nobs"}
 
 # For input excel file
-getModelOptionsIdCol <- function() {"modelname"}
+getModelOptionsIdCol <- function() {"modelspec"}
 getOptionNameCol     <- function() {"option"}
 getOptionValueCol    <- function() {"value"}
-getOptionsSheetName  <- function() {"Options"}
+getOptionsSheetName  <- function() {"ModelOptions"}
 getGlobalOptionName  <- function() {"ModelChecks"}
 getModelFunctionCol  <- function() {"function"}
 
