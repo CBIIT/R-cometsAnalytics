@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html >
-
+<html lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>COMETS Analytics Tutorial</title>
-  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
   <meta property="og:title" content="COMETS Analytics Tutorial" />
   <meta property="og:type" content="book" />
@@ -22,24 +21,28 @@
   <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics" />
   <meta name="twitter:image" content="static/COMETSLogo.png" />
 
-<meta name="author" content="CAT Work Group">
+<meta name="author" content="Version 1.6" />
 
 
-<meta name="date" content="2018-10-22">
+<meta name="date" content="2021-02-02" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 
-<link rel="next" href="quickstart.html">
+<link rel="next" href="quickstart.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
 
 
 
@@ -91,7 +94,7 @@
 </ul></li>
 <li class="chapter" data-level="2.5" data-path="cohort.html"><a href="cohort.html#step-5-correlation-analyses-output"><i class="fa fa-check"></i><b>2.5</b> Step 5 Correlation Analyses Output</a><ul>
 <li class="chapter" data-level="2.5.1" data-path="cohort.html"><a href="cohort.html#metabolite-tagging"><i class="fa fa-check"></i><b>2.5.1</b> Metabolite Tagging</a></li>
-<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of ‘Tagged’ Metabolites</a></li>
+<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of 'Tagged' Metabolites</a></li>
 <li class="chapter" data-level="2.5.3" data-path="cohort.html"><a href="cohort.html#create-a-heatmap"><i class="fa fa-check"></i><b>2.5.3</b> Create A Heatmap</a></li>
 <li class="chapter" data-level="2.5.4" data-path="cohort.html"><a href="cohort.html#the-heatmap"><i class="fa fa-check"></i><b>2.5.4</b> The Heatmap</a></li>
 <li class="chapter" data-level="2.5.5" data-path="cohort.html"><a href="cohort.html#the-heatmap-2"><i class="fa fa-check"></i><b>2.5.5</b> The Heatmap (2)</a></li>
@@ -131,7 +134,11 @@
 <li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
-<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+<li>
+<a href="https://epi.grants.cancer.gov/comets/" target="blank">COMETS Website</a><br>
+<a href="http://www.comets-analytics.org" target="blank">COMETS Analytics App</a><br>
+<a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a>
+</li>
 
 </ul>
 
@@ -152,15 +159,15 @@
             <section class="normal" id="section-">
 <div id="header">
 <h1 class="title">COMETS Analytics Tutorial</h1>
-<h4 class="author"><em>CAT Work Group</em></h4>
-<h4 class="date"><em>2018-10-22</em></h4>
+<p class="author"><em>Version 1.6</em></p>
+<p class="date"><em>2021-02-02</em></p>
 </div>
 <div id="introduction" class="section level1 unnumbered">
 <h1>Introduction</h1>
 <div style="position:absolute; margin-top:-180px; margin-left:600px;">
 <p><img src="static/COMETSLogo.png" width="60%"></p>
 </div>
-<p><a href="https://epi.grants.cancer.gov/comets/">COMETS</a>, the <strong>CO</strong>nsortium of <strong>MET</strong>abolomics <strong>S</strong>tudies, has a major goal to produce jointly coordinated, multi-cohort, high-impact publications devoted to advancing the methods and scientific understanding of the human metabolome and its relationship to disease etiology and prognosis. Since its inception in 2014, COMETS has grown to include more than 50 cohorts worldwide.</p>
+<p><a href="https://epi.grants.cancer.gov/comets/">COMETS</a>, the <strong>CO</strong>nsortium of <strong>MET</strong>abolomics <strong>S</strong>tudies, has a major goal to produce jointly coordinated, multi-cohort, high-impact publications devoted to advancing the methods and scientific understanding of the human metabolome and its relationship to disease etiology and prognosis. Since its inception in 2014, COMETS has grown to include more than 80 cohorts worldwide.</p>
 <p><a href="http://www.comets-analytics.org">COMETS Analytics</a> serves as the infrastructure to facilitate and coordinate data analysis efforts. This tutorial gives an overview and detailed instructions on the use of COMETS Analytics in support of COMETS.</p>
 <div style="line-height: 0.7;font-size: 12px">
 Prepared by the COMETS Tutorial Group:
@@ -185,8 +192,9 @@ Kaitlyn Mazzilli
 </div>
 <div id="overview" class="section level2 unnumbered">
 <h2>Overview</h2>
-<p>Each cycle of analyses consists of five steps described below to bundle multiple projects to minimize burden on cohort analytic resources.<br />
-<a href="static/COMETScycle.PNG"><img  href="static/COMETScycle.PNG"></a></p>
+<p>For each project, the cohort-level analytic flow consists of 3 steps to produce the standardized output required for central meta-analyses. Multiple projects can be bundled for each run to minimize burden on cohort analytic resources.<br />
+<img href="static/cometsflow.PNG" style="width: 60%"></p>
+<p><img src="static/input_metabolites.PNG" style="width: 60%"></p>
 <p>This tutorial serves as a guide through this cycle. You can register for access to COMETS Analytics using the instructions in Chapter <a href="manual.html#register">3.1</a> <a href="manual.html#register">Registration</a>. For a quick walk-through the cycle, you can use the sample input file and follow the directions in Chapter <a href="quickstart.html#quickstart">1</a> <a href="quickstart.html#quickstart">Get Started with the Sample File</a>. Once you are ready to conduct your cohort-specific analyses, see the Chapter <a href="cohort.html#cohort">2</a> <a href="cohort.html#cohort">Conduct Cohort Data Analyses</a>. For more technical details, refer to the Chapter <a href="manual.html#manual">3</a> <a href="manual.html#manual">Manual</a> and <a href="faq.html#faq">FAQ</a> for answers to commonly asked questions.</p>
 
 </div>
@@ -202,11 +210,13 @@ Kaitlyn Mazzilli
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
 <script>
 gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
@@ -214,12 +224,11 @@ gitbook.start({
 "github": false,
 "facebook": true,
 "twitter": true,
-"google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -227,10 +236,18 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/ellatemprosa/cometstutorial/index.Rmd",
-"text": "Edit"
+"link": null,
+"text": null
 },
-"download": ["catutorial.pdf"],
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
 "toc": {
 "collapse": "subsection"
 }

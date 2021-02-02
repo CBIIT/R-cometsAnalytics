@@ -1,7 +1,7 @@
 --- 
-title: "COMETS Analytics Tutorial"
-author: "CAT Work Group"
-date: "2018-10-22"
+title: "COMETS Analytics Tutorial "
+author: "Version 1.6"
+date: "2021-02-02"
 site: bookdown::bookdown_site
 output:
   bookdown::gitbook:
@@ -22,7 +22,7 @@ header-includes:
 # Introduction {-}
 <div style="position:absolute; margin-top:-180px; margin-left:600px;" ><img src="static/COMETSLogo.png" width="60%">
 </div>
-[COMETS](https://epi.grants.cancer.gov/comets/), the **CO**nsortium of **MET**abolomics **S**tudies, has a major goal to produce jointly coordinated, multi-cohort, high-impact publications devoted to advancing the methods and scientific understanding of the human metabolome and its relationship to disease etiology and prognosis. Since its inception in 2014, COMETS has grown to include more than 50 cohorts worldwide. 
+[COMETS](https://epi.grants.cancer.gov/comets/), the **CO**nsortium of **MET**abolomics **S**tudies, has a major goal to produce jointly coordinated, multi-cohort, high-impact publications devoted to advancing the methods and scientific understanding of the human metabolome and its relationship to disease etiology and prognosis. Since its inception in 2014, COMETS has grown to include more than 80 cohorts worldwide. 
 
 [COMETS Analytics](http://www.comets-analytics.org) serves as the infrastructure to facilitate and coordinate data analysis efforts. This tutorial gives an overview and detailed instructions on the use of COMETS Analytics in support of COMETS. 
 
@@ -43,8 +43,11 @@ Prepared by the COMETS Tutorial Group:
 
 
 ## Overview {-}
-Each cycle of analyses consists of five steps described below to bundle multiple projects to minimize burden on cohort analytic resources.  
-<a href="static/COMETScycle.PNG"><img  href="static/COMETScycle.PNG"></a>
+For each project, the cohort-level analytic flow consists of 3 steps to produce the standardized output required for central meta-analyses.
+Multiple projects can be bundled for each run to minimize burden on cohort analytic resources.  
+<img href="static/cometsflow.PNG" style="width: 60%">
+
+<img src="static/input_metabolites.PNG" style="width: 60%">
 
 
 This tutorial serves as a guide through this cycle. You can register for access to COMETS Analytics using the instructions in Chapter \@ref(register) [Registration]. For a quick walk-through the cycle, you can use the sample input file and follow the directions in Chapter \@ref(quickstart) [Get Started with the Sample File]. Once you are ready to conduct your cohort-specific analyses, see the Chapter \@ref(cohort) [Conduct Cohort Data Analyses]. For more technical details, refer to the Chapter \@ref(manual) [Manual] and [FAQ] for answers to commonly asked questions.

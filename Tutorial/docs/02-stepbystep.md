@@ -17,12 +17,12 @@ Each cohort is required to assemble their data into the standard Excel format fr
 
 
 ### Metabolites
-The _Metabolites_ sheet contains the meta-data related to the metabolite annotations, where the metabolites are the rows. This sheet requires two input columns: “metabid” and “metabolite_name”. Additional columns are helpful in the harmonization of metabolites. There are no restrictions on the names of the helpful columns, except HMDB ID and COMP ID should be named "HMDB_ID" and "COMP_ID". Additional meta-data include chemical pathways, alternate names, database IDs (HMDB, PubChem, etc.), mass/charge, retention times, etc. This meta-information is important as we are continuously updating the harmonization of metabolite names across studies and platforms. Importantly, the metabolite IDs in the “metabid” column are required to match the metabolite IDs used in the metabolite abundance matrix (sheet _SubjectMetabolites_).
+The __*Metabolites*__ sheet contains the meta-data related to the metabolite annotations, where the metabolites are the rows. This sheet requires two input columns: __metabid__ and __metabolite_name__. Additional columns are helpful in the harmonization of metabolites. There are no restrictions on the names of the helpful columns, except HMDB ID and COMP ID should be named __HMDB_ID__ and __COMP_ID__. Additional meta-data include chemical pathways, alternate names, database IDs (HMDB, PubChem, etc.), mass/charge, retention times, etc. This meta-information is important as we are continuously updating the harmonization of metabolite names across studies and platforms. Importantly, the metabolite IDs in the __metabid__ column are required to match the metabolite IDs used in the metabolite abundance matrix (sheet __*SubjectMetabolites*__).
 
-<span class='textintro'>The _Metabolites_ sheet contains the meta-data for metabolites used for harmonization.</span>
+<span class='textintro'>The __*Metabolites*__ sheet contains the meta-data for metabolites used for harmonization.</span>
 
 <div class="marginnote">
-<span class='texta'>**a. metabid**</span> is the name of the metabolites which may be different than the chemical ID with the non-standard characters. This is a required field to denote the metabolite columns in _SubjectMetabolites_ sheet.
+<span class='texta'>**a. metabid**</span> is the name of the metabolites which may be different than the chemical ID with the non-standard characters. This is a required field to denote the metabolite columns in __*SubjectMetabolites*__ sheet.
  
 <span class='textb'>**b. metabolite_name** </span> is a required field to denote the biochemical name of the metabolite, with all the non-standard characters.
  
@@ -33,16 +33,16 @@ The _Metabolites_ sheet contains the meta-data related to the metabolite annotat
 
 
 ### Subject Metabolites
-The _SubjectMetabolites_ sheet contains the measured metabolite values for the cohort samples. This sheet would typically be your data analysis file, where the metabolites are the columns and the subjects are the rows. The first column in this sheet represents the sample ID. Each subsequent column represents the measured values of one metabolite. The column names in this sheet (except the column named "SAMPLE_ID") must match the row names under the column “metabid” in sheet _Metabolites_. Further, the row names in this sheet are required to match the row names in the sheet _SubjectData_. Metabolite values should be analyses-ready.
+The __*SubjectMetabolites*__ sheet contains the measured metabolite values for the cohort samples. This sheet would typically be your data analysis file, where the metabolites are the columns and the subjects are the rows. The first column in this sheet represents the sample ID. Each subsequent column represents the measured values of one metabolite. The column names in this sheet (except the column named __SAMPLE_ID__) must match the row names under the column __metabid__ in sheet __*Metabolites*__. Further, the row names in this sheet are required to match the row names in the sheet __*SubjectData*__. Metabolite values should be analyses-ready.
 
-<span class='textintro'>The _SubjectMetabolites_ sheet contains the measured metabolite values for the cohort samples.</span>
+<span class='textintro'>The __*SubjectMetabolites*__ sheet contains the measured metabolite values for the cohort samples.</span>
 
 <div class="marginnote">
 <span class='texta'>**a. SubjectMetabolites**</span> this sheet in the input file contains the measured metabolite values for each sample.
  
 <span class='textb'>**b. SAMPLE_ID** </span> contains the study sample IDs, the subject identifier.
  
-<span class='textc'>**c. Metabolite ID**</span> is indicated in the first row of the sheet to represent all metabolites listed in the _Metabolites_ sheet.
+<span class='textc'>**c. Metabolite ID**</span> is indicated in the first row of the sheet to represent all metabolites listed in the __*Metabolites*__ sheet.
  
 <span class='textd'>**d. Each row**</span>  represents data for each subject in the cohort.
  
@@ -52,18 +52,18 @@ The _SubjectMetabolites_ sheet contains the measured metabolite values for the c
 
 
 ### Subject Data
-The _SubjectData_ sheet contains the subject-level data where the column names represent the variable names as used in the cohort, and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the _VarMap_ sheet. Equally important, the row names in this _SubjectData_ sheet must match the row names of the _SubjectMetabolites_ sheet.
+The __*SubjectData*__ sheet contains the subject-level data where the column names represent the variable names as used in the cohort, and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the __*VarMap*__ sheet. Equally important, the row names in this __*SubjectData*__ sheet must match the row names of the __*SubjectMetabolites*__ sheet.
 
-<span class='textintro'>The _SubjectData_ sheet contains the subject-level covariate data (all other information besides metabolites; the coding is laid out in the _VarMap_ sheet) for each sample. </span>
+<span class='textintro'>The __*SubjectData*__ sheet contains the subject-level covariate data (all other information besides metabolites; the coding is laid out in the __*VarMap*__ sheet) for each sample. </span>
 
 <div class="marginnote">
 <span class='texta'>**a. SubjectData**</span> is a sheet in the input file that contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race, and education.
  
 <span class='textb'>**b. SAMPLE_ID** </span> contains the sample identifiers.
 
-<span class='textc'>**c. Columns**</span> correspond to subject level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named **SAMPLE_ID**) must match the entries in the column **COHORTVARIABLE** from the sheet <i>VarMap</i>.
+<span class='textc'>**c. Columns**</span> correspond to subject level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named __SAMPLE_ID__) must match the entries in the column __COHORTVARIABLE__ from the sheet __*VarMap*__.
 
-<span class='textd'>**d. Rows**</span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (e.g., "SAMPLE_ID") are required to match the row names in the sheet <i>SubjectMetabolites</i>. 
+<span class='textd'>**d. Rows**</span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (e.g., __SAMPLE_ID__) are required to match the row names in the sheet __*SubjectMetabolites*__.
  
 <span class='texte'>**e. Cells**</span> contain subject-level covariate values.
 </div>
@@ -73,8 +73,8 @@ The _SubjectData_ sheet contains the subject-level data where the column names r
 
 
 ### VarMap
-<span class='textintro'>The _VarMap_ sheet contains the coding scheme for the covariates in your analysis, and maps the cohort variable names to the COMETS internal variable names. For projects in COMETS, which represent multi-cohort efforts coordinated by a central PI, this scheme will be completed by the PI and sent to you as part of their example data input files. There is no need to modify. 
-<br>Example: The cohort variable “bmi” would be mapped to the COMETS internal variable “bmi_grp” and must be coded as “0” for BMI<18.5, “1” for BMI 18.5 to <25, “2” for BMI 25 to <30, “3” for BMI 30.0+, and “4” for missing as defined in the column “VARDEFINITION”. </span>
+<span class='textintro'>The __*VarMap*__ sheet contains the coding scheme for the covariates in your analysis, and maps the cohort variable names to the COMETS internal variable names. For projects in COMETS, which represent multi-cohort efforts coordinated by a central PI, this scheme will be completed by the PI and sent to you as part of their example data input files. There is no need to modify. 
+<br>Example: The cohort variable __bmi__ would be mapped to the COMETS internal variable __bmi_grp__ and must be coded as “0” for BMI<18.5, “1” for BMI 18.5 to <25, “2” for BMI 25 to <30, “3” for BMI 30.0+, and “4” for missing as defined in the column __VARDEFINITION__. </span>
 
 <div class="marginnote">
 <span class='texta'>**a. VarMap**</span> is a sheet in the input file that gives the original cohort variable names and the COMETS internal variable names.
@@ -85,13 +85,13 @@ The _SubjectData_ sheet contains the subject-level data where the column names r
  
 <span class='textd'>**d. COHORTVARIABLE**</span> corresponds to the original cohort variable name. 
  
-<span class='texte'>**e. COHORTNOTES**</span> gives additional info for some variables (e.g., “age”, “female”), missing values are not allowed. 
+<span class='texte'>**e. COHORTNOTES**</span> gives additional info for some variables (e.g., __age__, __female__), missing values are not allowed. 
 </div>
 <a href="static/input_varmap3.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a>
 
 
 ### Models {#inputmodels}
-This worksheet specifies the models to run. In this example, Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes, while adjusting for smoking status (“smk_grp”), BMI (“bmi_grp”), race (“race_grp”), education (“educ_grp”), alcohol consumption (“alc_grp”), multivitamin use (“multivitamin”), hormonal status (“horm_curr”), and fasting status (“fasted”). This analysis will be stratified by gender using the internal COMETS variable “female”.
+This worksheet specifies the models to run. In this example, Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes, while adjusting for smoking status (__smk_grp__), BMI (__bmi_grp__), race (__race_grp__), education (__educ_grp__), alcohol consumption (__alc_grp__), multivitamin use (__multivitamin__), hormonal status (__horm_curr__), and fasting status (__fasted__). This analysis will be stratified by gender using the internal COMETS variable __female__.
 
 <span class='textintro'>Specify the analytical models you wish to run. </span> 
 
@@ -119,18 +119,18 @@ This worksheet specifies the models to run. In this example, Model “2.1” is 
 
 
 ## Step 2 Harmonization
-The harmonization step will assess whether your cohort's metabolites are available in the master metabolites list, so that a universal ID (named "UID_01") can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID ensures alignment of metabolites across the different cohorts to ensure identification for meta-analyses. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (i.e., metabolite meta-data) in the input file such as HMDB ID, KEGG ID, or other identifiers. For more details, see 
+The harmonization step will assess whether your cohort's metabolites are available in the master metabolites list, so that a universal ID (named __UID_01__) can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID ensures alignment of metabolites across the different cohorts to ensure identification for meta-analyses. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (i.e., metabolite meta-data) in the input file such as HMDB ID, KEGG ID, or other identifiers. For more details, see 
 
-**Note:** The harmonization step produces an output file that needs to be sent to comets.analytics@gmail.com to keep track of harmonization rates.
+__Note:__ The harmonization step produces an output file that needs to be sent to comets.analytics@gmail.com to keep track of harmonization rates.
 
 ### Harmonization File
 <span class='textintro'>The names of metabolites input into the software are automatically harmonized to a common name. This important feature facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.</span>
 
 <div class="marginnote">
 
-<span class='texta'>**a. metabid**</span> corresponds to metabolite IDs as defined by each individual cohort. The metabolite IDs correspond to the column "metabid" from the sheet _Metabolites_ of the input file.
+<span class='texta'>**a. metabid**</span> corresponds to metabolite IDs as defined by each individual cohort. The metabolite IDs correspond to the column __metabid__ from the sheet __*Metabolites*__ of the input file.
 
-<span class='textb'>**b. metabolite_names**</span> corresponds to metabolite names as defined by each individual cohort. The metabolite names correspond to the column "metabolite_name" from the sheet _Metabolites_ of the input file.
+<span class='textb'>**b. metabolite_names**</span> corresponds to metabolite names as defined by each individual cohort. The metabolite names correspond to the column __metabolite_name__ from the sheet __*Metabolites*__ of the input file.
 
 <span class='textc'>**c. Columns**</span> (except A, B, and C) correspond to metabolite meta-information that was either already present in the input file or was matched from the internal COMETS database. We highly recommend to add at least one public database identifier (e.g., HMDB ID).
 
@@ -154,7 +154,7 @@ There are two ways to run models: 1) interactive mode allows you to specify ad h
    
    <div class="marginnote"><span class='texta'>**a. Passed integrity check**</span> after harmonization, if data upload was successful and the data passed COMETS integrity checks, you will get a confirmation message.
     
-   <span class='textb'>**b. Specify interactive** </span> by clicking on 'Interactive user input' under 'Specify Method of Analyses'.
+   <span class='textb'>**b. Specify interactive** </span> by clicking on *Interactive user input* under *Specify Method of Analyses*.
    
    </div>
    
@@ -165,11 +165,11 @@ There are two ways to run models: 1) interactive mode allows you to specify ad h
  <span class='textintro'>Exploring your output. </span>
  
 <div class="marginnote">
-  <span class='texta'>**a. Correlation results **</span> check if correlation analyses were successful – if so click ‘Download Results’ and forward to the COMETS harmonization group who will utilize these for the meta-analyses.
+  <span class='texta'>**a. Correlation results **</span> check if correlation analyses were successful – if so click *Download Results* and forward to the COMETS harmonization group who will utilize these for the meta-analyses.
  
  <span class='textb'>**b. Specified model parameters ** </span> as defined in the interactive mode.
 
- <span class='textc'>**c. Correlation coefficient: **</span> Spearman Rank correlation coefficient between the specified outcome and the exposure (adjusting for the <i>adjvars</i>, and by strata if applicable).
+ <span class='textc'>**c. Correlation coefficient: **</span> Spearman Rank correlation coefficient between the specified outcome and the exposure (adjusting for the __adjvars__, and by strata if applicable).
  
  <span class='textd'>**d. p-value**</span> significance level for the correlation coefficient.
  
@@ -177,7 +177,7 @@ There are two ways to run models: 1) interactive mode allows you to specify ad h
  
  <span class='textf'>**f. Tag**</span> select metabolites for further analysis. This creates a subset of metabolites that can then be specified in the interactive output.
  
-  <span class='textg'>**Explore further **</span> further results can be ordered according to name of outcome, exposure, or "adjvars", or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds. 
+  <span class='textg'>**Explore further **</span> further results can be ordered according to name of outcome, exposure, or __adjvars__, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds. 
  </div>
 
 <a href="static/output_interactivemode_3.png"><img src="static/output_interactivemode_3.png" style="width: 60%"></a>
@@ -191,29 +191,29 @@ After running your correlation analyses by [Interactive mode] or [Batch mode], r
 
 
 ### Metabolite Tagging 
-The metabolite tagging ('Tag' option) is a feature in the correlate and heatmap tabs to select and create a subset of metabolites for further analysis based on results for further investigation. Once tagged, the list of metabolites can be used in interactive mode to specify other analyses to conduct.
+The metabolite tagging (*Tag* option) is a feature in the correlate and heatmap tabs to select and create a subset of metabolites for further analysis based on results for further investigation. Once tagged, the list of metabolites can be used in interactive mode to specify other analyses to conduct.
 
 <span class='textintro'>To select and create a subset of metabolites for further analysis based on the correlation results the tag function can be used.
-Below an example with age (exposure) and metabolites (outcome) as run in the 'Interactive user input' 'Correlation Results' tab. </span>
+Below an example with age (exposure) and metabolites (outcome) as run in the *Interactive user input Correlation Results* tab. </span>
 
 <div class="marginnote">
 <span class='texta'>**a. Set level of significance **</span> in this example the level of significance is defined as p<0.00001.
  
 <span class='textb'>**b. Select significant metabolites** </span> by ticking the box all significant metabolites are selected.
  
-<span class='textc'>**c. Tag metabolites **</span> by ticking the 'Tag' box all selected metabolites are automatically marked.
+<span class='textc'>**c. Tag metabolites **</span> by ticking the *Tag* box all selected metabolites are automatically marked.
 </div>
 <a href="static/output_heatmap3_1.PNG" target="_blank"><img src="static/output_heatmap3_1.PNG" style="width: 60%"></a>
 
 
 ### Create Subset of 'Tagged' Metabolites 
 
-<span class='textintro'>Once the 'Tag' button is clicked a screen will appear </span>
+<span class='textintro'>Once the *Tag* button is clicked a screen will appear </span>
 
 <div class="marginnote">
 <span class='texta'>**a. Name your Tag **</span> give the subset of metabolites a name (e.g., “age_related_metabolites”). 
  
-<span class='textb'>**b. Create Tag **</span> click the button 'Create Tag' to create the tag. 
+<span class='textb'>**b. Create Tag **</span> click the button *Create Tag* to create the tag. 
  
 <span class='textc'>**c. Tag is created **</span> a new box appears with an overview of your tagged metabolites. Close the newly created tag.
 </div>
@@ -223,7 +223,7 @@ Below an example with age (exposure) and metabolites (outcome) as run in the 'In
 
 ### Create A Heatmap 
 
-<span class='textintro'>Go back to the ‘Interactive user input’ and select your newly created subset, using the tag function
+<span class='textintro'>Go back to the *Interactive user input* and select your newly created subset, using the *Tag* function
 </span>
 
 <div class="marginnote">
@@ -231,9 +231,9 @@ Below an example with age (exposure) and metabolites (outcome) as run in the 'In
  
 <span class='textb'>**b. Select your outcome** </span> select the newly created "age_related_metabolites" tag. 
  
-<span class='textc'>**c. Run the model **</span> click the run button.
+<span class='textc'>**c. Run the model **</span> click the *Run* button.
  
-<span class='textd'>**d. Heatmap**</span> select the heatmap tab to view the heatmap. 
+<span class='textd'>**d. Heatmap**</span> select the *Heatmap* tab to view the heatmap. 
 </div>
 <a href="static/output_heatmap3_3.PNG" target="_blank"><img src="static/output_heatmap3_3.PNG" style="width: 60%"></a>
 
@@ -243,13 +243,13 @@ Below an example with age (exposure) and metabolites (outcome) as run in the 'In
 </span>
 
 <div class="marginnote">
-<span class='texta'>**a. Sort by outcome **</span> the display of the heatmap can be sorted by outcome or exposure (in the 'Outcomes Sort By' box). 
+<span class='texta'>**a. Sort by outcome **</span> the display of the heatmap can be sorted by outcome or exposure (in the *Outcomes Sort By* box). 
 
-<span class='textb'>**b. Sort by strata** </span> when a stratified analysis is performed, the display of the heatmap can be sorted by the different strata (in the 'Strata Sort By' box). 
+<span class='textb'>**b. Sort by strata** </span> when a stratified analysis is performed, the display of the heatmap can be sorted by the different strata (in the *Strata Sort By* box). 
  
-<span class='textc'>**c. Choose your color **</span> in the 'Palette' box different color schemes for the heatmap can be selected. 
+<span class='textc'>**c. Choose your color **</span> in the *Palette* box different color schemes for the heatmap can be selected. 
  
-<span class='textd'>**d. Adjust plot height and width**</span> the 'Plot height' and 'Plot width' can be adjusted using their respective boxes. 
+<span class='textd'>**d. Adjust plot height and width**</span> the *Plot height* and *Plot width* can be adjusted using their respective boxes. 
 </div>
 
 <a href="static/output_heatmap3_4.PNG" target="_blank"><img src="static/output_heatmap3_4.PNG" style="width: 60%"></a>
@@ -291,7 +291,7 @@ Below an example with age (exposure) and metabolites (outcome) as run in the 'In
  
 <span class='textb'>**b. Hierachical clustering **</span> ticking this box will allow you to display the metabolite clusters on the left side of the heatmap. 
  
-<span class='textc'>**c. Choose your dimensions **</span> by clicking the ‘Plot height’ and “Plot width’ and entering values (e.g., 900 by 1100) the plot will show in the chosen dimensions. 
+<span class='textc'>**c. Choose your dimensions **</span> by clicking the *Plot height* and *Plot width* and entering values (e.g., 900 by 1100) the plot will show in the chosen dimensions. 
 </div>
 
 <a href="static/output_heatmap3_6.PNG" target="_blank"><img src="static/output_heatmap3_6.PNG" style="width: 60%"></a>
