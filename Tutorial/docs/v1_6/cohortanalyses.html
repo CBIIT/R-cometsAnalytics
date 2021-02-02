@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>COMETS Analytics Tutorial</title>
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:image" content="static/COMETSLogo.png" />
+  <meta property="og:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  
+  <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  <meta name="twitter:image" content="static/COMETSLogo.png" />
+
+<meta name="author" content="CAT Work group">
+
+
+<meta name="date" content="2018-09-11">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="quickstart.html">
+<link rel="next" href="manual.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="tufte.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">COMETS Analytics Tutorial</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Quick Start with Sample File</a><ul>
+<li class="chapter" data-level="1.1" data-path="quickstart.html"><a href="quickstart.html#sample-input-file"><i class="fa fa-check"></i><b>1.1</b> Sample Input file</a></li>
+<li class="chapter" data-level="1.2" data-path="quickstart.html"><a href="quickstart.html#quick-analysis"><i class="fa fa-check"></i><b>1.2</b> Quick Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="cohortanalyses.html"><a href="cohortanalyses.html"><i class="fa fa-check"></i><b>2</b> Conduct Cohort Data Analyses</a><ul>
+<li class="chapter" data-level="2.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-1-data-preparation"><i class="fa fa-check"></i><b>2.1</b> Step 1 Data Preparation</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#metabolites"><i class="fa fa-check"></i><b>2.1.1</b> Metabolites</a></li>
+<li class="chapter" data-level="2.1.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#subject-metabolites"><i class="fa fa-check"></i><b>2.1.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="2.1.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#subject-data"><i class="fa fa-check"></i><b>2.1.3</b> Subject Data</a></li>
+<li class="chapter" data-level="2.1.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#varmap"><i class="fa fa-check"></i><b>2.1.4</b> Varmap</a></li>
+<li class="chapter" data-level="2.1.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#models"><i class="fa fa-check"></i><b>2.1.5</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-2-harmonization"><i class="fa fa-check"></i><b>2.2</b> Step 2 Harmonization</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#harmonization-file"><i class="fa fa-check"></i><b>2.2.1</b> Harmonization file</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-3-data-and-model-integrity"><i class="fa fa-check"></i><b>2.3</b> Step 3 Data and Model Integrity</a></li>
+<li class="chapter" data-level="2.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-4-model-specification"><i class="fa fa-check"></i><b>2.4</b> Step 4 Model Specification</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#create-input-file-model-specification"><i class="fa fa-check"></i><b>2.4.1</b> Create input file: Model specification</a></li>
+<li class="chapter" data-level="2.4.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#interactive"><i class="fa fa-check"></i><b>2.4.2</b> Interactive</a></li>
+<li class="chapter" data-level="2.4.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#batch"><i class="fa fa-check"></i><b>2.4.3</b> Batch</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-5-correlation-analyses-output"><i class="fa fa-check"></i><b>2.5</b> Step 5 Correlation Analyses Output</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#metabolite-tagging"><i class="fa fa-check"></i><b>2.5.1</b> Metabolite tagging</a></li>
+<li class="chapter" data-level="2.5.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create subset of ‘Tagged’ metabolites</a></li>
+<li class="chapter" data-level="2.5.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#create-a-heatmap"><i class="fa fa-check"></i><b>2.5.3</b> Create A heatmap</a></li>
+<li class="chapter" data-level="2.5.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#the-heatmap"><i class="fa fa-check"></i><b>2.5.4</b> The heatmap</a></li>
+<li class="chapter" data-level="2.5.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#the-heatmap-2"><i class="fa fa-check"></i><b>2.5.5</b> The heatmap (2)</a></li>
+<li class="chapter" data-level="2.5.6" data-path="cohortanalyses.html"><a href="cohortanalyses.html#annotations-and-hierarchical-clustering"><i class="fa fa-check"></i><b>2.5.6</b> Annotations and hierarchical clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-6-send-for-meta-analyses"><i class="fa fa-check"></i><b>2.6</b> Step 6 Send for Meta-analyses</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
+<li class="chapter" data-level="3.1" data-path="manual.html"><a href="manual.html#registration-and-account-set-up"><i class="fa fa-check"></i><b>3.1</b> Registration and Account Set-up</a></li>
+<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#input-file"><i class="fa fa-check"></i><b>3.2</b> Input File</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#metabolites"><i class="fa fa-check"></i><b>3.2.1</b> Metabolites</a></li>
+<li class="chapter" data-level="3.2.2" data-path="manual.html"><a href="manual.html#subjectmetabolites"><i class="fa fa-check"></i><b>3.2.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="3.2.3" data-path="manual.html"><a href="manual.html#subjectdata"><i class="fa fa-check"></i><b>3.2.3</b> Subject Data</a></li>
+<li class="chapter" data-level="3.2.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#varmap"><i class="fa fa-check"></i><b>3.2.4</b> Variable mapping</a></li>
+<li class="chapter" data-level="3.2.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#models"><i class="fa fa-check"></i><b>3.2.5</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#interactive-mode"><i class="fa fa-check"></i><b>3.3</b> Interactive mode</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="manual.html"><a href="manual.html#metabolite-tagging-1"><i class="fa fa-check"></i><b>3.3.1</b> Metabolite Tagging</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="manual.html"><a href="manual.html#batch-mode"><i class="fa fa-check"></i><b>3.4</b> Batch Mode</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="manual.html"><a href="manual.html#correlation-example-batch-mode-smoking-statified"><i class="fa fa-check"></i><b>3.4.1</b> Correlation example: batch mode <em>SMOKING STATIFIED</em></a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="manual.html"><a href="manual.html#super-batch-mode"><i class="fa fa-check"></i><b>3.5</b> Super Batch Mode</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="manual.html"><a href="manual.html#descriptive-statistics"><i class="fa fa-check"></i><b>3.5.1</b> Descriptive statistics</a></li>
+<li class="chapter" data-level="3.5.2" data-path="manual.html"><a href="manual.html#metabolite-correlations"><i class="fa fa-check"></i><b>3.5.2</b> Metabolite correlations</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="technical-details.html"><a href="technical-details.html"><i class="fa fa-check"></i><b>4</b> Technical Details</a><ul>
+<li class="chapter" data-level="4.1" data-path="technical-details.html"><a href="technical-details.html#preharmonization"><i class="fa fa-check"></i><b>4.1</b> Preharmonization</a></li>
+<li class="chapter" data-level="4.2" data-path="technical-details.html"><a href="technical-details.html#harmonization"><i class="fa fa-check"></i><b>4.2</b> Harmonization</a></li>
+<li class="chapter" data-level="4.3" data-path="technical-details.html"><a href="technical-details.html#integrity-checks"><i class="fa fa-check"></i><b>4.3</b> Integrity checks</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="technical-details.html"><a href="technical-details.html#data"><i class="fa fa-check"></i><b>4.3.1</b> Data</a></li>
+<li class="chapter" data-level="4.3.2" data-path="technical-details.html"><a href="technical-details.html#models-1"><i class="fa fa-check"></i><b>4.3.2</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="technical-details.html"><a href="technical-details.html#correlation-analyses"><i class="fa fa-check"></i><b>4.4</b> Correlation Analyses</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="technical-details.html"><a href="technical-details.html#details"><i class="fa fa-check"></i><b>4.4.1</b> Details</a></li>
+<li class="chapter" data-level="4.4.2" data-path="technical-details.html"><a href="technical-details.html#output"><i class="fa fa-check"></i><b>4.4.2</b> Output</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="technical-details.html"><a href="technical-details.html#linear-models"><i class="fa fa-check"></i><b>4.5</b> Linear Models</a><ul>
+<li class="chapter" data-level="4.5.1" data-path="technical-details.html"><a href="technical-details.html#details-1"><i class="fa fa-check"></i><b>4.5.1</b> Details</a></li>
+<li class="chapter" data-level="4.5.2" data-path="technical-details.html"><a href="technical-details.html#output-1"><i class="fa fa-check"></i><b>4.5.2</b> Output</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="technical-details.html"><a href="technical-details.html#logistic-models"><i class="fa fa-check"></i><b>4.6</b> Logistic Models</a><ul>
+<li class="chapter" data-level="4.6.1" data-path="technical-details.html"><a href="technical-details.html#details-2"><i class="fa fa-check"></i><b>4.6.1</b> Details</a></li>
+<li class="chapter" data-level="4.6.2" data-path="technical-details.html"><a href="technical-details.html#output-2"><i class="fa fa-check"></i><b>4.6.2</b> Output</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="technical-details.html"><a href="technical-details.html#meta-analyses"><i class="fa fa-check"></i><b>4.7</b> Meta-Analyses</a><ul>
+<li class="chapter" data-level="4.7.1" data-path="technical-details.html"><a href="technical-details.html#details-3"><i class="fa fa-check"></i><b>4.7.1</b> Details</a></li>
+<li class="chapter" data-level="4.7.2" data-path="technical-details.html"><a href="technical-details.html#output-3"><i class="fa fa-check"></i><b>4.7.2</b> Output</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">COMETS Analytics Tutorial</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="cohortanalyses" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Conduct Cohort Data Analyses</h1>
+<p>The chapter describes the step by step the process of conducting cohort analyses for correlation analyses. YOu will need to have an account set-up (see [Account Registration]) and have the sample input file (see <a href="quickstart.html#sample-input-file">Sample Input file</a>).</p>
+<div id="step-1-data-preparation" class="section level2">
+<h2><span class="header-section-number">2.1</span> Step 1 Data Preparation</h2>
+<p>Each cohort is required to assemble their data into the standard excel format from a variety of sources (xls, stata, sas, or r). File is used for harmonization and analyses. There are 5 sheets that are required. The detailed requirements are outlined below.</p>
+<div id="metabolites" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Metabolites</h3>
+</div>
+<div id="subject-metabolites" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> Subject Metabolites</h3>
+</div>
+<div id="subject-data" class="section level3">
+<h3><span class="header-section-number">2.1.3</span> Subject Data</h3>
+<p><span class="textintro">The <em>SubjectData</em> sheet contains the subject-level covariate data for each sample </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. SubjectData</strong></span> is a sheet in the input file that contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race and education. <br> <br> <span class="textb"><strong>b. SAMPLE_ID</strong> </span> (column A) contains the sample identifiers. <br> <br> <span class="textc"><strong>c. Columns</strong></span> correspond to subject-level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named SAMPLE_ID) must match the entries in the column COHORTVARIABLE from the sheet VarMap. <br> <br> <span class="textd"><strong>d. Rows</strong></span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (i.e., SAMPLE_ID) are required to match the row names in the sheet SubjectMetabolites. <br> <br> <span class="texte"><strong>e. Cells</strong></span> contain subject-level covariate values. </span> <a href="static/input_3subjectdata.png" target="_blank"><img src="static/input_3subjectdata.png" style="width: 60%"></a></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tufte::<span class="kw">margin_note</span>(<span class="st">&quot;&lt;span class=&#39;texta&#39;&gt;**a.Describe Model: **&lt;/span&gt; Name your model</span>
+<span class="st">  &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;textb&#39;&gt;**b.Select Exposure: ** &lt;/span&gt; i.e. your independent variable(s) of interest from the drop down list; the drop down options will include all the variables in your â€˜VarMapâ€™. The beta coefficient for this variable will be returned in the results </span>
+<span class="st">            &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;textc&#39;&gt;**c.Select your outcome: **&lt;/span&gt; i.e. your dependent variable(s) of interest from the drop down list</span>
+<span class="st">            &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;textd&#39;&gt;**d.Adjusted covariates**&lt;/span&gt; Select any variables from the drop down that are potential confounders and should be included in the model (optional)</span>
+<span class="st">            &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;texte&#39;&gt;**e.Strata by **&lt;/span&gt; for stratified analyses only. Select variable, and results will be returned for all strata within this variable (optional)</span>
+<span class="st">            &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;texte&#39;&gt;**f.Where**&lt;/span&gt; If analysis will only be run on a sunset of the cohort as defined by this variable. A where statement can be constructed using the â€˜operatorâ€™ and â€˜Compare toâ€™ (eg. Age &lt;18) (optional)</span>
+<span class="st">            &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;texte&#39;&gt;**g.Run Model **&lt;/span&gt; Click to run model. Or click rest to clear the work space and start a new model</span>
+<span class="st">            &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">            &lt;span class=&#39;texte&#39;&gt;** Timing **&lt;/span&gt; Depending on the size of your data, the complexity of the model and the current analysis load on the server this may take a few seconds or a few minutes.</span>
+<span class="st">            </span>
+<span class="st">            &quot;</span>)</code></pre></div>
+<pre><code>## [1] &quot;&lt;label for=\&quot;tufte-mn-\&quot; class=\&quot;margin-toggle\&quot;&gt;&amp;#8853;&lt;/label&gt;&lt;input type=\&quot;checkbox\&quot; id=\&quot;tufte-mn-\&quot; class=\&quot;margin-toggle\&quot;&gt;&lt;span class=\&quot;marginnote\&quot;&gt;&lt;span class=&#39;texta&#39;&gt;**a.Describe Model: **&lt;/span&gt; Name your model\n  &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;textb&#39;&gt;**b.Select Exposure: ** &lt;/span&gt; i.e. your independent variable(s) of interest from the drop down list; the drop down options will include all the variables in your âVarMapâ. The beta coefficient for this variable will be returned in the results \n            &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;textc&#39;&gt;**c.Select your outcome: **&lt;/span&gt; i.e. your dependent variable(s) of interest from the drop down list\n            &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;textd&#39;&gt;**d.Adjusted covariates**&lt;/span&gt; Select any variables from the drop down that are potential confounders and should be included in the model (optional)\n            &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;texte&#39;&gt;**e.Strata by **&lt;/span&gt; for stratified analyses only. Select variable, and results will be returned for all strata within this variable (optional)\n            &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;texte&#39;&gt;**f.Where**&lt;/span&gt; If analysis will only be run on a sunset of the cohort as defined by this variable. A where statement can be constructed using the âoperatorâ and âCompare toâ (eg. Age &lt;18) (optional)\n            &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;texte&#39;&gt;**g.Run Model **&lt;/span&gt; Click to run model. Or click rest to clear the work space and start a new model\n            &lt;br&gt;&amp;nbsp;&lt;br&gt;\n            &lt;span class=&#39;texte&#39;&gt;** Timing **&lt;/span&gt; Depending on the size of your data, the complexity of the model and the current analysis load on the server this may take a few seconds or a few minutes.\n            \n            &lt;/span&gt;&quot;</code></pre>
+</div>
+<div id="varmap" class="section level3">
+<h3><span class="header-section-number">2.1.4</span> Varmap</h3>
+<p><span class="textintro">The VarMap sheet maps the cohort variable names to the COMETS internal variable names Example: The cohort variable “bmi” would be mapped to the COMETS internal variable “bmi_grp” and must be coded as “0” for BMI&lt;18.5, “1” for BMI 18.5 to &lt;25, “2” for BMI 25 to &lt;30, “3” for BMI 30.0+, and “4” for if missing as defined in the column “VARDEFINITION” </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. VarMap</strong></span> is a sheet in the input file that gives the original cohort variable names and the COMETS internal variable names. <br> <br> <span class="textb"><strong>b. VARREFERENCE</strong> </span> refers to the internal COMETS variable names. <br> <br> <span class="textc"><strong>c. VARDEFINITION</strong></span> defines how the variables should be coded. <br> <br> <span class="textd"><strong>d. COHORTVARIABLE</strong></span> correspond to the original cohort variable name. <br> <br> <span class="texte"><strong>e. COHORTNOTES</strong></span> gives additional info e.g. for some variables (e.g. “age”, “female”), missing values are not allowed. </span> <a href="static/input_varmap3.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a></p>
+</div>
+<div id="models" class="section level3">
+<h3><span class="header-section-number">2.1.5</span> Models</h3>
+<p>This worksheet specifies the models to run in batch mode or super batch mode.</p>
+<p><a href="static/input_5models.png"><img src="static/input_5models.png" style="width: 60%"></a></p>
+</div>
+</div>
+<div id="step-2-harmonization" class="section level2">
+<h2><span class="header-section-number">2.2</span> Step 2 Harmonization</h2>
+<p>The harmonization step will assess whether your cohorts metabolites are available in the master metabolites list so that a universal ID (named UID_01) can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID (currently named UID_01) ensures alignment of metabolites across the different cohorts to ensure identification for meta-analysis. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (ie. metabolite metadata) in the input file such as HMDB ID, KEGG ID, or other identifiers.</p>
+<p>The harmonization step produces an output file that needs to be sent to <a href="mailto:comets.analytics@gmail.com">comets.analytics@gmail.com</a> to keep track of harmonization rates.</p>
+<div id="harmonization-file" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Harmonization file</h3>
+<p><span class="textintro">The names of metabolites inputted into the software are automatically harmonized to a common name. This important feature facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.</span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><span class="texta"><strong>a. metabid</strong></span> (column B) corresponds to metabolite IDs as defined by each individual cohort. The metabolite IDs correspond to the column metabid from the Sheet <em>Metabolites</em> of the input file.</span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><span class="textb"><strong>b. metabolite_names</strong></span> (column C) corresponds to metabolite names as defined by each individual cohort. The metabolite names correspond to the column metabolite_name from the sheet <em>Metabolites</em> of the input file.</span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><span class="textc"><strong>c. Columns</strong></span> c(except A and B) correspond to metabolite meta-information that was either already present in the input file or was matched from the internal COMETS database. We highly recommend to add at least on public database identifier (e.g. HMDB ID).</span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><span class="textd"><strong>d. Rows</strong></span> correspond to metabolites, with each row containing all available meta-information for one metabolite.</span></p>
+<p><a href="static/output_harmonization.png"><img src="static/output_harmonization.png" style="width: 60%"></a></p>
+</div>
+</div>
+<div id="step-3-data-and-model-integrity" class="section level2">
+<h2><span class="header-section-number">2.3</span> Step 3 Data and Model Integrity</h2>
+<p>Data integrity checks are run to ensure the appropriate data are presented for analyses. The following conditions are checked:</p>
+<ul>
+<li>Missing Subject ID or Metabolite ID in the Varmap sheet</li>
+<li>Subject ID or Metabolite ID provided in Varmap sheet do not correspond to a column in “Metabolites” and “SubjectData” sheets, respectively</li>
+<li>Metabolites ids in Metabolites and SubjectMetabolites sheet do not match</li>
+<li>Subject ids in SubjectData and SubjectMetabolites sheet do not match</li>
+</ul>
+<p>If any of the following conditions failed, the analyses will be suspended and corrections to the data are required. The data integrity checks will also flag the following but will proceed with the analyses:</p>
+<ul>
+<li>Number of subjects in “SubjectData” and “SubjectMetabolites” sheets do not match</li>
+<li>Metabolite abundances from “SubjectMetabolites” contains duplicate columns (metabolites) or rows (subjects)</li>
+<li>There are duplicate subject ids in Subject Information “SubjectData” sheet</li>
+<li>There are duplicate metabolite ids in Metabolite Information “Metabolites” sheet</li>
+</ul>
+<p>Models are also validated using xx.</p>
+</div>
+<div id="step-4-model-specification" class="section level2">
+<h2><span class="header-section-number">2.4</span> Step 4 Model Specification</h2>
+<div id="create-input-file-model-specification" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Create input file: Model specification</h3>
+<p><span class="textintro">Specify the Analytical Models you wish to Run </span> In this example. Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes while adjusting for smoking status (“smk_grp”), BMI (“bmi_grp”), race (“race_grp”), education (“educ_grp”), alcohol consumption (“alc_grp”), multivitamin use (“multivitamin”), hormonal status (“horm_curr”) and fasting status (“fasted”). This analysis will be stratified by gender using the internal COMETS variable “female”.</p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a.Models</strong></span>is a sheet in the input file that contains the models to be run on the cohort data. <br> <br> <span class="textb"><strong>b.MODEL</strong> </span> contains the model number and the model name. The results files will be named according to the chosen model name. <br> <br> <span class="textc"><strong>c.OUTCOME</strong></span> specifies which variable(s) will be the dependent variable(s). <br> <br> <span class="textd"><strong>d.EXPOSURE</strong></span> specifies the independent variable of interest. The beta coefficient for this variable will be returned in the results <br> <br> <span class="texte"><strong>e.ADJUSTMENT</strong></span> specifies the potential confounders to be included in the model (optional). <br> <br> <span class="texte"><strong>f.STRATIFICATION</strong></span> for stratified analyses only. Results will be returned for all strata within this variable (optional) <br> <br> <span class="texte"><strong>g.WHERE</strong></span> If the analysis is meant to be run on only a subset of the cohort, this column will contain the subset definition (e.g., “female==1” for an analysis stratified by hormone therapy use). (optional) <br> <br></p>
+<p></span></p>
+<p><a href="static/input_modelspecification.png"><img src="static/input_modelspecification" style="width: 60%"></a></p>
+</div>
+<div id="interactive" class="section level3">
+<h3><span class="header-section-number">2.4.2</span> Interactive</h3>
+<div id="running-analyses-interactive-mode" class="section level4">
+<h4><span class="header-section-number">2.4.2.1</span> Running Analyses: Interactive mode</h4>
+<p><span class="textintro">Allows you to run individual models; to specify model parameters; and to receive instantaneous results</span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><span class="texta"><strong>a.Confirm</strong></span> data upload was successful and the data has passed COMETS integrity check. <br> <br> <span class="textb"><strong>b.Select</strong> </span> Interactive user input as Method of Analyses.</p>
+<p></span></p>
+<p><a href="static/output_interactivemode_1.png"><img src="static/output_interactivemode_1.png" style="width: 60%"></a></p>
+</div>
+<div id="running-analyses-specifying-interactive-mode-models" class="section level4">
+<h4><span class="header-section-number">2.4.2.2</span> Running Analyses: Specifying Interactive Mode Models</h4>
+<p><span class="textintro">Specifying your model </span></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="kw">margin_note</span>(<span class="st">&quot;&lt;span class=&#39;texta&#39;&gt;**a.Describe Model: **&lt;/span&gt; Name your model</span>
+<span class="st">  &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;textb&#39;&gt;**b.Select Exposure: ** &lt;/span&gt; i.e. your independent variable(s) of interest from the drop down list; the drop down options will include all the variables in your â€˜VarMapâ€™. The beta coefficient for this variable will be returned in the results </span>
+<span class="st">  &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;textc&#39;&gt;**c.Select your outcome: **&lt;/span&gt; i.e. your dependent variable(s) of interest from the drop down list</span>
+<span class="st">  &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;textd&#39;&gt;**d.Adjusted covariates**&lt;/span&gt; Select any variables from the drop down that are potential confounders and should be included in the model (optional)</span>
+<span class="st">  &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;texte&#39;&gt;**e.Strata by **&lt;/span&gt; for stratified analyses only. Select variable, and results will be returned for all strata within this variable (optional)</span>
+<span class="st">  &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;texte&#39;&gt;**f.Where**&lt;/span&gt; If analysis will only be run on a sunset of the cohort as defined by this variable. A where statement can be constructed using the â€˜operatorâ€™ and â€˜Compare toâ€™ (eg. Age &lt;18) (optional)</span>
+<span class="st">   &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;texte&#39;&gt;**g.Run Model **&lt;/span&gt; Click to run model. Or click rest to clear the work space and start a new model</span>
+<span class="st"> &lt;br&gt;&amp;nbsp;&lt;br&gt;</span>
+<span class="st">  &lt;span class=&#39;texte&#39;&gt;** Timing **&lt;/span&gt; Depending on the size of your data, the complexity of the model and the current analysis load on the server this may take a few seconds or a few minutes.</span>
+
+<span class="st">  &quot;</span>)</code></pre></div>
+<pre><code>## [1] &quot;&lt;label for=\&quot;tufte-mn-\&quot; class=\&quot;margin-toggle\&quot;&gt;&amp;#8853;&lt;/label&gt;&lt;input type=\&quot;checkbox\&quot; id=\&quot;tufte-mn-\&quot; class=\&quot;margin-toggle\&quot;&gt;&lt;span class=\&quot;marginnote\&quot;&gt;&lt;span class=&#39;texta&#39;&gt;**a.Describe Model: **&lt;/span&gt; Name your model\n  &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;textb&#39;&gt;**b.Select Exposure: ** &lt;/span&gt; i.e. your independent variable(s) of interest from the drop down list; the drop down options will include all the variables in your âVarMapâ. The beta coefficient for this variable will be returned in the results \n  &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;textc&#39;&gt;**c.Select your outcome: **&lt;/span&gt; i.e. your dependent variable(s) of interest from the drop down list\n  &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;textd&#39;&gt;**d.Adjusted covariates**&lt;/span&gt; Select any variables from the drop down that are potential confounders and should be included in the model (optional)\n  &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;texte&#39;&gt;**e.Strata by **&lt;/span&gt; for stratified analyses only. Select variable, and results will be returned for all strata within this variable (optional)\n  &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;texte&#39;&gt;**f.Where**&lt;/span&gt; If analysis will only be run on a sunset of the cohort as defined by this variable. A where statement can be constructed using the âoperatorâ and âCompare toâ (eg. Age &lt;18) (optional)\n   &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;texte&#39;&gt;**g.Run Model **&lt;/span&gt; Click to run model. Or click rest to clear the work space and start a new model\n &lt;br&gt;&amp;nbsp;&lt;br&gt;\n  &lt;span class=&#39;texte&#39;&gt;** Timing **&lt;/span&gt; Depending on the size of your data, the complexity of the model and the current analysis load on the server this may take a few seconds or a few minutes.\n\n  &lt;/span&gt;&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># print(&#39;&lt;a href=&quot;static/output_interactivemode_2.png&quot;&gt;&lt;img src=&quot;static/output_interactivemode_2.png&quot; style=&quot;width: 60%&quot;&gt;&lt;/a&gt;&#39;)</span></code></pre></div>
+</div>
+<div id="running-analyses-exploring-interactive-mode-output" class="section level4">
+<h4><span class="header-section-number">2.4.2.3</span> Running Analyses: Exploring Interactive Mode Output</h4>
+<p><span class="textintro">Exploring your output </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><span class="texta"><strong>a.Correlation Results: </strong></span> Check correlation analyses was successful – if so ‘download results’ and forward to the COMETS harmonization group who will utilize these for the meta-analyses <br> <br> <span class="textb"><strong>b.Specified model parameters: </strong> </span> as defined in the interactive mode <br> <br> <span class="textc"><strong>c.Correlation Coefficient: </strong></span> Spearman Rank correlation coefficient between the specified outcome and the exposure (adjusting for the adjvars,and by strata if applicable) <br> <br> <span class="textd"><strong>d.p-value</strong></span> Significance level for the correlation coefficient <br> <br> <span class="texte"><strong>e.n</strong></span> number of samples included in the specified model <br> <br> <span class="texte"><strong>f.Tag</strong></span> Select metabolites for further analysis. Creates a subset of metabolites than can then be specified in the interactive output <br> <br> <span class="texte"><strong>Explore Further </strong></span> To explore further results can be ordered according to name of outcome, of exposure or of adjvars, by correlation coefficient, p-value or n. Alternatively, you can use the search boxes to search for specific metabolites ofrdefine thresholds </span></p>
+<p><a href="static/output_interactivemode_3.png"><img src="static/output_interactivemode_3.png" style="width: 60%"></a></p>
+</div>
+</div>
+<div id="batch" class="section level3">
+<h3><span class="header-section-number">2.4.3</span> Batch</h3>
+<p><em>All Models</em> is a special run of the prespecified models. IN this mode, all models are run in a queue and you will get the results via email.</p>
+</div>
+</div>
+<div id="step-5-correlation-analyses-output" class="section level2">
+<h2><span class="header-section-number">2.5</span> Step 5 Correlation Analyses Output</h2>
+<p>After running your correlation analyses by <a href="manual.html#interactive-mode">Interactive mode</a> or <a href="manual.html#batch-mode">Batch mode</a>, results are available under the correlation results and heatmap tabs. For other types of analyses, see <a href="technical-details.html#technical-details">Technical Details</a>. Some of the interactive features of the results and heatmap are described below.</p>
+<div id="metabolite-tagging" class="section level3">
+<h3><span class="header-section-number">2.5.1</span> Metabolite tagging</h3>
+<p>The metabolite tagging is a feature TAG’ option in the correlate and heatmap tab to select and create a subset of metabolites for further analysis based on analyses results for further investigation. Once tagged, the list of metabolites can be used in interactive mode to specify other analyses to conduct.</p>
+<p><span class="textintro">To select and create a subset of metabolites for further analysis based on the correlation results the ‘TAG’ function can be used. Below an example with age (exposure) and metabolites (outcome) as run in the ‘interactive user input’ correlate tab </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. Set level of significance: </strong></span> in this example the level of significance is defined as p&lt;0.00001. <br> <br> <span class="textb"><strong>b. Select significant metabolites:</strong> </span> by ticking the box all significant metabolites are selected. <br> <br> <span class="textc"><strong>c. TAG metabolites: </strong></span> by ticking the ‘TAG’ box all selected metabolites are automatically marked . </span> <a href="static/output_heatmap3_1.PNG" target="_blank"><img src="static/output_heatmap3_1.PNG" style="width: 60%"></a></p>
+</div>
+<div id="create-subset-of-tagged-metabolites" class="section level3">
+<h3><span class="header-section-number">2.5.2</span> Create subset of ‘Tagged’ metabolites</h3>
+<p><span class="textintro">Once the ‘TAG’ button is clicked a screen will appear </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. Name your ‘TAG: </strong></span> give the subset of metabolites a name (e.g. “Age_related_metabolites”). <br> <br> <span class="textb"><strong>b. Create ‘TAG’:</strong> </span> click the button ‘create Tag’ to create the tag. <br> <br> <span class="textc"><strong>c. ‘TAG’ is created: </strong></span> A new box appears with an overview of your tagged metabolites. Close the newly created ‘TAG’. </span> <a href="static/output_heatmap3_2.PNG" target="_blank"><img src="static/output_heatmap3_2.PNG" style="width: 60%"></a></p>
+</div>
+<div id="create-a-heatmap" class="section level3">
+<h3><span class="header-section-number">2.5.3</span> Create A heatmap</h3>
+<p><span class="textintro">Go back to the ‘Interactive user input’ and select your newly created subset, using the ‘TAG’ function </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. Select your exposure: </strong></span> select the newly created ‘Age_related_metabolites’ ‘TAG’. <br> <br> <span class="textb"><strong>b. Select your outcome:</strong> </span> select the newly created ‘Age_related_metabolites’ ‘TAG’. <br> <br> <span class="textc"><strong>c. Run the model: </strong></span> click the run button. <br> <br> <span class="textd"><strong>d. Heatmap</strong></span> select the heatmap tab to view the heatmap. </span> <a href="static/output_heatmap3_3.PNG" target="_blank"><img src="static/output_heatmap3_3.PNG" style="width: 60%"></a></p>
+</div>
+<div id="the-heatmap" class="section level3">
+<h3><span class="header-section-number">2.5.4</span> The heatmap</h3>
+<p><span class="textintro">Exposures are specified on the X axis and the outcomes on the Y axis. Different features are available in this interface: </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. Sort by outcome: </strong></span> The display of the heatmap can be sorted by outcome or exposure (in the ‘Outcomes Sort by’ box). <br> <br> <span class="textb"><strong>b. Sort by strata:</strong> </span> When a stratified analysis is performed, the display of the heatmap can be sorted by the different strata (in the ‘Strata sort by’ box). <br> <br> <span class="textc"><strong>c. Choose your color: </strong></span> In the ‘Palette’ box different color schemes for the heatmap can be selected. <br> <br> <span class="textd"><strong>d. Adjust plot height and width</strong></span> The ‘Plot height’ and “Plot width’ can be adjusted for in the respective boxes. </span> <a href="static/output_heatmap3_4.PNG" target="_blank"><img src="static/output_heatmap3_4.PNG" style="width: 60%"></a></p>
+</div>
+<div id="the-heatmap-2" class="section level3">
+<h3><span class="header-section-number">2.5.5</span> The heatmap (2)</h3>
+<p><span class="textintro">Additional features of the heatmap can be choosen </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. Additional toolbar: </strong></span> when moving the mouse in the top right corner of the graph an extra toolbar will be visible which allows you to: <br> <br> Download plot as png <br> <br> Save and edit plot in cloud <br> <br> Zoom <br> <br> Pan <br> <br> Zoom in <br> <br> Zoom out <br> <br> Autoscale <br> <br> Reset axes <br> <br> Use Plotly features (Toggle Spike Lines, Show closest data on hover, Compare data on hover)<br />
+</span> <a href="static/output_heatmap3_5.PNG" target="_blank"><img src="static/output_heatmap3_5.PNG" style="width: 60%"></a></p>
+</div>
+<div id="annotations-and-hierarchical-clustering" class="section level3">
+<h3><span class="header-section-number">2.5.6</span> Annotations and hierarchical clustering</h3>
+<p><span class="textintro">Annotations (display of the correlation coefficients in numbers) and hierarchical clustering (showing the metabolite clusters) can be superimposed on the heatmap </span></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"> <span class="texta"><strong>a. Annotiations: </strong></span> ticking this box will allow you to display the correlation coefficients in the plot. <br> <br> <span class="textb"><strong>b. Hierachical clustering:</strong> </span> ticking this box will allow you to display the metabolite clusters on the left side of the heatmap. <br> <br> <span class="textc"><strong>c. Choose your dimensions: </strong></span> by clicking e.g. 900*1100 dimensions the plot will show in the chosen dimensions. </span> <a href="static/output_heatmap3_6.PNG" target="_blank"><img src="static/output_heatmap3_6.PNG" style="width: 60%"></a></p>
+<div class="figure" style="text-align: center"><span id="fig:heatmap"></span>
+<img src="static/Output_heatmap3.PNG" alt="Heatmap1" width="100%" />
+<p class="caption">
+Figure 2.1: Heatmap1
+</p>
+</div>
+<div class="figure" style="text-align: center"><span id="fig:heatmap2"></span>
+<img src="static/Output_heatmap4.PNG" alt="Heatmap Controls" width="100%" />
+<p class="caption">
+Figure 2.2: Heatmap Controls
+</p>
+</div>
+<p><span class="textintro">For details on output for other models, see output section of each method under <a href="technical-details.html#technical-details">Technical Details</a>. </span></p>
+</div>
+</div>
+<div id="step-6-send-for-meta-analyses" class="section level2">
+<h2><span class="header-section-number">2.6</span> Step 6 Send for Meta-analyses</h2>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="quickstart.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="manual.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/ellatemprosa/cometstutorial/02-stepbystep.Rmd",
+"text": "Edit"
+},
+"download": ["catutorial.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
