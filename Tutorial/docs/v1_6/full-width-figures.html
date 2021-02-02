@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>COMETS Analytics Tutorial</title>
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:image" content="static/COMETSLogo.png" />
+  <meta property="og:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  
+  <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  <meta name="twitter:image" content="static/COMETSLogo.png" />
+
+<meta name="author" content="CAT Work group">
+
+
+<meta name="date" content="2018-07-30">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="arbitrary-margin-content.html">
+<link rel="next" href="main-column-figures.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">COMETS Analytics Tutorial</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Quick Start with Sample File</a><ul>
+<li class="chapter" data-level="1.1" data-path="sample-input-file.html"><a href="sample-input-file.html"><i class="fa fa-check"></i><b>1.1</b> Sample Input file</a></li>
+<li class="chapter" data-level="1.2" data-path="quick-analysis.html"><a href="quick-analysis.html"><i class="fa fa-check"></i><b>1.2</b> Quick Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="stepbystep.html"><a href="stepbystep.html"><i class="fa fa-check"></i><b>2</b> Step-by-Step Guide for Your Data</a><ul>
+<li class="chapter" data-level="2.1" data-path="step-1-data-preparation.html"><a href="step-1-data-preparation.html"><i class="fa fa-check"></i><b>2.1</b> Step 1 Data Preparation</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="step-1-data-preparation.html"><a href="step-1-data-preparation.html#metabolites"><i class="fa fa-check"></i><b>2.1.1</b> Metabolites</a></li>
+<li class="chapter" data-level="2.1.2" data-path="step-1-data-preparation.html"><a href="step-1-data-preparation.html#subject-metabolites"><i class="fa fa-check"></i><b>2.1.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="2.1.3" data-path="step-1-data-preparation.html"><a href="step-1-data-preparation.html#subject-data"><i class="fa fa-check"></i><b>2.1.3</b> Subject Data</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="warning-package-tufte-was-built-under-r-version-3-4-4.html"><a href="warning-package-tufte-was-built-under-r-version-3-4-4.html"><i class="fa fa-check"></i><b>2.2</b> Warning: package ‘tufte’ was built under R version 3.4.4</a></li>
+<li class="chapter" data-level="2.3" data-path="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html"><a href="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html"><i class="fa fa-check"></i><b>2.3</b> [1] “<label for=\"tufte-mn-\" class=\"margin-toggle\">⊕</label><input type=\"checkbox\" id=\"tufte-mn-\" class=\"margin-toggle\"><span class="\&quot;marginnote\&quot;">a. SubjectDat is a sheet in the input file that contains subject-level covariate data for each sample. Examples include such as age, gender, smoking, body mass index, race and .</span>”</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html"><a href="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html#varmap"><i class="fa fa-check"></i><b>2.3.1</b> Varmap</a></li>
+<li class="chapter" data-level="2.3.2" data-path="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html"><a href="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html#models"><i class="fa fa-check"></i><b>2.3.2</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="step-2-harmonization.html"><a href="step-2-harmonization.html"><i class="fa fa-check"></i><b>2.4</b> Step 2 Harmonization</a></li>
+<li class="chapter" data-level="2.5" data-path="step-3-data-and-model-integrity.html"><a href="step-3-data-and-model-integrity.html"><i class="fa fa-check"></i><b>2.5</b> Step 3 Data and Model Integrity</a></li>
+<li class="chapter" data-level="2.6" data-path="step-4-model-specification.html"><a href="step-4-model-specification.html"><i class="fa fa-check"></i><b>2.6</b> Step 4 Model Specification</a><ul>
+<li class="chapter" data-level="2.6.1" data-path="step-4-model-specification.html"><a href="step-4-model-specification.html#interactive"><i class="fa fa-check"></i><b>2.6.1</b> Interactive</a></li>
+<li class="chapter" data-level="2.6.2" data-path="step-4-model-specification.html"><a href="step-4-model-specification.html#batch"><i class="fa fa-check"></i><b>2.6.2</b> Batch</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="step-5-output.html"><a href="step-5-output.html"><i class="fa fa-check"></i><b>2.7</b> Step 5 Output</a></li>
+<li class="chapter" data-level="2.8" data-path="step-5-1-correlation-analyses.html"><a href="step-5-1-correlation-analyses.html"><i class="fa fa-check"></i><b>2.8</b> Step 5.1 Correlation Analyses</a><ul>
+<li class="chapter" data-level="2.8.1" data-path="step-5-1-correlation-analyses.html"><a href="step-5-1-correlation-analyses.html#correlation-results"><i class="fa fa-check"></i><b>2.8.1</b> Correlation results</a></li>
+<li class="chapter" data-level="2.8.2" data-path="step-5-1-correlation-analyses.html"><a href="step-5-1-correlation-analyses.html#heatmap"><i class="fa fa-check"></i><b>2.8.2</b> Heatmap</a></li>
+</ul></li>
+<li class="chapter" data-level="2.9" data-path="step-5-2-linear-models.html"><a href="step-5-2-linear-models.html"><i class="fa fa-check"></i><b>2.9</b> Step 5.2 Linear Models</a></li>
+<li class="chapter" data-level="2.10" data-path="step-5-3-logistic-models.html"><a href="step-5-3-logistic-models.html"><i class="fa fa-check"></i><b>2.10</b> Step 5.3 Logistic Models</a></li>
+<li class="chapter" data-level="2.11" data-path="step-5-4-cox-models.html"><a href="step-5-4-cox-models.html"><i class="fa fa-check"></i><b>2.11</b> Step 5.4 Cox Models</a></li>
+<li class="chapter" data-level="2.12" data-path="step-6-meta-analyses.html"><a href="step-6-meta-analyses.html"><i class="fa fa-check"></i><b>2.12</b> Step 6 Meta-Analyses</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
+<li class="chapter" data-level="3.1" data-path="registration-and-account-set-up.html"><a href="registration-and-account-set-up.html"><i class="fa fa-check"></i><b>3.1</b> Registration and Account Set-up</a></li>
+<li class="chapter" data-level="3.2" data-path="input-file.html"><a href="input-file.html"><i class="fa fa-check"></i><b>3.2</b> Input File</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="step-1-data-preparation.html"><a href="step-1-data-preparation.html#metabolites"><i class="fa fa-check"></i><b>3.2.1</b> Metabolites</a></li>
+<li class="chapter" data-level="3.2.2" data-path="input-file.html"><a href="input-file.html#subjectmetabolites"><i class="fa fa-check"></i><b>3.2.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="3.2.3" data-path="input-file.html"><a href="input-file.html#subjectdata"><i class="fa fa-check"></i><b>3.2.3</b> Subject Data</a></li>
+<li class="chapter" data-level="3.2.4" data-path="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html"><a href="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html#varmap"><i class="fa fa-check"></i><b>3.2.4</b> Variable mapping</a></li>
+<li class="chapter" data-level="3.2.5" data-path="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html"><a href="a-subjectdat-is-a-sheet-in-the-input-file-that-contains-subject-level-covariate-data-for-each-sample-examples-include-such-as-age-gender-smoking-body-mass-index-race-and-.html#models"><i class="fa fa-check"></i><b>3.2.5</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="interactive-mode.html"><a href="interactive-mode.html"><i class="fa fa-check"></i><b>3.3</b> Interactive mode</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="interactive-mode.html"><a href="interactive-mode.html#metabolite-tagging"><i class="fa fa-check"></i><b>3.3.1</b> Metabolite Tagging</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="batch-mode.html"><a href="batch-mode.html"><i class="fa fa-check"></i><b>3.4</b> Batch Mode</a></li>
+<li class="chapter" data-level="3.5" data-path="super-batch-mode.html"><a href="super-batch-mode.html"><i class="fa fa-check"></i><b>3.5</b> Super Batch Mode</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="super-batch-mode.html"><a href="super-batch-mode.html#descriptive-statistics"><i class="fa fa-check"></i><b>3.5.1</b> Descriptive statistics</a></li>
+<li class="chapter" data-level="3.5.2" data-path="super-batch-mode.html"><a href="super-batch-mode.html#metabolite-correlations"><i class="fa fa-check"></i><b>3.5.2</b> Metabolite correlations</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="technical-details.html"><a href="technical-details.html"><i class="fa fa-check"></i><b>4</b> Technical Details</a><ul>
+<li class="chapter" data-level="4.1" data-path="correlation-analyses.html"><a href="correlation-analyses.html"><i class="fa fa-check"></i><b>4.1</b> Correlation Analyses</a></li>
+<li class="chapter" data-level="4.2" data-path="linear-models.html"><a href="linear-models.html"><i class="fa fa-check"></i><b>4.2</b> Linear Models</a></li>
+<li class="chapter" data-level="4.3" data-path="logistic-models.html"><a href="logistic-models.html"><i class="fa fa-check"></i><b>4.3</b> Logistic Models</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="chapter" data-level="5" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>5</b> Introduction</a></li>
+<li class="chapter" data-level="6" data-path="headings.html"><a href="headings.html"><i class="fa fa-check"></i><b>6</b> Headings</a></li>
+<li class="chapter" data-level="7" data-path="figures.html"><a href="figures.html"><i class="fa fa-check"></i><b>7</b> Figures</a><ul>
+<li class="chapter" data-level="7.1" data-path="margin-figures.html"><a href="margin-figures.html"><i class="fa fa-check"></i><b>7.1</b> Margin Figures</a></li>
+<li class="chapter" data-level="7.2" data-path="arbitrary-margin-content.html"><a href="arbitrary-margin-content.html"><i class="fa fa-check"></i><b>7.2</b> Arbitrary Margin Content</a></li>
+<li class="chapter" data-level="7.3" data-path="full-width-figures.html"><a href="full-width-figures.html"><i class="fa fa-check"></i><b>7.3</b> Full Width Figures</a></li>
+<li class="chapter" data-level="7.4" data-path="main-column-figures.html"><a href="main-column-figures.html"><i class="fa fa-check"></i><b>7.4</b> Main Column Figures</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="sidenotes.html"><a href="sidenotes.html"><i class="fa fa-check"></i><b>8</b> Sidenotes</a></li>
+<li class="chapter" data-level="9" data-path="references-1.html"><a href="references-1.html"><i class="fa fa-check"></i><b>9</b> References</a></li>
+<li class="chapter" data-level="10" data-path="tables.html"><a href="tables.html"><i class="fa fa-check"></i><b>10</b> Tables</a></li>
+<li class="chapter" data-level="11" data-path="block-quotes.html"><a href="block-quotes.html"><i class="fa fa-check"></i><b>11</b> Block Quotes</a></li>
+<li class="chapter" data-level="12" data-path="responsiveness.html"><a href="responsiveness.html"><i class="fa fa-check"></i><b>12</b> Responsiveness</a></li>
+<li class="chapter" data-level="13" data-path="more-examples.html"><a href="more-examples.html"><i class="fa fa-check"></i><b>13</b> More Examples</a></li>
+<li class="chapter" data-level="14" data-path="some-notes-on-tufte-css.html"><a href="some-notes-on-tufte-css.html"><i class="fa fa-check"></i><b>14</b> Some Notes on Tufte CSS</a></li>
+<li class="divider"></li>
+<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">COMETS Analytics Tutorial</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="full-width-figures" class="section level2">
+<h2><span class="header-section-number">7.3</span> Full Width Figures</h2>
+<p>You can arrange for figures to span across the entire page by using the chunk option <code>fig.fullwidth = TRUE</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(diamonds, <span class="kw">aes</span>(carat, price)) +<span class="st"> </span><span class="kw">geom_smooth</span>() +
+<span class="st">  </span><span class="kw">facet_grid</span>(~<span class="st"> </span>cut)</code></pre></div>
+<div class="figure"><span id="fig:fig-fullwidth"></span>
+<img src="testtufte_files/figure-html/fig-fullwidth-1.png" alt="A full width figure." width="960" />
+<p class="caption">
+Figure 6.2: A full width figure.
+</p>
+</div>
+<p>Other chunk options related to figures can still be used, such as <code>fig.width</code>, <code>fig.cap</code>, <code>out.width</code>, and so on. For full width figures, usually <code>fig.width</code> is large and <code>fig.height</code> is small. In the above example, the plot size is <span class="math inline">\(10 \times 2\)</span>.</p>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="arbitrary-margin-content.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="main-column-figures.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/ellatemprosa/cometstutorial/edit/master/testtufte.Rmd",
+"text": "Edit"
+},
+"download": ["catBook.pdf", "catBook.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
