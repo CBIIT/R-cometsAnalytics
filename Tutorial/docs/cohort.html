@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>COMETS Analytics Tutorial</title>
-  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Conduct Cohort Data Analyses | COMETS Analytics Tutorial</title>
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:title" content="Chapter 2 Conduct Cohort Data Analyses | COMETS Analytics Tutorial" />
   <meta property="og:type" content="book" />
   
   <meta property="og:image" content="static/COMETSLogo.png" />
@@ -17,29 +16,33 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  <meta name="twitter:title" content="Chapter 2 Conduct Cohort Data Analyses | COMETS Analytics Tutorial" />
   
   <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics" />
   <meta name="twitter:image" content="static/COMETSLogo.png" />
 
-<meta name="author" content="CAT Work group">
+<meta name="author" content="Version 1.6" />
 
 
-<meta name="date" content="2018-10-01">
+<meta name="date" content="2021-02-02" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="quickstart.html">
-<link rel="next" href="manual.html">
+<link rel="prev" href="quickstart.html"/>
+<link rel="next" href="manual.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
 
 
 
@@ -69,7 +72,7 @@
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a><ul>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#overview"><i class="fa fa-check"></i>Overview</a></li>
 </ul></li>
-<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Get Started with Sample File</a><ul>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Get Started with the Sample File</a><ul>
 <li class="chapter" data-level="1.1" data-path="quickstart.html"><a href="quickstart.html#sample-input-file"><i class="fa fa-check"></i><b>1.1</b> Sample Input File</a></li>
 <li class="chapter" data-level="1.2" data-path="quickstart.html"><a href="quickstart.html#quick-analysis"><i class="fa fa-check"></i><b>1.2</b> Quick Analysis</a></li>
 </ul></li>
@@ -91,7 +94,7 @@
 </ul></li>
 <li class="chapter" data-level="2.5" data-path="cohort.html"><a href="cohort.html#step-5-correlation-analyses-output"><i class="fa fa-check"></i><b>2.5</b> Step 5 Correlation Analyses Output</a><ul>
 <li class="chapter" data-level="2.5.1" data-path="cohort.html"><a href="cohort.html#metabolite-tagging"><i class="fa fa-check"></i><b>2.5.1</b> Metabolite Tagging</a></li>
-<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of ‘Tagged’ Metabolites</a></li>
+<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of 'Tagged' Metabolites</a></li>
 <li class="chapter" data-level="2.5.3" data-path="cohort.html"><a href="cohort.html#create-a-heatmap"><i class="fa fa-check"></i><b>2.5.3</b> Create A Heatmap</a></li>
 <li class="chapter" data-level="2.5.4" data-path="cohort.html"><a href="cohort.html#the-heatmap"><i class="fa fa-check"></i><b>2.5.4</b> The Heatmap</a></li>
 <li class="chapter" data-level="2.5.5" data-path="cohort.html"><a href="cohort.html#the-heatmap-2"><i class="fa fa-check"></i><b>2.5.5</b> The Heatmap (2)</a></li>
@@ -131,7 +134,11 @@
 <li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
-<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+<li>
+<a href="https://epi.grants.cancer.gov/comets/" target="blank">COMETS Website</a><br>
+<a href="http://www.comets-analytics.org" target="blank">COMETS Analytics App</a><br>
+<a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a>
+</li>
 
 </ul>
 
@@ -158,10 +165,10 @@
 <p>Each cohort is required to assemble their data into the standard Excel format from a variety of sources (xls, stata, sas, or r). The file is used for harmonization and analyses. There are five sheets that are required: three of your own data following best practices and two for the project at hand which will be sent by the PI. The detailed requirements are outlined below. A tool is available on COMETS Analytics to help create this file called create input (see <a href="manual.html#create-input">Create Input</a>).</p>
 <div id="metabolites" class="section level3">
 <h3><span class="header-section-number">2.1.1</span> Metabolites</h3>
-<p>The <em>Metabolites</em> sheet contains the meta-data related to the metabolite annotations, where the metabolites are the rows. This sheet requires two input columns: “metabid” and “metabolite_name”. Additional columns are helpful in the harmonization of metabolites. There are no restrictions on the names of the helpful columns, except HMDB ID and COMP ID should be named “HMDB_ID” and “COMP_ID”. Additional meta-data include chemical pathways, alternate names, database IDs (HMDB, PubChem, etc.), mass/charge, retention times, etc. This meta-information is important as we are continuously updating the harmonization of metabolite names across studies and platforms. Importantly, the metabolite IDs in the “metabid” column are required to match the metabolite IDs used in the metabolite abundance matrix (sheet <em>SubjectMetabolites</em>).</p>
-<p><span class="textintro">The <em>Metabolites</em> sheet contains the meta-data for metabolites used for harmonization.</span></p>
+<p>The <strong><em>Metabolites</em></strong> sheet contains the meta-data related to the metabolite annotations, where the metabolites are the rows. This sheet requires two input columns: <strong>metabid</strong> and <strong>metabolite_name</strong>. Additional columns are helpful in the harmonization of metabolites. There are no restrictions on the names of the helpful columns, except HMDB ID and COMP ID should be named <strong>HMDB_ID</strong> and <strong>COMP_ID</strong>. Additional meta-data include chemical pathways, alternate names, database IDs (HMDB, PubChem, etc.), mass/charge, retention times, etc. This meta-information is important as we are continuously updating the harmonization of metabolite names across studies and platforms. Importantly, the metabolite IDs in the <strong>metabid</strong> column are required to match the metabolite IDs used in the metabolite abundance matrix (sheet <strong><em>SubjectMetabolites</em></strong>).</p>
+<p><span class="textintro">The <strong><em>Metabolites</em></strong> sheet contains the meta-data for metabolites used for harmonization.</span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. metabid</strong></span> is the name of the metabolites which may be different than the chemical ID with the non=stndara required field to denote the metabolite columns in <em>SubjectMetabolites</em> sheet.</p>
+<p><span class="texta"><strong>a. metabid</strong></span> is the name of the metabolites which may be different than the chemical ID with the non-standard characters. This is a required field to denote the metabolite columns in <strong><em>SubjectMetabolites</em></strong> sheet.</p>
 <p><span class="textb"><strong>b. metabolite_name</strong> </span> is a required field to denote the biochemical name of the metabolite, with all the non-standard characters.</p>
 <p><span class="textc"><strong>c. Helpful columns</strong></span> columns C-H are an example of additional metabolite information. If possible, cohorts should include as much metabolite information as possible to help in harmonization, especially mass charge, retention time, and HMDB ID.</p>
 </div>
@@ -169,12 +176,12 @@
 </div>
 <div id="subject-metabolites" class="section level3">
 <h3><span class="header-section-number">2.1.2</span> Subject Metabolites</h3>
-<p>The <em>SubjectMetabolites</em> sheet contains the measured metabolite values for the cohort samples. This sheet would typically be your data analysis file, where the metabolites are the columns and the subjects are the rows. The first column in this sheet represents the sample ID. Each subsequent column represents the measured values of one metabolite. The column names in this sheet (except the column named “SAMPLE_ID”) must match the row names under the column “metabid” in sheet <em>Metabolites</em>. Further, the row names in this sheet are required to match the row names in the sheet <em>SubjectData</em>. Metabolite values should be analyses-ready.</p>
-<p><span class="textintro">The <em>SubjectMetabolites</em> sheet contains the measured metabolite values for the cohort samples.</span></p>
+<p>The <strong><em>SubjectMetabolites</em></strong> sheet contains the measured metabolite values for the cohort samples. This sheet would typically be your data analysis file, where the metabolites are the columns and the subjects are the rows. The first column in this sheet represents the sample ID. Each subsequent column represents the measured values of one metabolite. The column names in this sheet (except the column named <strong>SAMPLE_ID</strong>) must match the row names under the column <strong>metabid</strong> in sheet <strong><em>Metabolites</em></strong>. Further, the row names in this sheet are required to match the row names in the sheet <strong><em>SubjectData</em></strong>. Metabolite values should be analyses-ready.</p>
+<p><span class="textintro">The <strong><em>SubjectMetabolites</em></strong> sheet contains the measured metabolite values for the cohort samples.</span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. SubjectMetabolites</strong></span> this sheet in the input file contains the measured metabolite values for each sample.</p>
 <p><span class="textb"><strong>b. SAMPLE_ID</strong> </span> contains the study sample IDs, the subject identifier.</p>
-<p><span class="textc"><strong>c. Metabolite ID</strong></span> is indicated in the first row of the sheet to represent all metabolites listed in the <em>Metabolites</em> sheet.</p>
+<p><span class="textc"><strong>c. Metabolite ID</strong></span> is indicated in the first row of the sheet to represent all metabolites listed in the <strong><em>Metabolites</em></strong> sheet.</p>
 <p><span class="textd"><strong>d. Each row</strong></span> represents data for each subject in the cohort.</p>
 <p><span class="texte"><strong>e. Value</strong></span> reflects the analyses-ready metabolite abundances.</p>
 </div>
@@ -182,32 +189,32 @@
 </div>
 <div id="subject-data" class="section level3">
 <h3><span class="header-section-number">2.1.3</span> Subject Data</h3>
-<p>The <em>SubjectData</em> sheet contains the subject-level data where the column names represent the variable names as used in the cohort, and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the <em>VarMap</em> sheet. Equally important, the row names in this <em>SubjectData</em> sheet must match the row names of the <em>SubjectMetabolites</em> sheet.</p>
-<p><span class="textintro">The <em>SubjectData</em> sheet contains the subject-level covariate data (all other information besides metabolites; the coding is laid out in the <em>VarMap</em> sheet) for each sample. </span></p>
+<p>The <strong><em>SubjectData</em></strong> sheet contains the subject-level data where the column names represent the variable names as used in the cohort, and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the <strong><em>VarMap</em></strong> sheet. Equally important, the row names in this <strong><em>SubjectData</em></strong> sheet must match the row names of the <strong><em>SubjectMetabolites</em></strong> sheet.</p>
+<p><span class="textintro">The <strong><em>SubjectData</em></strong> sheet contains the subject-level covariate data (all other information besides metabolites; the coding is laid out in the <strong><em>VarMap</em></strong> sheet) for each sample. </span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. SubjectData</strong></span> is a sheet in the input file that contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race, and education.</p>
 <p><span class="textb"><strong>b. SAMPLE_ID</strong> </span> contains the sample identifiers.</p>
-<p><span class="textc"><strong>c. Columns</strong></span> correspond to subject level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named <strong>SAMPLE_ID</strong>) must match the entries in the column <strong>COHORTVARIABLE</strong> from the sheet <i>VarMap</i>.</p>
-<p><span class="textd"><strong>d. Rows</strong></span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (e.g., “SAMPLE_ID”) are required to match the row names in the sheet <i>SubjectMetabolites</i>.</p>
+<p><span class="textc"><strong>c. Columns</strong></span> correspond to subject level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named <strong>SAMPLE_ID</strong>) must match the entries in the column <strong>COHORTVARIABLE</strong> from the sheet <strong><em>VarMap</em></strong>.</p>
+<p><span class="textd"><strong>d. Rows</strong></span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (e.g., <strong>SAMPLE_ID</strong>) are required to match the row names in the sheet <strong><em>SubjectMetabolites</em></strong>.</p>
 <p><span class="texte"><strong>e. Cells</strong></span> contain subject-level covariate values.</p>
 </div>
 <p><a href="static/input_3subjectdata.png" target="_blank"><img src="static/input_3subjectdata.png" style="width: 60%"></a></p>
 </div>
 <div id="varmap" class="section level3">
 <h3><span class="header-section-number">2.1.4</span> VarMap</h3>
-<p><span class="textintro">The <em>VarMap</em> sheet contains the coding scheme for the covariates in your analysis, and maps the cohort variable names to the COMETS internal variable names. For projects in COMETS, which represent multi-cohort efforts coordinated by a central PI, this scheme will be completed by the PI and sent to you as part of their example data input files. There is no need to modify. <br>Example: The cohort variable “bmi” would be mapped to the COMETS internal variable “bmi_grp” and must be coded as “0” for BMI&lt;18.5, “1” for BMI 18.5 to &lt;25, “2” for BMI 25 to &lt;30, “3” for BMI 30.0+, and “4” for missing as defined in the column “VARDEFINITION”. </span></p>
+<p><span class="textintro">The <strong><em>VarMap</em></strong> sheet contains the coding scheme for the covariates in your analysis, and maps the cohort variable names to the COMETS internal variable names. For projects in COMETS, which represent multi-cohort efforts coordinated by a central PI, this scheme will be completed by the PI and sent to you as part of their example data input files. There is no need to modify. <br>Example: The cohort variable <strong>bmi</strong> would be mapped to the COMETS internal variable <strong>bmi_grp</strong> and must be coded as “0” for BMI&lt;18.5, “1” for BMI 18.5 to &lt;25, “2” for BMI 25 to &lt;30, “3” for BMI 30.0+, and “4” for missing as defined in the column <strong>VARDEFINITION</strong>. </span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. VarMap</strong></span> is a sheet in the input file that gives the original cohort variable names and the COMETS internal variable names.</p>
 <p><span class="textb"><strong>b. VARREFERENCE</strong> </span> refers to the internal COMETS variable names.</p>
 <p><span class="textc"><strong>c. VARDEFINITION</strong></span> defines how the variables should be coded.</p>
 <p><span class="textd"><strong>d. COHORTVARIABLE</strong></span> corresponds to the original cohort variable name.</p>
-<p><span class="texte"><strong>e. COHORTNOTES</strong></span> gives additional info for some variables (e.g., “age”, “female”), missing values are not allowed.</p>
+<p><span class="texte"><strong>e. COHORTNOTES</strong></span> gives additional info for some variables (e.g., <strong>age</strong>, <strong>female</strong>), missing values are not allowed.</p>
 </div>
 <p><a href="static/input_varmap3.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a></p>
 </div>
 <div id="inputmodels" class="section level3">
 <h3><span class="header-section-number">2.1.5</span> Models</h3>
-<p>This worksheet specifies the models to run. In this example, Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes, while adjusting for smoking status (“smk_grp”), BMI (“bmi_grp”), race (“race_grp”), education (“educ_grp”), alcohol consumption (“alc_grp”), multivitamin use (“multivitamin”), hormonal status (“horm_curr”), and fasting status (“fasted”). This analysis will be stratified by gender using the internal COMETS variable “female”.</p>
+<p>This worksheet specifies the models to run. In this example, Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes, while adjusting for smoking status (<strong>smk_grp</strong>), BMI (<strong>bmi_grp</strong>), race (<strong>race_grp</strong>), education (<strong>educ_grp</strong>), alcohol consumption (<strong>alc_grp</strong>), multivitamin use (<strong>multivitamin</strong>), hormonal status (<strong>horm_curr</strong>), and fasting status (<strong>fasted</strong>). This analysis will be stratified by gender using the internal COMETS variable <strong>female</strong>.</p>
 <p><span class="textintro">Specify the analytical models you wish to run. </span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. Models</strong></span> is a sheet in the input file that contains the models to be run on the cohort data.</p>
@@ -223,14 +230,14 @@
 </div>
 <div id="step-2-harmonization" class="section level2">
 <h2><span class="header-section-number">2.2</span> Step 2 Harmonization</h2>
-<p>The harmonization step will assess whether your cohort’s metabolites are available in the master metabolites list, so that a universal ID (named “UID_01”) can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID ensures alignment of metabolites across the different cohorts to ensure identification for meta-analyses. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (i.e., metabolite meta-data) in the input file such as HMDB ID, KEGG ID, or other identifiers. For more details, see</p>
+<p>The harmonization step will assess whether your cohort's metabolites are available in the master metabolites list, so that a universal ID (named <strong>UID_01</strong>) can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID ensures alignment of metabolites across the different cohorts to ensure identification for meta-analyses. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (i.e., metabolite meta-data) in the input file such as HMDB ID, KEGG ID, or other identifiers. For more details, see</p>
 <p><strong>Note:</strong> The harmonization step produces an output file that needs to be sent to <a href="mailto:comets.analytics@gmail.com">comets.analytics@gmail.com</a> to keep track of harmonization rates.</p>
 <div id="harmonization-file" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Harmonization File</h3>
 <p><span class="textintro">The names of metabolites input into the software are automatically harmonized to a common name. This important feature facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.</span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. metabid</strong></span> corresponds to metabolite IDs as defined by each individual cohort. The metabolite IDs correspond to the column “metabid” from the sheet <em>Metabolites</em> of the input file.</p>
-<p><span class="textb"><strong>b. metabolite_names</strong></span> corresponds to metabolite names as defined by each individual cohort. The metabolite names correspond to the column “metabolite_name” from the sheet <em>Metabolites</em> of the input file.</p>
+<p><span class="texta"><strong>a. metabid</strong></span> corresponds to metabolite IDs as defined by each individual cohort. The metabolite IDs correspond to the column <strong>metabid</strong> from the sheet <strong><em>Metabolites</em></strong> of the input file.</p>
+<p><span class="textb"><strong>b. metabolite_names</strong></span> corresponds to metabolite names as defined by each individual cohort. The metabolite names correspond to the column <strong>metabolite_name</strong> from the sheet <strong><em>Metabolites</em></strong> of the input file.</p>
 <p><span class="textc"><strong>c. Columns</strong></span> (except A, B, and C) correspond to metabolite meta-information that was either already present in the input file or was matched from the internal COMETS database. We highly recommend to add at least one public database identifier (e.g., HMDB ID).</p>
 <p><span class="textd"><strong>d. Rows</strong></span> correspond to metabolites, with each row containing all available meta-information for one metabolite.</p>
 </div>
@@ -243,33 +250,33 @@
 </div>
 <div id="step-4-run-models" class="section level2">
 <h2><span class="header-section-number">2.4</span> Step 4 Run Models</h2>
-<p>There are two ways to run models: <strong>interactive mode</strong> allows you to specify ad hoc models when exploring the data, and <strong>batch mode</strong> models are prespecified through the model sheet in your input file which can be run one at a time or all models for running all models specified in the models sheet which uses a queueing system.</p>
+<p>There are two ways to run models: 1) interactive mode allows you to specify ad hoc models when exploring the data, and 2) batch mode models are prespecified through the model sheet in your input file which can be run one at a time or all models for running all models specified in the models sheet which uses a queueing system.</p>
 <div id="interactive-mode" class="section level3">
 <h3><span class="header-section-number">2.4.1</span> Interactive Mode</h3>
 <p><span class="textintro">Allows you to run individual models to specify model parameters and receive instantaneous results by clicking on interactive model specification.</span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. Passed integrity check</strong></span> after harmonization, if data upload was successful and the data passed COMETS integrity checks, you will get a confirmation message.</p>
-<p><span class="textb"><strong>b. Specify interactive</strong> </span> by clicking on ‘Interactive user input’ under ‘Specify Method of Analyses’.</p>
+<p><span class="textb"><strong>b. Specify interactive</strong> </span> by clicking on <em>Interactive user input</em> under <em>Specify Method of Analyses</em>.</p>
 </div>
 <p><a href="static/output_interactivemode_1.png"><img src="static/output_interactivemode_1.png" style="width: 60%"></a></p>
 <div id="explore-your-interactive-mode-output" class="section level4">
 <h4><span class="header-section-number">2.4.1.1</span> Explore Your Interactive Mode Output</h4>
 <p><span class="textintro">Exploring your output. </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. Correlation results </strong></span> check if correlation analyses were successful – if so click ‘Download Results’ and forward to the COMETS harmonization group who will utilize these for the meta-analyses.</p>
+<p><span class="texta"><strong>a. Correlation results </strong></span> check if correlation analyses were successful – if so click <em>Download Results</em> and forward to the COMETS harmonization group who will utilize these for the meta-analyses.</p>
 <p><span class="textb"><strong>b. Specified model parameters </strong> </span> as defined in the interactive mode.</p>
-<p><span class="textc"><strong>c. Correlation coefficient: </strong></span> Spearman Rank correlation coefficient between the specified outcome and the exposure (adjusting for the <i>adjvars</i>, and by strata if applicable).</p>
+<p><span class="textc"><strong>c. Correlation coefficient: </strong></span> Spearman Rank correlation coefficient between the specified outcome and the exposure (adjusting for the <strong>adjvars</strong>, and by strata if applicable).</p>
 <p><span class="textd"><strong>d. p-value</strong></span> significance level for the correlation coefficient.</p>
 <p><span class="texte"><strong>e. n</strong></span> number of samples included in the specified model.</p>
 <p><span class="textf"><strong>f. Tag</strong></span> select metabolites for further analysis. This creates a subset of metabolites that can then be specified in the interactive output.</p>
-<span class="textg"><strong>Explore further </strong></span> further results can be ordered according to name of outcome, exposure, or “adjvars”, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds.
+<span class="textg"><strong>Explore further </strong></span> further results can be ordered according to name of outcome, exposure, or <strong>adjvars</strong>, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds.
 </div>
 <p><a href="static/output_interactivemode_3.png"><img src="static/output_interactivemode_3.png" style="width: 60%"></a></p>
 </div>
 </div>
 <div id="batch-mode" class="section level3">
 <h3><span class="header-section-number">2.4.2</span> Batch Mode</h3>
-<p><em>All Models</em> is a special run of the prespecified models. In this mode, all models are run in a queue and you will get the results via email.</p>
+<p>All Models is a special run of the prespecified models. In this mode, all models are run in a queue and you will get the results via email.</p>
 </div>
 </div>
 <div id="step-5-correlation-analyses-output" class="section level2">
@@ -277,33 +284,33 @@
 <p>After running your correlation analyses by <a href="cohort.html#interactive-mode">Interactive mode</a> or <a href="cohort.html#batch-mode">Batch mode</a>, results are available under the correlation results and heatmap tabs. For other types of analyses, see <a href="manual.html#manual">Manual</a>. Some of the interactive features of the results and heatmap are described below.</p>
 <div id="metabolite-tagging" class="section level3">
 <h3><span class="header-section-number">2.5.1</span> Metabolite Tagging</h3>
-<p>The metabolite tagging (‘Tag’ option) is a feature in the correlate and heatmap tabs to select and create a subset of metabolites for further analysis based on results for further investigation. Once tagged, the list of metabolites can be used in interactive mode to specify other analyses to conduct.</p>
-<p><span class="textintro">To select and create a subset of metabolites for further analysis based on the correlation results the Tag function can be used. Below an example with age (exposure) and metabolites (outcome) as run in the ‘Interactive user input’ ‘Correlation Results’ tab. </span></p>
+<p>The metabolite tagging (<em>Tag</em> option) is a feature in the correlate and heatmap tabs to select and create a subset of metabolites for further analysis based on results for further investigation. Once tagged, the list of metabolites can be used in interactive mode to specify other analyses to conduct.</p>
+<p><span class="textintro">To select and create a subset of metabolites for further analysis based on the correlation results the tag function can be used. Below an example with age (exposure) and metabolites (outcome) as run in the <em>Interactive user input Correlation Results</em> tab. </span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. Set level of significance </strong></span> in this example the level of significance is defined as p&lt;0.00001.</p>
 <p><span class="textb"><strong>b. Select significant metabolites</strong> </span> by ticking the box all significant metabolites are selected.</p>
-<p><span class="textc"><strong>c. Tag metabolites </strong></span> by ticking the ‘Tag’ box all selected metabolites are automatically marked.</p>
+<p><span class="textc"><strong>c. Tag metabolites </strong></span> by ticking the <em>Tag</em> box all selected metabolites are automatically marked.</p>
 </div>
 <p><a href="static/output_heatmap3_1.PNG" target="_blank"><img src="static/output_heatmap3_1.PNG" style="width: 60%"></a></p>
 </div>
 <div id="create-subset-of-tagged-metabolites" class="section level3">
-<h3><span class="header-section-number">2.5.2</span> Create Subset of ‘Tagged’ Metabolites</h3>
-<p><span class="textintro">Once the ‘Tag’ button is clicked a screen will appear </span></p>
+<h3><span class="header-section-number">2.5.2</span> Create Subset of 'Tagged' Metabolites</h3>
+<p><span class="textintro">Once the <em>Tag</em> button is clicked a screen will appear </span></p>
 <div class="marginnote">
 <p><span class="texta"><strong>a. Name your Tag </strong></span> give the subset of metabolites a name (e.g., “age_related_metabolites”).</p>
-<p><span class="textb"><strong>b. Create Tag </strong></span> click the button ‘Create Tag’ to create the ‘Tag’.</p>
-<p><span class="textc"><strong>c. Tag is created </strong></span> a new box appears with an overview of your tagged metabolites. Close the newly created ‘Tag’.</p>
+<p><span class="textb"><strong>b. Create Tag </strong></span> click the button <em>Create Tag</em> to create the tag.</p>
+<p><span class="textc"><strong>c. Tag is created </strong></span> a new box appears with an overview of your tagged metabolites. Close the newly created tag.</p>
 </div>
 <p><a href="static/output_heatmap3_2.PNG" target="_blank"><img src="static/output_heatmap3_2.PNG" style="width: 60%"></a></p>
 </div>
 <div id="create-a-heatmap" class="section level3">
 <h3><span class="header-section-number">2.5.3</span> Create A Heatmap</h3>
-<p><span class="textintro">Go back to the ‘Interactive user input’ and select your newly created subset, using the ‘Tag’ function </span></p>
+<p><span class="textintro">Go back to the <em>Interactive user input</em> and select your newly created subset, using the <em>Tag</em> function </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. Select your exposure </strong></span> select the newly created “age_related_metabolites” tag.</p>
-<p><span class="textb"><strong>b. Select your outcome</strong> </span> select the newly created “age_related_metabolites” tag.</p>
-<p><span class="textc"><strong>c. Run the model </strong></span> click the run button.</p>
-<p><span class="textd"><strong>d. Heatmap</strong></span> select the heatmap tab to view the heatmap.</p>
+<p><span class="texta"><strong>a. Select your exposure </strong></span> select the newly created &quot;age_related_metabolites&quot; tag.</p>
+<p><span class="textb"><strong>b. Select your outcome</strong> </span> select the newly created &quot;age_related_metabolites&quot; tag.</p>
+<p><span class="textc"><strong>c. Run the model </strong></span> click the <em>Run</em> button.</p>
+<p><span class="textd"><strong>d. Heatmap</strong></span> select the <em>Heatmap</em> tab to view the heatmap.</p>
 </div>
 <p><a href="static/output_heatmap3_3.PNG" target="_blank"><img src="static/output_heatmap3_3.PNG" style="width: 60%"></a></p>
 </div>
@@ -311,10 +318,10 @@
 <h3><span class="header-section-number">2.5.4</span> The Heatmap</h3>
 <p><span class="textintro">Exposures are specified on the x-axis and the outcomes on the y-axis. Different features are available in this interface. </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. Sort by outcome </strong></span> the display of the heatmap can be sorted by outcome or exposure (in the ‘Outcomes Sort By’ box).</p>
-<p><span class="textb"><strong>b. Sort by strata</strong> </span> when a stratified analysis is performed, the display of the heatmap can be sorted by the different strata (in the ‘Strata Sort By’ box).</p>
-<p><span class="textc"><strong>c. Choose your color </strong></span> in the ‘Palette’ box different color schemes for the heatmap can be selected.</p>
-<p><span class="textd"><strong>d. Adjust plot height and width</strong></span> the ‘Plot height’ and ‘Plot width’ can be adjusted using their respective boxes.</p>
+<p><span class="texta"><strong>a. Sort by outcome </strong></span> the display of the heatmap can be sorted by outcome or exposure (in the <em>Outcomes Sort By</em> box).</p>
+<p><span class="textb"><strong>b. Sort by strata</strong> </span> when a stratified analysis is performed, the display of the heatmap can be sorted by the different strata (in the <em>Strata Sort By</em> box).</p>
+<p><span class="textc"><strong>c. Choose your color </strong></span> in the <em>Palette</em> box different color schemes for the heatmap can be selected.</p>
+<p><span class="textd"><strong>d. Adjust plot height and width</strong></span> the <em>Plot height</em> and <em>Plot width</em> can be adjusted using their respective boxes.</p>
 </div>
 <p><a href="static/output_heatmap3_4.PNG" target="_blank"><img src="static/output_heatmap3_4.PNG" style="width: 60%"></a></p>
 </div>
@@ -339,7 +346,7 @@
 <div class="marginnote">
 <p><span class="texta"><strong>a. Annotations </strong></span> ticking this box will allow you to display the correlation coefficients in the plot.</p>
 <p><span class="textb"><strong>b. Hierachical clustering </strong></span> ticking this box will allow you to display the metabolite clusters on the left side of the heatmap.</p>
-<p><span class="textc"><strong>c. Choose your dimensions </strong></span> by clicking the ‘Plot height’ and “Plot width’ and entering values (e.g., 900 by 1100) the plot will show in the chosen dimensions.</p>
+<p><span class="textc"><strong>c. Choose your dimensions </strong></span> by clicking the <em>Plot height</em> and <em>Plot width</em> and entering values (e.g., 900 by 1100) the plot will show in the chosen dimensions.</p>
 </div>
 <p><a href="static/output_heatmap3_6.PNG" target="_blank"><img src="static/output_heatmap3_6.PNG" style="width: 60%"></a></p>
 <p><a href="static/output_heatmap3.PNG" target="_blank"><img src="static/output_heatmap3.PNG" style="width: 60%"></a></p>
@@ -349,7 +356,7 @@
 </div>
 <div id="step-6-send-for-meta-analyses" class="section level2">
 <h2><span class="header-section-number">2.6</span> Step 6 Send for Meta-analyses</h2>
-<p>After you receive email notification of a successful run of <strong>ALL MODELS</strong>, please forward the email to <a href="mailto:comets.analytics@gmail.com">comets.analytics@gmail.com</a>. The results will be meta-analyzed centrally.</p>
+<p>After you receive email notification of a successful run of all models, please forward the email to <a href="mailto:comets.analytics@gmail.com">comets.analytics@gmail.com</a>. The results will be meta-analyzed centrally.</p>
 
 </div>
 </div>
@@ -364,11 +371,13 @@
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
 <script>
 gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
@@ -376,12 +385,11 @@ gitbook.start({
 "github": false,
 "facebook": true,
 "twitter": true,
-"google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -389,10 +397,18 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/ellatemprosa/cometstutorial/02-stepbystep.Rmd",
-"text": "Edit"
+"link": null,
+"text": null
 },
-"download": ["catutorial.pdf"],
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
 "toc": {
 "collapse": "subsection"
 }
