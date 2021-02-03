@@ -14,12 +14,12 @@ Using this sample file as your input data will allow you to practice using the a
 ## Quick Analysis
 To upload your input file to the COMETS Analytics website, please follow these steps:
 
-1. Select the *Correlate* tab. 
-2. Specify your cohort from the dropdown menu.
-3. Choose your input data file, formatted as described above, using the *Choose File* button.
-4. Once you have uploaded your file the *Check Integrity* button will activate, use this button to check the integrity of your data input file.
-5. If integrity checks fail, please email (Kaitlyn.mazzilli@nih.gov) to troubleshoot. If all integrity checks are passed, as indicated in a green banner above the summary output, please click *Download Results* in the right corner and email the file to comets.analytics@gmail.com which is managed by Nathan Appel at IMS.
-6. You may choose to analyze your data in interactive mode, which allows you to select your exposures, outcomes, and covariates of interest. Pictured below is an age x metabolites analysis adjusted for smoking group.
-7. Our analyses will be done in batch mode. Please select *Batch as specified in the input file* on the left panel. Select *All Models* from the drop down menu. You will be prompted to enter an email address. 
-8. After clicking *Run Model* an email will be sent to your account.  Please note that the email will take about 10-15 minutes to arrive but may take longer if others are using COMETS Analytics concurrently.
-9. Please note that the link in the email is only valid for 7 days.  Once you have received the email, please forward it to comets.analytics@gmail.com.
+  1. Select the *Correlate* tab. 
+  2. Specify your cohort from the dropdown menu.
+  3. Choose your input data file, formatted as described above, using the *Choose File* button.
+  4. Once you have uploaded your file the *Check Integrity* button will activate, use this button to check the integrity of your data input file.
+  5. If integrity checks fail, please email (Kaitlyn.mazzilli@nih.gov) to troubleshoot. If all integrity checks are passed, as indicated in a green banner above the summary output, please click *Download Results* in the right corner and email the file to comets.analytics@gmail.com.
+  6. You may choose to analyze your data in interactive mode, which allows you to select your exposures, outcomes, and covariates of interest. Pictured below is an age x metabolites analysis adjusted for smoking group.
+  7. Our analyses will be done in batch mode. Please select *Batch as specified in the input file* on the left panel. Select *All Models* from the drop down menu. You will be prompted to enter an email address. 
+  8. After clicking *Run Model* an email will be sent to your account.  Please note that the email will take about 10-15 minutes to arrive but may take longer if others are using COMETS Analytics concurrently.
+  9. Please note that the link in the email is only valid for 7 days.  Once you have received the email, please forward it to comets.analytics@gmail.com.

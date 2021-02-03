@@ -189,12 +189,12 @@
 </div>
 <div id="subject-data" class="section level3">
 <h3><span class="header-section-number">2.1.3</span> Subject Data</h3>
-<p>The <strong><em>SubjectData</em></strong> sheet contains the subject-level data where the column names represent the variable names as used in the cohort, and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the <strong><em>VarMap</em></strong> sheet. Equally important, the row names in this <strong><em>SubjectData</em></strong> sheet must match the row names of the <strong><em>SubjectMetabolites</em></strong> sheet.</p>
+<p>The <strong><em>SubjectData</em></strong> sheet contains the subject-level data where columns are data and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the <strong><em>VarMap</em></strong> sheet. Equally important, the row names in this <strong><em>SubjectData</em></strong> sheet must match the row names of the <strong><em>SubjectMetabolites</em></strong> sheet.</p>
 <p><span class="textintro">The <strong><em>SubjectData</em></strong> sheet contains the subject-level covariate data (all other information besides metabolites; the coding is laid out in the <strong><em>VarMap</em></strong> sheet) for each sample. </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. SubjectData</strong></span> is a sheet in the input file that contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race, and education.</p>
+<p><span class="texta"><strong>a. SubjectData</strong></span> sheet contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race, and education.</p>
 <p><span class="textb"><strong>b. SAMPLE_ID</strong> </span> contains the sample identifiers.</p>
-<p><span class="textc"><strong>c. Columns</strong></span> correspond to subject level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named <strong>SAMPLE_ID</strong>) must match the entries in the column <strong>COHORTVARIABLE</strong> from the sheet <strong><em>VarMap</em></strong>.</p>
+<p><span class="textc"><strong>c. Columns</strong></span> correspond to subject level covariates, as used in the cohort. Column names are in row 1 and (except the column named <strong>SAMPLE_ID</strong>) must match the entries in the column <strong>COHORTVARIABLE</strong> from the sheet <strong><em>VarMap</em></strong>.</p>
 <p><span class="textd"><strong>d. Rows</strong></span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (e.g., <strong>SAMPLE_ID</strong>) are required to match the row names in the sheet <strong><em>SubjectMetabolites</em></strong>.</p>
 <p><span class="texte"><strong>e. Cells</strong></span> contain subject-level covariate values.</p>
 </div>
@@ -204,20 +204,21 @@
 <h3><span class="header-section-number">2.1.4</span> VarMap</h3>
 <p><span class="textintro">The <strong><em>VarMap</em></strong> sheet contains the coding scheme for the covariates in your analysis, and maps the cohort variable names to the COMETS internal variable names. For projects in COMETS, which represent multi-cohort efforts coordinated by a central PI, this scheme will be completed by the PI and sent to you as part of their example data input files. There is no need to modify. <br>Example: The cohort variable <strong>bmi</strong> would be mapped to the COMETS internal variable <strong>bmi_grp</strong> and must be coded as “0” for BMI&lt;18.5, “1” for BMI 18.5 to &lt;25, “2” for BMI 25 to &lt;30, “3” for BMI 30.0+, and “4” for missing as defined in the column <strong>VARDEFINITION</strong>. </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. VarMap</strong></span> is a sheet in the input file that gives the original cohort variable names and the COMETS internal variable names.</p>
-<p><span class="textb"><strong>b. VARREFERENCE</strong> </span> refers to the internal COMETS variable names.</p>
+<p><span class="texta"><strong>a. VarMap</strong></span> sheet maps the cohort variable name and COMETS variable name. For example, subjects are identified in COMETS as id while the cohort uses sample_id.</p>
+<p><span class="textb"><strong>b. VARREFERENCE</strong> </span> refers to the COMETS variable name.</p>
 <p><span class="textc"><strong>c. VARDEFINITION</strong></span> defines how the variables should be coded.</p>
-<p><span class="textd"><strong>d. COHORTVARIABLE</strong></span> corresponds to the original cohort variable name.</p>
-<p><span class="texte"><strong>e. COHORTNOTES</strong></span> gives additional info for some variables (e.g., <strong>age</strong>, <strong>female</strong>), missing values are not allowed.</p>
+<p><span class="textd"><strong>d. COHORTVARIABLE</strong></span> corresponds to the cohort variable name.</p>
+<p><span class="texte"><strong>e. VARTYPE</strong></span> corresponds to type of variable expected as continuous or categorical.</p>
+<p><span class="textf"><strong>f. COHORTNOTES</strong></span> gives additional info for some variables (e.g., <strong>age</strong>, <strong>female</strong>), missing values are not allowed.</p>
 </div>
-<p><a href="static/input_varmap3.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a></p>
+<p><a href="static/input_4varmapv2.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a></p>
 </div>
 <div id="inputmodels" class="section level3">
 <h3><span class="header-section-number">2.1.5</span> Models</h3>
 <p>This worksheet specifies the models to run. In this example, Model “2.1” is named “Gender stratified” and the analysis will be run with “age” as the exposure and “All metabolites” as the outcomes, while adjusting for smoking status (<strong>smk_grp</strong>), BMI (<strong>bmi_grp</strong>), race (<strong>race_grp</strong>), education (<strong>educ_grp</strong>), alcohol consumption (<strong>alc_grp</strong>), multivitamin use (<strong>multivitamin</strong>), hormonal status (<strong>horm_curr</strong>), and fasting status (<strong>fasted</strong>). This analysis will be stratified by gender using the internal COMETS variable <strong>female</strong>.</p>
 <p><span class="textintro">Specify the analytical models you wish to run. </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. Models</strong></span> is a sheet in the input file that contains the models to be run on the cohort data.</p>
+<p><span class="texta"><strong>a. Models</strong></span> sheet describes the models for analyses.</p>
 <p><span class="textb"><strong>b. MODEL</strong> </span> contains the model number and the model name. The results files will be named according to the chosen model name.</p>
 <p><span class="textc"><strong>c. OUTCOMES</strong></span> specifies which variable(s) will be the dependent variable(s).</p>
 <p><span class="textd"><strong>d. EXPOSURE</strong></span> specifies the independent variable of interest. The beta coefficient for this variable will be returned in the results.</p>
@@ -231,7 +232,6 @@
 <div id="step-2-harmonization" class="section level2">
 <h2><span class="header-section-number">2.2</span> Step 2 Harmonization</h2>
 <p>The harmonization step will assess whether your cohort's metabolites are available in the master metabolites list, so that a universal ID (named <strong>UID_01</strong>) can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID ensures alignment of metabolites across the different cohorts to ensure identification for meta-analyses. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (i.e., metabolite meta-data) in the input file such as HMDB ID, KEGG ID, or other identifiers. For more details, see</p>
-<p><strong>Note:</strong> The harmonization step produces an output file that needs to be sent to <a href="mailto:comets.analytics@gmail.com">comets.analytics@gmail.com</a> to keep track of harmonization rates.</p>
 <div id="harmonization-file" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Harmonization File</h3>
 <p><span class="textintro">The names of metabolites input into the software are automatically harmonized to a common name. This important feature facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.</span></p>
@@ -263,15 +263,15 @@
 <h4><span class="header-section-number">2.4.1.1</span> Explore Your Interactive Mode Output</h4>
 <p><span class="textintro">Exploring your output. </span></p>
 <div class="marginnote">
-<p><span class="texta"><strong>a. Correlation results </strong></span> check if correlation analyses were successful – if so click <em>Download Results</em> and forward to the COMETS harmonization group who will utilize these for the meta-analyses.</p>
+<p><span class="texta"><strong>a. Correlation results </strong></span> if successful, click <em>Download Results</em>.</p>
 <p><span class="textb"><strong>b. Specified model parameters </strong> </span> as defined in the interactive mode.</p>
 <p><span class="textc"><strong>c. Correlation coefficient: </strong></span> Spearman Rank correlation coefficient between the specified outcome and the exposure (adjusting for the <strong>adjvars</strong>, and by strata if applicable).</p>
 <p><span class="textd"><strong>d. p-value</strong></span> significance level for the correlation coefficient.</p>
 <p><span class="texte"><strong>e. n</strong></span> number of samples included in the specified model.</p>
 <p><span class="textf"><strong>f. Tag</strong></span> select metabolites for further analysis. This creates a subset of metabolites that can then be specified in the interactive output.</p>
-<span class="textg"><strong>Explore further </strong></span> further results can be ordered according to name of outcome, exposure, or <strong>adjvars</strong>, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds.
 </div>
 <p><a href="static/output_interactivemode_3.png"><img src="static/output_interactivemode_3.png" style="width: 60%"></a></p>
+<p><strong>Explore further </strong> further results can be ordered according to name of outcome, exposure, or <strong>adjvars</strong>, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds.</p>
 </div>
 </div>
 <div id="batch-mode" class="section level3">
