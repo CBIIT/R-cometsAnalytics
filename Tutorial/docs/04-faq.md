@@ -2,10 +2,11 @@
 
 # FAQ {-}
 
-* _Data Privacy?_ blah blah <br> what is now the next line (15Aug2018)
+
+* How does COMETS analytics handle missing data?
 
 
-* Missing data?
+* Can I include unidentified metabolites for my cohort analyses?
 
+* Does COMETS Analytics comply with GDPR?
 
-* Unidentified metabolites?

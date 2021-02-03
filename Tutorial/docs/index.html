@@ -104,31 +104,23 @@
 </ul></li>
 <li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
 <li class="chapter" data-level="3.1" data-path="manual.html"><a href="manual.html#register"><i class="fa fa-check"></i><b>3.1</b> Registration</a></li>
-<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#data-preparation"><i class="fa fa-check"></i><b>3.2</b> Data Preparation</a><ul>
-<li class="chapter" data-level="3.2.1" data-path="manual.html"><a href="manual.html#create-input"><i class="fa fa-check"></i><b>3.2.1</b> Create Input</a></li>
-</ul></li>
-<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#details-harmonize"><i class="fa fa-check"></i><b>3.3</b> Harmonization details</a><ul>
-<li class="chapter" data-level="3.3.1" data-path="manual.html"><a href="manual.html#preharmonization"><i class="fa fa-check"></i><b>3.3.1</b> Preharmonization</a></li>
-</ul></li>
+<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#details-harmonize"><i class="fa fa-check"></i><b>3.2</b> Harmonization details</a></li>
+<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#security"><i class="fa fa-check"></i><b>3.3</b> Security and Privacy</a></li>
 <li class="chapter" data-level="3.4" data-path="manual.html"><a href="manual.html#integrity"><i class="fa fa-check"></i><b>3.4</b> Integrity checks</a><ul>
 <li class="chapter" data-level="3.4.1" data-path="manual.html"><a href="manual.html#data"><i class="fa fa-check"></i><b>3.4.1</b> Data</a></li>
 <li class="chapter" data-level="3.4.2" data-path="manual.html"><a href="manual.html#models"><i class="fa fa-check"></i><b>3.4.2</b> Models</a></li>
 </ul></li>
-<li class="chapter" data-level="3.5" data-path="manual.html"><a href="manual.html#correlation-analyses"><i class="fa fa-check"></i><b>3.5</b> Correlation Analyses</a><ul>
+<li class="chapter" data-level="3.5" data-path="manual.html"><a href="manual.html#linear-models"><i class="fa fa-check"></i><b>3.5</b> Linear Models</a><ul>
 <li class="chapter" data-level="3.5.1" data-path="manual.html"><a href="manual.html#details"><i class="fa fa-check"></i><b>3.5.1</b> Details</a></li>
 <li class="chapter" data-level="3.5.2" data-path="manual.html"><a href="manual.html#output"><i class="fa fa-check"></i><b>3.5.2</b> Output</a></li>
 </ul></li>
-<li class="chapter" data-level="3.6" data-path="manual.html"><a href="manual.html#linear-models"><i class="fa fa-check"></i><b>3.6</b> Linear Models</a><ul>
+<li class="chapter" data-level="3.6" data-path="manual.html"><a href="manual.html#logistic-models"><i class="fa fa-check"></i><b>3.6</b> Logistic Models</a><ul>
 <li class="chapter" data-level="3.6.1" data-path="manual.html"><a href="manual.html#details-1"><i class="fa fa-check"></i><b>3.6.1</b> Details</a></li>
 <li class="chapter" data-level="3.6.2" data-path="manual.html"><a href="manual.html#output-1"><i class="fa fa-check"></i><b>3.6.2</b> Output</a></li>
 </ul></li>
-<li class="chapter" data-level="3.7" data-path="manual.html"><a href="manual.html#logistic-models"><i class="fa fa-check"></i><b>3.7</b> Logistic Models</a><ul>
+<li class="chapter" data-level="3.7" data-path="manual.html"><a href="manual.html#meta-analyses"><i class="fa fa-check"></i><b>3.7</b> Meta-Analyses</a><ul>
 <li class="chapter" data-level="3.7.1" data-path="manual.html"><a href="manual.html#details-2"><i class="fa fa-check"></i><b>3.7.1</b> Details</a></li>
 <li class="chapter" data-level="3.7.2" data-path="manual.html"><a href="manual.html#output-2"><i class="fa fa-check"></i><b>3.7.2</b> Output</a></li>
-</ul></li>
-<li class="chapter" data-level="3.8" data-path="manual.html"><a href="manual.html#meta-analyses"><i class="fa fa-check"></i><b>3.8</b> Meta-Analyses</a><ul>
-<li class="chapter" data-level="3.8.1" data-path="manual.html"><a href="manual.html#details-3"><i class="fa fa-check"></i><b>3.8.1</b> Details</a></li>
-<li class="chapter" data-level="3.8.2" data-path="manual.html"><a href="manual.html#output-3"><i class="fa fa-check"></i><b>3.8.2</b> Output</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
@@ -137,7 +129,8 @@
 <li>
 <a href="https://epi.grants.cancer.gov/comets/" target="blank">COMETS Website</a><br>
 <a href="http://www.comets-analytics.org" target="blank">COMETS Analytics App</a><br>
-<a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a>
+<a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a><br>
+<a href="https://www.comets-analytics.org/examples/cometsInput.xlsx">Sample Input</a>
 </li>
 
 </ul>
@@ -193,8 +186,7 @@ Kaitlyn Mazzilli
 <div id="overview" class="section level2 unnumbered">
 <h2>Overview</h2>
 <p>For each project, the cohort-level analytic flow consists of 3 steps to produce the standardized output required for central meta-analyses. Multiple projects can be bundled for each run to minimize burden on cohort analytic resources.<br />
-<img href="static/cometsflow.PNG" style="width: 60%"></p>
-<p><img src="static/input_metabolites.PNG" style="width: 60%"></p>
+<a href="static/cometsflow.PNG" target="_blank"><img src="static/cometsflow.PNG" style="width: 80%"></a></p>
 <p>This tutorial serves as a guide through this cycle. You can register for access to COMETS Analytics using the instructions in Chapter <a href="manual.html#register">3.1</a> <a href="manual.html#register">Registration</a>. For a quick walk-through the cycle, you can use the sample input file and follow the directions in Chapter <a href="quickstart.html#quickstart">1</a> <a href="quickstart.html#quickstart">Get Started with the Sample File</a>. Once you are ready to conduct your cohort-specific analyses, see the Chapter <a href="cohort.html#cohort">2</a> <a href="cohort.html#cohort">Conduct Cohort Data Analyses</a>. For more technical details, refer to the Chapter <a href="manual.html#manual">3</a> <a href="manual.html#manual">Manual</a> and <a href="faq.html#faq">FAQ</a> for answers to commonly asked questions.</p>
 
 </div>

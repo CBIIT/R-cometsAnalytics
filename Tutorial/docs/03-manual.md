@@ -22,17 +22,11 @@ _Important_ features and technical details are described in this chapter.
 
 <a href="static/login.PNG" target="_blank"><img src="static/login.PNG" style="width: 60%"></a>
 
-## Data Preparation
-Standard input  using excel, a widely accessible format, is required for COMETS Analytics and can be created from various data file formats. Data Integrity checks for input errors provide meaningful and actionable messages to users for analyses to proceed. See chapter \@ref(input) [Step 1 Data Preparation]
-
-
-### Create Input
-
 ## Harmonization details {#details-harmonize}
 The names of metabolites  from each cohort has been mapped  or harmonized to a common name. This important stage facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.
 
-### Preharmonization
-Prior to conducting your cohort analyses, xxx. 
+## Security and Privacy {#security}
+
 
 ## Integrity checks {#integrity}
 Prior to running the models for analyses, CA conducts multi-level checks to ensure data and models are appropriate for analyses.
@@ -53,14 +47,12 @@ If any of the following conditions failed, the analyses will be suspended and co
 * There are duplicate metabolite IDs in the metabolite information _Metabolites_ sheet
 
 ### Models
-Models are also validated using the CARET package.
+Models are also validated using the CARET package to check for the following conditions:
 
+ * Variables with zero variance.
+ * Highly correlated covariates. 
+ * ???
 
-## Correlation Analyses
-
-### Details
-
-### Output
 
 <!--
 ## Linear Models

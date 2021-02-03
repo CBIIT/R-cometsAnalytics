@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>COMETS Analytics Tutorial</title>
-  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Manual | COMETS Analytics Tutorial</title>
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:title" content="Chapter 3 Manual | COMETS Analytics Tutorial" />
   <meta property="og:type" content="book" />
   
   <meta property="og:image" content="static/COMETSLogo.png" />
@@ -17,29 +16,33 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  <meta name="twitter:title" content="Chapter 3 Manual | COMETS Analytics Tutorial" />
   
   <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS Analytics" />
   <meta name="twitter:image" content="static/COMETSLogo.png" />
 
-<meta name="author" content="CAT Work group">
+<meta name="author" content="Version 1.6" />
 
 
-<meta name="date" content="2018-10-01">
+<meta name="date" content="2021-02-02" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="cohort.html">
-<link rel="next" href="faq.html">
+<link rel="prev" href="cohort.html"/>
+<link rel="next" href="faq.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
 
 
 
@@ -69,7 +72,7 @@
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a><ul>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#overview"><i class="fa fa-check"></i>Overview</a></li>
 </ul></li>
-<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Get Started with Sample File</a><ul>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Get Started with the Sample File</a><ul>
 <li class="chapter" data-level="1.1" data-path="quickstart.html"><a href="quickstart.html#sample-input-file"><i class="fa fa-check"></i><b>1.1</b> Sample Input File</a></li>
 <li class="chapter" data-level="1.2" data-path="quickstart.html"><a href="quickstart.html#quick-analysis"><i class="fa fa-check"></i><b>1.2</b> Quick Analysis</a></li>
 </ul></li>
@@ -91,7 +94,7 @@
 </ul></li>
 <li class="chapter" data-level="2.5" data-path="cohort.html"><a href="cohort.html#step-5-correlation-analyses-output"><i class="fa fa-check"></i><b>2.5</b> Step 5 Correlation Analyses Output</a><ul>
 <li class="chapter" data-level="2.5.1" data-path="cohort.html"><a href="cohort.html#metabolite-tagging"><i class="fa fa-check"></i><b>2.5.1</b> Metabolite Tagging</a></li>
-<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of ‘Tagged’ Metabolites</a></li>
+<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of 'Tagged' Metabolites</a></li>
 <li class="chapter" data-level="2.5.3" data-path="cohort.html"><a href="cohort.html#create-a-heatmap"><i class="fa fa-check"></i><b>2.5.3</b> Create A Heatmap</a></li>
 <li class="chapter" data-level="2.5.4" data-path="cohort.html"><a href="cohort.html#the-heatmap"><i class="fa fa-check"></i><b>2.5.4</b> The Heatmap</a></li>
 <li class="chapter" data-level="2.5.5" data-path="cohort.html"><a href="cohort.html#the-heatmap-2"><i class="fa fa-check"></i><b>2.5.5</b> The Heatmap (2)</a></li>
@@ -101,25 +104,22 @@
 </ul></li>
 <li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
 <li class="chapter" data-level="3.1" data-path="manual.html"><a href="manual.html#register"><i class="fa fa-check"></i><b>3.1</b> Registration</a></li>
-<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#data-preparation"><i class="fa fa-check"></i><b>3.2</b> Data Preparation</a><ul>
-<li class="chapter" data-level="3.2.1" data-path="manual.html"><a href="manual.html#create-input"><i class="fa fa-check"></i><b>3.2.1</b> Create Input</a></li>
-</ul></li>
-<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#details-harmonize"><i class="fa fa-check"></i><b>3.3</b> Harmonization details</a><ul>
-<li class="chapter" data-level="3.3.1" data-path="manual.html"><a href="manual.html#preharmonization"><i class="fa fa-check"></i><b>3.3.1</b> Preharmonization</a></li>
-</ul></li>
+<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#details-harmonize"><i class="fa fa-check"></i><b>3.2</b> Harmonization details</a></li>
+<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#security"><i class="fa fa-check"></i><b>3.3</b> Security and Privacy</a></li>
 <li class="chapter" data-level="3.4" data-path="manual.html"><a href="manual.html#integrity"><i class="fa fa-check"></i><b>3.4</b> Integrity checks</a><ul>
 <li class="chapter" data-level="3.4.1" data-path="manual.html"><a href="manual.html#data"><i class="fa fa-check"></i><b>3.4.1</b> Data</a></li>
 <li class="chapter" data-level="3.4.2" data-path="manual.html"><a href="manual.html#models"><i class="fa fa-check"></i><b>3.4.2</b> Models</a></li>
-</ul></li>
-<li class="chapter" data-level="3.5" data-path="manual.html"><a href="manual.html#correlation-analyses"><i class="fa fa-check"></i><b>3.5</b> Correlation Analyses</a><ul>
-<li class="chapter" data-level="3.5.1" data-path="manual.html"><a href="manual.html#details"><i class="fa fa-check"></i><b>3.5.1</b> Details</a></li>
-<li class="chapter" data-level="3.5.2" data-path="manual.html"><a href="manual.html#output"><i class="fa fa-check"></i><b>3.5.2</b> Output</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
-<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+<li>
+<a href="https://epi.grants.cancer.gov/comets/" target="blank">COMETS Website</a><br>
+<a href="http://www.comets-analytics.org" target="blank">COMETS Analytics App</a><br>
+<a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a><br>
+<a href="https://www.comets-analytics.org/examples/cometsInput.xlsx">Sample Input</a>
+</li>
 
 </ul>
 
@@ -153,20 +153,12 @@
 </div>
 <p><a href="static/login.PNG" target="_blank"><img src="static/login.PNG" style="width: 60%"></a></p>
 </div>
-<div id="data-preparation" class="section level2">
-<h2><span class="header-section-number">3.2</span> Data Preparation</h2>
-<p>Standard input using excel, a widely accessible format, is required for COMETS Analytics and can be created from various data file formats. Data Integrity checks for input errors provide meaningful and actionable messages to users for analyses to proceed. See chapter <a href="cohort.html#input">2.1</a> <a href="cohort.html#input">Step 1 Data Preparation</a></p>
-<div id="create-input" class="section level3">
-<h3><span class="header-section-number">3.2.1</span> Create Input</h3>
-</div>
-</div>
 <div id="details-harmonize" class="section level2">
-<h2><span class="header-section-number">3.3</span> Harmonization details</h2>
+<h2><span class="header-section-number">3.2</span> Harmonization details</h2>
 <p>The names of metabolites from each cohort has been mapped or harmonized to a common name. This important stage facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.</p>
-<div id="preharmonization" class="section level3">
-<h3><span class="header-section-number">3.3.1</span> Preharmonization</h3>
-<p>Prior to conducting your cohort analyses, xxx.</p>
 </div>
+<div id="security" class="section level2">
+<h2><span class="header-section-number">3.3</span> Security and Privacy</h2>
 </div>
 <div id="integrity" class="section level2">
 <h2><span class="header-section-number">3.4</span> Integrity checks</h2>
@@ -190,16 +182,12 @@
 </div>
 <div id="models" class="section level3">
 <h3><span class="header-section-number">3.4.2</span> Models</h3>
-<p>Models are also validated using the CARET package.</p>
-</div>
-</div>
-<div id="correlation-analyses" class="section level2">
-<h2><span class="header-section-number">3.5</span> Correlation Analyses</h2>
-<div id="details" class="section level3">
-<h3><span class="header-section-number">3.5.1</span> Details</h3>
-</div>
-<div id="output" class="section level3">
-<h3><span class="header-section-number">3.5.2</span> Output</h3>
+<p>Models are also validated using the CARET package to check for the following conditions:</p>
+<ul>
+<li>Variables with zero variance.</li>
+<li>Highly correlated covariates.</li>
+<li>???</li>
+</ul>
 <!--
 ## Linear Models
 
@@ -237,11 +225,13 @@
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
 <script>
 gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
@@ -249,12 +239,11 @@ gitbook.start({
 "github": false,
 "facebook": true,
 "twitter": true,
-"google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -262,10 +251,18 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/ellatemprosa/cometstutorial/03-manual.Rmd",
-"text": "Edit"
+"link": null,
+"text": null
 },
-"download": ["catutorial.pdf"],
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
 "toc": {
 "collapse": "subsection"
 }

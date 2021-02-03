@@ -59,16 +59,16 @@ The __*SubjectMetabolites*__ sheet contains the measured metabolite values for t
 
 
 ### Subject Data
-The __*SubjectData*__ sheet contains the subject-level data where the column names represent the variable names as used in the cohort, and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the __*VarMap*__ sheet. Equally important, the row names in this __*SubjectData*__ sheet must match the row names of the __*SubjectMetabolites*__ sheet.
+The __*SubjectData*__ sheet contains the subject-level data where columns are data and each row represents a unique subject. Importantly, these column names do not need to be harmonized according to the final meta-analysis names; this function is handled separately within the __*VarMap*__ sheet. Equally important, the row names in this __*SubjectData*__ sheet must match the row names of the __*SubjectMetabolites*__ sheet.
 
 <span class='textintro'>The __*SubjectData*__ sheet contains the subject-level covariate data (all other information besides metabolites; the coding is laid out in the __*VarMap*__ sheet) for each sample. </span>
 
 <div class="marginnote">
-<span class='texta'>**a. SubjectData**</span> is a sheet in the input file that contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race, and education.
+<span class='texta'>**a. SubjectData**</span> sheet contains the subject-level covariate data for each sample. Examples include factors such as age, gender, smoking, body mass index, race, and education.
  
 <span class='textb'>**b. SAMPLE_ID** </span> contains the sample identifiers.
 
-<span class='textc'>**c. Columns**</span> correspond to subject level covariates, as used in the cohort of origin. Column names are in row 1 and (except the column named __SAMPLE_ID__) must match the entries in the column __COHORTVARIABLE__ from the sheet __*VarMap*__.
+<span class='textc'>**c. Columns**</span> correspond to subject level covariates, as used in the cohort. Column names are in row 1 and (except the column named __SAMPLE_ID__) must match the entries in the column __COHORTVARIABLE__ from the sheet __*VarMap*__.
 
 <span class='textd'>**d. Rows**</span> correspond to observations, with each row containing all of the subject-level covariate values for a given sample. Row names (e.g., __SAMPLE_ID__) are required to match the row names in the sheet __*SubjectMetabolites*__.
  
@@ -84,17 +84,19 @@ The __*SubjectData*__ sheet contains the subject-level data where the column nam
 <br>Example: The cohort variable __bmi__ would be mapped to the COMETS internal variable __bmi_grp__ and must be coded as “0” for BMI<18.5, “1” for BMI 18.5 to <25, “2” for BMI 25 to <30, “3” for BMI 30.0+, and “4” for missing as defined in the column __VARDEFINITION__. </span>
 
 <div class="marginnote">
-<span class='texta'>**a. VarMap**</span> is a sheet in the input file that gives the original cohort variable names and the COMETS internal variable names.
+<span class='texta'>**a. VarMap**</span> sheet maps the cohort variable name and COMETS variable name. For example, subjects are identified in COMETS as id while the cohort uses sample_id. 
  
-<span class='textb'>**b. VARREFERENCE** </span> refers to the internal COMETS variable names.
+<span class='textb'>**b. VARREFERENCE** </span> refers to the COMETS variable name.
  
 <span class='textc'>**c. VARDEFINITION**</span> defines how the variables should be coded.
  
-<span class='textd'>**d. COHORTVARIABLE**</span> corresponds to the original cohort variable name. 
+<span class='textd'>**d. COHORTVARIABLE**</span> corresponds to the cohort variable name. 
  
-<span class='texte'>**e. COHORTNOTES**</span> gives additional info for some variables (e.g., __age__, __female__), missing values are not allowed. 
+<span class='texte'>**e. VARTYPE**</span> corresponds to type of variable expected as continuous or categorical. 
+ 
+<span class='textf'>**f. COHORTNOTES**</span> gives additional info for some variables (e.g., __age__, __female__), missing values are not allowed. 
 </div>
-<a href="static/input_varmap3.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a>
+<a href="static/input_4varmapv2.PNG" target="_blank"><img src="static/input_varmap3.PNG" style="width: 60%"></a>
 
 
 ### Models {#inputmodels}
@@ -103,7 +105,7 @@ This worksheet specifies the models to run. In this example, Model “2.1” is 
 <span class='textintro'>Specify the analytical models you wish to run. </span> 
 
 
- <div class="marginnote"> <span class='texta'>**a. Models**</span> is a sheet in the input file that contains the models to be run on the cohort data.
+ <div class="marginnote"> <span class='texta'>**a. Models**</span> sheet describes the models for analyses.
   
  <span class='textb'>**b. MODEL** </span> contains the model number and the model name. The results files will be named according to the chosen model name.
   
@@ -128,7 +130,7 @@ This worksheet specifies the models to run. In this example, Model “2.1” is 
 ## Step 2 Harmonization
 The harmonization step will assess whether your cohort's metabolites are available in the master metabolites list, so that a universal ID (named __UID_01__) can be associated with your metabolites. The COMETS master metabolite list is maintained by IMS and can be sent in advance of the analyses to ensure availability of a universal ID for each of your metabolites. The universal ID ensures alignment of metabolites across the different cohorts to ensure identification for meta-analyses. Metabolite harmonization is made possible by maintaining an up-to-date master list of metabolites across platforms and cohorts to establish a universal metabolite ID. This activity is managed by the data harmonization work group and IMS. In order to maximize harmonization of metabolites, it is important to include as much information (i.e., metabolite meta-data) in the input file such as HMDB ID, KEGG ID, or other identifiers. For more details, see 
 
-__Note:__ The harmonization step produces an output file that needs to be sent to comets.analytics@gmail.com to keep track of harmonization rates.
+
 
 ### Harmonization File
 <span class='textintro'>The names of metabolites input into the software are automatically harmonized to a common name. This important feature facilitates comparison of metabolites across different studies that use different platforms and/or naming conventions.</span>
@@ -142,6 +144,7 @@ __Note:__ The harmonization step produces an output file that needs to be sent t
 <span class='textc'>**c. Columns**</span> (except A, B, and C) correspond to metabolite meta-information that was either already present in the input file or was matched from the internal COMETS database. We highly recommend to add at least one public database identifier (e.g., HMDB ID).
 
 <span class='textd'>**d. Rows**</span> correspond to metabolites, with each row containing all available meta-information for one metabolite.
+
 </div>
 
 <a href="static/output_harmonization.png"><img src="static/output_harmonization.png" style="width: 60%"></a>
@@ -172,7 +175,7 @@ There are two ways to run models: 1) interactive mode allows you to specify ad h
  <span class='textintro'>Exploring your output. </span>
  
 <div class="marginnote">
-  <span class='texta'>**a. Correlation results **</span> check if correlation analyses were successful – if so click *Download Results* and forward to the COMETS harmonization group who will utilize these for the meta-analyses.
+  <span class='texta'>**a. Correlation results **</span> if successful, click *Download Results*.
  
  <span class='textb'>**b. Specified model parameters ** </span> as defined in the interactive mode.
 
@@ -184,10 +187,11 @@ There are two ways to run models: 1) interactive mode allows you to specify ad h
  
  <span class='textf'>**f. Tag**</span> select metabolites for further analysis. This creates a subset of metabolites that can then be specified in the interactive output.
  
-  <span class='textg'>**Explore further **</span> further results can be ordered according to name of outcome, exposure, or __adjvars__, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds. 
  </div>
 
 <a href="static/output_interactivemode_3.png"><img src="static/output_interactivemode_3.png" style="width: 60%"></a>
+
+**Explore further ** further results can be ordered according to name of outcome, exposure, or __adjvars__, or by correlation coefficient, p-value, or n. Alternatively, you can use the search boxes to search for specific metabolites or define thresholds. 
 
 ### Batch Mode
 

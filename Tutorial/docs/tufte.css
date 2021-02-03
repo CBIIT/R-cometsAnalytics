@@ -146,7 +146,7 @@ ol, ul { width: 100%;
          -webkit-padding-start: 5%;
          -webkit-padding-end: 5%; }
 
-li { padding: 0.5rem 0; }
+li { padding: .5rem 0; line-height: 100%;}
 
 table {
   border-top: 2px solid #111;
@@ -201,9 +201,9 @@ img {max-width: 100%;}
 .sidenote, .marginnote { float: right;
                          clear: right;
                          margin-right: 0%;
-                         width: 35%;
+                         width: 40%;
                          margin-top: 0;
-                         margin-bottom: 1rem;
+                         margin-bottom: 2rem;
                          margin-left: 0.7rem;
                          font-size:120%!important;
                          line-height: 1.3;
