@@ -8,7 +8,8 @@ bookdown::gitbook:
         <li>
         <a href="https://epi.grants.cancer.gov/comets/" target="blank">COMETS Website</a><br>
         <a href="http://www.comets-analytics.org" target="blank">COMETS Analytics App</a><br>
-        <a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a>
+        <a href="https://github.com/CBIIT/R-cometsAnalytics/tree/master/Tutorial">Tutorial source on github</a><br>
+        <a href="https://www.comets-analytics.org/examples/cometsInput.xlsx">Sample Input</a>
         </li>
 
 
