@@ -130,7 +130,11 @@ showModel <- function(obj, nlines=10) {
       x   <- obj[[nm, exact=TRUE]] 
       if (!is.data.frame(x)) stop("ERROR: obj must be an object returned from runModel")
       nr <- min(nrow(x), nlines)
-      if (nr) print(x[1:nr, , drop=FALSE]) 
+      if (nr) {
+        print(x[1:nr, , drop=FALSE])
+      } else {
+        print(x) # Could be an empty data frame
+      } 
     }
   } else if ("try-error" %in% class(obj)) {
     print(obj)

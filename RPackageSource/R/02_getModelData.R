@@ -249,12 +249,20 @@ getModelData <-  function(readData,
     readData    <- try(filterCOMETSinput(readData,where=where2), silent=TRUE)
     if ("try-error" %in% class(readData)) {
       print(readData)
-      stop(paste("ERROR applying WHERE: ", paste(where, collapse=" & ", sep=""), sep=""))
+      stop(paste("ERROR applying WHERE: ", paste(where, collapse=" AND ", sep=""), sep=""))
     }
     msg         <- paste0("Filtering subjects according to the rule(s) ", 
-                        paste(where, collapse=" & ", sep=""), " . ", 
+                        paste(where, collapse=" AND ", sep=""), " . ", 
                         nrow(readData$subjdata)," of ", numallsamps," are retained.")
     print(msg)
+    if (!nrow(readData$subjdata)) {
+      cat("Check the WHERE condition.\n") 
+      if (modelspec == getMode_batch()) {
+        cat("Remember that in batch mode, multiple WHERE conditions should be separated by a comma.\n")
+        cat("For example: x = 1, y > 3 \n")
+      }
+      stop("ERROR: no rows left in data after applying the WHERE condition")  
+    }
   }
 
   gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))

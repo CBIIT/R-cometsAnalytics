@@ -58,6 +58,7 @@ runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
   op        <- runModel.checkOptions(op, modeldata)
   op$cohort <- cohort
   ret       <- runModel.start(modeldata, metabdata, op)
+  ret       <- runModel.checkRetlist(ret, op) 
 
   # Stop the clock
   ptm <- base::proc.time() - ptm
@@ -66,6 +67,48 @@ runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
   ret
 
 } # END: runModel 
+
+# Function to check the return list
+runModel.checkRetlist <- function(ret, op) {
+
+  # Add model function to model summary
+  nm1  <- getModelSummaryName() # Sheet name
+  col  <- getModelSummaryFunCol()
+  df   <- ret[[nm1, exact=TRUE]]
+  if (!is.null(df)) {
+    if (!is.data.frame(df)) stop("INTERNAL CODING ERROR in runModel.checkRetlist")
+    df[, col]  <- op$model
+    ret[[nm1]] <- df
+  }
+
+  # Check for errors/warnings data frame
+  nm3 <- runModel.getWarningsListName()
+  df  <- ret[[nm3, exact=TRUE]]
+  if (is.null(df)) {
+    c1  <- runModel.getWarningCol() 
+    c2  <- runModel.getObjectCol()  
+    c3  <- runModel.getMessageCol() 
+    str <- paste("data.frame(", c1, "=character(0), ", c2, "=character(0), ",
+                                c3, "=character(0), stringsAsFactors=FALSE)", sep="")
+    ret[[nm3]] <- eval(parse(text=str))   
+  }
+
+  # Re-arrange order of sheets if needed
+  nms <- names(ret)
+  if ((nms[1] == nm3) && (length(nms) > 1)) {
+    nm2        <- getEffectsName()
+    obj1       <- ret[[nm1, exact=TRUE]]
+    obj2       <- ret[[nm2, exact=TRUE]]
+    obj3       <- ret[[nm3, exact=TRUE]]
+    ret        <- list()
+    ret[[nm1]] <- obj1
+    ret[[nm2]] <- obj2
+    ret[[nm3]] <- obj3  
+  }
+
+  ret
+
+} # END: runModel.checkRetlist
 
 # Function to get the original variable name
 runModel.varMap <- function(vars, varMap) {
@@ -241,9 +284,9 @@ runModel.start <- function(modeldata, metabdata, op) {
   # Combine any warnings from getModelData() at the end
   modeldata[[wr.nm]] <- NULL
 
-  c1      <- runModel.getWarningCol 
-  c2      <- runModel.getObjectCol  
-  c3      <- runModel.getMessageCol 
+  c1      <- runModel.getWarningCol() 
+  c2      <- runModel.getObjectCol()  
+  c3      <- runModel.getMessageCol() 
   retList <- list()
   for (i in 1:nstrata) {
     strat <- stratlist[i]
@@ -265,7 +308,7 @@ runModel.start <- function(modeldata, metabdata, op) {
   if (length(warn.obj)) {
     tmp              <- retList[[wr.nm, exact=TRUE]]
     retList[[wr.nm]] <- runModel.combineResObjects(tmp, warn.obj, "getModelData", NA) 
-  }
+  } 
   tmp              <- retList[[wr.nm, exact=TRUE]]
   retList[[wr.nm]] <- runModel.setReturnDF(tmp, modeldata$varMap)
 

@@ -60,13 +60,23 @@ readCOMETSinput <- function(file) {
   csvfilePath <- file
   stopifnot(is.character(csvfilePath))
   if (!file.exists(csvfilePath)) {
-    stop("CSV input file does not exist")
+    stop("input Excel file does not exist")
+  }
+
+  # Check for the required sheet names
+  nms <- getReqSheetNames()
+  tmp <- !(nms %in% readxl::excel_sheets(csvfilePath))
+  if (any(tmp)) {
+    msg <- paste0(nms[tmp], collapse=", ")
+    msg <- paste0("The input Excel file is missing the (case-sensitive) sheet name(s): ", msg)  
+    stop(msg)
   }
 
   #metabolite meta data
-  dta.metab <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Metabolites")))
+  dta.metab <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Metabolites")))
   print("Metabolites sheet is read in")
+  basicSheetCheck(dta.metab, getReqMetabSheetCols(), "Metabolites") 
+
   #subject metabolite data
   # The following call does not always work with skip=1, col_names=F
   #dta.smetab <-
@@ -74,6 +84,7 @@ readCOMETSinput <- function(file) {
 
   # New code
   dta.smetab <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites")))
+  basicSheetCheck(dta.smetab, NULL, "SubjectMetabolites") 
   dict_metabnames      <- tolower(colnames(dta.smetab))
   colnames(dta.smetab) <- paste("...", 1:ncol(dta.smetab), sep="")
   print("SubjectMetabolites sheet is read in")
@@ -84,13 +95,14 @@ readCOMETSinput <- function(file) {
   names(dict_metabnames) <- colnames(dta.smetab)
 
   #subject data
-  dta.sdata <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
+  dta.sdata <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
   print("SubjectData sheet is read in")
+  basicSheetCheck(dta.sdata, NULL, "SubjectData") 
+
   #variable mapping
-  dta.vmap <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
+  dta.vmap <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
   print("VarMap sheet is read in")
+  basicSheetCheck(dta.vmap, getReqVarMapSheetCols(), "VarMap") 
   
   # Make sure columns are in lower case
   dta.vmap$varreference   <- checkVariableNames(dta.vmap$varreference, "VarMap sheet, VARREFERENCE column") 
@@ -98,9 +110,9 @@ readCOMETSinput <- function(file) {
   dta.vmap$vartype        <- checkVariableNames(dta.vmap$vartype, "VarMap sheet, VARYTYPE column")
 
   #batch model specifications
-  dta.models <-
-    suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
+  dta.models <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
   print("Models sheet is read in")
+  basicSheetCheck(dta.models, getReqModelsSheetCols(), "Models") 
 
   # Make sure columns are in lower case. The adjustment and stratification columns
   #  can have missing values.
@@ -125,7 +137,11 @@ readCOMETSinput <- function(file) {
     # Check the table
     dta.options <- checkOptionsSheet(dta.options)
     print(paste0(opnm, " sheet is read in"))
-  }  
+  } else {
+    msg <- paste0("NOTE: the column ", toupper(modnm), " was not found in the Models sheet. ",
+                  "Assuming older version of Excel file\n")
+    cat(msg)
+  } 
 
   # Go through the varmap VARTYPE column and convert categorical entries into factors
   myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical" & dta.vmap$varreference!="metabolite_id")]
@@ -134,6 +150,11 @@ readCOMETSinput <- function(file) {
 	dta.sdata[,i] <- factor(dta.sdata[,i])
   }
 
+  # Go through the varmap VARTYPE column and make sure continuous variables are numeric
+  mycont <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="continuous" & dta.vmap$varreference!="metabolite_id")]
+  print(paste("There are",length(mycont),"continuous variables"))
+  if (length(mycont)) checkContVarsAreNumeric(dta.sdata, mycont) 
+  
   # Rename the variables in subject data to prevent errors in checkIntegrity
   oldnames <- names(dta.sdata)
   newnames <- renameSubjDataVars(oldnames, dta.vmap)
@@ -203,7 +224,8 @@ readCOMETSinput <- function(file) {
     mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
 
     # Make sure the metabololites are numeric
-    dtalist$subjdata <- convertVarsToNumeric(dtalist$subjdata, mymets)
+    checkContVarsAreNumeric(dtalist$subjdata, mymets, names=dict_metabnames[mymets])
+    #dtalist$subjdata <- convertVarsToNumeric(dtalist$subjdata, mymets)
 
     # check to see which columns have non-missing values
     havedata <-
@@ -281,6 +303,26 @@ readCOMETSinput <- function(file) {
   }
 }
 
+basicSheetCheck <- function(data, reqCols, sheetName, min.ncol=2) {
+
+  if (!length(data)) stop(paste0(sheetName, " sheet is empty"))
+  cols <- colnames(data)
+  if (length(reqCols)) {
+    reqCols <- trimws(tolower(reqCols))
+    cols    <- trimws(tolower(cols))
+    tmp  <- !(reqCols %in% cols)
+    if (any(tmp)) {
+      msg <- paste0(reqCols[tmp], collapse=", ")
+      msg <- paste0(sheetName, " sheet is missing column(s): ", toupper(msg))
+      stop(msg)
+    }
+  }
+  if (length(cols) < min.ncol) stop(paste0(sheetName, " sheet has too few columns"))
+  if (!nrow(data)) stop(paste0(sheetName, " sheet has no rows"))
+
+  NULL
+
+} # END: basicSheetCheck
 
 #' This function provides a description of the input data (for categorical data, the number of samples of each type; for continous data, the median and other statistics for each variable)
 #' @param readData list from readComets
@@ -346,7 +388,7 @@ checkOptionsSheet <- function(x) {
   for (i in 1:length(req)) {
     col <- req[i]
     if (!(col %in% cols)) {
-      stop(paste0("ERROR: ", sheet, " sheet does not contain the ", col, " column"))
+      stop(paste0("ERROR: ", sheet, " sheet does not contain the ", toupper(col), " column"))
     }
 
     # Replace missing values with empty string
@@ -384,10 +426,41 @@ checkModelspecCol <- function(vec) {
   reserved <- getGlobalOptionName()  
   tmp      <- trimws(vec) %in% reserved
   if (any(tmp)) {
-    msg <- paste0("ERROR: the ", getModelOptionsIdCol(), 
+    msg <- paste0("ERROR: the ", toupper(getModelOptionsIdCol()), 
                   " in the Models sheet contains the reseved word ", reserved)
     stop(msg)
   }
   
 } # END: checkModelspecCol
 
+checkContVarsAreNumeric <- function(data, vars, names=NULL) {
+
+  n <- length(vars)
+  if (!n || !length(data)) return(NULL)
+  if (is.null(names)) names <- vars 
+  if (length(names) != n) stop("INTERNAL CODING ERROR in checkContVarsAreNumeric")
+
+  err <- rep(FALSE, n) 
+  for (i in 1:n) {
+    vec <- data[, vars[i], drop=TRUE]
+    if (!is.numeric(vec) && !all(is.na(vec))) {
+      err[i] <- TRUE
+      vec2   <- as.numeric(vec)
+      tmp    <- is.na(vec2)
+      vec2   <- unique(vec[tmp])
+      tmp    <- !is.na(vec2)
+      vec2   <- vec2[tmp]
+      if (length(vec2)) {
+        vals <- paste(vec2, collapse=", ", sep="")
+      } else {
+        vals <- ""
+      }
+      msg <- paste("ERROR: the continuous variable ", names[i], " contains invalid value(s): ", vals, sep="")
+      print(msg) 
+    }
+  }
+  if (any(err)) stop("ERROR with continuous variables. See above")
+  
+  NULL
+
+} # END: checkContVarsAreNumeric
