@@ -96,7 +96,9 @@ OutputListToExcel <- function(filename, obj) {
       over <- FALSE
     }
   }
-  
-  NULL
+  msg <- paste0("List saved to file: ", filename, "\n")
+  cat(msg)  
+
+  filename
 }
 

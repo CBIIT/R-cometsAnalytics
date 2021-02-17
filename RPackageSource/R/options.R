@@ -108,6 +108,10 @@ convertModelOptions <- function(opnames, opvalues, model) {
       val <- getLogicalValueFromStr(val) 
     } else if (!(nm %in% ops.c)) {
       val <- as.numeric(val) 
+    } else if (nm %in% ops.c) {
+      val <- trimws(val)
+      if (!nchar(val)) val <- NULL
+      if (!length(val)) val <- NULL 
     }
     ret[[nm]] <- val
   }

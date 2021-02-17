@@ -45,14 +45,19 @@ getEffectsRunName          <- function() {"run"}
 # ModelSummary 
 getModelSummaryName       <- function() {"ModelSummary"}
 getModelSummaryNobsName   <- function() {"nobs"}
+getModelSummaryFunCol     <- function() {"model_function"}
 
 # For input excel file
-getModelOptionsIdCol <- function() {"modelspec"}
-getOptionNameCol     <- function() {"option"}
-getOptionValueCol    <- function() {"value"}
-getOptionsSheetName  <- function() {"ModelOptions"}
-getGlobalOptionName  <- function() {"ModelChecks"}
-getModelFunctionCol  <- function() {"function"}
+getModelOptionsIdCol  <- function() {"modelspec"}
+getOptionNameCol      <- function() {"option"}
+getOptionValueCol     <- function() {"value"}
+getOptionsSheetName   <- function() {"ModelOptions"}
+getGlobalOptionName   <- function() {"ModelChecks"}
+getModelFunctionCol   <- function() {"function"}
+getReqSheetNames      <- function() {c("Metabolites", "SubjectMetabolites", "SubjectData", "VarMap", "Models")} 
+getReqMetabSheetCols  <- function() {c("metabid	", "metabolite_name")}
+getReqVarMapSheetCols <- function() {c("VARREFERENCE", "COHORTVARIABLE", "VARTYPE")}
+getReqModelsSheetCols <- function() {c("MODEL", "OUTCOMES", "EXPOSURE", "ADJUSTMENT", "STRATIFICATION", "WHERE")}
 
 getVarRef_metabId    <- function() {"metabolite_id"}
 getVarRef_subjectId  <- function() {"id"}
