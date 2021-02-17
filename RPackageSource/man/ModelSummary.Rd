@@ -26,6 +26,7 @@ all the below names may not appear in the data frame.
 \item{\code{loglik}}{ Log-likelihood of the fitted model}
 \item{\code{message}}{ Error message produced from the modeling function}
 \item{\code{model}}{ Model label from \code{\link{getModelData}}}
+\item{\code{model_function}}{ Model function used in \code{\link{runModel}}}
 \item{\code{nobs}}{ Number of observations used}
 \item{\code{null.deviance}}{ Deviance of the NULL model}
 \item{\code{outcome}}{ Outcome variable}
