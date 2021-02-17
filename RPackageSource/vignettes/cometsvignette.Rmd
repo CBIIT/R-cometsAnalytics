@@ -15,26 +15,40 @@ vignette: >
 
 ## Introduction
 
-COMETS Analytics support all cohort-specific analyses of the COMETS consortium. This collaborative work is done via the COMETS harmonization group activities. For more information, see the [COMETS website] (http://epi.grants.cancer.gov/comets/).
+COMETS Analytics support all cohort-specific analyses of the COMETS consortium. 
+This collaborative work is done via the COMETS harmonization group activities. 
+For more information, see the [COMETS website] (http://epi.grants.cancer.gov/comets/).
+This vignette demonstrates using the COMETS R package from the command line. 
+See the [**tutorial**](https://cbiit.github.io/R-cometsAnalytics/Tutorial/docs/) for using COMETS from the GUI. 
+Documentation of the COMETS R package can be found here [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/COMETS-manual.pdf).
+Each project could create their own vignette to run the analyses.
 
 ## Data Input Format
 
-The required input file shoud be in excel format with the following 6 sheets: 
+The required input file should be in excel format with the following 6 sheets: 
 
-  1. Metabolites - from harmonized metabolites output
-  2. SubjectMetabolites - abundances in columns and subject in rows
-  3. SubjectData - other exposure and adjustment variables
-  4. VarMap - maps the variables needed to conduct the cohort specific analysis. Specify the name of variables under CohortVariable column. if the VarReference has the same name in the cohort, leave blank
-  5. Models - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
-  6. ModelOptions - optional sheet containing model specific options
+  1. [**Metabolites**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/Metabolites.jpg) - from harmonized metabolites output
+  2. [**SubjectMetabolites**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/SubjectMetabolites.jpg) - abundances in columns and subject in rows
+  3. [**SubjectData**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/SubjectData.jpg) - other exposure and adjustment variables
+  4. [**VarMap**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/VarMap.jpg) - maps the variables needed to conduct the cohort specific analysis. Specify the name of variables under CohortVariable column.
+  5. [**Models**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/Models.jpg) - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
+  6. [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg) - sheet containing model specific options
 
+Complete documentation of the various sheets can be found in the package documentation.
 An example input file is available [**HERE**](https://www.comets-analytics.org/examples/cometsInput.xlsx).
 
-## Analysis Workflow for correlation analysis
+## Missing values
+
+Only empty cells in any excel sheet become missing values when the R software reads the sheet into a data frame.
+Any non-numeric value in a cell for a continuous variable will result in an error.
+
+ 
+## Example Workflows for different analyses
 
 ### 1. Load Data
 
-The first step of the analysis is to load in the data with the *readCOMETSinput()* function.  Input for this function is an Excel spreadsheet, per the description above.  
+The first step of the analysis is to load in the data with the *readCOMETSinput()* function.  
+Input for this function is an Excel spreadsheet, per the description above.  
 
 ```{r}
 # Retrieve the full path of the input data
@@ -194,7 +208,19 @@ list with family set to "poisson".
   print(poisson_results)
 ```
 
-### 9. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
+### 9. Confidence intervals for effects from lm or glm.
+Below is example code to compute 95% confidence intervals for the estimates from the 
+glm results above in the Effects data frame. Confidence intervals for the lm results
+are similar.
+```{r}
+  x <- glm_results$Effects
+  z <- qnorm((1 - 0.95)/2, lower.tail=FALSE)
+  x[, "estimate.lower"] <- x[, "estimate"] - z*x[, "std.error"]
+  x[, "estimate.upper"] <- x[, "estimate"] + z*x[, "std.error"]
+  print(x)
+```
+
+### 10. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
 
 All models desginated in the input file can be run with one command, 
 and individual output Excel files or correlation results will be written
