@@ -47,7 +47,7 @@ fixData <- function(dta,compbl=FALSE) {
 checkForSameVars <- function(v1, v2) {
 
   # Variables should be "tolowered" at this point
-  ret <- FALSE
+  ret <- NULL
   n1  <- length(v1)
   if (n1 != length(v2)) stop("Vectors do not have the same length")
   v1  <- trimws(v1)
@@ -60,13 +60,13 @@ checkForSameVars <- function(v1, v2) {
       vars1 <- trimws(unlist(strsplit(v1[row], " ", fixed=TRUE)))
       vars2 <- trimws(unlist(strsplit(v2[row], " ", fixed=TRUE)))
       tmp   <- intersect(vars1, vars2)
-      if (length(tmp)) return(TRUE)
+      if (length(tmp)) ret <- unique(c(ret, tmp))
     }
   }
 
   ret
 
-} # END: cehckForSameVars
+} # END: checkForSameVars
 
 
 # ---------------------------------------------------------------------------
@@ -128,11 +128,20 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
-    else if (checkForSameVars(dta.models$stratification, dta.models$adjustment)) { 
-	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
+
+    tmp <- checkForSameVars(dta.models$stratification, dta.models$adjustment)
+    if (length(tmp)) {
+      tmp <- paste0(tmp, collapse=", ")  
+      msg <- paste0("The variables ", tmp, 
+               " are both adjustment and stratification variables! This is not allowed.") 
+	  stop(msg)
     }
-    else if (checkForSameVars(dta.models$stratification, dta.models$exposure)) { 
-        stop("Exposure and stratification parameters are the same!  This is not allowed.")
+    tmp <- checkForSameVars(dta.models$stratification, dta.models$exposure)
+    if (length(tmp)) { 
+      tmp <- paste0(tmp, collapse=", ")  
+      msg <- paste0("The variables ", tmp, 
+               " are both exposure and stratification variables! This is not allowed.") 
+	  stop(msg)
     }
     else if (length(subjid) == 0) {
         stop("id (for subject id) is not found as a parameter in VarMap sheet!  Specify which column should be used for subject id")
@@ -239,7 +248,6 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
       )
     )
   } # end checkIntegriy
-
 
 # ---------------------------------------------------------------------------
 # Harmonize ---------------------------------------------------
@@ -355,10 +363,22 @@ prdebug<-function(lab,x){
   print(paste(lab," = ",x," Time: ",Sys.time()))
 }
 
+checkWhereVarInData <- function(var, colNames) {
+
+  if (!(var %in% colNames)) {
+    msg <- paste0("ERROR: column ", var, " not found in data\n")
+    cat(msg)
+    stop(msg)
+  }
+  NULL
+
+} # END: checkWhereVarInData
+
+
 #' Function that subsets input data based on "where variable"
 #'
 #' @param readData list from readComets
-#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator ("<", ">", "=","<=",">="), and a value.  For example, "where = c("Gender=Female")". Multiple where statements should be comma separated (a vector).
+#' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator ("<", ">", "=","<=",">="), and a value.  For example, "where = c("Gender=Female")".
 #' @return filtered list
 #'
 filterCOMETSinput <- function(readData,where=NULL) {
@@ -375,42 +395,42 @@ filterCOMETSinput <- function(readData,where=NULL) {
     warning("No filtering was performed because 'where' parameter contains no filters")
     return(readData)
   }
+  cx <- colnames(readData$subjdata)
 
   # create rules for each filter
   for (i in 1:length(myfilts)) {
-		myrule <- myfilts[i]
-                if(length(grep("<=",myrule))>0) {
-                        mysplit <- strsplit(myrule,"<=")[[1]]
-			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
-                        myvar = gsub(" ","",mysplit[1])
-			samplesToKeep <- c(samplesToKeep,
-                           which(as.numeric(as.character(readData$subjdata[,myvar])) <= gsub(" ","",as.numeric(mysplit[2]))) )
-                } else if(length(grep(">=",myrule))>0) {
-                        mysplit <- strsplit(myrule,">=")[[1]]
-			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
-                        myvar = gsub(" ","",mysplit[1])
-			samplesToKeep <- c(samplesToKeep,
-                           which(as.numeric(as.character(readData$subjdata[,myvar])) >= gsub(" ","",as.numeric(mysplit[2]))) )
-                } else if(length(grep("<",myrule))>0) {
-			mysplit <- strsplit(myrule,"<")[[1]]
-			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
-			myvar = gsub(" ","",mysplit[1])
-               		samplesToKeep <- c(samplesToKeep,
-                           which(as.numeric(as.character(readData$subjdata[,myvar])) < gsub(" ","",as.numeric(mysplit[2]))) )
-        	} else if(length(grep(">",myrule))>0) {
-	        	mysplit <- strsplit(myrule,">")[[1]]
-			#myvar <- readData$vmap$cohortvariable[which(readData$vmap$varreference==gsub(" ","",mysplit[1]))]
-			myvar = gsub(" ","",mysplit[1])
-                        samplesToKeep <- c(samplesToKeep,
-                           which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(gsub(" ","",mysplit[2]))) )
-		} else if (length(grep("!=",myrule))>0) {
-                tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=1)   
-                samplesToKeep <- c(samplesToKeep, tmp)  
-              } else if (length(grep("=",myrule))>0) {
-                tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=0)   
-                samplesToKeep <- c(samplesToKeep, tmp)  
-        	} else
-                stop("Make sure your 'where' filters contain logicals '>', '<', or '='")
+    myrule <- myfilts[i]
+    if (length(grep("<=",myrule))>0) {
+      mysplit <- strsplit(myrule,"<=")[[1]]
+      myvar = gsub(" ","",mysplit[1])
+      checkWhereVarInData(myvar, cx)  
+      samplesToKeep <- c(samplesToKeep,
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) <= gsub(" ","",as.numeric(mysplit[2]))) )
+    } else if(length(grep(">=",myrule))>0) {
+      mysplit <- strsplit(myrule,">=")[[1]]
+      myvar = gsub(" ","",mysplit[1])
+      checkWhereVarInData(myvar, cx)
+      samplesToKeep <- c(samplesToKeep,
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) >= gsub(" ","",as.numeric(mysplit[2]))) )
+    } else if(length(grep("<",myrule))>0) {
+      mysplit <- strsplit(myrule,"<")[[1]]
+      myvar = gsub(" ","",mysplit[1])
+      checkWhereVarInData(myvar, cx)
+      samplesToKeep <- c(samplesToKeep,
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) < gsub(" ","",as.numeric(mysplit[2]))) )
+    } else if(length(grep(">",myrule))>0) {
+      mysplit <- strsplit(myrule,">")[[1]]
+      myvar = gsub(" ","",mysplit[1])
+      checkWhereVarInData(myvar, cx)
+      samplesToKeep <- c(samplesToKeep,
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(gsub(" ","",mysplit[2]))) )
+    } else if (length(grep("!=",myrule))>0) {
+      tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=1)   
+      samplesToKeep <- c(samplesToKeep, tmp)  
+    } else if (length(grep("=",myrule))>0) {
+      tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=0)   
+      samplesToKeep <- c(samplesToKeep, tmp)  
+    } else stop("Make sure your 'where' filters contain logicals (>, >=, <, <=, =, !=)")
   }
   mycounts          <- as.numeric(lapply(unique(samplesToKeep),function(x)
                                             length(which(samplesToKeep==x))))
@@ -432,6 +452,7 @@ getSubsFromEqWhere <- function(data, myrule, notEqual=1) {
   tmp     <- nchar(trimws(mysplit)) > 0  # Takes care of cases == and =
   mysplit <- mysplit[tmp]
   myvar   <- mysplit[1]
+  checkWhereVarInData(myvar, colnames(data))
   
   # Take missing values into account
   missFlag <- length(mysplit) < 2
