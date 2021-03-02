@@ -19,8 +19,8 @@ all the below names may not appear in the data frame.
                    \code{\link{ModelSummary}} table}
 \item{\code{statistic}}{ The test statistic for \code{term}}
 \item{\code{std.error}}{ The standard error of \code{estimate}}
-\item{\code{strata}}{ Stratum label}
-\item{\code{strata.num}}{ Stratum number}
+\item{\code{stratavar}}{ Stratum label or variable}
+\item{\code{strata}}{ Stratum number or level}
 \item{\code{term}}{ Exposure variable or dummy variable name}
 }
 }
