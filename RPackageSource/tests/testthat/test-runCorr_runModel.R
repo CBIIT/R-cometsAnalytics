@@ -14,9 +14,12 @@ load(rdafile)
 results1  <- COMETS::runCorr(test_exmodeldata, test_exmetabdata,"DPP")
 results2  <- COMETS::runModel(test_exmodeldata, test_exmetabdata,"DPP")
 
+keep     <- c("corr", "pvalue")
+results1 <- results1[, keep, drop=FALSE]
+results2 <- (results2$Effects)[, c("corr", "p.value"), drop=FALSE]
+colnames(results2) <- keep
+
 # Compare results
-attr(results1, "ptime") <- NULL
-attr(results2, "ptime") <- NULL
 test_that("runCorr vs runModel",
 {
   expect_equal(results1, results2)
