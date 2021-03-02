@@ -116,8 +116,8 @@ readCOMETSinput <- function(file) {
 
   # Make sure columns are in lower case. The adjustment and stratification columns
   #  can have missing values.
-  dta.models$outcomes       <- checkVariableNames(dta.models$outcomes, "Models sheet, OUTCOMES column") 
-  dta.models$exposure       <- checkVariableNames(dta.models$exposure, "Models sheet, EXPOSURE column") 
+  dta.models$outcomes       <- checkVariableNames(dta.models$outcomes, "Models sheet, OUTCOMES column", stopOnMissError=0) 
+  dta.models$exposure       <- checkVariableNames(dta.models$exposure, "Models sheet, EXPOSURE column", stopOnMissError=0) 
   dta.models$adjustment     <- checkVariableNames(dta.models$adjustment, "Models sheet, ADJUSTMENT column", convertMissTo=NA, stopOnMissError=0) 
   dta.models$stratification <- checkVariableNames(dta.models$stratification, "Models sheet, STRATIFICATION column", convertMissTo=NA, stopOnMissError=0) 
 
@@ -133,9 +133,10 @@ readCOMETSinput <- function(file) {
     
     opnm        <- getOptionsSheetName()
     dta.options <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, opnm),compbl=TRUE))
+    basicSheetCheck(dta.options, getReqModOpSheetCols(), opnm) 
 
     # Check the table
-    dta.options <- checkOptionsSheet(dta.options)
+    dta.options <- checkOptionsSheet0(dta.options)
     print(paste0(opnm, " sheet is read in"))
   } else {
     msg <- paste0("NOTE: the column ", toupper(modnm), " was not found in the Models sheet. ",
@@ -376,21 +377,13 @@ runDescrip<- function(readData){
   return(list(sum_categorical=sumcat,sum_continuous=sumcnt))
 }
 
-checkOptionsSheet <- function(x) {
-
-  sheet <- getOptionsSheetName()
-  if (!length(x)) stop(paste0("ERROR: ", sheet, " is empty"))
-  cols <- colnames(x)
+checkOptionsSheet0 <- function(x) {
 
   # Required columns
-  req  <- c(getModelOptionsIdCol(), getModelFunctionCol(),
-            getOptionNameCol(), getOptionValueCol())
+  req  <- getReqModOpSheetCols()
   for (i in 1:length(req)) {
     col <- req[i]
-    if (!(col %in% cols)) {
-      stop(paste0("ERROR: ", sheet, " sheet does not contain the ", toupper(col), " column"))
-    }
-
+    
     # Replace missing values with empty string
     tmp <- is.na(x[, col, drop=TRUE])
     if (any(tmp)) x[tmp, col] <- ""
@@ -401,7 +394,7 @@ checkOptionsSheet <- function(x) {
 
   x
 
-} # END: checkOptionsSheet
+} # END: checkOptionsSheet0
 
 renameSubjDataVars <- function(oldnames, vmap) {
 

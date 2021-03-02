@@ -83,21 +83,31 @@ OutputListToExcel <- function(filename, obj) {
   if (str != ".xlsx") stop("ERROR: filename must have a .xlsx extension")
   if (file.exists(filename)) file.remove(filename)
 
+  # For backwards compatibility
+  if (is.data.frame(obj) || is.matrix(obj)) obj <- list(output=obj)
+  N <- length(obj)
+
   nms <- trimws(names(obj))
-  if (!length(nms)) nms <- paste("object ", 1:N, sep="")
+  if (!length(nms)) nms <- paste("output ", 1:N, sep="")
   tmp <- nchar(nms) < 1
-  if (any(tmp)) nms[tmp] <- paste("object ", (1:N)[tmp], sep="")
+  if (any(tmp)) nms[tmp] <- paste("output ", (1:N)[tmp], sep="")
 
   over <- TRUE
+  flag <- FALSE
   for (i in 1:N) {
     tmp <- obj[[i]]
     if (length(tmp) && (is.data.frame(tmp) || is.matrix(tmp))) {
       rio::export(tmp, filename, which=nms[i], overwrite=over)
       over <- FALSE
+      flag <- TRUE
     }
   }
-  msg <- paste0("List saved to file: ", filename, "\n")
-  cat(msg)  
+  if (flag) {
+    msg <- paste0("Output saved to file: ", filename, "\n")
+    cat(msg)
+  } else {
+    warning("No output written, check the input object.")
+  }  
 
   filename
 }

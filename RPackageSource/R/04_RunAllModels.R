@@ -5,7 +5,7 @@
 #' @param writeTofile T/F (whether or not to write results for each model into
 #' separate xlsx files). Files are written to current directory. Default is TRUE.
 #' 
-#' @return A list of return objects from \code{\link{runModel}}.
+#' @return A list of return objects from \code{\link{runModel}} or \code{\link{runCorr}}.
 #'       The \code{ith} element in this list is the output from 
 #'        the \code{ith} model run.
 #'
@@ -30,7 +30,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
     print(paste("Running",i))
     mymod <- try(getModelData(readData,modlabel=i))
     if (!("try-error" %in% class(mymod))) {
-      myobj <- try(runModel(mymod, readData, cohort=cohort, op=NULL))
+      myobj <- try(run1Model(mymod, readData, cohort=cohort))
       if ("try-error" %in% class(mymod)) errFlag <- 1
     } else {
       myobj   <- mymod
@@ -44,4 +44,18 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
   }
   return(results)
 }
+
+# Function to call runCorr or runModel
+run1Model <- function(mymod, readData, cohort="") {
+
+  flag <- mymod[[getOldCorrModelName(), exact=TRUE]]
+  if (is.null(flag)) flag <- FALSE
+  if (flag) {
+    ret <- runCorr(mymod, readData, cohort=cohort)
+  } else {
+    ret <- runModel(mymod, readData, cohort=cohort, op=NULL)
+  }
+  ret
+
+} # END: run1Model
 

@@ -68,6 +68,211 @@ checkForSameVars <- function(v1, v2) {
 
 } # END: checkForSameVars
 
+modifySetOfVars <- function(vars) {
+
+  if (!length(vars)) return(NULL)
+  tmp  <- is.character(vars) & !is.na(vars)
+  vars <- vars[tmp]
+  if (length(vars)) {
+    tmp  <- nchar(vars) > 0
+    vars <- vars[tmp]
+  }
+  if (!length(vars)) vars <- NULL
+
+  vars
+
+} # END: modifySetOfVars
+
+checkForVarsInData <- function(row, colName, vars, allcols, sheet="Models", exc="_all_metabolites_") {
+
+  err  <- 0
+  vars <- modifySetOfVars(vars)
+  if (!length(vars)) return(err)
+  vars <- vars[!(vars %in% exc)] 
+  if (!length(vars)) return(err)
+
+  tmp <- !(vars %in% allcols)
+  if (any(tmp)) {
+    err <- 1
+    msg <- paste0(vars[tmp], collapse=", ")
+    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
+                  " The ", toupper(colName), " variable(s) ", msg,
+                  " do not exist in the data! Check the naming!\n")  
+    cat(msg)
+  }
+
+  err
+
+} # END: checkForVarsInData
+
+checkForMissingVarNames <- function(row, colName, vars, sheet="Models") {
+
+  err  <- 0
+  vars <- modifySetOfVars(vars)
+  if (!length(vars)) {
+    err <- 1
+    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
+                  " The ", toupper(colName), " column must contain variable names.\n")  
+    cat(msg)
+  }
+
+  err
+
+} # END: checkForMissingVarNames
+
+checkForOverlappingVars <- function(row, colName1, colName2, vars1, vars2, sheet="Models", 
+                                    exc="_all_metabolites_") {
+
+  err   <- 0
+  vars1 <- modifySetOfVars(vars1)
+  vars2 <- modifySetOfVars(vars2)
+  if (!length(vars1) || !length(vars2)) return(err)
+  vv <- intersect(vars1, vars2)
+  if (length(vv)) vv <- vv[!(vv %in% exc)]
+  if (length(vv)) {
+    err <- 1
+    msg <- paste0(vv, collapse=", ")
+    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
+                  " The variable(s) ", msg, " appear on both the ",
+                  toupper(colName1), " and ", toupper(colName2), 
+                  " columns. This is not allowed.\n")  
+    cat(msg)
+  }
+  
+  err
+
+} # END: checkForOverlappingVars
+
+searchForWhereOp <- function(str, row, colName="WHERE", sheet="Models") {
+
+  ret <- 0
+  if (!length(str) || is.na(str)) return(ret)
+  if (grepl("=", str, fixed=TRUE)) return(ret)
+  if (grepl("<", str, fixed=TRUE)) return(ret)
+  if (grepl(">", str, fixed=TRUE)) return(ret)
+
+  msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
+                  " The ", toupper(colName), " column does not contain", 
+                  " an operator (<, >, =, >=, <=, !=)\n")  
+  cat(msg)
+
+  1
+
+} # END: searchForWhereOp
+
+checkModelsSheet <- function(x, allcols) {
+
+  err <- 0
+  err <- err + basicSheetCheck2(x, getReqModelsSheetCols(), "Models") 
+
+  if (!length(x)) return(err)
+  nr   <- nrow(x)
+  if (!nr) return(err)
+
+  ovec    <- tolower(unlist(x[, "outcomes", drop=TRUE]))
+  evec    <- tolower(unlist(x[, "exposure", drop=TRUE]))
+  avec    <- tolower(unlist(x[, "adjustment", drop=TRUE]))
+  svec    <- tolower(unlist(x[, "stratification", drop=TRUE]))
+  wvec    <- tolower(unlist(x[, "where", drop=TRUE]))
+  ovec    <- gsub("all metabolites", "_all_metabolites_", ovec, fixed=TRUE)
+  evec    <- gsub("all metabolites", "_all_metabolites_", evec, fixed=TRUE)
+  allcols <- trimws(tolower(allcols))
+
+  for (i in 1:nr) {
+    ovars <- trimws(unlist(strsplit(ovec[i], " ", fixed=TRUE)))
+    evars <- trimws(unlist(strsplit(evec[i], " ", fixed=TRUE)))
+    avars <- trimws(unlist(strsplit(avec[i], " ", fixed=TRUE)))
+    svars <- trimws(unlist(strsplit(svec[i], " ", fixed=TRUE)))
+    wstr  <- wvec[i]
+    wvars <- wstr
+    if (grepl(",", wvars, fixed=TRUE)) wvars <- trimws(unlist(strsplit(wvars, ",", fixed=TRUE)))   
+    tmp   <- !is.na(wvars)
+    wvars <- wvars[tmp]
+    wvars <- getVarsFromWhereVec(wvars)
+ 
+    row <- i + 1
+
+    # Check for missing values 
+    err <- err + checkForMissingVarNames(row, "OUTCOMES", ovars, sheet="Models") 
+    err <- err + checkForMissingVarNames(row, "EXPOSURE", evars, sheet="Models")
+
+    # Check that the variables exist in the data
+    err <- err + checkForVarsInData(row, "OUTCOMES", ovars, allcols, sheet="Models")
+    err <- err + checkForVarsInData(row, "EXPOSURE", evars, allcols, sheet="Models")
+    err <- err + checkForVarsInData(row, "ADJUSTMENT", avars, allcols, sheet="Models")
+    err <- err + checkForVarsInData(row, "STRATIFICATION", svars, allcols, sheet="Models")
+    err <- err + checkForVarsInData(row, "WHERE", wvars, allcols, sheet="Models")
+
+    # Check for overlapping variables
+    err <- err + checkForOverlappingVars(row, "OUTCOMES",   "STRATIFICATION", ovars, svars, sheet="Models")
+    err <- err + checkForOverlappingVars(row, "EXPOSURE",   "STRATIFICATION", evars, svars, sheet="Models")
+    err <- err + checkForOverlappingVars(row, "ADJUSTMENT", "STRATIFICATION", avars, svars, sheet="Models")
+
+    err <- err + searchForWhereOp(wstr, row, colName="WHERE", sheet="Models") 
+  }
+
+  err
+
+} # END: checkModelsSheet
+
+checkModelOptionsSheet <- function(x, allcols) {
+
+  sheet <- getOptionsSheetName()
+  err   <- 0
+  err   <- err + basicSheetCheck2(x, getReqModOpSheetCols(), sheet) 
+
+  if (!length(x)) return(err)
+  nr   <- nrow(x)
+  if (!nr) return(err)
+
+  idv  <- getModelOptionsIdCol()  
+  funv <- getModelFunctionCol()
+  opv  <- getOptionNameCol()     
+  valv <- getOptionValueCol()
+
+  idvec   <- unlist(x[, idv, drop=TRUE])
+  funvec  <- tolower(unlist(x[, funv, drop=TRUE]))
+  opvec   <- unlist(x[, opv, drop=TRUE])
+  valvec  <- unlist(x[, valv, drop=TRUE])
+  allcols <- trimws(tolower(allcols))
+
+  
+  err
+
+} # END: checkModelOptionsSheet
+
+basicSheetCheck2 <- function(data, reqCols, sheetName, min.ncol=2) {
+
+  err <- 0
+  if (!length(data)) {
+    cat(paste0("ERROR: ", sheetName, " sheet is empty.\n"))
+    err <- 1
+  }
+  cols <- colnames(data)
+  if (length(reqCols)) {
+    reqCols <- trimws(tolower(reqCols))
+    cols    <- trimws(tolower(cols))
+    tmp  <- !(reqCols %in% cols)
+    if (any(tmp)) {
+      msg <- paste0(reqCols[tmp], collapse=", ")
+      msg <- paste0("ERROR: ", sheetName, " sheet is missing column(s): ", toupper(msg), ".\n")
+      cat(msg)
+      err <- 1
+    }
+  }
+  if (length(cols) < min.ncol) {
+    cat(paste0("ERROR: ", sheetName, " sheet has too few columns.\n"))
+    err <- 1
+  }
+  if (!nrow(data)) {
+    cat(paste0("ERROR: ", sheetName, " sheet has no rows.\n"))
+    err <- 1
+  }
+
+  err
+
+} # END: basicSheetCheck2
+
 
 # ---------------------------------------------------------------------------
 # checkIntegrity function ---------------------------------------------------
@@ -83,13 +288,23 @@ checkForSameVars <- function(v1, v2) {
 checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames) {
 
     print("Running Integrity Check...")
+    ret <- checkIntegrity.main(dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames)
+    if (ret$error) stop("ERROR in Excel file. See above ERROR message(s).")
+    ret
 
+}
+
+checkIntegrity.main <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames) {
+
+    err            <- 0
     allVars.data   <- trimws(colnames(dta.sdata))
     allVars.metabs <- trimws(dict_metabnames)  
     allVars.common <- intersect(allVars.data, allVars.metabs)
     allVars        <- c(allVars.data, allVars.metabs)
     metabIdName    <- getVarRef_metabId()
     subjidNew      <- getVarRef_subjectId()
+
+    err            <- err + checkModelsSheet(dta.models, allVars)
 
     # get the cohort equivalent of metabolite_id and subject id
     metabid = tolower(dta.vmap$cohortvariable[tolower(dta.vmap$varreference) == metabIdName])
@@ -100,93 +315,73 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)]))
     allmodelparams=gsub("all metabolites","All_metabolites", allmodelparams, fixed=TRUE)
 
-    #print(paste(dta.models$ccovs,dta.models$scovs))
-
     # take out multiple blanks and add _ to all metabolites to avoid splitting
     allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
     outmessage = c()
 
     # See if the variables exist in the data
     params <- unique(allmodelparams[!(allmodelparams %in% c("All_metabolites", "all_metabolites"))])
-    tmp    <- !(params %in% allVars)
-    if (any(tmp)) {
-      tmp <- paste0(params[tmp], collapse=", ")
-      msg <- paste0("ERROR: the variable(s) ", tmp, 
-                    " do not exist in the data! Check the naming!")
-      stop(msg)
-    }
-
+    
     # See if any of the variables are in both sets of data
     tmp <- params %in% allVars.common
     if (any(tmp)) {
       tmp <- paste0(params[tmp], collapse=", ")
       msg <- paste0("ERROR: the variable(s) ", tmp, 
-                   " are on both the SubjectData and SubjectMetabolite sheets")
-      stop(msg)
+                   " are on both the SubjectData and SubjectMetabolite sheets\n")
+      cat(msg)
+      err <- err + 1 
     }
 
     if (length(metabid) == 0) {
-      stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
+      cat("metabid is not found as a parameter in VarMap sheet! Specify which column should be used for metabolite id.\n")
+      err <- err + 1
     }
-
-    tmp <- checkForSameVars(dta.models$stratification, dta.models$adjustment)
-    if (length(tmp)) {
-      tmp <- paste0(tmp, collapse=", ")  
-      msg <- paste0("The variables ", tmp, 
-               " are both adjustment and stratification variables! This is not allowed.") 
-	  stop(msg)
+ 
+    if (length(subjid) == 0) {
+      cat("id (for subject id) is not found as a parameter in VarMap sheet! Specify which column should be used for subject id.\n")
+      err <- err + 1
     }
-    tmp <- checkForSameVars(dta.models$stratification, dta.models$exposure)
-    if (length(tmp)) { 
-      tmp <- paste0(tmp, collapse=", ")  
-      msg <- paste0("The variables ", tmp, 
-               " are both exposure and stratification variables! This is not allowed.") 
-	  stop(msg)
+    if (length(intersect(subjidNew,colnames(dta.sdata))) != 1) {
+      cat("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectData' sheet. Check the input file.\n")
+      err <- err + 1
     }
-    else if (length(subjid) == 0) {
-        stop("id (for subject id) is not found as a parameter in VarMap sheet!  Specify which column should be used for subject id")
+    if (length(intersect(subjid,dict_metabnames)) !=1) {
+      cat("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectMetabolites' sheet. Check the input file.\n")
+      err <- err + 1
     }
-    else if (length(intersect(subjidNew,colnames(dta.sdata))) != 1) {
-        stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectData' sheet. Check the input file.")
+    if (length(intersect(metabid,colnames(dta.metab))) != 1) {
+      cat("The user input metabolite_id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'Metabolites' sheet. Check the input file.\n")
+      err <- err + 1
     }
-     else if (length(intersect(subjid,dict_metabnames)) !=1) {
-        stop("The user input id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'SubjectMetabolites' sheet. Check the input file.")
+    
+    dta.metab[[metabid]] = tolower(dta.metab[[metabid]])
+    dta.sdata[[subjidNew]] = tolower(dta.sdata[[subjidNew]])
+    dta.smetab[[subjid.smetab]] = tolower(dta.smetab[[subjid.smetab]])
+    if (length(grep(metabid,colnames(dta.metab))) == 0) {
+      cat("Error: Metabolite ID from 'VarMap Sheet' (",metabid,") does not match column name from 'Metabolites Sheet'.\n")
+      err <- err + 1
     }
-    else if (length(intersect(metabid,colnames(dta.metab))) != 1) {
-        stop("The user input metabolite_id in the 'COHORTVARIABLE' column of the Varmap Sheet is not found in the 'Metabolites' sheet. Check the input file.")
+    if (length(grep(subjidNew,colnames(dta.sdata))) == 0) {
+      cat("Error: Sample ID from 'VarMap Sheet' (",subjid,") does not match a column name in 'SubjectData Sheet'.\n")
+      err <- err + 1
     }
-    else {
-      #print("Passed the checks")
-      dta.metab[[metabid]] = tolower(dta.metab[[metabid]])
-      dta.sdata[[subjidNew]] = tolower(dta.sdata[[subjidNew]])
-      dta.smetab[[subjid.smetab]] = tolower(dta.smetab[[subjid.smetab]])
-      if (length(grep(metabid,colnames(dta.metab))) == 0) {
-          stop("Error: Metabolite ID from 'VarMap Sheet' (",metabid,") does not match column name from 'Metabolites Sheet'")
-      }
-      else if (length(grep(subjidNew,colnames(dta.sdata))) == 0) {
-          stop("Error: Sample ID from 'VarMap Sheet' (",subjid,") does not match a column name in 'SubjectData Sheet'")
-      }
-      else if (length(unique(dta.sdata[,subjidNew])) != length(unique(dta.smetab[,subjid.smetab]))) {
-        outmessage = c(
+    if (length(unique(dta.sdata[,subjidNew])) != length(unique(dta.smetab[,subjid.smetab]))) {
+      outmessage = c(
           outmessage,"Number of subjects in SubjectData sheet does not match number of subjects in SubjectMetabolites sheet"
-        )
-      }
-      else if (length(unique(colnames(dta.smetab))) != ncol(dta.smetab)) {
-        outmessage = c(
-          outmessage,"Metabolite abundances sheet (SubjectMetabolites) contains duplicate columns (metabolite names)"
-        )
-      }
-      else if (length(unique(unlist(dta.sdata[,subjidNew]))) != nrow(dta.sdata)) {
+      )
+    } else if (length(unique(colnames(dta.smetab))) != ncol(dta.smetab)) {
+      outmessage = c(
+        outmessage,"Metabolite abundances sheet (SubjectMetabolites) contains duplicate columns (metabolite names)"
+      )
+    } else if (length(unique(unlist(dta.sdata[,subjidNew]))) != nrow(dta.sdata)) {
         outmessage = c(
           outmessage,"Warning: Sample Information sheet (SubjectData) contains duplicate ids"
         )
-      }
-      else if (length(unique(unlist(dta.metab[,metabid]))) != nrow(dta.metab)) {
+    } else if (length(unique(unlist(dta.metab[,metabid]))) != nrow(dta.metab)) {
         outmessage = c(
           outmessage,"Warning: Metabolite Information sheet (Metabolites) contains duplicate metabolite ids"
         )
-      }
-      else {
+    } else {
         nummetab = length(unique(colnames(dta.smetab)[-c(which(colnames(dta.smetab) ==
                                                                  subjid.smetab))]))
         numsamples = length(unique(dta.smetab[[subjid.smetab]]))
@@ -197,43 +392,18 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
           outmessage = c(
             outmessage,"Passed all integrity checks, analyses can proceed. If you are part of COMETS, please download metabolite list below and submit to the COMETS harmonization group."
           )
-        }
-        else {
-          # if (length(intersect(tolower(make.names(dta.metab[[metabid]])),tolower(colnames(dta.smetab)))) !=
-          #    nummetab) {
-	  if (length(intersect(names(dict_metabnames)[match(tolower(dta.metab[[metabid]]),dict_metabnames)],
-		tolower(colnames(dta.smetab)))) != nummetab) {	
-              stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
-          }
-          if (length(intersect(dta.sdata[[subjidNew]],dta.smetab[[subjid.smetab]])) !=
-              numsamples) {
-              stop("Error: Sample ids in SubjectMetabolites DO NOT ALL match subject ids in SubjectData sheet")
-          }
-        }
-      }
+       }
     }
-
-   ########################################
-   # Check that models are reasonable
-   ########################################
-   # Check that adjustment variables that at least two unique values
-##   for (i in dta.models$adjustment) {
-##        temp <- length(unique(dta.sdata[[i]]))
-##	if(temp <= 1 && !is.na(i)) {
-##		outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an adjustment but that variable only has
-##			one possible value"))
-##   	}
-##   }
-##
-##   # Check that stratification variables that at least two unique values
-##   for (i in dta.models$stratification) {
-##        temp <- length(unique(dta.sdata[[i]]))
-##        if(temp <= 1 && !is.na(i)) {
-##                outmessage<-c(outmessage,paste("Error: one of your models specifies",i,"as an stratification but that variable only has
-##                        one possible value"))
-##        }
-##   }
-
+        
+    #if (length(intersect(names(dict_metabnames)[match(tolower(dta.metab[[metabid]]),dict_metabnames)],
+    #  tolower(colnames(dta.smetab)))) != nummetab) {	
+    #         stop("Error: Metabolites in SubjectMetabolites DO NOT ALL match metabolite ids in Metabolites Sheet")
+    #}
+    #if (length(intersect(dta.sdata[[subjidNew]],dta.smetab[[subjid.smetab]])) !=
+    #         numsamples) {
+    #         stop("Error: Sample ids in SubjectMetabolites DO NOT ALL match subject ids in SubjectData sheet")
+    #}
+            
     if (is.null(outmessage)) {
       outmessage = "Input data has passed QC (metabolite and sample names match in all input files)"
     }
@@ -241,13 +411,12 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     # rename subjid in dta.smetab sheet for merging later on
     colnames(dta.smetab)[which(colnames(dta.smetab)==subjid.smetab)] <- subjidNew
 
-    return(
-      list(
-        dta.smetab = dta.smetab,dta.metab = dta.metab, dta.sdata = dta.sdata,outmessage =
-          outmessage
-      )
-    )
-  } # end checkIntegriy
+    ret <- list(dta.smetab=dta.smetab, dta.metab=dta.metab, dta.sdata=dta.sdata, 
+                outmessage=outmessage, error=err)
+      
+    ret    
+
+} # end checkIntegriy.main
 
 # ---------------------------------------------------------------------------
 # Harmonize ---------------------------------------------------

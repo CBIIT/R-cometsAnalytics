@@ -153,7 +153,7 @@ runModel.setReturnDF <- function(x, varMap) {
   cvars <- c("adj", "exposure", "exposurespec", "outcomespec", "term",
              "adjspec", "adjvars", "adjvars.removed", "adj_uid",
              "cohort", "exposure_uid", "exposurespec", "message", "model",
-             "outcome", "outcome_uid", "spec", "strata",
+             "outcome", "outcome_uid", "spec", "stratavar", "strata",
              "type", "object") 
   cx    <- colnames(x)
   tmp   <- !(cx %in% cvars)
@@ -163,9 +163,8 @@ runModel.setReturnDF <- function(x, varMap) {
     for (v in vars[tmp]) x[, v] <- as.numeric(x[, v])
   }
 
-  # Remove adj and exposure columns (duplicated information)
+  # Remove adj column (duplicated information)
   if ("adj" %in% colnames(x)) x$adj <- NULL
-  if ("exposure" %in% colnames(x)) x$exposure <- NULL
 
   # Make sure terms and exposure columns that have metabolites have
   #   the metabolite name instead of ...j

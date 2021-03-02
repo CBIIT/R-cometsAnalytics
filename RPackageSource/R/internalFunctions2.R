@@ -387,3 +387,151 @@ transformDataFromString <- function(data, vars, funcStr) {
 
 } # END: transformDataFromString
 
+newVersionOutToOldOut <- function(x) {
+
+  if (!length(x)) return(x)
+  if (!is.list(x)) return(x)
+ 
+  msn  <- getModelSummaryName()
+  effn <- getEffectsName()
+  ms   <- x[[msn, exact=TRUE]]
+  eff  <- x[[effn, exact=TRUE]]
+  if (!length(ms) || !length(eff)) return(x)
+
+  # Merge data frames
+  cms  <- colnames(ms)
+  ceff <- colnames(eff)
+  idv  <- getEffectsRunName()
+  rows <- match(eff[, idv, drop=TRUE], ms[, idv, drop=TRUE])
+  if (any(is.na(rows))) return(x)
+  tmp  <- !(cms %in% eff)
+  cms  <- cms[tmp]
+  if (length(cms)) ret <- cbind(eff, ms[rows, , drop=FALSE])
+  rm(ms, eff)
+  gc()
+  ret <- as.data.frame(ret, stringsAsFactors=FALSE)
+
+  # Old and new column names. NOTE _NO_COL1_ and _NO_COL2_ are placeholders
+  old.req <- c("cohort", "spec", "model", "outcomespec", "exposurespec",
+               "corr", "n", "pvalue", "adjspec", "adjvars", "outcome_uid",
+               "outcome", "exposure_uid", "exposure", "adj_uid", "adj")
+  old.op  <- c("stratavar", "strata")
+  new.req <- c("cohort", "spec", "model", "outcomespec", "term",
+               "corr", "nobs", "p.value", "adjvars",  "_NO_COL1_", "outcome_uid",
+               "outcome", "exposure_uid", "exposure", "adj_uid", "_NO_COL2_")
+  new.op  <- c("stratavar", "strata")
+
+  # Change exposure_uid and exposure 
+  vars <- c("exposure_uid", "exposure", "exposurespec", "term")
+  if (all(vars %in% colnames(ret))) {
+    tmp <- ret[, "exposurespec", drop=TRUE] != ret[, "term", drop=TRUE]
+    tmp[is.na(tmp)] <- FALSE
+    if (any(tmp)) {
+      ret[tmp, "exposure_uid"] <- ret[tmp, "term"]
+      ret[tmp, "exposure"]     <- ret[tmp, "term"]
+    }
+  }
+
+  # Change strata, strata.num, variable sep in new
+  sep0 <- runModel.getOldVarSep()
+  sep1 <- runModel.getVarSep()
+  v    <- new.op[1]
+  if (v %in% colnames(ret)) {
+    tmp <- parseStratVar(ret[, v, drop=TRUE], sep1) 
+    if (length(tmp)) {
+      ret[, v]  <- tmp[, 1]
+      v2        <- new.op[2] 
+      ret[, v2] <- tmp[, 2]
+    }
+  }
+  vars <- c("adjvars", "adjspec", "adj_uid")
+  vars <- vars[vars %in% colnames(ret)]
+  if (length(vars) && (sep0 != sep1)) {
+    for (v in vars) ret[, v] <- gsub(sep1, sep0, ret[, v, drop=TRUE], fixed=TRUE)
+  }
+
+  # Rename cols
+  ret$exposurespec <- NULL
+  old <- c(old.req, old.op)
+  new <- c(new.req, new.op)
+  cx  <- colnames(ret)
+  tmp <- (new != old) & (new %in% cx)
+  if (any(tmp)) {
+    new2 <- new[tmp]
+    old2 <- old[tmp]
+    for (i in 1:length(new2)) cx[cx %in% new2[i]] <- old2[i]
+    colnames(ret) <- cx
+  }
+  v <- "adjspec"
+  if (v %in% colnames(ret)) {
+    ret[, "adjvars"] <- ret[, v, drop=TRUE]
+    ret[, "adj"]     <- ret[, v, drop=TRUE]
+  }
+  
+  # Get the correct cols and order
+  tmp <- old %in% colnames(ret)
+  if (any(tmp)) ret <- ret[, old[tmp], drop=FALSE]  
+
+  tmp <- attributes(x)
+  if (is.list(tmp)) {
+    v            <- runmodel.getTimeAttr()
+    attr(ret, v) <- tmp[[v, exact=TRUE]]
+  }
+  rownames(ret) <- NULL
+
+  ret
+
+} # END: newVersionOutToOldOut
+
+parseDelimVec <- function(vec, sep, ncol) {
+
+  mat <- unlist(strsplit(vec, sep, fixed=TRUE))
+  if (length(mat) != length(vec)*ncol) return(NULL)
+  mat <- matrix(mat, byrow=TRUE, ncol=ncol)
+
+  mat
+
+} # END: parseDelimVec
+
+# Function to break up character vector
+parseStratVar <- function(vec, sep) {
+
+  nr <- length(vec)
+  if (!nr) return(NULL)
+ 
+  # See if more than one var
+  nsep <- stringr::str_count(vec[1], pattern=sep)
+  ncol <- nsep + 1
+
+  ret <- matrix(data=vec, nrow=nr, ncol=2) 
+
+  if (nsep) {
+    mat <- parseDelimVec(vec, sep, ncol)
+    if (length(mat)) {
+      flag <- 0
+      for (i in 1:ncol) {
+        tmp      <- parseDelimVec(mat[, i], "=", 2) 
+        if (length(tmp)) {
+          if (!flag) {
+            ret[, 1] <- trimws(tmp[, 1])
+            ret[, 2] <- trimws(tmp[, 2])
+            flag     <- 1
+          } else {
+            ret[, 1] <- trimws(paste(ret[, 1], tmp[, 1], sep=" "))
+            ret[, 2] <- trimws(paste(ret[, 2], tmp[, 2], sep=" "))
+          }
+        } 
+      }
+    }
+  } else {
+    tmp <- parseDelimVec(vec, "=", 2)
+    if (length(tmp)) {
+      ret[, 1] <- trimws(tmp[, 1])
+      ret[, 2] <- trimws(tmp[, 2])
+    }
+  } 
+    
+  ret   
+
+} # END: parseStratVar
+

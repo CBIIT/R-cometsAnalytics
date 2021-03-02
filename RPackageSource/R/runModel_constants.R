@@ -1,5 +1,9 @@
+
+runmodel.getTimeAttr <- function() {"ptime"}
+
 # Delimiter in output lists of variable names
 runModel.getVarSep <- function() {";"}
+runModel.getOldVarSep <- function() {" "}
 
 # Batch or interactive
 getMode_batch       <- function() {"Batch"}
@@ -7,8 +11,8 @@ getMode_interactive <- function() {"Interactive"}
 getAllMetabsName    <- function() {"All metabolites"}
 
 # For appending stratification columns
-runModel.getStrataColName    <- function() {"strata"}
-runModel.getStrataNumColName <- function() {"strata.num"}
+runModel.getStrataColName    <- function() {"stratavar"}
+runModel.getStrataNumColName <- function() {"strata"}
 
 # For Warnings matrix
 runModel.getWarningCol        <- function() {"type"}
@@ -27,6 +31,7 @@ getNoFamilyValue    <- function() {""}
 getOpStrSep         <- function() {";"}
 getOpStrEq          <- function() {"="}
 getModelOpsName     <- function() {"model.options"}
+getOldCorrModelName <- function() {"runcorr"}
 getCorrModelName    <- function() {"correlation"}
 getGlmModelName     <- function() {"glm"}
 getLmModelName      <- function() {"lm"}
@@ -37,7 +42,7 @@ getMetabDataOpsName <- function() {"options"}
 getEffectsName             <- function() {"Effects"}
 getEffectsTermName         <- function() {"term"}
 getEffectsOutcomespecName  <- function() {"outcomespec"}
-getEffectsExposurespecName <- function() {"outcomespec"}
+getEffectsExposurespecName <- function() {"exposurespec"}
 getEffectsCorrEstName      <- function() {"corr"}
 getEffectsPvalueName       <- function() {"p.value"}
 getEffectsRunName          <- function() {"run"}
@@ -58,6 +63,7 @@ getReqSheetNames      <- function() {c("Metabolites", "SubjectMetabolites", "Sub
 getReqMetabSheetCols  <- function() {c("metabid	", "metabolite_name")}
 getReqVarMapSheetCols <- function() {c("VARREFERENCE", "COHORTVARIABLE", "VARTYPE")}
 getReqModelsSheetCols <- function() {c("MODEL", "OUTCOMES", "EXPOSURE", "ADJUSTMENT", "STRATIFICATION", "WHERE")}
+getReqModOpSheetCols  <- function() {c(getModelOptionsIdCol(), getModelFunctionCol(), getOptionNameCol(), getOptionValueCol())}
 
 getVarRef_metabId    <- function() {"metabolite_id"}
 getVarRef_subjectId  <- function() {"id"}
