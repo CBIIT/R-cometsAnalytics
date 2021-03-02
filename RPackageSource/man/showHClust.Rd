@@ -6,7 +6,7 @@
 \usage{
 showHClust(
   ccorrList,
-  strata.num = NULL,
+  strata = NULL,
   clust = TRUE,
   colscale = "RdYlBu",
   showticklabels = TRUE
@@ -15,7 +15,7 @@ showHClust(
 \arguments{
 \item{ccorrList}{correlation object (output of \code{\link{runCorr}})}
 
-\item{strata.num}{Only valid if ccorrList is from a stratified analysis. 
+\item{strata}{Only valid if ccorrList is from a stratified analysis. 
 If NULL, then results from the first stratum will be used in the plot.}
 
 \item{clust}{TRUE or FALSE to show hierarchical clustering. The default is TRUE.}
