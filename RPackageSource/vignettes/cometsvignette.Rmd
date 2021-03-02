@@ -17,10 +17,12 @@ vignette: >
 
 COMETS Analytics support all cohort-specific analyses of the COMETS consortium. 
 This collaborative work is done via the COMETS harmonization group activities. 
-For more information, see the [COMETS website] (http://epi.grants.cancer.gov/comets/).
-This vignette demonstrates using the COMETS R package from the command line. 
-See the [**tutorial**](https://cbiit.github.io/R-cometsAnalytics/Tutorial/docs/) for using COMETS from the GUI. 
-Documentation of the COMETS R package can be found here [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/COMETS-manual.pdf).
+For more information, see the COMETS [**website**](http://epi.grants.cancer.gov/comets/).
+This vignette demonstrates using the COMETS R package from the command line, while  
+ the [**tutorial**](https://cbiit.github.io/R-cometsAnalytics/Tutorial/docs/) 
+ demonstrates using COMETS from the GUI. 
+Documentation of the COMETS R package can be found here
+  [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/COMETS-manual.pdf).
 Each project could create their own vignette to run the analyses.
 
 ## Data Input Format
@@ -34,7 +36,8 @@ The required input file should be in excel format with the following 6 sheets:
   5. [**Models**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/Models.jpg) - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
   6. [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg) - sheet containing model specific options
 
-Complete documentation of the various sheets can be found in the package documentation.
+Complete documentation of the various sheets can be found in the package 
+ [**documentation**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/COMETS-manual.pdf).
 An example input file is available [**HERE**](https://www.comets-analytics.org/examples/cometsInput.xlsx).
 
 ## Missing values
@@ -228,6 +231,25 @@ and individual output Excel files or correlation results will be written
 
 ```{r eval=F}
  allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
+```
+
+### 11. Backwards compatibility with older Excel files and runCorr.
+Older Excel files that do not have a 
+  [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg)
+ sheet can still be used with newer versions of the COMETS R package. The runCorr function is
+ kept in the package for backwards compatibility and will return a single data frame as in the
+ older versions of COMETS. Below is a comparison of the output from a correlation analysis
+ using runCorr and runModel.
+```{r}
+ exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+                   outcomes=c("lactose","lactate"), exposures=c("age","bmi_grp"))
+
+ old_corr  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
+ new_corr  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
+ print(old_corr)
+ print(new_corr)
+```
+
 
 ```{r}
 sessionInfo()
