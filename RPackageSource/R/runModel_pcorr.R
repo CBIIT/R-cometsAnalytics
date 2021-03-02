@@ -171,30 +171,32 @@ runModel.pcor.test <- function(designMat, y, expVars, method) {
 
 runModel.pcor <- function(x, method) {
 
-  n   <- dim(x)[1]
-  gp  <- dim(x)[2] - 2
-  cvx <- cov(x, method = method)
-  if (det(cvx) < .Machine$double.eps) {
-    warning("The inverse of variance-covariance matrix is calculated using Moore-Penrose generalized matrix invers due to its determinant of zero.")
-    icvx <- ginv(cvx)
-    gp   <- qr(cvx)$rank - 2
-  } else {
-    icvx <- solve(cvx)
-  }
-  pcor <- -cov2cor(icvx)
-  diag(pcor) <- 1
-  if (method == "kendall") {
-    statistic <- pcor/sqrt(2 * (2 * (n - gp) + 5)/(9 * (n - gp) * (n - 1 - gp)))
-    p.value <- 2 * pnorm(-abs(statistic))
-  } else {
-    statistic <- pcor * sqrt((n - 2 - gp)/(1 - pcor^2))
-    p.value <- 2 * pt(-abs(statistic), (n - 2 - gp))
-  }
-  diag(statistic) <- 0
-  diag(p.value)   <- 0
+  return(ppcor::pcor(x, method=method))
 
-  list(estimate = pcor, p.value = p.value, statistic = statistic, 
-        n = n, gp = gp, method = method)
+  #n   <- dim(x)[1]
+  #gp  <- dim(x)[2] - 2
+  #cvx <- cov(x, method = method)
+  #if (det(cvx) < .Machine$double.eps) {
+  #  warning("The inverse of variance-covariance matrix is calculated using Moore-Penrose generalized matrix invers due to its determinant of zero.")
+  #  icvx <- ginv(cvx)
+  #  gp   <- qr(cvx)$rank - 2
+  #} else {
+  #  icvx <- solve(cvx)
+  #}
+  #pcor <- -cov2cor(icvx)
+  #diag(pcor) <- 1
+  #if (method == "kendall") {
+  #  statistic <- pcor/sqrt(2 * (2 * (n - gp) + 5)/(9 * (n - gp) * (n - 1 - gp)))
+  #  p.value <- 2 * pnorm(-abs(statistic))
+  #} else {
+  #  statistic <- pcor * sqrt((n - 2 - gp)/(1 - pcor^2))
+  #  p.value <- 2 * pt(-abs(statistic), (n - 2 - gp))
+  #}
+  #diag(statistic) <- 0
+  #diag(p.value)   <- 0
+
+  #list(estimate = pcor, p.value = p.value, statistic = statistic, 
+  #      n = n, gp = gp, method = method)
 
 } # END: runModel.pcor
 

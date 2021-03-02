@@ -1,17 +1,21 @@
 #---------------------------------------------------------
-#' Calculate correlation matrix for input model.
+#' Calculate correlations for input model.
 #'
 #' @param modeldata list from function \code{\link{getModelData}}
 #' @param metabdata metabolite data list from \code{\link{readCOMETSinput}}
 #' @param cohort cohort label (e.g DPP, NCI, Shanghai)
-#' @param op list of options (see \code{\link{options}}).
 #'
 #' @details This function is a special case of \code{\link{runModel}}
-#'          with the option \code{op$model = "correlation"}
+#'          with the option \code{op$model = "correlation"}, 
+#'          however for backwards compatibility, it returns a data frame as
+#'          in the original version of the \bold{COMETS} R package.
 #'
-#' @return A list of objects with names \code{\link{ModelSummary}},
-#'        \code{\link{Effects}}, and \code{\link{Errors_Warnings}}. 
-#' Attribute of this list includes ptime for processing time of model run.
+#' @return data frame with each row representing the correlation for each combination of outcomes and 
+#' exposures represented as specified in the model (*spec), label (*lab), and universal id (*_uid)
+#' with additional columns for n, pvalue, method of model specification (Interactive or Batch), 
+#' universal id for outcomes (outcome_uid) and exposures (exposure_uid)
+#' name of the cohort, adjustment (adjvars) and stratification (stratavar,strata)  variables. 
+#' Attribute of dataframe includes ptime for processing time of model run.
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
@@ -21,13 +25,15 @@
 #' 	outcomes=c("lactose","lactate"), modelspec="Interactive")
 #' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
-runCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
-  calcCorr(modeldata, metabdata, cohort=cohort, op=op) 
+runCorr <- function(modeldata, metabdata, cohort = "") {
+  calcCorr(modeldata, metabdata, cohort=cohort) 
 }
 
 calcCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
   if (!length(op)) op <- list(model=getCorrModelName())
   if (is.list(op)) op$model <- getCorrModelName()
-  runModel(modeldata, metabdata, cohort=cohort, op=op)
+  ret <- runModel(modeldata, metabdata, cohort=cohort, op=op)
+  ret <- newVersionOutToOldOut(ret)
+  ret
 }
 
