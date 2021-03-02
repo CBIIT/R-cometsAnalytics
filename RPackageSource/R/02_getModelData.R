@@ -63,13 +63,14 @@ getModelData <-  function(readData,
   colvars   <- exposures
   modelspec <- check.string(modelspec, c(getMode_interactive(), getMode_batch()), "modelspec")
   
-  allvsall <- FALSE
-  rem.obj  <- NULL
-  options  <- NULL
-  acovs    <- NULL
-  scovs    <- NULL
-  wgtcov   <- NULL
-  offcov   <- NULL
+  allvsall    <- FALSE
+  rem.obj     <- NULL
+  options     <- NULL
+  acovs       <- NULL
+  scovs       <- NULL
+  wgtcov      <- NULL
+  offcov      <- NULL
+  runCorrFlag <- 0
 
   # All original metabolite names
   allmetabs   <- readData$dict_metabnames
@@ -189,6 +190,11 @@ getModelData <-  function(readData,
     options <- getAllOptionsForModel(mods, readData)
     if (is.null(options)) options <- list()
 
+    # Determine if runCorr is the function to be called
+    runCorrFlag <- options[[getOldCorrModelName(), exact=TRUE]]
+    if (is.null(runCorrFlag)) runCorrFlag <- 0 
+    options[[getOldCorrModelName()]] <- NULL
+
     # Get weight and offset variables
     wgtvar <- NULL
     offvar <- NULL
@@ -300,6 +306,7 @@ getModelData <-  function(readData,
   options         = options
   )
   ret[[runModel.getWarningsListName()]] <- rem.obj
+  ret[[getOldCorrModelName()]]          <- runCorrFlag
 
   ret
 }
@@ -356,7 +363,7 @@ getModelFunFromSheet <- function(opTable) {
   if (!n) stop("ERROR: no model function specified")
   if (n > 1) stop("ERROR: more than one model function specified")
   
-  valid <- getValidModelNames()
+  valid <- c(getValidModelNames(), getOldCorrModelName())
   ret   <- check.string(vec, valid, col)
 
   ret
@@ -436,25 +443,34 @@ getAllOptionsForModel <- function(mods, readData) {
   modelID <- mods[[modnm,  exact=TRUE]]
   if (length(modelID) != 1) stop("INTERNAL CODING ERROR 1 in getOptionsForModel")  
 
-  # Get global options
-  op <- getGlobalOptionsFromSheet(opTable)
-  if (is.null(op)) op <- list()
-
-  # Subset the sheet for the specific model id
-  tmp       <- opTable[, modnm] %in% modelID
-  opTable   <- opTable[tmp, , drop=FALSE]
-  if (!nrow(opTable)) {
+  # Make sure modelID is in the table
+  tmp <- opTable[, modnm] %in% modelID
+  if (!any(tmp)) {
     msg <- paste0("ERROR: ", modnm, " = ", modelID, " not found in ", 
                   getOptionsSheetName(), " sheet")
     stop(msg)
   }
+  opTable2 <- opTable[tmp, , drop=FALSE]
 
   # Get the model function
-  modelFunc <- getModelFunFromSheet(opTable)
+  modelFunc <- getModelFunFromSheet(opTable2)
+
+  # If the model function is runCorr, then we don't need to worry about any options
+  nm <- getOldCorrModelName()
+  if (modelFunc == nm) {
+    ret <- list() 
+    ret[[nm]] <- 1
+    return(ret)
+  }
+
+  # Get global options
+  op <- getGlobalOptionsFromSheet(opTable)
+  if (is.null(op)) op <- list()
+
   op$model  <- modelFunc
 
   # Get model options and include them in op
-  op <- getModelOptionsFromSheet(op, opTable, modelFunc)
+  op <- getModelOptionsFromSheet(op, opTable2, modelFunc)
 
   op
 
