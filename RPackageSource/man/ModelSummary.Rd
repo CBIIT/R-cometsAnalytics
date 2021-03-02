@@ -21,6 +21,7 @@ all the below names may not appear in the data frame.
 \item{\code{deviance}}{ Deviance of the fitted model}
 \item{\code{df.null}}{ NULL model degrees of freedom}
 \item{\code{df.residual}}{ Residual degrees of freedom}
+\item{\code{exposure}}{ Exposure variable}
 \item{\code{exposure_uid}}{ Exposure universal id}
 \item{\code{exposurespec}}{ Exposure variable}
 \item{\code{loglik}}{ Log-likelihood of the fitted model}
@@ -37,8 +38,8 @@ all the below names may not appear in the data frame.
 \item{\code{r.squared}}{ R-squared, the fraction of variance explained by the model}
 \item{\code{sigma}}{ Square root of the estimated variance of the random error}
 \item{\code{spec}}{ "Batch" or "Interactive"}
-\item{\code{strata}}{ Stratum label}
-\item{\code{strata.num}}{ Stratum number}
+\item{\code{stratavar}}{ Stratum label or variable}
+\item{\code{strata}}{ Stratum number or level}
 \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
                           exposure is categorical.}
