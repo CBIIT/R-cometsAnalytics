@@ -20,7 +20,7 @@ Previous releases can be found here: https://github.com/CBIIT/R-cometsAnalytics/
 # Help
 A companion vignette to run through analyses using the R package can be found [here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette.html).
 
-A presentation of the software, its implementation and vision can be found [here](https://www.youtube.com/watch?reload=9&v=dWJ_fdibnms) and a preview of upcoming changes are presented [here](https://github.com/CBIIT/R-cometsAnalytics/tree/master/Presentations) and .
+A presentation of the software, its implementation and vision can be found [here](https://www.youtube.com/watch?reload=9&v=dWJ_fdibnms) and a preview of upcoming changes are presented [here](https://github.com/CBIIT/R-cometsAnalytics/tree/master/Presentations). 
 
 For questions or help on COMETS Analytics app or R package, please send an e-mail to comets.analytics@gmail.com.
 
