@@ -6,14 +6,15 @@
 COMETS Analytics was designed to simplify meta-analysis at the consortia level.  Users prepare data input, and then the software takes care of checking the data integrity, performs data analyses securely, and aggregates results in a standardized format.  Further details on the vision for implementing the software and the current features available can be found here.
 Accessibility
 The software can be run two different ways:
-1.      A standalone R package “R-cometsAnalytics” that encapsulates our core algorithms and functionality, allowing the software to be run locally. The GitHub repository for the development of COMETS Analytics is publicly available at https://github.com/CBIIT/R-cometsAnalytics/ under a GPL-3 license.
-2.      A web-based app (https://www.comets-analytics.org) developed as a user friendly interface to the R package using HTML5.  This app operates on secure cloud-based servers that delete data after analyses.
+1. A standalone R package “R-cometsAnalytics” that encapsulates our core algorithms and functionality, allowing the software to be run locally. The GitHub repository for the development of COMETS Analytics is publicly available at https://github.com/CBIIT/R-cometsAnalytics/ under a GPL-3 license.
+2. A web-based app (https://www.comets-analytics.org) developed as a user friendly interface to the R package using HTML5.  This app operates on secure cloud-based servers that delete data after analyses.
 
 All underlying statistical analyses and data processing use the R-cometsAnalytics R package so that using the R package or the app will produce the same results.
 
 # Version 
 Current Version is 1.6: Released on 10/14/2019 with analytic module for unadjusted and partial correlation analyses. Complete details of the version history are documented in the GitHub repository https://github.com/CBIIT/R-cometsAnalytics/.
 Upcoming Version 2.0: Analytic module with generalized linear models is in testing, expected release in 2021.
+
 Previous releases can be found here: https://github.com/CBIIT/R-cometsAnalytics/releases
 
 # Help
@@ -42,6 +43,7 @@ If you encouter any issues with the R package, please submit an issues using the
 
 # Acknowledgements
 We thank the National Cancer Institute (NCI) for supporting the development and expansion of COMETS Analytics, the NCI Center for Biomedical Informatics and Information Technology team for developing the app, the Information Management Services team for further developing the R package, and our users for providing feedback so we can continuously ameliorate the software.
+
 R COMETS Package Development Team:  Ewy Mathé, Steve Moore, Ella Temprosa, Bill Wheeler, and Joe Zou.
 Web application Development Team: Kailing Chen, Ewy Mathé, Steve Moore, Brian Park, and Ella Temprosa.
  
