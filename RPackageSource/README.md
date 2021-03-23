@@ -18,7 +18,7 @@ Upcoming Version 2.0: Analytic module with generalized linear models is in testi
 Previous releases can be found here: https://github.com/CBIIT/R-cometsAnalytics/releases
 
 # Help
-A companion vignette to run through analyses using the R package can be found [here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v1.5.html).
+A companion vignette to run through analyses using the R package can be found [here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v1.6.html).
 
 A presentation of the software, its implementation and vision can be found [here](https://www.youtube.com/watch?reload=9&v=dWJ_fdibnms) and a preview of upcoming changes are presented [here](https://github.com/CBIIT/R-cometsAnalytics/tree/master/Presentations). 
 
@@ -29,6 +29,13 @@ For questions or help on COMETS Analytics app or R package, please send an e-mai
 To install R Comets-Analytics, simply type the following:
 
 ```
+devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource")
+```
+
+If you are using a newer version of R (>4.0), you will need to reinstall specific d3heatmap and dplyr versions as follows:
+```
+devtools::install_github('rstudio/d3heatmap')
+devtools::install_version('dplyr', version='0.8.5', repos='https://cloud.r-project.org/')
 devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource")
 ```
 
