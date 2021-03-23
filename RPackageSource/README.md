@@ -18,7 +18,7 @@ Upcoming Version 2.0: Analytic module with generalized linear models is in testi
 Previous releases can be found here: https://github.com/CBIIT/R-cometsAnalytics/releases
 
 # Help
-A companion vignette to run through analyses using the R package can be found [here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette.html).
+A companion vignette to run through analyses using the R package can be found [here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v1.5.html).
 
 A presentation of the software, its implementation and vision can be found [here](https://www.youtube.com/watch?reload=9&v=dWJ_fdibnms) and a preview of upcoming changes are presented [here](https://github.com/CBIIT/R-cometsAnalytics/tree/master/Presentations). 
 
@@ -31,8 +31,6 @@ To install R Comets-Analytics, simply type the following:
 ```
 devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource")
 ```
-# Vignette
-[Click here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v1.5.html) to view a detailed vignette that outlines the basic steps of the software.
 
 # Example Data
 We have provided an example input file for users to mimic when creating their own.  This data can be found in the folder inst/extdata.
