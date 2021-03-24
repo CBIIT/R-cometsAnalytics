@@ -1,0 +1,22 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: r
+bioc_required: true
+r:
+  - bioc-release
+
+sudo: false
+cache: packages
+warnings_are_errors: false
+r_build_args: --no-build-vignettes --no-manual
+r_check_args: --no-build-vignettes --no-manual --as-cran
+before_install:
+  cd RPackageSource
+  Rscript -e 'update.packages(ask = FALSE)'
+
+os:
+  - linux
+r_packages:
+  - covr
+after_success:
+- Rscript -e 'library(covr); codecov()'
