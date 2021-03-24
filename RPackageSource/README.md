@@ -1,5 +1,5 @@
-# [![Build Status](https://travis-ci.org/Mathelab/RaMP-DB.svg?branch=master)](https://travis-ci.org/Mathelab/RaMP-DB)
-# [![Build status](https://ci.appveyor.com/api/projects/status/cg0md9vd8njancij?svg=true)](https://ci.appveyor.com/project/Mathelab/ramp-db)
+# [![Build Status](https://travis-ci.org/CBIIT/R-cometsAnalytics.svg?branch=v1.7)](https://travis-ci.org/CBIIT/R-cometsAnalytics)
+# [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=v1.7)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
 
 # R Comets-Analytics
 [Comets-Analytics](http://comets-analytics.org/) supports and streamlines consortium-based analyses of metabolomics data. The software is continuously being developed and maintained by the COMETS Data Infrastructure Working Group with web interface support from NCI's CBIIT and R package development support from IMS.
@@ -12,7 +12,7 @@ The software can be run two different ways:
 All underlying statistical analyses and data processing use the R-cometsAnalytics R package so that using the R package or the app will produce the same results.
 
 # Version 
-Current Version is 1.6: Released on 10/14/2019 with analytic module for unadjusted and partial correlation analyses. Complete details of the version history are documented in the GitHub repository https://github.com/CBIIT/R-cometsAnalytics/.
+Current Version is 1.7: Released on 03/24/2021 with analytic module for unadjusted and partial correlation analyses. Complete details of the version history are documented in the GitHub repository https://github.com/CBIIT/R-cometsAnalytics/.
 Upcoming Version 2.0: Analytic module with generalized linear models is in testing, expected release in 2021.
 
 Previous releases can be found here: https://github.com/CBIIT/R-cometsAnalytics/releases
