@@ -44,6 +44,14 @@ getModelData <-  function(readData,
 
 allvsall=F
 
+# All original metabolite names
+  allmetabs   <- readData$dict_metabnames
+  tmp         <- !(allmetabs %in% readData$subjId)
+  allmetabs   <- allmetabs[tmp]
+  allmetabStr <- getAllMetabsName()
+  acovs       <- NULL
+  scovs       <- NULL
+
 # figure out the model specification based on type (Interactive or Batch)
 if (modelspec == "Interactive") {
   if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables (parameter colvars)")}
@@ -76,8 +84,9 @@ if (modelspec == "Interactive") {
         return(x) }))
   
 #  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
+
   if(any(is.na(match(allvars,subjmetab)))) {
-	stop("HICheck that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
 
   # rename the variables (Assumed to be 'All metabolites' by default)
@@ -130,7 +139,7 @@ if (modelspec == "Interactive") {
   }
 
   # Assign allvsall variable
-  if((colvars=="All metabolites") && (rowvars=="All metabolites")) {
+  if(("All metabolites" %in% colvars) && ("All metabolites" %in% rowvars)) {
 	allvsall=TRUE
   } else {
 	allvsall=FALSE
@@ -223,32 +232,43 @@ else if (modelspec == "Batch") {
   names(readData$subjdata) <- newnames
 
   # assign outcome vars -------------------------
-  if (length(mods) > 0 & mods$outcomes == "All metabolites") {
-    rcovs <- c(readData[[2]])
-  } else
-    rcovs <- as.vector(strsplit(mods$outcomes, " ")[[1]])
+  #if (length(mods) > 0 & mods$outcomes == "All metabolites") {
+  #  rcovs <- c(readData[[2]])
+  #} else
+  #  rcovs <- as.vector(strsplit(mods$outcomes, " ")[[1]])
+  rcovs <- getCovNames_allMetabs(mods$outcomes, allmetabs, readData$dict_metabnames)
 
   # assign exposure vars -------------------------
-  if (length(mods) > 0 & mods$exposure == "All metabolites") {
-    ccovs <- c(readData[[2]])
-  } else
-    ccovs <- as.vector(strsplit(mods$exposure, " ")[[1]])
+  #if (length(mods) > 0 & mods$exposure == "All metabolites") {
+  #  ccovs <- c(readData[[2]])
+  #} else
+  #  ccovs <- as.vector(strsplit(mods$exposure, " ")[[1]])
+  ccovs <- getCovNames_allMetabs(mods$exposure, allmetabs, readData$dict_metabnames)
 
   # assign adjustment vars -------------------------
+  #if (!is.na(mods$adjustment)) {
+  #  acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
+  #} else
+  #  acovs <- NULL
   if (!is.na(mods$adjustment)) {
-    acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
-  } else
-    acovs <- NULL
+      acovs <- as.vector(strsplit(mods$adjustment, " ")[[1]])
+      acovs <- runModel.getNewVarName(unique(trimws(acovs)), readData$dict_metabnames)
+  } 
 
   # assign stratification vars vars -------------------------
+  #if (!is.na(mods$stratification)) {
+  #  scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
+  #} else
+  #  scovs <- NULL
   if (!is.na(mods$stratification)) {
-    scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
-  } else
-    scovs <- NULL
+      scovs <- as.vector(strsplit(mods$stratification, " ")[[1]])
+      scovs <- runModel.getNewVarName(unique(trimws(scovs)), readData$dict_metabnames)
+  } 
 
   # Check that all variables that are input by user exist in the renamed data
   allvars <- c(setdiff(c(rcovs,ccovs,acovs,scovs),"All metabolites"))
-  if(any(is.na(match(allvars,colnames(readData$subjdata))))) {
+  allcols <- c(colnames(readData$subjdata), readData$dict_metabnames)
+  if(any(is.na(match(allvars, allcols)))) {
         stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
   }
 
