@@ -23,13 +23,20 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
   results <- list()
 
   for (i in mymodels) {
-        print(paste("Running",i))
-	mymod <- getModelData(readData,modlabel=i)
-        mycorr <- runCorr(mymod,readData,cohort)
-	results[[i]] <- mycorr
-        if (writeTofile) {
-              OutputCSVResults(i,mycorr,cohort=cohort)
-        }
+    errFlag <- 0
+    print(paste("Running",i))
+    mymod <- try(getModelData(readData,modlabel=i))
+    if (!("try-error" %in% class(mymod))) {
+      mycorr <- try(runCorr(mymod,readData,cohort))
+      if ("try-error" %in% class(mycorr)) errFlag <- 1
+    } else {
+      mycorr  <- mymod  
+      errFlag <- 1
+    }
+    results[[i]] <- mycorr
+    if (writeTofile && !errFlag) {
+      OutputCSVResults(i,mycorr,cohort=cohort)
+    }
   }
   return(results)
 }

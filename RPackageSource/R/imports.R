@@ -12,7 +12,8 @@
 #' @import plotly
 #' @import caret
 #' @importFrom tidyr gather
-#' @importFrom d3heatmap d3heatmap
+#' @importFrom heatmaply heatmaply
 #' @importFrom Hmisc rcorr
-#' @importFrom stats cor
+#' @importFrom methods new
+#' @importFrom stats cor as.formula model.matrix
 NULL
