@@ -3,7 +3,6 @@
 \docType{package}
 \name{CometsAnalytics}
 \alias{CometsAnalytics}
-\alias{CometsAnalytics-package}
 \title{COMETS Analytics R package}
 \description{
 This R package support all cohort-specific analyses of
