@@ -4,9 +4,16 @@
 \alias{getModelData}
 \title{Prepares data for the models to be run as specified in the input.  Can be run in interactive or batch mode.  Each model is checked for validity (correlation between predictors, zero variance, etc.).}
 \usage{
-getModelData(readData, modelspec = "Batch", modlabel = "",
-  rowvars = "All metabolites", colvars = "", adjvars = NULL,
-  strvars = NULL, where = NULL)
+getModelData(
+  readData,
+  modelspec = "Batch",
+  modlabel = "",
+  rowvars = "All metabolites",
+  colvars = "",
+  adjvars = NULL,
+  strvars = NULL,
+  where = NULL
+)
 }
 \arguments{
 \item{readData}{list from readComets}

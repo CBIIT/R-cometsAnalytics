@@ -2,7 +2,7 @@
 % Please edit documentation in R/plottingfunctions.R
 \name{showHClust}
 \alias{showHClust}
-\title{Show interactive heatmap using d3heatmap with hierarchical clustering}
+\title{Show interactive heatmap using heatmaply with hierarchical clustering}
 \usage{
 showHClust(ccorrmat, clust = TRUE, colscale = "RdYlBu")
 }
@@ -11,7 +11,7 @@ showHClust(ccorrmat, clust = TRUE, colscale = "RdYlBu")
 
 \item{clust}{Show hierarchical clustering}
 
-\item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \url{https://plot.ly/ipython-notebooks/color-scales/}}
+\item{colscale}{colorscale, can be custom or named ("Hots","Greens","Blues","Greys","Purples") see \code{\link[heatmaply]{RColorBrewer_colors}}}
 }
 \value{
 a heatmap with outcomes as rows and exposures in columns.
@@ -29,5 +29,5 @@ corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 showHClust(corrmatrix)
 }
 \references{
-For colorscale reference: \url{https://plot.ly/ipython-notebooks/color-scales/}
+For colorscale reference: \code{\link[heatmaply]{RColorBrewer_colors}}
 }
