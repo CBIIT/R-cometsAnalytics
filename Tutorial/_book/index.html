@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>COMETS Analytics Tutorial</title>
+  <meta name="description" content="This is a companion tutorial for comets-analytics.org to help guide cohort-based analyses.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a companion tutorial for comets-analytics.org to help guide cohort-based analyses." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  
+  <meta name="twitter:description" content="This is a companion tutorial for comets-analytics.org to help guide cohort-based analyses." />
+  
+
+<meta name="author" content="CAT Work group">
+
+
+<meta name="date" content="2018-05-23">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+
+<link rel="next" href="quickstart.html">
+<script src="libs/jquery/jquery.min.js"></script>
+<link href="libs/gitbook/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">COMETS Analytics Tutorial</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Overview</a></li>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Quick Start</a></li>
+<li class="chapter" data-level="2" data-path="stepbystep.html"><a href="stepbystep.html"><i class="fa fa-check"></i><b>2</b> Step-by-Step Guide</a><ul>
+<li class="chapter" data-level="2.1" data-path="stepbystep.html"><a href="stepbystep.html#step-2-create-input-file"><i class="fa fa-check"></i><b>2.1</b> Step 2 Create input file</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="stepbystep.html"><a href="stepbystep.html#metabolites"><i class="fa fa-check"></i><b>2.1.1</b> Metabolites</a></li>
+<li class="chapter" data-level="2.1.2" data-path="stepbystep.html"><a href="stepbystep.html#subject-metabolites"><i class="fa fa-check"></i><b>2.1.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="2.1.3" data-path="stepbystep.html"><a href="stepbystep.html#subject-data"><i class="fa fa-check"></i><b>2.1.3</b> Subject Data</a></li>
+<li class="chapter" data-level="2.1.4" data-path="stepbystep.html"><a href="stepbystep.html#varmap"><i class="fa fa-check"></i><b>2.1.4</b> Varmap</a></li>
+<li class="chapter" data-level="2.1.5" data-path="stepbystep.html"><a href="stepbystep.html#subject-data-1"><i class="fa fa-check"></i><b>2.1.5</b> Subject Data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
+<li class="chapter" data-level="3.1" data-path="manual.html"><a href="manual.html#registration-and-account-set-up"><i class="fa fa-check"></i><b>3.1</b> Registration and Account Set-up</a></li>
+<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#input-file"><i class="fa fa-check"></i><b>3.2</b> Input File</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="stepbystep.html"><a href="stepbystep.html#metabolites"><i class="fa fa-check"></i><b>3.2.1</b> Metabolites</a></li>
+<li class="chapter" data-level="3.2.2" data-path="manual.html"><a href="manual.html#subjectmetabolites"><i class="fa fa-check"></i><b>3.2.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="3.2.3" data-path="manual.html"><a href="manual.html#subjectdata"><i class="fa fa-check"></i><b>3.2.3</b> Subject Data</a></li>
+<li class="chapter" data-level="3.2.4" data-path="stepbystep.html"><a href="stepbystep.html#varmap"><i class="fa fa-check"></i><b>3.2.4</b> Variable mapping</a></li>
+<li class="chapter" data-level="3.2.5" data-path="manual.html"><a href="manual.html#models"><i class="fa fa-check"></i><b>3.2.5</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#modelspec"><i class="fa fa-check"></i><b>3.3</b> Analyses modes</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="manual.html"><a href="manual.html#interactive"><i class="fa fa-check"></i><b>3.3.1</b> Interactive</a></li>
+<li class="chapter" data-level="3.3.2" data-path="manual.html"><a href="manual.html#batch"><i class="fa fa-check"></i><b>3.3.2</b> Batch</a></li>
+<li class="chapter" data-level="3.3.3" data-path="manual.html"><a href="manual.html#super-batch"><i class="fa fa-check"></i><b>3.3.3</b> Super Batch</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="correlation-analyses.html"><a href="correlation-analyses.html"><i class="fa fa-check"></i><b>4</b> Correlation Analyses</a><ul>
+<li class="chapter" data-level="4.1" data-path="correlation-analyses.html"><a href="correlation-analyses.html#overview-1"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
+<li class="chapter" data-level="4.2" data-path="correlation-analyses.html"><a href="correlation-analyses.html#details"><i class="fa fa-check"></i><b>4.2</b> Details</a></li>
+<li class="chapter" data-level="4.3" data-path="correlation-analyses.html"><a href="correlation-analyses.html#interactive-or-batch-output"><i class="fa fa-check"></i><b>4.3</b> Interactive or Batch Output</a></li>
+<li class="chapter" data-level="4.4" data-path="correlation-analyses.html"><a href="correlation-analyses.html#super-batch-output"><i class="fa fa-check"></i><b>4.4</b> Super Batch output</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="correlation-analyses.html"><a href="correlation-analyses.html#harmonization-output"><i class="fa fa-check"></i><b>4.4.1</b> Harmonization output</a></li>
+<li class="chapter" data-level="4.4.2" data-path="correlation-analyses.html"><a href="correlation-analyses.html#descriptive-statistics"><i class="fa fa-check"></i><b>4.4.2</b> Descriptive statistics</a></li>
+<li class="chapter" data-level="4.4.3" data-path="correlation-analyses.html"><a href="correlation-analyses.html#all-metabolite-correlations"><i class="fa fa-check"></i><b>4.4.3</b> All Metabolite Correlations</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">COMETS Analytics Tutorial</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">COMETS Analytics Tutorial</h1>
+<h4 class="author"><em>CAT Work group</em></h4>
+<h4 class="date"><em>2018-05-23</em></h4>
+</div>
+<div id="overview" class="section level1 unnumbered">
+<h1>Overview</h1>
+<p>This is a <em>sample</em> book written in <strong>Markdown</strong>. You can use anything that Pandoc’s Markdown supports, e.g., a math equation <span class="math inline">\(a^2 + b^2 = c^2\)</span>.</p>
+<p>The <strong>bookdown</strong> package can be installed from CRAN or Github:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;bookdown&quot;</span>)
+<span class="co"># or the development version</span>
+<span class="co"># devtools::install_github(&quot;rstudio/bookdown&quot;)</span></code></pre></div>
+<p>Remember each Rmd file contains one and only one chapter, and a chapter is defined by the first-level heading <code>#</code>.</p>
+<p>To compile this example to PDF, you need XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <a href="https://yihui.name/tinytex/" class="uri">https://yihui.name/tinytex/</a>.</p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+<a href="quickstart.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook/js/app.min.js"></script>
+<script src="libs/gitbook/js/lunr.js"></script>
+<script src="libs/gitbook/js/plugin-search.js"></script>
+<script src="libs/gitbook/js/plugin-sharing.js"></script>
+<script src="libs/gitbook/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/index.Rmd",
+"text": "Edit"
+},
+"download": ["catBook.pdf", "catBook.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

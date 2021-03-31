@@ -1,0 +1,11 @@
+
+```{r include=FALSE,echo=FALSE,cache=FALSE}
+#make sure to install th etufte package first
+#install.packages("tufte")
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+
