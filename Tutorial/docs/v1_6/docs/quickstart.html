@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>COMETS Analytics Tutorial</title>
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:image" content="static/COMETSLogo.png" />
+  <meta property="og:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  
+  <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  <meta name="twitter:image" content="static/COMETSLogo.png" />
+
+<meta name="author" content="CAT Work group">
+
+
+<meta name="date" content="2018-09-22">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="index.html">
+<link rel="next" href="cohort.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="tufte.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">COMETS Analytics Tutorial</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#overview"><i class="fa fa-check"></i>Overview</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Get Started with the Sample File</a><ul>
+<li class="chapter" data-level="1.1" data-path="quickstart.html"><a href="quickstart.html#sample-input-file"><i class="fa fa-check"></i><b>1.1</b> Sample Input File</a></li>
+<li class="chapter" data-level="1.2" data-path="quickstart.html"><a href="quickstart.html#quick-analysis"><i class="fa fa-check"></i><b>1.2</b> Quick Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="cohort.html"><a href="cohort.html"><i class="fa fa-check"></i><b>2</b> Conduct Cohort Data Analyses</a><ul>
+<li class="chapter" data-level="2.1" data-path="cohort.html"><a href="cohort.html#input"><i class="fa fa-check"></i><b>2.1</b> Step 1 Data Preparation</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="cohort.html"><a href="cohort.html#metabolites"><i class="fa fa-check"></i><b>2.1.1</b> Metabolites</a></li>
+<li class="chapter" data-level="2.1.2" data-path="cohort.html"><a href="cohort.html#subject-metabolites"><i class="fa fa-check"></i><b>2.1.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="2.1.3" data-path="cohort.html"><a href="cohort.html#subject-data"><i class="fa fa-check"></i><b>2.1.3</b> Subject Data</a></li>
+<li class="chapter" data-level="2.1.4" data-path="cohort.html"><a href="cohort.html#varmap"><i class="fa fa-check"></i><b>2.1.4</b> VarMap</a></li>
+<li class="chapter" data-level="2.1.5" data-path="cohort.html"><a href="cohort.html#inputmodels"><i class="fa fa-check"></i><b>2.1.5</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="cohort.html"><a href="cohort.html#step-2-harmonization"><i class="fa fa-check"></i><b>2.2</b> <strong>Step 2 Harmonization</strong></a><ul>
+<li class="chapter" data-level="2.2.1" data-path="cohort.html"><a href="cohort.html#harmonization-file"><i class="fa fa-check"></i><b>2.2.1</b> Harmonization File</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="cohort.html"><a href="cohort.html#step-3-data-and-model-integrity"><i class="fa fa-check"></i><b>2.3</b> <strong>Step 3 Data and Model Integrity</strong></a></li>
+<li class="chapter" data-level="2.4" data-path="cohort.html"><a href="cohort.html#step-4-run-models"><i class="fa fa-check"></i><b>2.4</b> <strong>Step 4 Run Models</strong></a><ul>
+<li class="chapter" data-level="2.4.1" data-path="cohort.html"><a href="cohort.html#interactive-mode"><i class="fa fa-check"></i><b>2.4.1</b> Interactive Mode</a></li>
+<li class="chapter" data-level="2.4.2" data-path="cohort.html"><a href="cohort.html#batch-mode"><i class="fa fa-check"></i><b>2.4.2</b> Batch Mode</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="cohort.html"><a href="cohort.html#step-5-correlation-analyses-output"><i class="fa fa-check"></i><b>2.5</b> <strong>Step 5 Correlation Analyses Output</strong></a><ul>
+<li class="chapter" data-level="2.5.1" data-path="cohort.html"><a href="cohort.html#metabolite-tagging"><i class="fa fa-check"></i><b>2.5.1</b> Metabolite Tagging</a></li>
+<li class="chapter" data-level="2.5.2" data-path="cohort.html"><a href="cohort.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create Subset of ‘Tagged’ Metabolites</a></li>
+<li class="chapter" data-level="2.5.3" data-path="cohort.html"><a href="cohort.html#create-a-heatmap"><i class="fa fa-check"></i><b>2.5.3</b> Create A Heatmap</a></li>
+<li class="chapter" data-level="2.5.4" data-path="cohort.html"><a href="cohort.html#the-heatmap"><i class="fa fa-check"></i><b>2.5.4</b> The Heatmap</a></li>
+<li class="chapter" data-level="2.5.5" data-path="cohort.html"><a href="cohort.html#the-heatmap-2"><i class="fa fa-check"></i><b>2.5.5</b> The Heatmap (2)</a></li>
+<li class="chapter" data-level="2.5.6" data-path="cohort.html"><a href="cohort.html#annotations-and-hierarchical-clustering"><i class="fa fa-check"></i><b>2.5.6</b> Annotations and Hierarchical Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="cohort.html"><a href="cohort.html#step-6-send-for-meta-analyses"><i class="fa fa-check"></i><b>2.6</b> Step 6 Send for Meta-analyses</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
+<li class="chapter" data-level="3.1" data-path="manual.html"><a href="manual.html#register"><i class="fa fa-check"></i><b>3.1</b> Registration</a></li>
+<li class="chapter" data-level="3.2" data-path="manual.html"><a href="manual.html#data-preparation"><i class="fa fa-check"></i><b>3.2</b> Data Preparation</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="manual.html"><a href="manual.html#create-input"><i class="fa fa-check"></i><b>3.2.1</b> Create Input</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="manual.html"><a href="manual.html#details-harmonize"><i class="fa fa-check"></i><b>3.3</b> Harmonization details</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="manual.html"><a href="manual.html#preharmonization"><i class="fa fa-check"></i><b>3.3.1</b> Preharmonization</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="manual.html"><a href="manual.html#integrity-checks"><i class="fa fa-check"></i><b>3.4</b> Integrity checks</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="manual.html"><a href="manual.html#data"><i class="fa fa-check"></i><b>3.4.1</b> Data</a></li>
+<li class="chapter" data-level="3.4.2" data-path="manual.html"><a href="manual.html#models"><i class="fa fa-check"></i><b>3.4.2</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="manual.html"><a href="manual.html#correlation-analyses"><i class="fa fa-check"></i><b>3.5</b> Correlation Analyses</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="manual.html"><a href="manual.html#details"><i class="fa fa-check"></i><b>3.5.1</b> Details</a></li>
+<li class="chapter" data-level="3.5.2" data-path="manual.html"><a href="manual.html#output"><i class="fa fa-check"></i><b>3.5.2</b> Output</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="faq.html"><a href="faq.html"><i class="fa fa-check"></i>FAQ</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">COMETS Analytics Tutorial</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="quickstart" class="section level1">
+<h1><span class="header-section-number">Chapter 1</span> Get Started with the Sample File</h1>
+<p>This chapter guides you through the features of COMETS Analytics using the sample file to provide an introduction to the flow of analyses.</p>
+<div id="sample-input-file" class="section level2">
+<h2><span class="header-section-number">1.1</span> Sample Input File</h2>
+<p>There is a sample file located on the website that will serve as your data input template. After logging in, navigate to the ‘Correlate’ tab. On the lower left side, there is text stating ‘Download Sample Input’. Click this text, and the sample file will download. This template was designed to conduct analyses of age and metabolite, and BMI and metabolite correlations. It illustrates how your input data should be formatted, and includes practice data for &gt;600 metabolites and key covariates such as age and gender. Using this sample file as your input data will allow you to practice using the app functions and familiarize yourself with its output. You may want to begin by downloading and then inputting this sample file to the website to familiarize yourself with how the data analysis works.</p>
+</div>
+<div id="quick-analysis" class="section level2">
+<h2><span class="header-section-number">1.2</span> Quick Analysis</h2>
+<p>To upload your input file to the COMETS Analytics website, please follow these steps:</p>
+<ol style="list-style-type: decimal">
+<li>Select the ‘Correlate’ tab.</li>
+<li>Specify your cohort from the dropdown menu.</li>
+<li>Choose your input data file, formatted as described above, using the ‘Choose File’ button.</li>
+<li>Once you have uploaded your file the ‘Check Integrity’ button will activate, use this button to check the integrity of your data input file. The integrity check results are displayed in the right panel. The integrity check results contain a summary of the input data, including the number of measured metabolites (as defined by the user in the <em>Metabolites</em> sheet), the number of cohort subjects and covariates (as defined by the user in the <em>SubjectData</em> sheet), and the number of subjects by the number of metabolites measured (as defined by the user in the <em>SubjectMetabolites</em> sheet). Additionally, a harmonization summary is displayed that includes number of harmonized and non-harmonized metabolites as well as number of metabolites with variance equal to zero or with more than 25% of values represented by minimum values. Finally, histograms illustrating the distributions of the variance and the number of missing values are plotted (figures not shown here). <br>Integrity checks are run to ensure the appropriate data are presented for analysis. If integrity checks fail, please email Kaitlyn Mazilli (<a href="mailto:kaitlyn.mazzilli@nih.gov">kaitlyn.mazzilli@nih.gov</a>). If all integrity checks are passed, as indicated in a green banner above the summary output, please click ‘Download Results’ in the right corner and email the file to <a href="mailto:comets.analytics@gmail.com">comets.analytics@gmail.com</a> which is managed by Nathan Appel at IMS.</li>
+</ol>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="cohort.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/ellatemprosa/cometstutorial/01-quickstart.Rmd",
+"text": "Edit"
+},
+"download": ["catutorial.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,267 @@
+\documentclass[]{book}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={COMETS Analytics Tutorial},
+            pdfauthor={CAT Work group},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{COMETS Analytics Tutorial}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{CAT Work group}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{2018-09-22}
+
+\usepackage{color}
+\usepackage{marginnote}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{1}
+\tableofcontents
+}
+\chapter*{Introduction}\label{introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+\href{https://epi.grants.cancer.gov/comets/}{COMETS}, the
+\textbf{CO}nsortium of \textbf{MET}abolomics \textbf{S}tudies, has a
+major goal to produce jointly coordinated, multi-cohort, high-impact
+publications devoted to advancing the methods and scientific
+understanding of the human metabolome and its relationship to disease
+etiology and prognosis. Since its inception in 2014, COMETS has grown to
+include more than 50 cohorts worldwide.
+
+Comets Analytics serves as the infrastructure to facilitate and
+coordinate data analysis efforts. This tutorial gives an overview and
+detailed instructions on the use of
+\href{http://www.comets-analytics.org}{COMETS Analytics} in support of
+the \href{https://epi.grants.cancer.gov/comets/}{COMETS Consortium}.
+
+Prepared by the COMETS Tutorial Group:
+
+Ella Temprosa
+
+Steve Moore
+
+Oana Zeleznik
+
+Laura Trijsburg
+
+Rachel Kelly
+
+Errika Loftfield
+
+Kathleen McClain
+
+Kaitlyn Mazzili
+
+\section*{Overview}\label{overview}
+\addcontentsline{toc}{section}{Overview}
+
+Each cycle of analyses consists of 5 steps described below to bundle
+multiple projects to minimize burden on cohort analytic resources.\\
+
+This tutorial serves as a guide through this cycle. You can register for
+access to Comets Analytics using the instructions in Chapter
+\ref{register} \protect\hyperlink{register}{Registration} For a quick
+walk-through the cycle, you can use the sample input file and follow the
+directions in Chapter \ref{quickstart} {[}Get Started with Sample
+File{]}. Once you are ready to conduct your cohort-specific analyses,
+see the Chapter \ref{cohort} {[}Conduct Cohort Data Analyses{]}. For
+more technical details, refer to the Chapter \ref{manual}
+\protect\hyperlink{manual}{Manual} and {[}FAQ{]} for anwers to commonly
+asked questions.
+
+\chapter{Get Started with the Sample File}\label{quickstart}
+
+This chapter guides you through the features of COMETS Analytics using
+the sample file to provide an introduction to the flow of analyses.
+
+\section{Sample Input File}\label{sample-input-file}
+
+There is a sample file located on the website that will serve as your
+data input template. After logging in, navigate to the `Correlate' tab.
+On the lower left side, there is text stating `Download Sample Input'.
+Click this text, and the sample file will download. This template was
+designed to conduct analyses of age and metabolite, and BMI and
+metabolite correlations. It illustrates how your input data should be
+formatted, and includes practice data for \textgreater{}600 metabolites
+and key covariates such as age and gender. Using this sample file as
+your input data will allow you to practice using the app functions and
+familiarize yourself with its output. You may want to begin by
+downloading and then inputting this sample file to the website to
+familiarize yourself with how the data analysis works.
+
+\section{Quick Analysis}\label{quick-analysis}
+
+To upload your input file to the COMETS Analytics website, please follow
+these steps:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Select the `Correlate' tab.
+\item
+  Specify your cohort from the dropdown menu.
+\item
+  Choose your input data file, formatted as described above, using the
+  `Choose File' button.
+\item
+  Once you have uploaded your file the `Check Integrity' button will
+  activate, use this button to check the integrity of your data input
+  file. The integrity check results are displayed in the right panel.
+  The integrity check results contain a summary of the input data,
+  including the number of measured metabolites (as defined by the user
+  in the \emph{Metabolites} sheet), the number of cohort subjects and
+  covariates (as defined by the user in the \emph{SubjectData} sheet),
+  and the number of subjects by the number of metabolites measured (as
+  defined by the user in the \emph{SubjectMetabolites} sheet).
+  Additionally, a harmonization summary is displayed that includes
+  number of harmonized and non-harmonized metabolites as well as number
+  of metabolites with variance equal to zero or with more than 25\% of
+  values represented by minimum values. Finally, histograms illustrating
+  the distributions of the variance and the number of missing values are
+  plotted (figures not shown here). Integrity checks are run to ensure
+  the appropriate data are presented for analysis. If integrity checks
+  fail, please email Kaitlyn Mazilli
+  (\href{mailto:kaitlyn.mazzilli@nih.gov}{\nolinkurl{kaitlyn.mazzilli@nih.gov}}).
+  If all integrity checks are passed, as indicated in a green banner
+  above the summary output, please click `Download Results' in the right
+  corner and email the file to
+  \href{mailto:comets.analytics@gmail.com}{\nolinkurl{comets.analytics@gmail.com}}
+  which is managed by Nathan Appel at IMS.
+\end{enumerate}
+
+\hypertarget{manual}{\chapter{Manual}\label{manual}}
+
+\emph{Important} features and technical details are described in this
+chapter.
+
+\hypertarget{register}{\section{Registration}\label{register}}
+
+{Users are required to LOG IN using an existing Facebook or Google
+account, or can sign up for a login using the ``SIGN UP'' button. Your
+gmail account through your university may be used for authentication. }
+
+\marginnote{
+<span class='texta'>**a. Login**</span> is initially active where you may use the 3rd party login or your account.
+<span class='textb'>**b. Sign-Up** </span> click on this tab to register for an account.
+<span class='textc'>**c. 3rd party login**</span> click on the facebook or google icons to login using your credentials from your account.
+<span class='textd'>**d. Forget password**</span> to reset your password. You are required to provide the email associated with your account. 
+<span class='texte'>**e. Proceed**</span> to the web app by clicking on the orange button.
+}
+
+\section{Data Preparation}\label{data-preparation}
+
+Standard input using excel, a widely accessible format, is required for
+COMETS Analytics and can be created from various data file formats. Data
+Integrity checks for input errors provide meaningful and actionable
+messages to users for analyses to proceed. See chapter \ref{input}
+{[}Step 1 Data Preparation{]}
+
+\subsection{Create Input}\label{create-input}
+
+\section{Harmonization details}\label{details-harmonize}
+
+The names of metabolites from each cohort has been mapped or harmonized
+to a common name. This important stage facilitates comparison of
+metabolites across different studies that use different platforms and/or
+naming conventions.
+
+\subsection{Preharmonization}\label{preharmonization}
+
+Prior to conducting your cohort analyses, xxx.
+
+\section{Integrity checks}\label{integrity-checks}
+
+Prior to running the models for analyses, CA conducts multi-level checks
+to ensure data and models are appropriate for analyses.
+
+\subsection{Data}\label{data}
+
+\subsection{Models}\label{models}
+
+\section{Correlation Analyses}\label{correlation-analyses}
+
+\subsection{Details}\label{details}
+
+\subsection{Output}\label{output}
+
+
+\end{document}
