@@ -35,11 +35,11 @@ all the below names may not appear in the data frame.
 \item{\code{outcome_uid}}{ Outcome universal id}
 \item{\code{run}}{ Run number that can be used to link with the 
                    \code{\link{Effects}} table}
+\item{\code{runmode}}{ "Batch" or "Interactive"}
 \item{\code{r.squared}}{ R-squared, the fraction of variance explained by the model}
 \item{\code{sigma}}{ Square root of the estimated variance of the random error}
-\item{\code{spec}}{ "Batch" or "Interactive"}
-\item{\code{stratavar}}{ Stratum label or variable}
-\item{\code{strata}}{ Stratum number or level}
+\item{\code{stratavar}}{ Stratum variable(s)}
+\item{\code{strata}}{ Stratum level(s)}
 \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
                           exposure is categorical.}
