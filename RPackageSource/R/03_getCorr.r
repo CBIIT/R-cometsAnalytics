@@ -34,6 +34,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
   if (is.list(op)) op$model <- getCorrModelName()
   ret <- runModel(modeldata, metabdata, cohort=cohort, op=op)
   ret <- newVersionOutToOldOut(ret)
+
   ret
 }
 

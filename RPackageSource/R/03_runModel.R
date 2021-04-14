@@ -153,7 +153,7 @@ runModel.setReturnDF <- function(x, varMap) {
   cvars <- c("adj", "exposure", "exposurespec", "outcomespec", "term",
              "adjspec", "adjvars", "adjvars.removed", "adj_uid",
              "cohort", "exposure_uid", "exposurespec", "message", "model",
-             "outcome", "outcome_uid", "spec", "stratavar", "strata",
+             "outcome", "outcome_uid", getModelSummaryRunModeName(), "stratavar", "strata",
              "type", "object") 
   cx    <- colnames(x)
   tmp   <- !(cx %in% cvars)
@@ -237,11 +237,10 @@ runModel.combineResults <- function(base, new, strat, stratNum) {
 runModel.getStratVec <- function(gdta, scovs) {
 
   n   <- length(scovs)
-  ret <- paste(scovs[1], "=", gdta[, scovs[1]], sep="")
+  ret <- gdta[, scovs[1], drop=TRUE]
   if (n > 1) {
     for (i in 2:n) {
-      tmp <- paste(scovs[i], "=", gdta[, scovs[i]], sep="")
-      ret <- paste(ret, tmp, sep=";")
+      ret <- paste(ret, gdta[, scovs[i], drop=TRUE], sep=runModel.getVarSep())
     }
   }
   
@@ -257,7 +256,11 @@ runModel.start <- function(modeldata, metabdata, op) {
   wr.nm    <- runModel.getWarningsListName()
   warn.obj <- modeldata[[wr.nm, exact=TRUE]]
 
-  scovs  <- modeldata[["scovs", exact=TRUE]]
+  if (op$DONOTRUN) {
+    scovs <- NULL
+  } else {
+    scovs <- modeldata[["scovs", exact=TRUE]]
+  }
   nscovs <- length(scovs)
 
   if (!nscovs) return(runModel.main(modeldata, metabdata, op))
@@ -269,6 +272,7 @@ runModel.start <- function(modeldata, metabdata, op) {
 
   # Original strat var names
   svars0    <- runModel.varMap(scovs, modeldata$dict_metabnames)
+  strat2    <- paste0(svars0, collapse=runModel.getVarSep())
 
   if (nstrata > op$max.nstrata) {
     msg <- paste("The stratification variable(s) ",
@@ -300,8 +304,8 @@ runModel.start <- function(modeldata, metabdata, op) {
     }
 
     # Combine results
-    strat2  <- updateStrWithNewVars(strat, scovs, svars0)
-    retList <- runModel.combineResults(retList, tmp, strat2, i)
+    #strat2  <- updateStrWithNewVars(strat, scovs, svars0)
+    retList <- runModel.combineResults(retList, tmp, strat2, strat)
   }
 
   if (length(warn.obj)) {
@@ -320,6 +324,7 @@ runModel.main <- function(modeldata, metabdata, op) {
   # Get the initial design matrix and other objects
   modeldata <- runModel.checkModelDesign(modeldata, metabdata, op)
   if (!length(names(modeldata))) return(modeldata)
+  if (op$DONOTRUN) return(NULL)
 
   # Check if any adjustment vars are metabolites
   modeldata$designMatCols0 <- runModel.varMap(modeldata$designMatCols0, modeldata$varMap)
@@ -343,10 +348,10 @@ runModel.main <- function(modeldata, metabdata, op) {
   }
 
   # Add on some additional cols to the fit df
-  ret[, "cohort"] <- op$cohort
-  ret[, "spec"]   <- modeldata$modelspec
-  ret[, "model"]  <- modeldata$modlabel
-  tmp <- modeldata[["acovs", exact=TRUE]]
+  ret[, "cohort"]                       <- op$cohort
+  ret[, getModelSummaryRunModeName()]   <- modeldata$modelspec
+  ret[, "model"]                        <- modeldata$modlabel
+  tmp                                   <- modeldata[["acovs", exact=TRUE]]
   if (length(tmp)) tmp <- runModel.varMap(tmp, modeldata$varMap)
   ret[, "adjspec"] <- runModel.getVarStr(tmp)
   ret <- fixData(ret)
@@ -355,7 +360,7 @@ runModel.main <- function(modeldata, metabdata, op) {
   ret <- addMetabInfo(ret, modeldata, metabdata)
 
   # Let run, cohort, spec, model column be the first columns
-  ret <- orderVars(ret, c("run", "cohort", "spec", "model"))
+  ret <- orderVars(ret, c("run", "cohort", getModelSummaryRunModeName(), "model"))
 
   # Append adjvars variables removed from checkModelDesign
   rem <- runModel.getVarsRemoved(rem.obj, type="adjvars")
@@ -413,7 +418,7 @@ runModel.getDesignSubs <- function(x) {
 
   ret
 
-} # END: runModel.getUseSubjects
+} # END: runModel.getDesignSubs
 
 runModel.getResponseSubs <- function(y, family) {
 
@@ -506,6 +511,26 @@ runModel.tidy <- function(nsubs, fit, expVars, defObj, designMat, dmatCols0, op)
   ret
 
 } # END: runModel.tidy 
+
+runModel.checkDesignWithExp <- function(dmat, op, expVar, varMap=NULL) {
+
+  tmp  <- runModel.checkDesignMatCols(dmat, op, varMap=varMap)
+  cols <- colnames(tmp$designMat)
+  rem  <- tmp$rem.obj
+  msg  <- ""
+  tmp  <- expVar %in% cols
+  vars <- expVar[tmp]
+
+  # Return NULL if exposure was removed
+  if (!length(vars)) {
+    cols <- NULL
+    msg  <- runModel.getRemMessage(rem, expVar, collapse=";", varMap=varMap)
+    #msg  <- runModel.getExpRemFromDesign()
+  }
+
+  list(cols=cols, msg=msg, expVar=vars)
+
+} # END: runModel.checkDesignWithExp
 
 runModel.runAllMetabs <- function(newmodeldata, op) {
 
@@ -801,9 +826,10 @@ runModel.getNlevels <- function(data, ccovs, isfactor) {
 
 } # END: runModel.getNlevels
 
-runModel.getVarStr <- function(vars, collapse=";", default="") {
+runModel.getVarStr <- function(vars, collapse=NULL, default="") {
 
   if (length(vars)) {
+    if (is.null(collapse)) collapse <- runModel.getVarSep()
     ret <- paste(vars, collapse=collapse, sep="")
   } else {
     ret <- default
@@ -813,10 +839,11 @@ runModel.getVarStr <- function(vars, collapse=";", default="") {
 
 } # END: runModel.getVarStr
 
-runModel.getAdjVarStr <- function(nms, dmatCols0) {
+runModel.getAdjVarStr <- function(nms, dmatCols0, replaceSpace=1) {
 
   if (length(nms)) {
     orig <- dmatCols0[nms]
+    if (length(orig) && replaceSpace) orig <- gsub(" ", runModel.replaceSpace(), orig, fixed=TRUE) 
   } else {
     orig <- NULL
   }

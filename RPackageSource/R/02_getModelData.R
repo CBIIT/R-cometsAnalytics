@@ -258,9 +258,9 @@ getModelData <-  function(readData,
       stop(paste("ERROR applying WHERE: ", paste(where, collapse=" AND ", sep=""), sep=""))
     }
     msg         <- paste0("Filtering subjects according to the rule(s) ", 
-                        paste(where, collapse=" AND ", sep=""), " . ", 
-                        nrow(readData$subjdata)," of ", numallsamps," are retained.")
-    print(msg)
+                        paste(where, collapse=" AND ", sep=""), ". ", 
+                        nrow(readData$subjdata)," of ", numallsamps," are retained. \n")
+    cat(msg)
     if (!nrow(readData$subjdata)) {
       cat("Check the WHERE condition.\n") 
       if (modelspec == getMode_batch()) {

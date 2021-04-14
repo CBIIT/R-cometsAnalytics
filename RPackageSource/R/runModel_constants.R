@@ -2,13 +2,15 @@
 runmodel.getTimeAttr <- function() {"ptime"}
 
 # Delimiter in output lists of variable names
-runModel.getVarSep <- function() {";"}
+runModel.getVarSep    <- function() {" "}
 runModel.getOldVarSep <- function() {" "}
+runModel.replaceSpace <- function() {"."}
 
 # Batch or interactive
 getMode_batch       <- function() {"Batch"}
 getMode_interactive <- function() {"Interactive"}
 getAllMetabsName    <- function() {"All metabolites"}
+getAllMetabsNewName <- function() {"*"}
 
 # For appending stratification columns
 runModel.getStrataColName    <- function() {"stratavar"}
@@ -30,6 +32,7 @@ runModel.getExpRemFromDesign <- function() {"exposure removed from design matrix
 getNoFamilyValue    <- function() {""}
 getOpStrSep         <- function() {";"}
 getOpStrEq          <- function() {"="}
+getStrataSep        <- function() {","}
 getModelOpsName     <- function() {"model.options"}
 getOldCorrModelName <- function() {"runcorr"}
 getCorrModelName    <- function() {"correlation"}
@@ -48,22 +51,41 @@ getEffectsPvalueName       <- function() {"p.value"}
 getEffectsRunName          <- function() {"run"}
 
 # ModelSummary 
-getModelSummaryName       <- function() {"ModelSummary"}
-getModelSummaryNobsName   <- function() {"nobs"}
-getModelSummaryFunCol     <- function() {"model_function"}
+getModelSummaryName        <- function() {"ModelSummary"}
+getModelSummaryNobsName    <- function() {"nobs"}
+getModelSummaryFunCol      <- function() {"model_function"}
+getModelSummaryRunModeName <- function() {"runmode"}
 
 # For input excel file
 getModelOptionsIdCol  <- function() {"modelspec"}
 getOptionNameCol      <- function() {"option"}
 getOptionValueCol     <- function() {"value"}
+getMetabSheetName     <- function() {"Metabolites"}
+getSubMetabSheetName  <- function() {"SubjectMetabolites"}
+getSubDataSheetName   <- function() {"SubjectData"}
+getVarMapSheetName    <- function() {"VarMap"}
+getModelsSheetName    <- function() {"Models"}
 getOptionsSheetName   <- function() {"ModelOptions"}
 getGlobalOptionName   <- function() {"ModelChecks"}
 getModelFunctionCol   <- function() {"function"}
-getReqSheetNames      <- function() {c("Metabolites", "SubjectMetabolites", "SubjectData", "VarMap", "Models")} 
-getReqMetabSheetCols  <- function() {c("metabid	", "metabolite_name")}
-getReqVarMapSheetCols <- function() {c("VARREFERENCE", "COHORTVARIABLE", "VARTYPE")}
-getReqModelsSheetCols <- function() {c("MODEL", "OUTCOMES", "EXPOSURE", "ADJUSTMENT", "STRATIFICATION", "WHERE")}
+getReqSheetNames      <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
+getReqMetabSheetCols  <- function() {c("metabolite_name")}
+getVarMapVarRefCol    <- function() {"VARREFERENCE"}
+getVarMapCohortVarCol <- function() {"COHORTVARIABLE"}
+getVarMapVarTypeCol   <- function() {"VARTYPE"}
+getReqVarMapSheetCols <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), getVarMapVarTypeCol())}
+getModelsModelCol     <- function() {"MODEL"}
+getModelsOutcomeCol   <- function() {"OUTCOMES"}
+getModelsExposureCol  <- function() {"EXPOSURE"}
+getModelsAdjCol       <- function() {"ADJUSTMENT"}
+getModelsStratCol     <- function() {"STRATIFICATION"}
+getModelsWhereCol     <- function() {"WHERE"}
+getReqModelsSheetCols <- function() {c(getModelsModelCol(), getModelsOutcomeCol(), getModelsExposureCol(), 
+                                       getModelsAdjCol(), getModelsStratCol(), getModelsWhereCol())}
 getReqModOpSheetCols  <- function() {c(getModelOptionsIdCol(), getModelFunctionCol(), getOptionNameCol(), getOptionValueCol())}
+getVarMapVarTypeCont  <- function() {"continuous"}
+getVarMapVarTypeCat   <- function() {"categorical"}
+getVarMapVarTypeVals  <- function() {c(getVarMapVarTypeCont(), getVarMapVarTypeCat())}
 
 getVarRef_metabId    <- function() {"metabolite_id"}
 getVarRef_subjectId  <- function() {"id"}
@@ -71,3 +93,4 @@ getVarRef_subjectId  <- function() {"id"}
 # Model options that specify variables
 runModel.getOptionsThatAreVars <- function() {c("weights", "offset")}
 
+runModel.testModelString <- function() {"Testing models in Models sheet... \n"}
