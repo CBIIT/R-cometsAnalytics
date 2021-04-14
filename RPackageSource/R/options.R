@@ -187,12 +187,12 @@ getAllOptionNames <- function() {
 
 getValidGlobalOps <- function() {
   ops.char <- c("model", "check.cor.method")
-  ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", "DEBUG")
+  ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", "DEBUG", "DONOTRUN")
   ops.log  <- c("check.illCond", "check.design")
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
                    check.design=TRUE, max.nstrata=10,
-                   model=getCorrModelName(), DEBUG=0)
+                   model=getCorrModelName(), DEBUG=0, DONOTRUN=0)
   valid    <- names(default)
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
        valid=valid, default=default)
@@ -467,6 +467,9 @@ checkOp_max.nstrata <- function(x) {
 checkOp_DEBUG <- function(x) {
   check.logical(x, "DEBUG") 
 } 
+checkOp_DONOTRUN <- function(x) {
+  check.logical(x, "DONOTRUN") 
+}
 checkOp_model <- function(x) {
   runModel.check.model(x)
 } 

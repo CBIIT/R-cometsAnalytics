@@ -2,8 +2,8 @@
 #' models, and model options.
 #'
 #' @param file path of Excel file to be read in. This file must contain sheets
-#' with names \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, \bold{Models},
-#' and \bold{ModelOptions} (see details).
+#' with names \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
+#' and optionally \bold{Models}, \bold{ModelOptions} (see details).
 #' @return a list comprising of data and information needed for \code{\link{getModelData}}.
 #'
 #' @details Additional information regarding each sheet in the input Excel file is given below. 
@@ -24,7 +24,7 @@
 #' \bold{Models} \cr
 #' A table where each row represents a model to be run, and with columns \code{MODEL}, 
 #' \code{OUTCOMES}, \code{EXPOSURE}, \code{ADJUSTMENT},
-#'  \code{STRATIFICATION}, \code{WHERE}, and \code{MODELSPEC}. All variable names in this
+#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODELSPEC}. All variable names in this
 #' table must match variable names in the \code{VARREFERENCE} column of the \bold{VarMap} sheet.
 #' The \code{MODEL} column is a label for the model. The \code{OUTCOMES} and \code{EXPOSURE} columns define the 
 #' outcome and exposure variables for the model. Use \code{All metabolites} to specify
@@ -41,12 +41,16 @@
 #' than 50 in the analysis. Multiple \code{WHERE} conditions must be separated by a \code{&}. 
 #' For example, \code{age > 50 & bmi >= 22} will include the subjects older than 50 AND with
 #' bmi >= 22. Values in the \code{MODELSPEC} column must match with the \code{MODELSPEC} column
-#' in the \bold{ModelOptions} sheet. \cr
+#' in the \bold{ModelOptions} sheet. 
+#' This sheet is not required when running in interactive mode, but is required when
+#' running in batch mode. \cr
 
 #' \bold{ModelOptions} \cr
 #' A table where each row specifies an option and has columns \code{MODELSPEC}, \code{FUNCTION},
 #' \code{OPTION}, and \code{VALUE}. For an example sheet and additional information about this
 #' sheet, see the Excel file \code{/extdata/cometsInput.xlsx}.
+#' This sheet is optional, but is required when the \bold{Models} sheet contains the 
+#' column \code{MODELSPEC}.
 #'
 #' @examples
 #' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
@@ -57,109 +61,70 @@
 
 readCOMETSinput <- function(file) {
 
-  csvfilePath <- file
-  stopifnot(is.character(csvfilePath))
-  if (!file.exists(csvfilePath)) {
-    stop("input Excel file does not exist")
-  }
+  if (!isString(file)) stop("ERROR: file must be a character string giving the complete path to the Excel file.")
+  if (!file.exists(file)) stop(paste0("ERROR: input Excel file ", file, " does not exist."))
+
+  # Get the sheet names in the file
+  sheets <- try(readxl::excel_sheets(file))
+  if ("try-error" %in% class(sheets)) stop("ERROR: check that the input file is an Excel file")
 
   # Check for the required sheet names
-  nms <- getReqSheetNames()
-  tmp <- !(nms %in% readxl::excel_sheets(csvfilePath))
-  if (any(tmp)) {
-    msg <- paste0(nms[tmp], collapse=", ")
-    msg <- paste0("The input Excel file is missing the (case-sensitive) sheet name(s): ", msg)  
+  nms    <- getReqSheetNames()
+  tmp    <- toupper(nms) %in% toupper(sheets)
+  if (!any(tmp)) {
+    msg <- infile.collapseVec(nms)
+    msg <- paste0("The input Excel file is missing all required sheets: ", msg)  
     stop(msg)
   }
 
   #metabolite meta data
-  dta.metab <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Metabolites")))
-  print("Metabolites sheet is read in")
-  basicSheetCheck(dta.metab, getReqMetabSheetCols(), "Metabolites") 
+  dta.metab <- readExcelSheet(file, getMetabSheetName(), sheets) 
 
   #subject metabolite data
-  # The following call does not always work with skip=1, col_names=F
-  #dta.smetab <-
-  #  suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",skip=1,col_names=F)))
-
-  # New code
-  dta.smetab <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites")))
-  basicSheetCheck(dta.smetab, NULL, "SubjectMetabolites") 
-  dict_metabnames      <- tolower(colnames(dta.smetab))
-  colnames(dta.smetab) <- paste("...", 1:ncol(dta.smetab), sep="")
-  print("SubjectMetabolites sheet is read in")
-
-  # Read in the first row (column names) of subject metabolite data (this is now the dictionary of metabolite names)
-  #dict_metabnames <- 
-  #	tolower(fixData(readxl::read_excel(csvfilePath, "SubjectMetabolites",col_names=F,n_max=1)))
-  names(dict_metabnames) <- colnames(dta.smetab)
+  dta.smetab <- readExcelSheet(file, getSubMetabSheetName(), sheets) 
+  if (length(dta.smetab)) {
+    dict_metabnames        <- tolower(colnames(dta.smetab))
+    colnames(dta.smetab)   <- paste("...", 1:ncol(dta.smetab), sep="")
+    names(dict_metabnames) <- colnames(dta.smetab)
+  }
 
   #subject data
-  dta.sdata <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "SubjectData")))
-  print("SubjectData sheet is read in")
-  basicSheetCheck(dta.sdata, NULL, "SubjectData") 
+  dta.sdata <- readExcelSheet(file, getSubDataSheetName(), sheets) 
 
   #variable mapping
-  dta.vmap <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "VarMap")))
-  print("VarMap sheet is read in")
-  basicSheetCheck(dta.vmap, getReqVarMapSheetCols(), "VarMap") 
+  dta.vmap <- readExcelSheet(file, getVarMapSheetName(), sheets) 
+  dta.vmap <- checkVarMapCols(dta.vmap)
   
-  # Make sure columns are in lower case
-  dta.vmap$varreference   <- checkVariableNames(dta.vmap$varreference, "VarMap sheet, VARREFERENCE column") 
-  dta.vmap$cohortvariable <- checkVariableNames(dta.vmap$cohortvariable, "VarMap sheet, COHORTVARIABLE column")
-  dta.vmap$vartype        <- checkVariableNames(dta.vmap$vartype, "VarMap sheet, VARYTYPE column")
-
-  #batch model specifications
-  dta.models <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, "Models"),compbl=TRUE))
-  print("Models sheet is read in")
-  basicSheetCheck(dta.models, getReqModelsSheetCols(), "Models") 
-
-  # Make sure columns are in lower case. The adjustment and stratification columns
-  #  can have missing values.
-  dta.models$outcomes       <- checkVariableNames(dta.models$outcomes, "Models sheet, OUTCOMES column", stopOnMissError=0) 
-  dta.models$exposure       <- checkVariableNames(dta.models$exposure, "Models sheet, EXPOSURE column", stopOnMissError=0) 
-  dta.models$adjustment     <- checkVariableNames(dta.models$adjustment, "Models sheet, ADJUSTMENT column", convertMissTo=NA, stopOnMissError=0) 
-  dta.models$stratification <- checkVariableNames(dta.models$stratification, "Models sheet, STRATIFICATION column", convertMissTo=NA, stopOnMissError=0) 
-
-  # We need a different function for the WHERE column
-  dta.models$where <- normalizeWhere(dta.models$where) 
-
-  # Read in the options if models sheet has a MODELSPEC column
+  #batch model specifications. Models sheet is now optional (for interactive use)
+  dta.models  <- NULL
   dta.options <- NULL
-  modnm       <- getModelOptionsIdCol()
-  if (modnm %in% colnames(dta.models)) {
-    # Check that this column does not contain reserved words
-    checkModelspecCol(dta.models[, modnm, drop=TRUE])
+  modelsSheet <- getModelsSheetName()
+  if (toupper(modelsSheet) %in% toupper(sheets)) {
+    dta.models <- readExcelSheet(file, modelsSheet, sheets, optional=1) 
+    dta.models <- checkModelsCols(dta.models)
     
-    opnm        <- getOptionsSheetName()
-    dta.options <- suppressWarnings(fixData(readxl::read_excel(csvfilePath, opnm),compbl=TRUE))
-    basicSheetCheck(dta.options, getReqModOpSheetCols(), opnm) 
-
-    # Check the table
-    dta.options <- checkOptionsSheet0(dta.options)
-    print(paste0(opnm, " sheet is read in"))
+    # Read in the options if models sheet has a MODELSPEC column
+    modnm <- getModelOptionsIdCol()
+    if (modnm %in% colnames(dta.models)) {
+      opnm        <- getOptionsSheetName()
+      dta.options <- readExcelSheet(file, getOptionsSheetName(), sheets, optional=1) 
+      if (length(dta.options)) dta.options <- checkOptionsSheet0(dta.options)
+    } else {
+      msg <- paste0("NOTE: the column ", toupper(modnm), " was not found in the ", modelsSheet, " sheet. ",
+                    "Assuming older version of Excel file.\n")
+      cat(msg)
+    }
   } else {
-    msg <- paste0("NOTE: the column ", toupper(modnm), " was not found in the Models sheet. ",
-                  "Assuming older version of Excel file\n")
+    msg <- paste0("NOTE: the ", modelsSheet, " sheet was not found in input excel file.",
+                  " Assuming COMETS will be run in interactive mode.\n")
     cat(msg)
   } 
 
   # Go through the varmap VARTYPE column and convert categorical entries into factors
-  myfactors <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="categorical" & dta.vmap$varreference!="metabolite_id")]
-  print(paste("There are",length(myfactors),"categorical variables"))
-  for (i in myfactors) {
-	dta.sdata[,i] <- factor(dta.sdata[,i])
-  }
+  dta.sdata <- infile.catVarsToFactors(dta.sdata, dta.vmap)
 
-  # Go through the varmap VARTYPE column and make sure continuous variables are numeric
-  mycont <- dta.vmap$cohortvariable[which(dta.vmap$vartype=="continuous" & dta.vmap$varreference!="metabolite_id")]
-  print(paste("There are",length(mycont),"continuous variables"))
-  if (length(mycont)) checkContVarsAreNumeric(dta.sdata, mycont) 
-  
   # Rename the variables in subject data to prevent errors in checkIntegrity
-  oldnames <- names(dta.sdata)
-  newnames <- renameSubjDataVars(oldnames, dta.vmap)
-  names(dta.sdata) <- newnames
+  dta.sdata <- renameSubjDataVars(dta.sdata, dta.vmap)
 
   # Check file integrity:
   ckintegrity = checkIntegrity(
@@ -168,37 +133,41 @@ readCOMETSinput <- function(file) {
     dta.sdata = dta.sdata,
     dta.vmap = dta.vmap,
     dta.models = dta.models,
-    dict_metabnames = dict_metabnames
+    dict_metabnames = dict_metabnames,
+    dta.op = dta.options
   )
 
-  integritymessage = ckintegrity$outmessage
   dta.metab = ckintegrity$dta.metab
   dta.smetab = ckintegrity$dta.smetab
   dta.sdata = ckintegrity$dta.sdata
+  integritymessage <- ckintegrity$integritymessage
+  
+  idvar <- tolower(getVarRef_subjectId())  
+  dta   <- dplyr::inner_join(dta.sdata, dta.smetab, by=idvar)
+  rm(ckintegrity)
+  gc()
 
-  # If an error was found during integrity check (e.g. not all metabolites or subjects
-  # in the SubjectMetabolite sheet are annotated in the respective metadatasheets Subjects
-  # and Metabolites), then return only integrity check
-  if (length(grep("Error", ckintegrity$outmessage)) > 0) {
-    dtalist = list(integritymessage = integritymessage, mods = dta.models)
-  }
-  else {
-    dta <- dplyr::inner_join(dta.sdata, dta.smetab)
+  cohortv  <- tolower(getVarMapCohortVarCol())
+  varrefv  <- tolower(getVarMapVarRefCol())  
+  metidv   <- tolower(getVarRef_metabId())
+  idvar0   <- base::tolower(dta.vmap[[cohortv]][dta.vmap[[varrefv]] == idvar])  
+  metabvar <- base::tolower(dta.vmap[[cohortv]][dta.vmap[[varrefv]] == metidv])
 
-    idvar0 <- base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == 'id'])
-    idvar  <- getVarRef_subjectId()  
-    metabvar <-
-      base::tolower(dta.vmap[['cohortvariable']][dta.vmap[['varreference']] == "metabolite_id"])
+  # Get names
+  nms      <- names(dta.smetab)
+  metabs   <- nms[nms != idvar]
+  nms      <- names(dta.sdata)
+  submeta  <- nms[nms != idvar]
 
-    # run through all vmap specifications to create variables
-    dtalist <- list(
+  # run through all vmap specifications to create variables
+  dtalist <- list(
       subjdata = dta,
       # metabolite abundances
-      allMetabolites = names(dta.smetab)[-1],
+      allMetabolites = metabs,
       # metabolite names
-      allSubjectMetaData = names(dta.sdata)[-1],
+      allSubjectMetaData = submeta,
       # subject meta data
-      allSubjects = dta.sdata[, idvar],
+      allSubjects = dta.sdata[, idvar, drop=TRUE],
       # subject names
       subjId = idvar, subjId0 = idvar0,
       # id used for subject names
@@ -211,29 +180,27 @@ readCOMETSinput <- function(file) {
       # model specification information
       integritymessage = integritymessage,
       # message for integrity check
-      vmap = dplyr::filter(dta.vmap, !is.na(dta.vmap[["cohortvariable"]]) &
-                             dta.vmap[["varreference"]] != "metabolite_id") # variable mapping
-    )
+      vmap = dplyr::filter(dta.vmap, !is.na(dta.vmap[[cohortv]]) &
+                             dta.vmap[[varrefv]] != metidv) # variable mapping
+  )
 
-    # Harmonize metabolites
-    dtalist <- Harmonize(dtalist)
+  rm(dta, dta.sdata, dta.smetab, metabs, submeta)
+  gc()
 
-    # keep only columns with non-missing values
-    mymets = dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
+  # Harmonize metabolites
+  dtalist <- Harmonize(dtalist)
 
-    # convert the names to indexes from dictionary:
-    mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
+  # keep only columns with non-missing values
+  mymets = dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
 
-    # Make sure the metabololites are numeric
-    checkContVarsAreNumeric(dtalist$subjdata, mymets, names=dict_metabnames[mymets])
-    #dtalist$subjdata <- convertVarsToNumeric(dtalist$subjdata, mymets)
+  # convert the names to indexes from dictionary:
+  mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
 
-    # check to see which columns have non-missing values
-    havedata <-
-      base::apply(dtalist$subjdata, 2, function(x)
-        all(is.na(x)))
-    mymets = mymets[mymets %in% names(havedata[havedata == FALSE])]
-    if (length(mymets) > 0) {
+  # check to see which columns have non-missing values
+  havedata <- base::apply(dtalist$subjdata, 2, function(x) all(is.na(x)))
+
+  mymets = mymets[mymets %in% names(havedata[havedata == FALSE])]
+  if (length(mymets) > 0) {
       # Determine whether data is already transformed:
       tst <- min(dtalist$subjdata[, c(mymets)], na.rm = T)
       if (tst < 0) {
@@ -270,60 +237,34 @@ readCOMETSinput <- function(file) {
           )))
       }))
       dtalist$transformation = transformation
-      dtalist$metab$var[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] =
-        log2metvar
-      dtalist$metab$num.min[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] =
-        num.min
-    } else {
-      # if all subject metabolite data is missing
-      dtalist$transformation = NA
-      dtalist$metab$var = NA
-      dtalist$metab$num.min = NA
-    }
-
-    # vector of variables to display in table
-    dtalist$dispvars <-
-      c("outcome",
-        "exposure",
-        "adjvars",
-        "corr",
-        "pvalue",
-        "n",
-        "stratavar",
-        "strata")
-
-    # Return a map between the old and new variable names for all variables
-    #varMap         <- c(oldnames, dict_metabnames)
-    #names(varMap)  <- c(newnames, names(dict_metabnames))
-    #dtalist$varMap <- varMap
-
-    dtalist[[getMetabDataOpsName()]] <- dta.options
-
-    print(integritymessage)
-    return(dtalist)
+      dtalist$metab$var[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] = log2metvar
+      dtalist$metab$num.min[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] = num.min
+  } else {
+    # if all subject metabolite data is missing
+    dtalist$transformation = NA
+    dtalist$metab$var = NA
+    dtalist$metab$num.min = NA
   }
+
+  # vector of variables to display in table
+  dtalist$dispvars <- c("outcome", "exposure", "adjvars", "corr", "pvalue",
+                        "n", "stratavar", "strata")
+
+  dtalist[[getMetabDataOpsName()]] <- dta.options
+
+  # Test the models in the Models sheet 
+  err <- infile.checkAllModels(dtalist)
+  if (err) {
+    # Display warning, user could be running in interactive model 
+    msg <- paste0("ERRORS were produced for some models in the ", getModelsSheetName(),
+                  " sheet. See messages above. \n")
+    cat(msg)
+    warning(msg)
+  } 
+
+  return(dtalist)
+
 }
-
-basicSheetCheck <- function(data, reqCols, sheetName, min.ncol=2) {
-
-  if (!length(data)) stop(paste0(sheetName, " sheet is empty"))
-  cols <- colnames(data)
-  if (length(reqCols)) {
-    reqCols <- trimws(tolower(reqCols))
-    cols    <- trimws(tolower(cols))
-    tmp  <- !(reqCols %in% cols)
-    if (any(tmp)) {
-      msg <- paste0(reqCols[tmp], collapse=", ")
-      msg <- paste0(sheetName, " sheet is missing column(s): ", toupper(msg))
-      stop(msg)
-    }
-  }
-  if (length(cols) < min.ncol) stop(paste0(sheetName, " sheet has too few columns"))
-  if (!nrow(data)) stop(paste0(sheetName, " sheet has no rows"))
-
-  NULL
-
-} # END: basicSheetCheck
 
 #' This function provides a description of the input data (for categorical data, the number of samples of each type; for continous data, the median and other statistics for each variable)
 #' @param readData list from readComets
@@ -379,6 +320,8 @@ runDescrip<- function(readData){
 
 checkOptionsSheet0 <- function(x) {
 
+  if (!length(x)) return(x)
+
   # Required columns
   req  <- getReqModOpSheetCols()
   for (i in 1:length(req)) {
@@ -395,65 +338,37 @@ checkOptionsSheet0 <- function(x) {
   x
 
 } # END: checkOptionsSheet0
+renameSubjDataVars <- function(x, vmap) {
 
-renameSubjDataVars <- function(oldnames, vmap) {
+  if (!length(x)) return(x)
+  if (!length(vmap)) return(x)
+  
+  cohortv  <- tolower(getVarMapCohortVarCol())
+  varrefv  <- tolower(getVarMapVarRefCol())  
+  metidv   <- tolower(getVarRef_metabId())
+  cx       <- tolower(colnames(vmap))
+  if (!(cohortv %in% cx)) return(x)
+  if (!(varrefv %in% cx)) return(x)
 
   # list of variables named differently for cohort
-  tmp <- !is.na(vmap[["cohortvariable"]]) & vmap[["varreference"]] != getVarRef_metabId()
+  tmp <- !is.na(vmap[[cohortv]]) & (vmap[[varrefv]] != metidv)
   tmp[is.na(tmp)] <- FALSE
-  tst <- dplyr::filter(vmap, tmp)
-                  
-  # changes names string using mapvalues
-  newnames <- plyr::mapvalues(
-    oldnames,
-    from = c(base::tolower(tst$cohortvariable)),
-    to = c(base::tolower(tst$varreference))
-  )
+  if (any(tmp)) {
+    old  <- tolower(vmap[tmp, cohortv, drop=TRUE])
+    new  <- tolower(vmap[tmp, varrefv, drop=TRUE])
+    cx   <- tolower(colnames(x))
+    ii   <- match(cx, old)
+    tmp  <- !is.na(ii)
+    ii   <- ii[tmp]
+    if (length(ii)) {
+      cx[tmp]     <- new[ii]
+      colnames(x) <- cx 
+    }
+  }
 
-  newnames
+  x
 
 } # END: renameSubjDataVars
 
-checkModelspecCol <- function(vec) {
 
-  reserved <- getGlobalOptionName()  
-  tmp      <- trimws(vec) %in% reserved
-  if (any(tmp)) {
-    msg <- paste0("ERROR: the ", toupper(getModelOptionsIdCol()), 
-                  " in the Models sheet contains the reseved word ", reserved)
-    stop(msg)
-  }
-  
-} # END: checkModelspecCol
 
-checkContVarsAreNumeric <- function(data, vars, names=NULL) {
-
-  n <- length(vars)
-  if (!n || !length(data)) return(NULL)
-  if (is.null(names)) names <- vars 
-  if (length(names) != n) stop("INTERNAL CODING ERROR in checkContVarsAreNumeric")
-
-  err <- rep(FALSE, n) 
-  for (i in 1:n) {
-    vec <- data[, vars[i], drop=TRUE]
-    if (!is.numeric(vec) && !all(is.na(vec))) {
-      err[i] <- TRUE
-      vec2   <- as.numeric(vec)
-      tmp    <- is.na(vec2)
-      vec2   <- unique(vec[tmp])
-      tmp    <- !is.na(vec2)
-      vec2   <- vec2[tmp]
-      if (length(vec2)) {
-        vals <- paste(vec2, collapse=", ", sep="")
-      } else {
-        vals <- ""
-      }
-      msg <- paste("ERROR: the continuous variable ", names[i], " contains invalid value(s): ", vals, sep="")
-      print(msg) 
-    }
-  }
-  if (any(err)) stop("ERROR with continuous variables. See above")
-  
-  NULL
-
-} # END: checkContVarsAreNumeric

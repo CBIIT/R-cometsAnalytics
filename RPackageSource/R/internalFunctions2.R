@@ -398,15 +398,22 @@ newVersionOutToOldOut <- function(x) {
   eff  <- x[[effn, exact=TRUE]]
   if (!length(ms) || !length(eff)) return(x)
 
-  # Merge data frames
+  # Merge data frames, if stratified run, then include strata to match rows
   cms  <- colnames(ms)
   ceff <- colnames(eff)
   idv  <- getEffectsRunName()
-  rows <- match(eff[, idv, drop=TRUE], ms[, idv, drop=TRUE])
+  sv   <- "strata"
+  eids <- eff[, idv, drop=TRUE]
+  mids <- ms[, idv, drop=TRUE]
+  if (sv %in% cms) {
+    eids <- paste(eids, eff[, sv, drop=TRUE], sep=":")
+    mids <- paste(mids, ms[, sv, drop=TRUE], sep=":")
+  } 
+  rows <- match(eids, mids)
   if (any(is.na(rows))) return(x)
-  tmp  <- !(cms %in% eff)
+  tmp  <- !(cms %in% ceff)
   cms  <- cms[tmp]
-  if (length(cms)) ret <- cbind(eff, ms[rows, , drop=FALSE])
+  if (length(cms)) ret <- cbind(eff, ms[rows, cms, drop=FALSE])
   rm(ms, eff)
   gc()
   ret <- as.data.frame(ret, stringsAsFactors=FALSE)
@@ -416,7 +423,7 @@ newVersionOutToOldOut <- function(x) {
                "corr", "n", "pvalue", "adjspec", "adjvars", "outcome_uid",
                "outcome", "exposure_uid", "exposure", "adj_uid", "adj")
   old.op  <- c("stratavar", "strata")
-  new.req <- c("cohort", "spec", "model", "outcomespec", "term",
+  new.req <- c("cohort", getModelSummaryRunModeName(), "model", "outcomespec", "term",
                "corr", "nobs", "p.value", "adjvars",  "_NO_COL1_", "outcome_uid",
                "outcome", "exposure_uid", "exposure", "adj_uid", "_NO_COL2_")
   new.op  <- c("stratavar", "strata")
@@ -435,15 +442,13 @@ newVersionOutToOldOut <- function(x) {
   # Change strata, strata.num, variable sep in new
   sep0 <- runModel.getOldVarSep()
   sep1 <- runModel.getVarSep()
-  v    <- new.op[1]
-  if (v %in% colnames(ret)) {
-    tmp <- parseStratVar(ret[, v, drop=TRUE], sep1) 
-    if (length(tmp)) {
-      ret[, v]  <- tmp[, 1]
-      v2        <- new.op[2] 
-      ret[, v2] <- tmp[, 2]
+  tmp  <- colnames(ret)
+  if (sep0 != sep1) {
+    for (v in new.op) {
+      if (v %in% tmp) ret[, v] <- gsub(sep1, sep0, ret[, v], fixed=TRUE)
     }
   }
+  
   vars <- c("adjvars", "adjspec", "adj_uid")
   vars <- vars[vars %in% colnames(ret)]
   if (length(vars) && (sep0 != sep1)) {
@@ -535,3 +540,15 @@ parseStratVar <- function(vec, sep) {
 
 } # END: parseStratVar
 
+getErrorMsgFromTryError <- function(obj, addToEnd=NULL) {
+
+  ret <- NULL
+  if ("try-error" %in% class(obj)) {
+    msg <- attr(obj, "condition")
+    ret <- msg[["message", exact=TRUE]]
+  }
+  if (length(addToEnd) && length(ret)) ret <- paste0(ret, addToEnd) 
+
+  ret
+
+} # END: getErrorMsgFromTryError
