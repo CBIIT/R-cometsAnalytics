@@ -10,7 +10,8 @@ checkIntegrity(
   dta.sdata,
   dta.vmap,
   dta.models,
-  dict_metabnames
+  dict_metabnames,
+  dta.op
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ checkIntegrity(
 \item{dta.models}{dta.models}
 
 \item{dict_metabnames}{dict_metabnames}
+
+\item{dta.op}{dta.op}
 }
 \description{
 Checks integrity of sheets in the user input CSV file
