@@ -632,14 +632,16 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   
   # Check model design
   # Bug fix 03/15/2021
-  newmodeldata <- runModel.checkModelDesign(modeldata, metabdata)
+  newmodeldata <- try(runModel.checkModelDesign(modeldata, metabdata), silent=TRUE)
+  if ("try-error" %in% class(newmodeldata)) return(NULL)
  
   # Bug fixes
   op   <- list(check.cor.method="spearman", check.illCond=TRUE, 
-                 check.cor.cutoff=0.97, check.nsubjects=25, 
+                 check.cor.cutoff=0.97, check.nsubjects=1, 
                  check.design=TRUE, max.nstrata=10,
                  DEBUG=0, 
                  colNamePrefix="...x", rowNamePrefix="r", check.n.unique.vals=2)
+
   tmp   <- runModel.runAllMetabs(newmodeldata, op)
 
   corrlong <- data.frame(cohort=cohort, spec=newmodeldata$modelspec, model=newmodeldata$modlabel,
