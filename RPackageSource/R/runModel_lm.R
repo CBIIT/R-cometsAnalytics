@@ -30,21 +30,25 @@ runModel.checkLmOpList <- function(op, modeldata, name="lm.options") {
 
 } # END: runModel.checkLmOpList
 
-runModel.defRetObj.lm <- function(dmatCols0) {
+runModel.defRetObj.lm <- function(dmatCols0, op) {
 
-  vec               <- c("term", "estimate", "std.error", "statistic", "p.value")
+  vec               <- getEffectsGlmCoefNames()
   coef.names        <- vec
-  fit.names         <- c("r.squared", "adj.r.squared", "sigma", "statistic",
-                         "p.value", "df", "logLik", "AIC",
-                         "BIC", "deviance", "df.residual", "nobs")
+  if (op[[getOutModSumOpName(), exact=TRUE]] == getOutModSumOpDefault()) {
+    fit.names       <- getModelSummaryNobsName()
+  } else {
+    fit.names       <- getModelSummaryLmFitNames()
+  }
   coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
   colnames(coef.stats) <- coef.names
   fit.stats         <- rep(NA, length(fit.names))
   names(fit.stats)  <- fit.names
   adj               <- runModel.getVarStr(dmatCols0[-1])
+  wp                <- NA
+  names(wp)         <- ""
 
   list(converged=FALSE, coef.stats=coef.stats, fit.stats=fit.stats, 
-       msg="", adj=adj, adj.rem="", wald.pvalue=NA)
+       msg="", adj=adj, adj.rem="", wald.pvalue=wp)
 
 } # END: runModel.defRetObj.lm
 

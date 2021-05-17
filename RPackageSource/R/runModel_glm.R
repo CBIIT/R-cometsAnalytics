@@ -287,20 +287,25 @@ runModel.getFamilyFun <- function(family, link) {
 
 } # END: runModel.getFamilyFun
 
-runModel.defRetObj.glm <- function(dmatCols0) {
+runModel.defRetObj.glm <- function(dmatCols0, op) {
 
-  vec               <- c("term", "estimate", "std.error", "statistic", "p.value")
-  coef.names        <- vec
-  fit.names         <- c("null.deviance", "df.null", "logLik", "AIC",
-                         "BIC", "deviance", "df.residual", "nobs")
-  coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
+  vec                  <- getEffectsGlmCoefNames()
+  coef.names           <- vec
+  if (op[[getOutModSumOpName(), exact=TRUE]] == getOutModSumOpDefault()) {
+    fit.names          <- getModelSummaryNobsName()
+  } else {
+    fit.names          <- getModelSummaryGlmFitNames()
+  }
+  coef.stats           <- matrix(data=NA, nrow=1, ncol=length(coef.names))
   colnames(coef.stats) <- coef.names
-  fit.stats         <- rep(NA, length(fit.names))
-  names(fit.stats)  <- fit.names
-  adj               <- runModel.getVarStr(dmatCols0[-1])
+  fit.stats            <- rep(NA, length(fit.names))
+  names(fit.stats)     <- fit.names
+  adj                  <- runModel.getVarStr(dmatCols0[-1])
+  wp                   <- NA
+  names(wp)            <- ""
 
   list(converged=FALSE, coef.stats=coef.stats, fit.stats=fit.stats, 
-       msg="", adj=adj, adj.rem="", wald.pvalue=NA)
+       msg="", adj=adj, adj.rem="", wald.pvalue=wp)
 
 } # END: runModel.defRetObj.glm
 
@@ -321,42 +326,39 @@ runModel.callGLM <- function(x, y, op) {
 
 } # END: runModel.callGLM
 
-runModel.tidyGLM <- function(nsubs, fit, expVars, defObj, dmatCols0) {
+runModel.tidyGLM <- function(nsubs, fit, exposure, expVars, defObj, modeldata, op) {
 
-  n <- length(fit)
+  nv        <- getModelSummaryNobsName()
+  n         <- length(fit)
+  dmatCols0 <- modeldata$designMatCols  
   if ("try-error" %in% class(fit)) {
     ret                   <- defObj
     ret$msg               <- runModel.getErrorMsg(fit)
-    ret$fit.stats["nobs"] <- nsubs
+    ret$fit.stats[nv]     <- nsubs
   } else if (!n || isString(fit)) {
     ret                   <- defObj
-    ret$fit.stats["nobs"] <- nsubs
+    ret$fit.stats[nv]     <- nsubs
     if (n) {
       ret$msg <- fit
     } else {
       ret$msg <- runModel.getUnknownErrorStr()
     }    
   } else {
-    obj2 <- as.numeric(glance(fit))
+    if (op[[getOutModSumOpName(), exact=TRUE]] == getOutModSumOpDefault()) {
+      obj2 <- nsubs
+    } else {
+      obj2 <- as.numeric(glance(fit))
+    }
     conv <- fit$converged
     if (length(conv) != 1) conv <- FALSE
     sfit <- summary(fit)
     obj  <- sfit$coefficients
-    msg  <- ""
 
-    # Get the rows and columns we need and convert to a named vector
-    terms <- rownames(obj)
-    tmp   <- terms %in% expVars
-    m     <- sum(tmp)
-    if (m) {    
-      terms  <- terms[tmp]
-      obj    <- as.matrix(obj[tmp, , drop=FALSE]) 
-      obj1   <- cbind(terms, obj) 
-    } else {
-      # No exposure names found in fitted object, return default 
-      obj1 <- defObj$coef.stats
-      msg  <- "exposure could not be estimated"
-    }
+    # Get the matrix of coefficients
+    tmp     <- runModel.getCoefsGLM(obj, defObj, expVars, op)
+    obj1    <- tmp$obj1
+    msg     <- ""
+
     vec     <- fit$coefficients
     nms     <- names(vec)
     # We only want the non-intercept, non-exposure adjustments
@@ -370,8 +372,9 @@ runModel.tidyGLM <- function(nsubs, fit, expVars, defObj, dmatCols0) {
     adj.rem <- runModel.getAdjVarStr(nms0[rem], dmatCols0)
 
     # Wald p-value
-    wald.p <- runModel.getWaldTest(fit, expVars, sfit=sfit)$pvalue 
-
+    #wald.p <- runModel.getWaldTest(fit, expVars, sfit=sfit)$pvalue 
+    wald.p <- runModel.getWaldPvalues(exposure, expVars, modeldata[["acovs.new.list", exact=TRUE]], 
+                                      fit, sfit=sfit)
     ret  <- list(converged=conv, coef.stats=obj1, fit.stats=obj2, 
                  msg=msg, adj=adj, adj.rem=adj.rem, 
                  wald.pvalue=wald.p)  
@@ -380,6 +383,32 @@ runModel.tidyGLM <- function(nsubs, fit, expVars, defObj, dmatCols0) {
 
 } # END: runModel.tidyGLM
 
+runModel.getCoefsGLM <- function(coefMat, defObj, expVars, op) {
 
+  outeff  <- op[[getOutEffectsOpName(), exact=TRUE]]
+  defFlag <- outeff == getOutEffectsOpDefault()
+  msg     <- ""
+
+  # Get the rows and columns we need and convert to a named vector
+  terms <- rownames(coefMat)
+  if (defFlag) {
+    tmp <- terms %in% expVars
+  } else {
+    tmp    <- rep(TRUE, length(terms)) 
+    tmp[1] <- FALSE  # Do not include intercept 
+  }
+  m     <- sum(tmp)
+  if (m) {    
+    terms  <- terms[tmp]
+    obj    <- as.matrix(coefMat[tmp, , drop=FALSE]) 
+    obj1   <- cbind(terms, obj) 
+  } else {
+    # No exposure names found in fitted object, return default 
+    obj1 <- defObj$coef.stats
+    msg  <- runModel.getExpNotEstimated()
+  }
+
+  list(obj1=obj1, msg=msg)
+}
 
 

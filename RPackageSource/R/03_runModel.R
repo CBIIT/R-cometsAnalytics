@@ -393,14 +393,14 @@ runModel.main <- function(modeldata, metabdata, op) {
 
 } # END: runModel.main
 
-runModel.defRetObj <- function(model, dmatCols0) {
+runModel.defRetObj <- function(model, dmatCols0, op) {
 
   if (model == getCorrModelName()) {
     ret <- runModel.defRetObj.pcor(dmatCols0)
   } else if (model == getGlmModelName()) {
-    ret <- runModel.defRetObj.glm(dmatCols0)
+    ret <- runModel.defRetObj.glm(dmatCols0, op)
   } else if (model == getLmModelName()) {
-    ret <- runModel.defRetObj.lm(dmatCols0)
+    ret <- runModel.defRetObj.lm(dmatCols0, op)
   } else {
     stop("INTERNAL CODING ERROR in runModel.defRetObj")
   }
@@ -500,12 +500,13 @@ runModel.callFunc <- function(x, y, expVars, op) {
 
 } # END: runModel.callFunc
 
-runModel.tidy <- function(nsubs, fit, expVars, defObj, designMat, dmatCols0, op) {
+runModel.tidy <- function(nsubs, fit, exposure, expVars, defObj, designMat, modeldata, op) {
 
   if (op$pcorrFlag) {
-    ret <- runModel.tidyPcorr(nsubs, fit, expVars, defObj, designMat, dmatCols0)
+    ret <- runModel.tidyPcorr(nsubs, fit, expVars, defObj, designMat, modeldata$designMatCols)
   } else {
-    ret <- runModel.tidyGLM(nsubs, fit, expVars, defObj, dmatCols0) 
+    # runModel.tidyGLM is used for glm and lm
+    ret <- runModel.tidyGLM(nsubs, fit, exposure, expVars, defObj, modeldata, op) 
   }
 
   ret
@@ -532,6 +533,34 @@ runModel.checkDesignWithExp <- function(dmat, op, expVar, varMap=NULL) {
 
 } # END: runModel.checkDesignWithExp
 
+runModel.getMaxEffRows <- function(nrcovs, nlevels, nadjv, op) {
+
+  if (op[[getOutEffectsOpName(), exact=TRUE]] == getOutEffectsOpDefault()) {
+    N <- nrcovs*sum(nlevels)
+  } else {
+    N <- nrcovs*sum(nlevels) + nrcovs*length(nlevels)*(nadjv - 1)
+  }
+
+  N
+
+} # END: runModel.getMaxEffRows
+
+runModel.getMaxModSumRows <- function(newmodeldata, op) {
+
+  nacovs <- length(newmodeldata[["acovs", exact=TRUE]])
+  nccovs <- length(newmodeldata$ccovs)
+  nrcovs <- length(newmodeldata$rcovs)
+
+  if (op[[getOutEffectsOpName(), exact=TRUE]] == getOutEffectsOpDefault()) {
+    N <- nrcovs*nccovs
+  } else {
+    N <- nrcovs*(nccovs*(nacovs + 1))     
+  }
+
+  N
+
+} # END: runModel.getMaxModSumRows
+
 runModel.runAllMetabs <- function(newmodeldata, op) {
 
   # Minimum number of subjects required
@@ -540,7 +569,6 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   nrcovs       <- length(rcovs)
   ccovs        <- newmodeldata$ccovs
   nccovs       <- length(ccovs)
-  nruns        <- nrcovs*nccovs
   dmatCols0    <- newmodeldata$designMatCols  
   varMap       <- newmodeldata$varMap
   checkDesign  <- op$check.design
@@ -549,29 +577,27 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   if (DEBUG) print(rem.obj)
   tooFewSubs   <- runModel.getTooFewSubsStr()
 
-  # Get the maximum number of rows in the return object for effects
-  N <- nrcovs*sum(newmodeldata$nlevels)
-
   # Get a default summary object when model fails 
-  defObj <- runModel.defRetObj(op$model, dmatCols0)
+  defObj <- runModel.defRetObj(op$model, dmatCols0, op)
 
   # Initialize objects to store results. For the special case of
   #  model=correlation and no adjusted covs, the continuous
   #  exposure variables will be taken care of in this call (for efficiency).
-  tmp      <- runModel.initSaveObjects(N, nruns, defObj, newmodeldata, op) 
+  tmp      <- runModel.initSaveObjects(defObj, newmodeldata, op) 
   rname    <- tmp$rname
   cname    <- tmp$cname
   coefMat  <- tmp$coefMat
-  runVec   <- tmp$runVec
-  runRows  <- tmp$runRows
+  runRows1 <- tmp$runRows1
+  runRows2 <- tmp$runRows2
   msgVec   <- tmp$msgVec
   adjVec   <- tmp$adjVec
   remVec   <- tmp$remVec
   fitMat   <- tmp$fitMat
   conv     <- tmp$conv
   waldP    <- tmp$waldP
-  k        <- tmp$k
-  k1       <- tmp$k1
+  index1   <- tmp$index1
+  index2   <- tmp$index2
+  term     <- tmp$term
   ccovs    <- tmp[["ccovs", exact=TRUE]]
   nccovs   <- length(ccovs)
   isfactor <- tmp[["isfactor", exact=TRUE]]
@@ -580,6 +606,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   } else {
     CVEC <- numeric(0)
   }
+  runNumber <- index1
     
   # Loop over each exposure in the outer loop
   for (j in seq_along(CVEC)) {
@@ -665,31 +692,37 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       } 
 
       # Get the results to save
-      tmp <- runModel.tidy(nsubs, fit, ccovNames, defObj, dcols, dmatCols0, op)
+      tmp <- runModel.tidy(nsubs, fit, ccovj, ccovNames, defObj, dcols, newmodeldata, op)
 
       # Save results
-      k              <- k + 1
-      k1             <- k1 + 1
-      coef           <- tmp$coef.stats
-      k2             <- k + nrow(coef) - 1
-      vec            <- k:k2
-      runRows[k1]    <- k
-      rname[vec]     <- rcovi
-      cname[vec]     <- ccovj
-      coefMat[vec, ] <- coef
-      runVec[vec]    <- k1
-      msgVec[k1]     <- tmp$msg
-      adjVec[k1]     <- tmp$adj
-      remVec[k1]     <- tmp$adj.rem
-      fitMat[k1,]    <- tmp$fit.stats
-      conv[k1]       <- tmp$converged
-      waldP[k1]      <- tmp$wald.pvalue
-      k              <- k2
+      runNumber          <- runNumber + 1
+      rname[runNumber]   <- rcovi
+      cname[runNumber]   <- ccovj
+      conv[runNumber]    <- tmp$converged
+      msgVec[runNumber]  <- tmp$msg
+      adjVec[runNumber]  <- tmp$adj
+      remVec[runNumber]  <- tmp$adj.rem
+      fitMat[runNumber,] <- tmp$fit.stats
+      obj                <- tmp$wald.pvalue
+      a                  <- index1 + 1
+      b                  <- a + length(obj) - 1
+      vec                <- a:b
+      runRows1[vec]      <- runNumber
+      waldP[vec]         <- obj
+      term[vec]          <- names(obj)
+      index1             <- b
+      obj                <- tmp$coef.stats
+      a                  <- index2 + 1 
+      b                  <- a + nrow(obj) - 1
+      vec                <- a:b
+      runRows2[vec]      <- runNumber
+      coefMat[vec, ]     <- obj
+      index2             <- b
     }
   }
 
   # Get objects to return
-  tmp <- runModel.returnSaveObj(k, k1, N, rname, cname, coefMat, runVec, runRows,
+  tmp <- runModel.returnSaveObj(rname, cname, term, coefMat, runRows1, runRows2,
                                 msgVec, adjVec, remVec, fitMat, conv, waldP, 
                                 defObj, op)
 
@@ -702,34 +735,42 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
 
 } # END: runModel.runAllMetabs
 
-runModel.returnSaveObj <- function(k, k1, N, rname, cname, coefMat, runVec, runRows,
+runModel.returnSaveObj <- function(rname, cname, term, coefMat, runRows1, runRows2, 
                                    msgVec, adjVec, remVec, fitMat, conv, waldP, 
                                    defObj, op) {
 
   ret1 <- NULL 
   ret2 <- NULL
   
-  if (k) {
-    tmp  <- 1:k1
-    ret1 <- data.frame(tmp, rname[runRows], cname[runRows], conv[tmp], waldP[tmp], 
-                       fitMat[tmp, , drop=FALSE], 
-                       msgVec[tmp], adjVec[tmp], remVec[tmp], stringsAsFactors=FALSE)
-    colnames(ret1) <- c("run", "outcomespec", "exposurespec", "converged", "wald.pvalue",
-                        names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
-    ret2 <- data.frame(runVec, rname, cname, coefMat, stringsAsFactors=FALSE)
-    colnames(ret2) <- c("run", "outcomespec", "exposurespec", 
+  if (!is.na(runRows1[1])) {
+    # ModelSummary
+    tmp             <- runRows1 > 0
+    tmp[is.na(tmp)] <- FALSE 
+    runRows1        <- runRows1[tmp]  
+    ret1            <- data.frame(runRows1, rname[runRows1], cname[runRows1], conv[runRows1],
+                         term[tmp], waldP[tmp], fitMat[runRows1, , drop=FALSE], msgVec[runRows1], 
+                         adjVec[runRows1], remVec[runRows1], stringsAsFactors=FALSE)
+    colnames(ret1)  <- c(getEffectsRunName(), getEffectsOutcomespecName(), getEffectsExposurespecName(),
+                         "converged", getEffectsTermName(), "wald.pvalue",
+                         names(defObj$fit.stats), "message", "adjvars", "adjvars.removed")
+
+    # Effects
+    tmp             <- runRows2 > 0
+    tmp[is.na(tmp)] <- FALSE 
+    runRows2        <- runRows2[tmp]  
+    ret2            <- data.frame(runRows2, rname[runRows2], cname[runRows2], 
+                         coefMat[tmp, , drop=FALSE], stringsAsFactors=FALSE)
+    colnames(ret2)  <- c(getEffectsRunName(), getEffectsOutcomespecName(), getEffectsExposurespecName(),
                         colnames(defObj$coef.stats))
 
-    # Subset if needed
-    if (k < N) ret2 <- ret2[1:k, , drop=FALSE]
     if (op$pcorrFlag) {
-      ret1$converged   <- NULL
-      ret1$wald.pvalue <- NULL
+      ret1$converged                 <- NULL
+      ret1$wald.pvalue               <- NULL
     } else if (op$lmFlag) {
-      ret1$converged   <- NULL
-      ret1$statistic   <- NULL
-      ret1$df          <- NULL 
-      ret1$p.value     <- NULL 
+      ret1$converged                 <- NULL
+      ret1$statistic                 <- NULL
+      ret1$df                        <- NULL 
+      ret1[[getEffectsPvalueName()]] <- NULL 
     }
   }
 
@@ -871,6 +912,32 @@ runModel.getWaldTest <- function(fit, parmNames, sfit=NULL, whichCov=NULL) {
   
 } # END: runModel.getWaldTest
 
+# Function to get Wald p-values 
+runModel.getWaldPvalues <- function(exposure, expVars, parmList, fit, sfit=NULL) {
+
+  len   <- length(parmList)
+  N     <- len + 1
+  tmp   <- runModel.getEstCov(fit, sfit=sfit, which=NULL)
+  parms <- tmp[["estimates", exact=TRUE]]
+  cov   <- tmp[["cov", exact=TRUE]]
+  ret   <- rep(NA, N)
+
+  # For the exposure
+  ret[1] <- runModel.waldTest.main(parms, cov, expVars)$pvalue
+  
+  if (len) {
+    for (i in 1:len) { 
+      tmp      <- runModel.waldTest.main(parms, cov, parmList[[i]])
+      ret[i+1] <- tmp$pvalue 
+    }
+    names(ret) <- c(exposure, names(parmList))
+  } else {
+    names(ret) <- exposure
+  }
+
+  ret
+}
+
 # Function to return point estimates and covariance matrix from an object
 runModel.getEstCov <- function(fit, sfit=NULL, which=NULL) {
 
@@ -957,19 +1024,41 @@ runModel.getFormulaStr <- function(yvar, dmatCols) {
 } # END: runModel.getFormulaStr
 
 # Function to initialize objects to store results
-runModel.initSaveObjects <- function(N, nruns, defObj, modeldata, op) {
+runModel.initSaveObjects <- function(defObj, modeldata, op) {
 
-  rname    <- rep("", N)
-  cname    <- rep("", N)
-  coefMat  <- matrix(data=NA, nrow=N, ncol=ncol(defObj$coef.stats))
-  runVec   <- rep(0, N)
-  runRows  <- rep(0, nruns)
-  msgVec   <- rep("", nruns)
-  adjVec   <- rep("", nruns)
-  remVec   <- rep("", nruns)
-  fitMat   <- matrix(data=NA, nrow=nruns, ncol=length(defObj$fit.stats))
-  conv     <- rep(FALSE, nruns)
-  waldP    <- rep(NA, nruns)
+  nrcovs       <- length(modeldata$rcovs)
+  nccovs       <- length(modeldata$ccovs)
+  nruns        <- nrcovs*nccovs
+  ndmatCols    <- length(modeldata$designMatCols)  
+
+  # N1 max number of rows for ModelSummary
+  # N2 max number of rows for Effects
+
+  # Get the maximum number of rows in the return ModelSummary data frame
+  N1 <- runModel.getMaxModSumRows(modeldata, op) 
+
+  # Get the maximum number of rows in the return Effects data frame
+  N2 <- runModel.getMaxEffRows(nrcovs, modeldata$nlevels, ndmatCols, op)
+
+  # Length 1 objects for each outcome/exposure
+  runVec  <- rep(NA, nruns)
+  rname   <- rep("", nruns)
+  cname   <- rep("", nruns)
+  conv    <- rep(FALSE, nruns)
+  msgVec  <- rep("", nruns)
+  adjVec  <- rep("", nruns)
+  remVec  <- rep("", nruns)
+
+  # For ModelSummary data frame
+  runRows1 <- rep(NA, N1)
+  fitMat   <- matrix(data=NA, nrow=N1, ncol=length(defObj$fit.stats))
+  waldP    <- rep(NA, N1)
+  term     <- rep("", N1)
+
+  # For Effects data frame
+  coefMat  <- matrix(data=NA, nrow=N2, ncol=ncol(defObj$coef.stats))
+  runRows2 <- rep(NA, N2)
+
   k        <- 0
   k1       <- 0
   ccovs0   <- modeldata$ccovs
@@ -995,7 +1084,8 @@ runModel.initSaveObjects <- function(N, nruns, defObj, modeldata, op) {
     v                 <- getEffectsTermName()
     coefMat[vec, v]   <- ccovs
     runVec[vec]       <- vec
-    runRows[vec]      <- vec
+    runRows1[vec]     <- vec
+    runRows2[vec]     <- vec
     v                 <- getModelSummaryNobsName()
     nobs              <- tmp$nobs
     fitMat[vec, v]    <- nobs
@@ -1012,9 +1102,9 @@ runModel.initSaveObjects <- function(N, nruns, defObj, modeldata, op) {
   }
 
   list(rname=rname, cname=cname, coefMat=coefMat, runVec=runVec, 
-       runRows=runRows, msgVec=msgVec, adjVec=adjVec, remVec=remVec,
-       fitMat=fitMat, conv=conv, waldP=waldP, k=k, k1=k1, 
-       ccovs=ccovs0, isfactor=isfac0, nlevels=nlev0)
+       runRows1=runRows1, runRows2=runRows2, msgVec=msgVec, adjVec=adjVec, 
+       remVec=remVec, fitMat=fitMat, conv=conv, waldP=waldP, index1=k, index2=k1, 
+       ccovs=ccovs0, isfactor=isfac0, nlevels=nlev0, term=term)
 
 } # END: runModel.initSaveObjects
 

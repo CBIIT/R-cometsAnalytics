@@ -1,4 +1,4 @@
-#' A list of 8:
+#' A list of 10:
 #' \itemize{
 #' \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
 #'                         design matrix. The default value is 0.97.}
@@ -22,6 +22,17 @@
 #'        and \code{\link{lm.options}} for options specific to
 #' \code{model="correlation", "lm", "glm"} respectively.        
 #'                      The default is NULL.} 
+#' \item{\code{output.Effects}}{ A string to define the terms output in the returned Effects
+#'                            and ModelSummary data frames. Currently, it must be "exposure" or "all".
+#'                           If set to "all", then summary statistics for the exposure
+#'                            and adjustment variables will be output. Otherwise, only
+#'                            summary statistics for the exposure will be output.
+#'                            This option is ignored with \code{model = "correlation"}.
+#'                            The default is "exposure".}
+#' \item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
+#'                            ModelSummary data frame. Currently, it must be "anova" or "all".
+#'                            This option is ignored with \code{model = "correlation"}.
+#'                            The default is "anova".}
 #' }
 #'
 #' @name options
@@ -85,6 +96,12 @@ runModel.checkOptions <- function(op, modeldata) {
   op$colNamePrefix       <- "...x"
   op$rowNamePrefix       <- "r"
   op$check.n.unique.vals <- 2
+
+  # Output options are ignored for correlation analysis
+  if (op$pcorrFlag) {
+    op[[getOutEffectsOpName()]] <- getOutEffectsOpDefault()
+    op[[getOutModSumOpName()]]  <- getOutModSumOpDefault()
+  }
 
   op
 
@@ -186,13 +203,21 @@ getAllOptionNames <- function() {
 } # END: getAllOptionNames
 
 getValidGlobalOps <- function() {
-  ops.char <- c("model", "check.cor.method")
+
+  out.eff    <- getOutEffectsOpName()
+  out.modSum <- getOutModSumOpName()
+
+  ops.char <- c("model", "check.cor.method", out.eff, out.modSum)
   ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", "DEBUG", "DONOTRUN")
   ops.log  <- c("check.illCond", "check.design")
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
                    check.design=TRUE, max.nstrata=10,
-                   model=getCorrModelName(), DEBUG=0, DONOTRUN=0)
+                   model=getCorrModelName(), 
+                   DEBUG=0, DONOTRUN=0)
+  default[[out.eff]]    <- getOutEffectsOpDefault()
+  default[[out.modSum]] <- getOutModSumOpDefault()
+
   valid    <- names(default)
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
        valid=valid, default=default)
@@ -240,7 +265,6 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
   ret
 
 } # END: checkGlobalOpsFromCharVecs
-
 
 checkOptionListNames <- function(op, valid, name) {
 
@@ -351,6 +375,26 @@ runModel.check.model <- function(obj) {
 
 } # END: runModel.check.model
 
+checkOp_output.Effects <- function(str, name=NULL) {
+
+  if (!isString(str)) stop("INTERNAL CODING ERROR in checkOp_output.Effects")
+  valid <- tolower(getOutEffectsOpVals())
+  str   <- tolower(str)
+  str   <- check.string(str, valid, getOutEffectsOpName())
+  str
+
+} 
+
+checkOp_output.ModelSummary <- function(str, name=NULL) {
+
+  if (!isString(str)) stop("INTERNAL CODING ERROR in checkOp_output.ModelSummary")
+  valid <- tolower(getOutModSumOpVals())
+  str   <- tolower(str)
+  str   <- check.string(str, valid, getOutModSumOpName())
+  str
+
+} 
+
 # Function to check an argument 
 check.string <- function(obj, valid, parm) {
 
@@ -374,7 +418,6 @@ check.string <- function(obj, valid, parm) {
   obj
 
 } # END: check.string
-
 
 check.logical <- function(x, name) {
 
