@@ -1,0 +1,4 @@
+The files in this folder were created from saving objects created in the COMETS vignette. 
+The objects are returned from the functions readCOMETSinput, getModelData, runCorr, and runModel.
+They serve as the baseline objects for the unit tests in the /tests/testthat folder.
+ 
