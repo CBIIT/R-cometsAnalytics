@@ -14,14 +14,14 @@ all the below names may not appear in the data frame.
 \item{\code{estimate}}{ The regression coefficient of \code{term}}
 \item{\code{exposurespec}}{ Exposure variable}
 \item{\code{outcomespec}}{ Outcome variable}
-\item{\code{p.value}}{ The p-value of the test}
+\item{\code{pvalue}}{ The p-value of the test}
 \item{\code{run}}{ Run number that can be used to link with the
                    \code{\link{ModelSummary}} table}
 \item{\code{statistic}}{ The test statistic for \code{term}}
 \item{\code{std.error}}{ The standard error of \code{estimate}}
 \item{\code{stratavar}}{ Stratum variable(s)}
 \item{\code{strata}}{ Stratum level(s)}
-\item{\code{term}}{ Exposure variable or dummy variable name}
+\item{\code{term}}{ Variable in the model}
 }
 }
 \details{

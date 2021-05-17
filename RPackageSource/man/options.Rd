@@ -4,7 +4,7 @@
 \alias{options}
 \title{options list}
 \description{
-A list of 8:
+A list of 10:
 \itemize{
 \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
                         design matrix. The default value is 0.97.}
@@ -28,6 +28,17 @@ A list of 8:
        and \code{\link{lm.options}} for options specific to
 \code{model="correlation", "lm", "glm"} respectively.        
                      The default is NULL.} 
+\item{\code{output.Effects}}{ A string to define the terms output in the returned Effects
+                           and ModelSummary data frames. Currently, it must be "exposure" or "all".
+                          If set to "all", then summary statistics for the exposure
+                           and adjustment variables will be output. Otherwise, only
+                           summary statistics for the exposure will be output.
+                           This option is ignored with \code{model = "correlation"}.
+                           The default is "exposure".}
+\item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
+                           ModelSummary data frame. Currently, it must be "anova" or "all".
+                           This option is ignored with \code{model = "correlation"}.
+                           The default is "anova".}
 }
 }
 \details{
