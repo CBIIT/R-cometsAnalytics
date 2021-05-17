@@ -12,7 +12,7 @@ The software can be run two different ways:
 All underlying statistical analyses and data processing use the R-cometsAnalytics R package so that using the R package or the app will produce the same results.
 
 # Version 
-Current Version is 1.7: Released on 03/24/2021 with analytic module for unadjusted and partial correlation analyses. Complete details of the version history are documented in the GitHub repository https://github.com/CBIIT/R-cometsAnalytics/. For graphical representations displaying the differences in correlations and p-values between version 1.6 and 1.7, see the [plots](https://github.com/CBIIT/R-cometsAnalytics/tree/v1.7/Differences_with_v1.6/plots).
+Current Version is 1.7: Released on 03/24/2021 with analytic module for unadjusted and partial correlation analyses. Complete details of the version history are documented in the GitHub repository https://github.com/CBIIT/R-cometsAnalytics/. For graphical illustrations displaying the differences in correlations and p-values between versions 1.6 and 1.7, see the [plots](https://github.com/CBIIT/R-cometsAnalytics/tree/v1.7/Differences_with_v1.6/plots).
 Upcoming Version 2.0: Analytic module with generalized linear models is in testing, expected release in 2021.
 
 Previous releases can be found here: https://github.com/CBIIT/R-cometsAnalytics/releases
