@@ -16,7 +16,7 @@ results2  <- COMETS::runModel(test_exmodeldata, test_exmetabdata,"DPP")
 
 keep     <- c("corr", "pvalue")
 results1 <- results1[, keep, drop=FALSE]
-results2 <- (results2$Effects)[, c("corr", "p.value"), drop=FALSE]
+results2 <- (results2$Effects)[, c("corr", "pvalue"), drop=FALSE]
 colnames(results2) <- keep
 
 # Compare results
