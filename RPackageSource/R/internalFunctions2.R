@@ -420,11 +420,13 @@ newVersionOutToOldOut <- function(x) {
 
   # Old and new column names. NOTE _NO_COL1_ and _NO_COL2_ are placeholders
   old.req <- c("cohort", "spec", "model", "outcomespec", "exposurespec",
-               "corr", "n", "pvalue", "adjspec", "adjvars", "outcome_uid",
+               "corr", "n", "pvalue", 
+               "adjspec", "adjvars", "outcome_uid",
                "outcome", "exposure_uid", "exposure", "adj_uid", "adj")
   old.op  <- c("stratavar", "strata")
-  new.req <- c("cohort", getModelSummaryRunModeName(), "model", "outcomespec", "term",
-               "corr", "nobs", "p.value", "adjvars",  "_NO_COL1_", "outcome_uid",
+  new.req <- c("cohort", getModelSummaryRunModeName(), "model", "outcomespec", getEffectsTermName(),
+               getEffectsCorrEstName(), getModelSummaryNobsName(), getEffectsPvalueName(),
+               "adjvars",  "_NO_COL1_", "outcome_uid",
                "outcome", "exposure_uid", "exposure", "adj_uid", "_NO_COL2_")
   new.op  <- c("stratavar", "strata")
 
@@ -476,6 +478,17 @@ newVersionOutToOldOut <- function(x) {
   # Get the correct cols and order
   tmp <- old %in% colnames(ret)
   if (any(tmp)) ret <- ret[, old[tmp], drop=FALSE]  
+
+  # Set unadjusted columns to None
+  vv  <- c("adjspec", "adjvars", "adj_uid", "adj")
+  tmp <- vv %in% colnames(ret)
+  vv  <- vv[tmp]
+  if (length(vv)) {
+    for (v in vv) {
+      tmp <- !nchar(trimws(ret[, v, drop=TRUE]))
+      if (any(tmp)) ret[tmp, v] <- "None"
+    }
+  }
 
   tmp <- attributes(x)
   if (is.list(tmp)) {

@@ -153,8 +153,39 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
     rem.obj <- tmp$rem.obj
   }
 
-  # Get the design matrix of adjusted variables and intercept
-  dmat  <- runModel.designMat(gdta, acovs) 
+  # Get the design matrix of adjusted variables and intercept.
+  # Get temporary names for acovs, so that we can get all dummy vars for each categorical var.
+  # This will be needed for computing the multi-df Wald tests.
+  nacovs     <- length(acovs)
+  acovs.list <- NULL
+  if (nacovs) {
+    gdta2           <- gdta[, acovs, drop=FALSE]
+    prefix          <- paste0("x", 1:nacovs, ".")
+    acovs2          <- paste0(prefix, acovs)
+    colnames(gdta2) <- acovs2
+    dmat            <- runModel.designMat(gdta2, acovs2) 
+    # Get the variable column names for each acov
+    acovs.list <- list()
+    dvars      <- colnames(dmat)
+    dvars2     <- dvars
+    dlen       <- nchar(dvars)
+    vec        <- 1:ncol(dmat)
+    for (i in 1:nacovs) {
+      pre <- prefix[i]
+      len <- nchar(pre)
+      tmp <- substr(dvars, 1, len) == pre
+      if (!any(tmp)) stop("INTERNAL CODING ERROR 2 in runModel.checkModelDesign")
+      ii                     <- vec[tmp]
+      dvars2[ii]             <- substr(dvars2[ii], len+1, dlen[ii]) 
+      acovs.list[[acovs[i]]] <- dvars2[ii]
+    }
+    # Rename columns of dmat
+    colnames(dmat) <- dvars2
+    rm(gdta2, acovs2, dvars2, vec)
+    gc()
+  } else {
+    dmat  <- runModel.designMat(gdta, acovs) 
+  }
 
   # Check that there is at least a minimum number of subjects
   if (nrow(dmat) < minN){
@@ -174,6 +205,20 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
   dmatCols        <- colnames(dmat)
   colnames(dmat)  <- paste(op$colNamePrefix, 0:(ncol(dmat)-1), sep="")
   names(dmatCols) <- colnames(dmat)
+
+  # Get new acovs.list to use the new names
+  len            <- length(acovs.list)
+  acovs.new.list <- NULL
+  if (len) {
+    new            <- colnames(dmat)
+    acovs.new.list <- list()
+    nms            <- names(acovs.list)
+    for (i in 1:len) {
+      vars <- acovs.list[[i]]
+      tmp  <- dmatCols %in% vars
+      if (any(tmp)) acovs.new.list[[nms[i]]] <- new[tmp]
+    }
+  }
 
   # If subjects were removed, then update gdta.
   # Possibly change this to keep a logical vector of subs to keep.
@@ -239,6 +284,8 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
   modeldata$varMap               <- c(metabdata$dict_metabnames, dmatCols,
                                       modeldata[["varMap", exact=TRUE]])
   modeldata[[wr.nm]]             <- rem.obj
+  modeldata$acovs.list           <- acovs.list
+  modeldata$acovs.new.list       <- acovs.new.list
 
   modeldata
 

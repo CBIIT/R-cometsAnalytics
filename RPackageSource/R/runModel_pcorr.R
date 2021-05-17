@@ -45,17 +45,19 @@ runModel.checkPcorrOpList <- function(op, name="model.options") {
 
 runModel.defRetObj.pcor <- function(dmatCols0) {
 
-  vec               <- c("term", "corr", "p.value")
-  coef.names        <- vec
-  coef.stats        <- matrix(data=NA, nrow=1, ncol=length(coef.names))
+  vec                  <- getEffectsPcorCoefNames()
+  coef.names           <- vec
+  coef.stats           <- matrix(data=NA, nrow=1, ncol=length(coef.names))
   colnames(coef.stats) <- coef.names
-  fit.names         <- "nobs"
-  fit.stats         <- rep(NA, length(fit.names))
-  names(fit.stats)  <- fit.names
-  adj               <- runModel.getVarStr(dmatCols0[-1])
+  fit.names            <- getModelSummaryNobsName()
+  fit.stats            <- rep(NA, length(fit.names))
+  names(fit.stats)     <- fit.names
+  adj                  <- runModel.getVarStr(dmatCols0[-1])
+  wp                   <- NA
+  names(wp)            <- ""
 
   list(converged=TRUE, coef.stats=coef.stats, fit.stats=fit.stats, 
-       msg="", adj=adj, adj.rem="", wald.pvalue=NA)
+       msg="", adj=adj, adj.rem="", wald.pvalue=wp)
 
 } # END: runModel.defRetObj.pcor
 
@@ -72,16 +74,18 @@ runModel.tidyPcorr <- function(nsubs, fit, expVars, defObj, designMatCols, dmatC
     msg     <- fit$msg
 
     # We only want the non-intercept, non-exposure adjustments
-    nms0    <- names(dmatCols0)
-    nms     <- designMatCols
-    tmp     <- nms %in% nms0
-    tmp[1]  <- FALSE
-    rem     <- !(nms0 %in% nms)
-    adj     <- runModel.getAdjVarStr(nms[tmp], dmatCols0)
-    adj.rem <- runModel.getAdjVarStr(nms0[rem], dmatCols0)
+    nms0      <- names(dmatCols0)
+    nms       <- designMatCols
+    tmp       <- nms %in% nms0
+    tmp[1]    <- FALSE
+    rem       <- !(nms0 %in% nms)
+    adj       <- runModel.getAdjVarStr(nms[tmp], dmatCols0)
+    adj.rem   <- runModel.getAdjVarStr(nms0[rem], dmatCols0)
+    wp        <- NA
+    names(wp) <- ""
 
     ret  <- list(converged=TRUE, coef.stats=obj1, fit.stats=nsubs, 
-                 msg=msg, adj=adj, adj.rem=adj.rem, wald.pvalue=NA)  
+                 msg=msg, adj=adj, adj.rem=adj.rem, wald.pvalue=wp)  
   } 
 
   ret

@@ -28,18 +28,28 @@ runModel.getStratTooFewSubStr <- function() {"Stratum contains to few subjects"}
 # Message when exposure has been removed from design matrix
 runModel.getExpRemFromDesign <- function() {"exposure removed from design matrix"}
 
+# Message when exposure could not be estimated from the model
+runModel.getExpNotEstimated <- function() {"exposure could not be estimated"}
+
 # For option strings
-getNoFamilyValue    <- function() {""}
-getOpStrSep         <- function() {";"}
-getOpStrEq          <- function() {"="}
-getStrataSep        <- function() {","}
-getModelOpsName     <- function() {"model.options"}
-getOldCorrModelName <- function() {"runcorr"}
-getCorrModelName    <- function() {"correlation"}
-getGlmModelName     <- function() {"glm"}
-getLmModelName      <- function() {"lm"}
-getValidModelNames  <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName())}
-getMetabDataOpsName <- function() {"options"} 
+getNoFamilyValue         <- function() {""}
+getOpStrSep              <- function() {";"}
+getOpStrEq               <- function() {"="}
+getStrataSep             <- function() {","}
+getModelOpsName          <- function() {"model.options"}
+getOldCorrModelName      <- function() {"runcorr"}
+getCorrModelName         <- function() {"correlation"}
+getGlmModelName          <- function() {"glm"}
+getLmModelName           <- function() {"lm"}
+getValidModelNames       <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName())}
+getMetabDataOpsName      <- function() {"options"} 
+getOutEffectsOpName      <- function() {"output.Effects"}
+getOutEffectsOpDefault   <- function() {"exposure"}
+getOutEffectsOpVals      <- function() {c(getOutEffectsOpDefault(), "all")}
+getOutModSumOpName       <- function() {"output.ModelSummary"}
+getOutModSumOpDefault    <- function() {"anova"}
+getOutModSumOpVals       <- function() {c(getOutModSumOpDefault(), "all")}
+
 
 # For Effects data frame
 getEffectsName             <- function() {"Effects"}
@@ -47,26 +57,35 @@ getEffectsTermName         <- function() {"term"}
 getEffectsOutcomespecName  <- function() {"outcomespec"}
 getEffectsExposurespecName <- function() {"exposurespec"}
 getEffectsCorrEstName      <- function() {"corr"}
-getEffectsPvalueName       <- function() {"p.value"}
+getEffectsPvalueName       <- function() {"pvalue"}
 getEffectsRunName          <- function() {"run"}
+getEffectsGlmCoefNames     <- function() {c(getEffectsTermName(), "estimate", "std.error", "statistic", 
+                                            getEffectsPvalueName())}
+getEffectsPcorCoefNames    <- function() {c(getEffectsTermName(), getEffectsCorrEstName(), 
+                                            getEffectsPvalueName())}
 
 # ModelSummary 
 getModelSummaryName        <- function() {"ModelSummary"}
 getModelSummaryNobsName    <- function() {"nobs"}
 getModelSummaryFunCol      <- function() {"model_function"}
 getModelSummaryRunModeName <- function() {"runmode"}
+getModelSummaryGlmFitNames <- function() {c("null.deviance", "df.null", "logLik", "AIC", "BIC", "deviance", 
+                                            "df.residual", getModelSummaryNobsName())}
+getModelSummaryLmFitNames  <- function() {c("r.squared", "adj.r.squared", "sigma", "statistic",
+                                            getEffectsPvalueName(), "df", "logLik", "AIC", "BIC", "deviance", 
+                                            "df.residual", getModelSummaryNobsName())}
 
 # For input excel file
-getModelOptionsIdCol  <- function() {"modelspec"}
-getOptionNameCol      <- function() {"option"}
-getOptionValueCol     <- function() {"value"}
-getMetabSheetName     <- function() {"Metabolites"}
-getSubMetabSheetName  <- function() {"SubjectMetabolites"}
-getSubDataSheetName   <- function() {"SubjectData"}
-getVarMapSheetName    <- function() {"VarMap"}
-getModelsSheetName    <- function() {"Models"}
-getOptionsSheetName   <- function() {"ModelOptions"}
-getGlobalOptionName   <- function() {"ModelChecks"}
+getModelOptionsIdCol     <- function() {"modelspec"}
+getOptionNameCol         <- function() {"option"}
+getOptionValueCol        <- function() {"value"}
+getMetabSheetName        <- function() {"Metabolites"}
+getSubMetabSheetName     <- function() {"SubjectMetabolites"}
+getSubDataSheetName      <- function() {"SubjectData"}
+getVarMapSheetName       <- function() {"VarMap"}
+getModelsSheetName       <- function() {"Models"}
+getOptionsSheetName      <- function() {"ModelOptions"}
+getGlobalOptionName      <- function() {"ModelChecks"}
 getModelFunctionCol   <- function() {"function"}
 getReqSheetNames      <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
 getReqMetabSheetCols  <- function() {c("metabolite_name")}

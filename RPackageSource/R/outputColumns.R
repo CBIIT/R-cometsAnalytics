@@ -34,9 +34,10 @@
 #' \item{\code{sigma}}{ Square root of the estimated variance of the random error}
 #' \item{\code{stratavar}}{ Stratum variable(s)}
 #' \item{\code{strata}}{ Stratum level(s)}
-#' \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
+#' \item{\code{term}}{ Variable in the model}
+#' \item{\code{wald.pvalue}}{ P-value from the Wald test of the given variable. 
 #'                           Note that this test may be a multi-df test if the
-#'                           exposure is categorical.}
+#'                           variable is categorical.}
 #' }
 #'
 #' @name ModelSummary
@@ -56,14 +57,14 @@ NULL
 #' \item{\code{estimate}}{ The regression coefficient of \code{term}}
 #' \item{\code{exposurespec}}{ Exposure variable}
 #' \item{\code{outcomespec}}{ Outcome variable}
-#' \item{\code{p.value}}{ The p-value of the test}
+#' \item{\code{pvalue}}{ The p-value of the test}
 #' \item{\code{run}}{ Run number that can be used to link with the
 #'                    \code{\link{ModelSummary}} table}
 #' \item{\code{statistic}}{ The test statistic for \code{term}}
 #' \item{\code{std.error}}{ The standard error of \code{estimate}}
 #' \item{\code{stratavar}}{ Stratum variable(s)}
 #' \item{\code{strata}}{ Stratum level(s)}
-#' \item{\code{term}}{ Exposure variable or dummy variable name}
+#' \item{\code{term}}{ Variable in the model}
 #' }
 #'
 #' @name Effects
