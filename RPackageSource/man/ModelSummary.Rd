@@ -40,9 +40,10 @@ all the below names may not appear in the data frame.
 \item{\code{sigma}}{ Square root of the estimated variance of the random error}
 \item{\code{stratavar}}{ Stratum variable(s)}
 \item{\code{strata}}{ Stratum level(s)}
-\item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
+\item{\code{term}}{ Variable in the model}
+\item{\code{wald.pvalue}}{ P-value from the Wald test of the given variable. 
                           Note that this test may be a multi-df test if the
-                          exposure is categorical.}
+                          variable is categorical.}
 }
 }
 \details{
