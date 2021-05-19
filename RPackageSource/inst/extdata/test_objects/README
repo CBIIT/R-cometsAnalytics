@@ -1,4 +1,11 @@
-The files in this folder were created from saving objects created in the COMETS vignette. 
+The .rda files in this folder were created from saving objects created in the COMETS vignette. 
 The objects are returned from the functions readCOMETSinput, getModelData, runCorr, and runModel.
-They serve as the baseline objects for the unit tests in the /tests/testthat folder.
+They serve as the baseline objects for the unit tests in the /tests/testthat folder. 
+The unit tests are automatically run when R CMD check is invoked on the COMETS package.
+
+History:
+2021-05-17 New test object files were created due to the change in output columns on the
+           returned data frames from runModel. These changes are associated with the new
+           output options output.Effects and output.ModelSummary.
+
  
