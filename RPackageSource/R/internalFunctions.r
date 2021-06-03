@@ -278,8 +278,9 @@ getSubsFromEqWhere <- function(data, myrule, notEqual=1) {
   }
   mysplit <- strsplit(myrule, op, fixed=TRUE)[[1]]
   tmp     <- nchar(trimws(mysplit)) > 0  # Takes care of cases == and =
-  mysplit <- mysplit[tmp]
+  mysplit <- trimws(mysplit[tmp])
   myvar   <- mysplit[1]
+
   checkWhereVarInData(myvar, colnames(data))
   
   # Take missing values into account

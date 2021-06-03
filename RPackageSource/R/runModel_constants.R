@@ -36,6 +36,7 @@ getNoFamilyValue         <- function() {""}
 getOpStrSep              <- function() {";"}
 getOpStrEq               <- function() {"="}
 getStrataSep             <- function() {","}
+getWhereSep              <- function() {","}
 getModelOpsName          <- function() {"model.options"}
 getOldCorrModelName      <- function() {"runcorr"}
 getCorrModelName         <- function() {"correlation"}
@@ -112,4 +113,5 @@ getVarRef_subjectId  <- function() {"id"}
 # Model options that specify variables
 runModel.getOptionsThatAreVars <- function() {c("weights", "offset")}
 
-runModel.testModelString <- function() {"Testing models in Models sheet... \n"}
+runModel.testModelString  <- function() {"Begin testing models in Models sheet... \n"}
+runModel.testModelString2 <- function() {"Finished testing models in Models sheet. \n"}

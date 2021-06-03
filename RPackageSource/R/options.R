@@ -517,55 +517,6 @@ checkOp_model <- function(x) {
   runModel.check.model(x)
 } 
 
-
-####################################################################
-# Old code to be removed:
-# Parse and check global options from global options string. Return a list of options.
-parseAndCheckGlobalOps.OLD <- function(str) {
-
-  tmp    <- getValidGlobalOps()
-  def    <- tmp$default
-  ops.n  <- tmp$ops.numeric
-  valid  <- names(def)
-
-  if (!length(str)) return(def)
-  if (!isString(str)) stop("str must be a string")
-
-  str    <- setupOpStr(str)
-  if (!nchar(str)) return(def)
-
-  strVec <- parseStr(str, sep=getOpStrSep()) 
-  n      <- length(strVec)
-  ret    <- list()
-  # Loop over each element of strVec, each element should be
-  #   of the form "op=value" 
-  eq <- getOpStrEq()
-  for (i in 1:n) {
-    tmp   <- getOptionNameAndValue(strVec[i], sep=eq)
-    name  <- tmp$name
-    value <- tmp$value
-    if (!(name %in% valid)) stop(paste("ERROR: ", strVec[i], " is not valid", sep=""))
-    if (!length(value)) stop(paste("ERROR: ", strVec[i], " is not valid", sep=""))
-    
-    # value must be converted to the correct type
-    if (name %in% ops.n) value <- as.numeric(value)
-
-    ret[[name]] <- value
-  }
-
-  # Check the values
-  ret <- try(checkGlobalOpList(ret, name="options"), silent=TRUE)
-  if ("try-error" %in% class(ret)) {
-    print(ret)
-    msg <- paste("ERROR with options, make sure options are separated by a ", 
-                 getOpStrSep(), sep="")
-    stop(msg)
-  }
-
-  ret
-
-} # END: parseAndCheckGlobalOps.OLD
-
 getOptionNameAndValue <- function(str, sep="=") {
 
   tmp <- parseStr(str, sep=sep)
