@@ -96,7 +96,6 @@ getModelData <-  function(readData,
         myind <- which(names(readData$dict_metabnames)==x)
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
         return(x) }))
-
     if(any(is.na(match(allvars,subjmetab)))) {
 	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
     }
@@ -248,6 +247,8 @@ getModelData <-  function(readData,
   }
 
   if (!is.null(where)) {
+    # Normalize variable name in where statement 
+    where <- normalizeWhere(where, sep=getWhereSep())
 
     # Update the where rule (variables names have changed)
     where2      <- updateWhereStr(where, readData$dict_metabnames)

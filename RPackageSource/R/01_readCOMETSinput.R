@@ -255,7 +255,7 @@ readCOMETSinput <- function(file) {
   # Test the models in the Models sheet 
   err <- infile.checkAllModels(dtalist)
   if (err) {
-    # Display warning, user could be running in interactive model 
+    # Display warning, user could be running in interactive mode 
     msg <- paste0("ERRORS were produced for some models in the ", getModelsSheetName(),
                   " sheet. See messages above. \n")
     cat(msg)

@@ -2,7 +2,7 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
 
   ret <- NULL
 
-  # make sheel names not case-sensitive
+  # make sheet names not case-sensitive
   tmp <- toupper(f.sheets) %in% toupper(sheet)
   sh2 <- f.sheets[tmp]
   m   <- sum(tmp)  
@@ -14,6 +14,8 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
     cat(msg)
     return(NULL)
   }
+
+  # This should not be possible
   if (m > 1) {
     msg <- paste0("ERROR: multiple sheets in the input Excel file map to the ", sheet, " sheet.\n")
     if (stopOnError) stop(msg)
@@ -49,7 +51,9 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
     cat(msg)
   }
 
-  # Check column names 
+  # Check column names for duplicate names. Currently, this seems impossible to know for sure, 
+  #   because the readxl::read_excel function will rename the columns to something suffixed 
+  #   with "..." and print a message without returning that info.
   if (length(ret)) {
     cx  <- colnames(ret)
     if (length(cx)) {
@@ -923,27 +927,32 @@ infile.checkAllModels <- function(readData) {
   mymodels <- readData[["mods", exact=TRUE]]
   if (!length(mymodels)) return(err)
   mymodels <- mymodels[["model", exact=TRUE]]
-  if (!length(mymodels)) return(err)
+  nmodels  <- length(mymodels)
+  if (!nmodels) return(err)
+  sheet <- getModelsSheetName()
 
   cat(runModel.testModelString())
   opnm <- getMetabDataOpsName()
-  for (i in mymodels) {
-    modeldata <- try(getModelData(readData, modlabel=i), silent=TRUE)
+  for (i in 1:nmodels) {
+    row       <- i + 1 
+    modeldata <- try(getModelData(readData, modlabel=mymodels[i]), silent=TRUE)
     if ("try-error" %in% class(modeldata)) {
       err <- err + 1
       # Get and print error message
-      msg <- getErrorMsgFromTryError(modeldata, addToEnd="\n")
+      msg <- getErrorMsgFromTryError(modeldata)
+      msg <- paste0("ERROR for model on row ", row, " of the ", sheet, " sheet: \n", msg, "\n")
       cat(msg)
       next
     }
     op <- modeldata[[opnm, exact=TRUE]]
     if (!is.list(op)) op <- list()
-    op$DONOTRUN <- 1 
+    op$DONOTRUN <- 1 # This will only cause the beginning of runModel to execute
     op          <- try(runModel.checkOptions(op, modeldata), silent=TRUE)
     if ("try-error" %in% class(op)) {
       err <- err + 1
       # Get and print error message
-      msg <- getErrorMsgFromTryError(op, addToEnd="\n")
+      msg <- getErrorMsgFromTryError(op)
+      msg <- paste0("ERROR for model on row ", row, " of the ", sheet, " sheet: \n", msg, "\n")
       cat(msg)
       next
     }
@@ -952,11 +961,13 @@ infile.checkAllModels <- function(readData) {
     if ("try-error" %in% class(tmp)) {
       err <- err + 1
       # Get and print error message
-      msg <- getErrorMsgFromTryError(tmp, addToEnd="\n")
+      msg <- getErrorMsgFromTryError(tmp)
+      msg <- paste0("ERROR for model on row ", row, " of the ", sheet, " sheet: \n", msg, "\n")
       cat(msg)
       next
     }
   }
+  cat(runModel.testModelString2())
 
   err
 

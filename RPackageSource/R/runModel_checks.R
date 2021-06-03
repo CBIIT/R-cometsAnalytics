@@ -80,17 +80,17 @@ runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL,
     dmat    <- dmat[, -rem, drop=FALSE]
   }
 
-  # Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
-  freqCut <- op$check.nearZeroVar.freqCut
-  if ((ncol(dmat) > 1) && (freqCut > 0)) { # Col 1 is intercept
-    rem <- caret::nearZeroVar(dmat[, -1, drop=FALSE], freqCut=freqCut)
-    if (length(rem)) {
-      tmp     <- colnames(dmat)[-1]
-      rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], varSet, "near zero variance",
-                                     varMap=varMap)
-      dmat    <- dmat[, -(rem+1), drop=FALSE]
-    }
-  }
+  # Check for zero-variance predictors 
+  #freqCut <- op$check.nearZeroVar.freqCut
+  #if ((ncol(dmat) > 1) && (freqCut > 0)) { # Col 1 is intercept
+  #  rem <- caret::nearZeroVar(dmat[, -1, drop=FALSE], freqCut=freqCut)
+  #  if (length(rem)) {
+  #    tmp     <- colnames(dmat)[-1]
+  #    rem.obj <- runModel.addRemVars(rem.obj, tmp[rem], varSet, "near zero variance",
+  #                                   varMap=varMap)
+  #    dmat    <- dmat[, -(rem+1), drop=FALSE]
+  #  }
+  #}
 
   # Check for correlated predictors
   corMat     <- NULL

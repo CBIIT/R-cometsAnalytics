@@ -27,7 +27,7 @@ runAllModels <- function(readData, cohort="", writeTofile=T) {
 
   for (i in mymodels) {
     errFlag <- 0
-    print(paste("Running",i))
+    cat(paste0("Running ",i, "\n"))
     mymod <- try(getModelData(readData,modlabel=i))
     if (!("try-error" %in% class(mymod))) {
       myobj <- try(run1Model(mymod, readData, cohort=cohort))
