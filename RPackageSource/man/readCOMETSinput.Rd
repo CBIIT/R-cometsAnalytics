@@ -9,7 +9,7 @@ readCOMETSinput(file)
 }
 \arguments{
 \item{file}{path of Excel file to be read in. This file must contain sheets
-with names \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
+with names \bold{Metabolites}, \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
 and optionally \bold{Models}, \bold{ModelOptions} (see details).}
 }
 \value{
@@ -22,6 +22,10 @@ models, and model options.
 \details{
 Additional information regarding each sheet in the input Excel file is given below. 
 
+\bold{Metabolites} \cr
+A table with the columns \code{METABID}, \code{METABOLITE_NAME}, and possibly other columns \cr
+ of information about the metabolites. The \code{METABID} column is used
+ for harmonizing the metabolite names across different cohorts when meta-analyses are performed. \cr
 \bold{SubjectMetabolites} \cr
 A table with the subject ids in the first column and metabolites as the other columns. \cr
 \bold{SubjectData} \cr

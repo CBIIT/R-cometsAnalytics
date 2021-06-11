@@ -4,14 +4,14 @@
 \alias{runModel}
 \title{Main function for running the models}
 \usage{
-runModel(modeldata, metabdata, cohort = "", op = NULL)
+runModel(modeldata, metabdata, cohortLabel = "", op = NULL)
 }
 \arguments{
 \item{modeldata}{list from function \code{\link{getModelData}}}
 
 \item{metabdata}{metabolite data list from \code{\link{readCOMETSinput}}}
 
-\item{cohort}{cohort label (e.g DPP, NCI, Shanghai)}
+\item{cohortLabel}{cohort label (e.g DPP, NCI, Shanghai)}
 
 \item{op}{list of options when running in \code{Interactive} mode (see \code{\link{options}}).}
 }
@@ -41,5 +41,5 @@ csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
 	outcomes=c("lactose","lactate"))
-obj <- runModel(modeldata,exmetabdata, "DPP")
+obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 }
