@@ -93,16 +93,14 @@ OutputListToExcel <- function(filename, obj) {
   if (any(tmp)) nms[tmp] <- paste("output ", (1:N)[tmp], sep="")
 
   over <- TRUE
-  flag <- FALSE
   for (i in 1:N) {
     tmp <- obj[[i]]
     if (length(tmp) && (is.data.frame(tmp) || is.matrix(tmp))) {
       rio::export(tmp, filename, which=nms[i], overwrite=over)
       over <- FALSE
-      flag <- TRUE
     }
   }
-  if (flag) {
+  if (file.exists(filename)) {
     msg <- paste0("Output saved to file: ", filename, "\n")
     cat(msg)
   } else {

@@ -86,7 +86,7 @@ getSubDataSheetName      <- function() {"SubjectData"}
 getVarMapSheetName       <- function() {"VarMap"}
 getModelsSheetName       <- function() {"Models"}
 getOptionsSheetName      <- function() {"ModelOptions"}
-getGlobalOptionName      <- function() {"ModelChecks"}
+getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput")}
 getModelFunctionCol   <- function() {"function"}
 getReqSheetNames      <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
 getReqMetabSheetCols  <- function() {c("metabolite_name")}

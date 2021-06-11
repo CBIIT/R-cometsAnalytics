@@ -22,10 +22,10 @@ plotVar <- function(cometsdata,
                     xlabel = "Variance of transformed metabolite abundances",
                     ylabel = "Frequency",
                     xylabelsize = 12) {
-   if(is.null(cometsdata$metab$var)) {
-	stop("The input data is not in the correct format.  Make sure it is the output of the 
-            readCOMETSinput function")
+   if (is.null(cometsdata$metab$var)) {
+     stop("The input data is not in the correct format.  Make sure it is the output of the readCOMETSinput function")
    }
+   if (titlesize > 16) warning("The plot title may not display properly with titlesize > 16.")
 
    toplot <- cometsdata$metab$var
    font1 <- list(size=4,color="red")
@@ -125,7 +125,7 @@ showCorr <- function(corr, nlines=50) {
 #' csvfile     <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
-#' result      <- runModel(modeldata,exmetabdata,"DPP")
+#' result      <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' showModel(result)
 #' @export
 showModel <- function(obj, nlines=10) {

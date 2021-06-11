@@ -3,7 +3,7 @@
 #'
 #' @param modeldata list from function \code{\link{getModelData}}
 #' @param metabdata metabolite data list from \code{\link{readCOMETSinput}}
-#' @param cohort cohort label (e.g DPP, NCI, Shanghai)
+#' @param cohortLabel cohort label (e.g DPP, NCI, Shanghai)
 #' @param op list of options when running in \code{Interactive} mode (see \code{\link{options}}).
 #'
 #' @return A list of objects with names \code{\link{ModelSummary}},
@@ -27,17 +27,17 @@
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
 #' 	outcomes=c("lactose","lactate"))
-#' obj <- runModel(modeldata,exmetabdata, "DPP")
+#' obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' @export
 
-runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
+runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
 
   ptm <- base::proc.time() # start processing time
 
   # Error checks
   runModel.checkModeldata(modeldata)
   runModel.checkMetabdata(metabdata)
-  if (!isString(cohort)) stop("ERROR: cohort must be a string")
+  if (!isString(cohortLabel)) stop("ERROR: cohortLabel must be a string")
 
   # Check if options were obtained in getModelData
   if (modeldata$modelspec == getMode_batch()) {
@@ -56,7 +56,7 @@ runModel <- function(modeldata, metabdata, cohort="", op=NULL) {
   }
 
   op        <- runModel.checkOptions(op, modeldata)
-  op$cohort <- cohort
+  op$cohort <- cohortLabel
   ret       <- runModel.start(modeldata, metabdata, op)
   ret       <- runModel.checkRetlist(ret, op) 
 

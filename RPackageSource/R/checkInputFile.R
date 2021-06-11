@@ -37,6 +37,7 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
   if (sheet %in% c(getModelsSheetName(), getOptionsSheetName())) compbl <- TRUE
   if (length(ret)) {
     if (nrow(ret)) {
+      # column names are lower case after fixData is called  
       ret <- suppressWarnings(fixData(ret, compbl=compbl))
     } else {
       if (optional) return(NULL)
@@ -74,6 +75,31 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
   ret
 
 } # END: readExcelSheet
+
+infile.normIdCol <- function(x, vmap, which="metab") {
+
+  if (!length(x) || !length(vmap)) return(x)
+  if (!nrow(x)) return(x)
+  
+  # Get the id column
+  tmp <- infile.checkVarMapSheet(vmap, only.ids=1)
+  if (which == "metab") {
+    idv <- tmp[["metab.idvar", exact=TRUE]]
+  } else {
+    idv <- tmp[["sub.idvar", exact=TRUE]]
+  }
+  if (!length(idv)) return(x)
+
+  idv <- tolower(idv)
+  cx  <- tolower(colnames(x))
+  tmp <- cx %in% idv
+  if (any(tmp)) {
+    col <- (1:length(cx))[tmp]
+    for (v in col) x[, v] <- trimws(tolower(x[, v]))
+  }
+  x
+
+} # END: infile.normIdCol
 
 infile.catVarsToFactors <- function(dta.sdata, dta.vmap) {
 
@@ -484,13 +510,15 @@ infile.checkColForDups <- function(colvec, sheetName, colName, error=1) {
 
 } # END: infile.checkColForDups
 
-infile.checkVarMapSheet <- function(x) {
+infile.checkVarMapSheet <- function(x, only.ids=0) {
+
+  # only.ids  A flag added to only return the id variables without perform the checks
 
   err  <- 0
   mvar <- NULL
   svar <- NULL
   nm   <- "VarMap"
-  err  <- err + infile.basicSheetCheck(x, getReqVarMapSheetCols(), nm, min.ncol=3)
+  if (!only.ids) err  <- err + infile.basicSheetCheck(x, getReqVarMapSheetCols(), nm, min.ncol=3)
 
   # Check for required ids
   mid <- getVarRef_metabId()
@@ -503,16 +531,20 @@ infile.checkVarMapSheet <- function(x) {
     flag2 <- 0
     if (vref %in% colnames(x)) {
       vvec  <- x[, vref, drop=TRUE]
-      err   <- err + infile.checkColForDups(vvec, nm, vref)
-      err   <- err + infile.checkColForMiss(vvec, nm, vref)
-      err   <- err + infile.checkForValInCol(vvec, mid, nm, vref)
-      err   <- err + infile.checkForValInCol(vvec, sid, nm, vref)
+      if (!only.ids) {
+        err   <- err + infile.checkColForDups(vvec, nm, vref)
+        err   <- err + infile.checkColForMiss(vvec, nm, vref)
+        err   <- err + infile.checkForValInCol(vvec, mid, nm, vref)
+        err   <- err + infile.checkForValInCol(vvec, sid, nm, vref)
+      }
       flag1 <- 1
     }
     if (cvar %in% colnames(x)) {
       cvec  <- x[, cvar, drop=TRUE]
-      err   <- err + infile.checkColForDups(cvec, nm, cvar)
-      err   <- err + infile.checkColForMiss(cvec, nm, cvar)
+      if (!only.ids) {
+        err   <- err + infile.checkColForDups(cvec, nm, cvar)
+        err   <- err + infile.checkColForMiss(cvec, nm, cvar)
+      }
       flag2 <- 1
     }
 
@@ -538,12 +570,14 @@ infile.checkVarMapSheet <- function(x) {
     }
 
     # Check the vartype column, ignore the vartype for the id variables
-    var <- tolower(getVarMapVarTypeCol())
-    if (var %in% colnames(x)) {
-      req <- getVarMapVarTypeVals()
-      vec <- infile.normVarNames(x[, var, drop=TRUE])
-      if (any(tmp0)) vec[tmp0] <- req[1]  # ignore the ids, set to one of req
-      err <- err + infile.checkColForReqVals(vec, req, nm, var) 
+    if (!only.ids) {
+      var <- tolower(getVarMapVarTypeCol())
+      if (var %in% colnames(x)) {
+        req <- getVarMapVarTypeVals()
+        vec <- infile.normVarNames(x[, var, drop=TRUE])
+        if (any(tmp0)) vec[tmp0] <- req[1]  # ignore the ids, set to one of req
+        err <- err + infile.checkColForReqVals(vec, req, nm, var) 
+      }
     }
   }
 

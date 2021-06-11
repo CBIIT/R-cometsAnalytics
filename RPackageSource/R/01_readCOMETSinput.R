@@ -2,12 +2,17 @@
 #' models, and model options.
 #'
 #' @param file path of Excel file to be read in. This file must contain sheets
-#' with names \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
+#' with names \bold{Metabolites}, \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
 #' and optionally \bold{Models}, \bold{ModelOptions} (see details).
 #' @return a list comprising of data and information needed for \code{\link{getModelData}}.
 #'
 #' @details Additional information regarding each sheet in the input Excel file is given below. 
 #'
+#' \bold{Metabolites} \cr
+#' A table with the columns \code{METABID}, \code{METABOLITE_NAME}, and possibly other columns \cr
+#'  of information about the metabolites. The \code{METABID} column is used
+#'  for harmonizing the metabolite names across different cohorts when meta-analyses are performed. \cr
+
 #' \bold{SubjectMetabolites} \cr
 #' A table with the subject ids in the first column and metabolites as the other columns. \cr
 
@@ -77,11 +82,17 @@ readCOMETSinput <- function(file) {
     stop(msg)
   }
 
+  # Read varMap sheet first
+  dta.vmap <- readExcelSheet(file, getVarMapSheetName(), sheets) 
+  dta.vmap <- checkVarMapCols(dta.vmap)
+
   #metabolite meta data
-  dta.metab <- readExcelSheet(file, getMetabSheetName(), sheets) 
+  dta.metab <- readExcelSheet(file, getMetabSheetName(), sheets)
+  dta.metab <- infile.normIdCol(dta.metab, dta.vmap, which="metab")
 
   #subject metabolite data
   dta.smetab <- readExcelSheet(file, getSubMetabSheetName(), sheets) 
+  dta.smetab <- infile.normIdCol(dta.smetab, dta.vmap, which="submetab")
   if (length(dta.smetab)) {
     dict_metabnames        <- tolower(colnames(dta.smetab))
     colnames(dta.smetab)   <- paste("...", 1:ncol(dta.smetab), sep="")
@@ -89,11 +100,8 @@ readCOMETSinput <- function(file) {
   }
 
   #subject data
-  dta.sdata <- readExcelSheet(file, getSubDataSheetName(), sheets) 
-
-  #variable mapping
-  dta.vmap <- readExcelSheet(file, getVarMapSheetName(), sheets) 
-  dta.vmap <- checkVarMapCols(dta.vmap)
+  dta.sdata <- readExcelSheet(file, getSubDataSheetName(), sheets)  
+  dta.sdata <- infile.normIdCol(dta.sdata, dta.vmap, which="subdata")
   
   #batch model specifications. Models sheet is now optional (for interactive use)
   dta.models  <- NULL
@@ -194,7 +202,7 @@ readCOMETSinput <- function(file) {
   mymets = dtalist$metab[[dtalist$metabId]] # get complete list of metabolites
 
   # convert the names to indexes from dictionary:
-  mymets <- as.character(lapply(mymets,function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
+  mymets <- as.character(lapply(tolower(mymets),function(x) names(dict_metabnames)[which(dict_metabnames==x)]))
 
   # check to see which columns have non-missing values
   havedata <- base::apply(dtalist$subjdata, 2, function(x) all(is.na(x)))
