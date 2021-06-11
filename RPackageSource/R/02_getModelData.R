@@ -460,7 +460,7 @@ getAllOptionsForModel <- function(mods, readData) {
   nm <- getOldCorrModelName()
   if (modelFunc == nm) {
     ret <- list() 
-    ret[[nm]] <- 1
+    ret[[nm]] <- 1  # Flag to return signaling runCorr is to be run
     return(ret)
   }
 

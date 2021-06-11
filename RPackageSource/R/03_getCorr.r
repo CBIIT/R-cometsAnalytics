@@ -32,7 +32,9 @@ runCorr <- function(modeldata, metabdata, cohort = "") {
 calcCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
   if (!length(op)) op <- list(model=getCorrModelName())
   if (is.list(op)) op$model <- getCorrModelName()
-  ret <- runModel(modeldata, metabdata, cohort=cohort, op=op)
+  ret <- runModel(modeldata, metabdata, cohortLabel=cohort, op=op)
+
+  # For backwards compatibility, convert the output from runModel to old format
   ret <- newVersionOutToOldOut(ret)
 
   ret
