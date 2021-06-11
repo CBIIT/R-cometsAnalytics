@@ -21,6 +21,6 @@ dir         <- system.file("extdata", package="COMETS", mustWork=TRUE)
 csvfile     <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
-result      <- runModel(modeldata,exmetabdata,"DPP")
+result      <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 showModel(result)
 }

@@ -5,12 +5,12 @@
 \title{This function allows users to run all models that are provided in the "Models" sheet of
 the input Excel file.}
 \usage{
-runAllModels(readData, cohort = "", writeTofile = T)
+runAllModels(readData, cohortLabel = "", writeTofile = T)
 }
 \arguments{
 \item{readData}{list from \code{\link{readCOMETSinput}}}
 
-\item{cohort}{cohort label (e.g. DPP, NCI, Shanghai)}
+\item{cohortLabel}{cohort label (e.g. DPP, NCI, Shanghai)}
 
 \item{writeTofile}{T/F (whether or not to write results for each model into
 separate xlsx files). Files are written to current directory. Default is TRUE.}
