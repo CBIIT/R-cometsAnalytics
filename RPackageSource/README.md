@@ -1,5 +1,5 @@
-# [![Build Status](https://travis-ci.org/Mathelab/RaMP-DB.svg?branch=master)](https://travis-ci.org/Mathelab/RaMP-DB)
-# [![Build status](https://ci.appveyor.com/api/projects/status/cg0md9vd8njancij?svg=true)](https://ci.appveyor.com/project/Mathelab/ramp-db)
+# [![Build Status](https://travis-ci.org/CBIIT/R-cometsAnalytics.svg?branch=master)](https://travis-ci.org/CBIIT/R-cometsAnalytics)
+# [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=master)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
 
 # R Comets-Analytics
 [Comets-Analytics](http://comets-analytics.org/) supports and streamlines consortium-based analyses of metabolomics data. The software is continuously being developed and maintained by the COMETS Data Infrastructure Working Group with web interface support from NCI's CBIIT and R package development support from IMS.
@@ -53,6 +53,10 @@ R COMETS Package Development Team:  Ewy Mathé, Steve Moore, Ella Temprosa, Bill
 Web application Development Team: Kailing Chen, Ewy Mathé, Steve Moore, Brian Park, and Ella Temprosa.
  
 Metabolite Harmonization Team: Dave Ruggieri and Steve Moore
+
+# Citation
+Please site the following when using COMETS Analytics:
+(Temprosa M, Moore SC, Zanetti KA, Appel N, Ruggieri D, Mazzilli KM, Chen KL, Kelly RS, Lasky-Su JA, Loftfield E, McClain K, Park B, Trijsburg L, Zeleznik OA, Mathé EA. COMETS Analytics: An online tool for analyzing and meta-analyzing metabolomics data in large research consortia. Am J Epidemiol. 2021 Apr 22:kwab120. doi: 10.1093/aje/kwab120. Epub ahead of print. PMID: 33889934.)[https://pubmed.ncbi.nlm.nih.gov/33889934/]
  
 A special thanks as well to the broader COMETS Data Infrastructure Group.
 
