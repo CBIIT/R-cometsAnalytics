@@ -56,7 +56,7 @@ Metabolite Harmonization Team: Dave Ruggieri and Steve Moore
 
 # Citation
 Please site the following when using COMETS Analytics:
-(Temprosa M, Moore SC, Zanetti KA, Appel N, Ruggieri D, Mazzilli KM, Chen KL, Kelly RS, Lasky-Su JA, Loftfield E, McClain K, Park B, Trijsburg L, Zeleznik OA, Mathé EA. COMETS Analytics: An online tool for analyzing and meta-analyzing metabolomics data in large research consortia. Am J Epidemiol. 2021 Apr 22:kwab120. doi: 10.1093/aje/kwab120. Epub ahead of print. PMID: 33889934.)[https://pubmed.ncbi.nlm.nih.gov/33889934/]
+[Temprosa M, Moore SC, Zanetti KA, Appel N, Ruggieri D, Mazzilli KM, Chen KL, Kelly RS, Lasky-Su JA, Loftfield E, McClain K, Park B, Trijsburg L, Zeleznik OA, Mathé EA. COMETS Analytics: An online tool for analyzing and meta-analyzing metabolomics data in large research consortia. Am J Epidemiol. 2021 Apr 22:kwab120. doi: 10.1093/aje/kwab120. Epub ahead of print. PMID: 33889934.](https://pubmed.ncbi.nlm.nih.gov/33889934/)
  
 A special thanks as well to the broader COMETS Data Infrastructure Group.
 
