@@ -221,11 +221,13 @@ runDescrip<- function(readData){
   # Retrieve the original names for metabolites
   newvars <- data.frame(vars=as.character(names(readData$dict_metabname)),
 		new=as.character(readData$dict_metabname),stringsAsFactors = FALSE)
-  sumcnt <- suppressWarnings(dplyr::left_join(sumcnt, newvars,by=c("vars","vars"))) %>% 
+  new    <- newvars$new   # Bug fix
+  vars   <- newvars$vars  # Bug fix
+  sumcnt <- suppressWarnings(dplyr::left_join(sumcnt, newvars,by=unique(c("vars","vars")))) %>% 
 	dplyr::mutate(vars = ifelse(!is.na(new), new, vars)) %>%
 	dplyr::select(-new)
   colnames(newvars)[which(colnames(newvars)=="vars")]="variable"
-  sumcat <- suppressWarnings(dplyr::left_join(as.data.frame(sumcat), newvars,by=c("variable","variable"))) %>%
+  sumcat <- suppressWarnings(dplyr::left_join(as.data.frame(sumcat), newvars,by=unique(c("variable","variable")))) %>%
         dplyr::mutate(variable = ifelse(!is.na(new), new, variable)) %>%
         dplyr::select(-new)
 
