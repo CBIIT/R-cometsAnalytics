@@ -130,7 +130,7 @@ if (modelspec == "Interactive") {
   }
 
   # Assign allvsall variable
-  if((colvars=="All metabolites") && (rowvars=="All metabolites")) {
+  if(("All metabolites" %in% colvars) && ("All metabolites" %in% rowvars)) {
 	allvsall=TRUE
   } else {
 	allvsall=FALSE
