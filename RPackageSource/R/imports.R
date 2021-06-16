@@ -12,7 +12,7 @@
 #' @import plotly
 #' @import caret
 #' @importFrom tidyr gather
-#' @importFrom d3heatmap d3heatmap
+#' @importFrom heatmaply heatmaply
 #' @importFrom Hmisc rcorr
 #' @importFrom stats cor
 NULL

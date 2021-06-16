@@ -256,11 +256,23 @@ Harmonize<-function(dtalist){
     # need to rename to hmdb_id so that it can be left_join match
     names(finharmlistg)<-gsub(cohorthmdb,"hmdb_id",names(finharmlistg))
 
+    ###########################################################  
+    # The following code fixes a bug in the code below it. 
+    #   The select statement was throwing an error, 
+    #   and the chemical_id column was sometimes numeric.
+    ###########################################################
+
     # bring in the masterhmdb file to find further matches
-    foundhmdb<-finharmlistg %>%
-      filter(is.na(uid_01)) %>% # only find match for unmatched metabolites
-      select(1:ncol(dtalist$metab)) %>%  # keep only original columns before match
-      left_join(masterhmdb,suffix=c(".cohort",".comets"))
+    foundhmdb <- finharmlistg %>% filter(is.na(uid_01)) # only find match for unmatched metabolites
+    foundhmdb <- foundhmdb[, 1:ncol(dtalist$metab), drop=FALSE] # keep only original columns before match
+    foundhmdb <- foundhmdb %>% left_join(masterhmdb,suffix=c(".cohort",".comets"))
+    foundhmdb[, "chemical_id"] <- as.character(foundhmdb[, "chemical_id"])
+
+    # bring in the masterhmdb file to find further matches
+    #foundhmdb<-finharmlistg %>%
+    #  filter(is.na(uid_01)) %>% # only find match for unmatched metabolites
+    #  select(1:ncol(dtalist$metab)) %>%  # keep only original columns before match
+    #  left_join(masterhmdb,suffix=c(".cohort",".comets"))
 
     # rename back so we can combine
     names(foundhmdb)<-gsub("hmdb_id",cohorthmdb,names(foundhmdb))
