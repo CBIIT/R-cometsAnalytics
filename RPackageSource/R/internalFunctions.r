@@ -68,26 +68,37 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     # add _ to all metabolites before splitting at blank
     allmodelparams=c(dta.models$outcomes,dta.models$exposure, dta.models$adjustment,dta.models$stratification)
     allmodelparams=gsub("All metabolites","All_metabolites",gsub("\\s+", " ", allmodelparams[!is.na(allmodelparams)]))
-    print(paste(dta.models$ccovs,dta.models$scovs))
-
+    #print(paste(dta.models$ccovs,dta.models$scovs))
+    
     # take out multiple blanks and add _ to all metabolites to avoid splitting
     allmodelparams=tolower(unique(unlist(stringr::str_split(allmodelparams," "))))
+    params  <- unique(allmodelparams[!(allmodelparams %in% c("All_metabolites", "all_metabolites"))])
+    allVars <- c(dta.vmap$varreference, trimws(dict_metabnames))
+
     outmessage = c()
     if (length(metabid) == 0) {
       stop("metabid is not found as a parameter in VarMap sheet!  Specify which column should be used for metabolite id")
     }
-    else if (!is.na(dta.models$stratification) &&
-		length(intersect(dta.models$adjustment,dta.models$stratification))>=1) {
-	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
+    else if (length(checkForSameVars(dta.models$adjustment, dta.models$stratification))) {
+      stop("Adjustment and stratification parameters are the same!  This is not allowed.")
     }
-    else if (!is.na(dta.models$stratification) &&
-		length(intersect(dta.models$exposure,dta.models$stratification))>=1) {
-        stop("Exposure and stratification parameters are the same!  This is not allowed.")
+    else if (length(checkForSameVars(dta.models$exposure, dta.models$stratification))) {
+      stop("Exposure and stratification parameters are the same!  This is not allowed.")
     }
-    else if (length(intersect(allmodelparams,
-         tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
-# tolower(c("All metabolites", colnames(dta.smetab), colnames(dta.sdata)))))!=length(allmodelparams))
-{
+    #else if (!is.na(dta.models$stratification) &&
+    #		length(intersect(dta.models$adjustment,dta.models$stratification))>=1) {
+    #	stop("Adjustment and stratification parameters are the same!  This is not allowed.")
+    #}
+    #else if (!is.na(dta.models$stratification) &&
+    #		length(intersect(dta.models$exposure,dta.models$stratification))>=1) {
+    #    stop("Exposure and stratification parameters are the same!  This is not allowed.")
+    #}
+    #else if (length(intersect(allmodelparams, tolower(c("All_metabolites",  dta.vmap$varreference)))) !=length(allmodelparams))
+    #{
+    #     stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")
+    #}
+    else if (!all(params %in% allVars))
+    {
          stop("Parameters in model data ('Models' sheet in input file) do not exist!  Check the naming!")
     }
     else if (length(subjid) == 0) {
@@ -196,7 +207,6 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
       )
     )
   } # end checkIntegriy
-
 
 # ---------------------------------------------------------------------------
 # Harmonize ---------------------------------------------------
@@ -924,4 +934,28 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
 
   return(corrlong)
 }
+
+checkForSameVars <- function(v1, v2) {
+
+  # Variables should be "tolowered" at this point
+  ret <- NULL
+  n1  <- length(v1)
+  if (n1 != length(v2)) stop("Vectors do not have the same length")
+  v1  <- trimws(v1)
+  v2  <- trimws(v2)
+  tmp <- !is.na(v1) & !is.na(v2) & (nchar(v1) > 0) & (nchar(v2) > 0)
+  tmp[is.na(tmp)] <- FALSE
+  if (any(tmp)) {
+    rows <- (1:n1)[tmp]
+    for (row in rows) {
+      vars1 <- trimws(unlist(strsplit(v1[row], " ", fixed=TRUE)))
+      vars2 <- trimws(unlist(strsplit(v2[row], " ", fixed=TRUE)))
+      tmp   <- intersect(vars1, vars2)
+      if (length(tmp)) ret <- unique(c(ret, tmp))
+    }
+  }
+
+  ret
+
+} # END: checkForSameVars
 
