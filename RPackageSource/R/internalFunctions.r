@@ -208,6 +208,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
     )
   } # end checkIntegriy
 
+
 # ---------------------------------------------------------------------------
 # Harmonize ---------------------------------------------------
 # ---------------------------------------------------------------------------
@@ -382,11 +383,12 @@ return(readData)
 #' @param modeldata (output of function getModelData())
 #' @return modeldata after checks are performed
 checkModelDesign <- function (modeldata=NULL) {
-	if(is.null(modeldata)) {
-		stop("Please make sure that modeldata is defined")
-	}
- errormessage=warningmessage=c()
- # Check that there are at least 25 samples (n>=25) reference https://link.springer.com/content/pdf/10.1007%2FBF02294183.pdf
+  if(is.null(modeldata)) {
+    stop("Please make sure that modeldata is defined")
+  }
+
+  errormessage=warningmessage=c()
+  # Check that there are at least 25 samples (n>=25) reference https://link.springer.com/content/pdf/10.1007%2FBF02294183.pdf
   if (nrow(modeldata$gdta)<25){
     if (!is.null(modeldata$scovs)){
       #warning(paste("Data has < 25 observations for strata in",modeldata$scovs))
@@ -398,46 +400,48 @@ checkModelDesign <- function (modeldata=NULL) {
     }
   }
 
-   # Check that adjustment variable that at least two unique values
-   for (i in modeldata$acovs) {
+  # Check that adjustment variable that at least two unique values
+  for (i in modeldata$acovs) {
         temp <- length(unique(modeldata$gdta[[i]]))
         if(temp <= 1 && !is.na(i)) {
                warning(paste("One of your models specifies",i,"as an adjustment value but that variable only has one possible value.",
                "Model will run without",i,"as an adjustment"))
                modeldata$acovs <- setdiff(modeldata$acovs,i)
         }
-   }
+  }
 
-  	metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
-  	cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
-  	metabolite_name=expmetname=exposurespec=c()
+  metabid=uid_01=biochemical=outmetname=outcomespec=exposuren=exposurep=metabolite_id=c()
+  cohortvariable=vardefinition=varreference=outcome=outcome_uid=exposure=exposure_uid=c()
+  metabolite_name=expmetname=exposurespec=c()
 
-  	# column indices of row/outcome covariates
-  	col.rcovar <- match(modeldata[["rcovs"]],names(modeldata[["gdta"]]))
+  # column indices of row/outcome covariates
+  col.rcovar <- match(modeldata[["rcovs"]],names(modeldata[["gdta"]]))
 
-  	# column indices of column/exposure covariates
-  	col.ccovar <- match(modeldata[["ccovs"]],names(modeldata[["gdta"]]))
+  # column indices of column/exposure covariates
+  col.ccovar <- match(modeldata[["ccovs"]],names(modeldata[["gdta"]]))
 
-  	# column indices of adj-var
-  	col.adj <- match(modeldata[["acovs"]],names(modeldata[["gdta"]]))
+  # column indices of adj-var
+  col.adj <- match(modeldata[["acovs"]],names(modeldata[["gdta"]]))
 
-  	# Defining global variable to remove R check warnings
-  	corr=c()
-  	loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
+  # Defining global variable to remove R check warnings
+  corr=c()
+  loadNamespace("caret") #need this to avoid problem of not finding contr.ltfr
 
-  	# check if any of the exposure and adjustments are factors
-  	ckfactor<-sapply(dplyr::select(modeldata$gdta,dplyr::one_of(modeldata$rcovs,modeldata$acovs)),class)
-  	hasfactor<-NULL
-  	if (length(ckfactor[ckfactor=="factor"])==0){
-  	  hasfactor<-FALSE
-  	} else {
-  	  hasfactor<-TRUE
-  	}
+  # check if any of the exposure and adjustments are factors
+  ckfactor<-sapply(dplyr::select(modeldata$gdta,dplyr::one_of(modeldata$rcovs,modeldata$acovs)),class)
+  hasfactor<-NULL
+  if (length(ckfactor[ckfactor=="factor"])==0){
+    hasfactor<-FALSE
+  } else {
+    hasfactor<-TRUE
+  }
 
-	# If all vs all, only check variance is zero for covars and allvars
-	if(modeldata$allvsall | hasfactor==FALSE) {
+  # If all vs all, only check variance is zero for covars and allvars
+  if(modeldata$allvsall | hasfactor==FALSE) {
 		print("No factors found,  only performing near zero variance check for all covariates.")
-		nonzeroc <- caret::nearZeroVar(modeldata$gdta[,modeldata$ccovs],freqCut = 95/5)
+                # Bug fix 03/15/2021
+		#nonzeroc <- caret::nearZeroVar(modeldata$gdta[,modeldata$ccovs],freqCut = 95/5)
+                nonzeroc <- NULL
 		if(length(nonzeroc)>0) {
 			#modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
 			warningmessage <- c(warningmessage,
@@ -451,7 +455,9 @@ checkModelDesign <- function (modeldata=NULL) {
 			modeldata$ccovs <- modeldata$ccovs[-nonzeroc]
 			nonzeroc <- temp
 		}
-		nonzeror <- caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
+                # Bug fix 03/15/2021
+		#nonzeror <- caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
+                nonzeror <- NULL
 		if(length(nonzeror)>0) {
 		  #modeldata$rcovs <- modeldata$rcovs[-nonzeror]
 		  warningmessage <- c(warningmessage,
@@ -465,36 +471,38 @@ checkModelDesign <- function (modeldata=NULL) {
 		  nonzeror <- temp
 		}
 		if (length(modeldata$acovs)>0){
-		nonzeroa <- caret::nearZeroVar(modeldata$gdta[,modeldata$acovs],freqCut = 95/5)
-		if(length(nonzeroa)>0) {
-		  # modeldata$acovs <- modeldata$acovs[-nonzeroa]
-		  warningmessage <- c(warningmessage,
+                  # Bug fix 03/15/2021
+		  #nonzeroa <- caret::nearZeroVar(modeldata$gdta[,modeldata$acovs],freqCut = 95/5)
+                  nonzeroa <- NULL
+		  if(length(nonzeroa)>0) {
+		    # modeldata$acovs <- modeldata$acovs[-nonzeroa]
+		    warningmessage <- c(warningmessage,
 		                      paste0("Removed ",length(nonzeroa),"adjustment(s):",
 					#paste(colnames(modeldata$gdta)[unique(nonzeroa)],
 					paste(modeldata$dict_metabnames[colnames(modeldata$gdta[,modeldata$acovs])[unique(nonzeroa)]],
 		                                              collapse=","),
 		                             " because of zero-variance",collapse=""))
-		  temp <- modeldata$acovs[nonzeroa]
-		  modeldata$acovs <- modeldata$acovs[-nonzeroa]
-		  nonzeroa <- temp
-		}
-		if (length(unique(c(nonzeroa,nonzeroc,nonzeror)))>0){
-		  # Get indices before modifying gdta.  They need to be converted to names above or else
-		  # the wrong indices are getting removed (because the nearZeroVar function returns indices
-		  # based on input, and the input is not the entire gdta data frame)
-		  myind <- as.numeric(lapply(unique(c(nonzeroa,nonzeroc,nonzeror)), function(x) {
-			which(colnames(modeldata$gdta)==x)}))
-		  #modeldata$gdta <- modeldata$gdta[,-unique(c(nonzeroa,nonzeroc,nonzeror))]
-		  modeldata$gdta <- modeldata$gdta[,-myind]
-		}
-		}
+		    temp <- modeldata$acovs[nonzeroa]
+		    modeldata$acovs <- modeldata$acovs[-nonzeroa]
+		    nonzeroa <- temp
+		  }
+		  if (length(unique(c(nonzeroa,nonzeroc,nonzeror)))>0){
+		    # Get indices before modifying gdta.  They need to be converted to names above or else
+		    # the wrong indices are getting removed (because the nearZeroVar function returns indices
+		    # based on input, and the input is not the entire gdta data frame)
+		    myind <- as.numeric(lapply(unique(c(nonzeroa,nonzeroc,nonzeror)), function(x) {
+		  	which(colnames(modeldata$gdta)==x)}))
+		    #modeldata$gdta <- modeldata$gdta[,-unique(c(nonzeroa,nonzeroc,nonzeror))]
+		    modeldata$gdta <- modeldata$gdta[,-myind]
+		  }
+                }
 
 			 return(list(warningmessage=warningmessage,errormessage=errormessage,
 				modeldata=modeldata))
 
         } else {
 
-  # Create models to run for each ccovar
+        # Create models to run for each ccovar
 	# Create dummy variables
 	myformula <- paste0("`",colnames(modeldata$gdta)[col.rcovar], "` ~ ",
 		paste0("`",colnames(modeldata$gdta)[c(col.ccovar, col.adj)],"`",collapse = " + "))
@@ -519,7 +527,9 @@ checkModelDesign <- function (modeldata=NULL) {
 	# Now perform all the checks on the design matrix (if there are adjusted covariates)
 	if(!is.null(mydummies)) {
 		# Check for zero-variance predictors (e.g. a stratified group that only has 1 value)
-		nonzero <- caret::nearZeroVar(mydummies,freqCut = 95/5)
+                # Bug fix 03/15/2021  
+		#nonzero <- caret::nearZeroVar(mydummies,freqCut = 95/5)
+                nonzero <- NULL
 		if(length(nonzero)>0) {
 		        filtdummies <- mydummies[,-nonzero]
 			if(is.null(ncol(filtdummies))) {
@@ -573,7 +583,9 @@ checkModelDesign <- function (modeldata=NULL) {
 	  }
 	# Now run check on outcome
 	# check for variance near 0 for rcovs (outcome)
-	outcwvar<-caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
+        # Bug fix 03/15/2021
+	#outcwvar<-caret::nearZeroVar(modeldata$gdta[,modeldata$rcovs],freqCut = 95/5)
+        outcwvar <- NULL
 	if (length(outcwvar)>0){
 	  	warningmessage <- c(warningmessage,paste("Near zero variance for these outcome(s) removed:",paste(modeldata$rcovs[outcwvar],collapse = ", ")))
 		outcwvar<-modeldata$rcovs[-outcwvar]
@@ -617,345 +629,29 @@ checkModelDesign <- function (modeldata=NULL) {
 #' name of the cohort and adjustment variables. Attribute of dataframe includes ptime for processing time of model
 #' run.
 calcCorr <- function(modeldata, metabdata, cohort = "") {
-  .Machine$double.eps <- 1e-300
-
-  # Defining global variables to pass Rcheck()
-  #ptm <- proc.time() # start processing time
-  metabid = uid_01 = biochemical = outmetname = outcomespec = exposuren =
-    exposurep = metabolite_id = c()
-  cohortvariable = vardefinition = varreference = outcome = outcome_uid =
-    exposure = exposure_uid = c()
-  metabolite_name = expmetname = exposurespec = c()
-  adjname = adjvars = adj_uid = c()
-
-  # column indices of row/outcome covariates
-  col.rcovar <-
-    match(modeldata[["rcovs"]], names(modeldata[["gdta"]]))
-
-  # column indices of column/exposure covariates
-  col.ccovar <-
-    match(modeldata[["ccovs"]], names(modeldata[["gdta"]]))
-
-  # column indices of adj-var
-  col.adj <- match(modeldata[["acovs"]], names(modeldata[["gdta"]]))
-
-  # Defining global variable to remove R check warnings
-  corr = c()
-
+  
   # Check model design
-  designcheck <- checkModelDesign(modeldata)
-  if (length(names(designcheck)) == 0) {
-    return(designcheck)
-  }
+  # Bug fix 03/15/2021
+  newmodeldata <- runModel.checkModelDesign(modeldata, metabdata)
+ 
+  # Bug fixes
+  op   <- list(check.cor.method="spearman", check.illCond=TRUE, 
+                 check.cor.cutoff=0.97, check.nsubjects=25, 
+                 check.design=TRUE, max.nstrata=10,
+                 DEBUG=0, 
+                 colNamePrefix="...x", rowNamePrefix="r", check.n.unique.vals=2)
+  tmp   <- runModel.runAllMetabs(newmodeldata, op)
 
-  newmodeldata <- designcheck$modeldata
-  #print(designcheck$warningmessage)
-  if (length(designcheck$warningmessage) > 0) {
-    print(designcheck$warningmessage)
-  }
-  if (length(designcheck$errormessage) > 0) {
-    print(designcheck$errormessage)
-    return(NULL)
-  }
+  corrlong <- data.frame(cohort=cohort, spec=newmodeldata$modelspec, model=newmodeldata$modlabel,
+                         outcomespec=tmp$rname, exposurespec=tmp$cname, 
+                         corr=tmp$corr, n=tmp$n, pvalue=tmp$pval,
+                         adjspec=tmp$adj, adjvars=tmp$adj)
+  rm(tmp)
+  gc()
 
-  # readjust exposure and adjustment covariates
-  col.adj <-
-    match(newmodeldata[["acovs"]], colnames(newmodeldata[["gdta"]]))
-  col.ccovar <-
-    match(newmodeldata[["ccovs"]], colnames(newmodeldata[["gdta"]]))
-  col.rcovar <-
-    match(newmodeldata[["rcovs"]], colnames(newmodeldata[["gdta"]]))
-
-
-
-  if (length(col.adj) == 0) {
-    print("running unadjusted")
-
-    data <- newmodeldata$gdta[ , unique(c(col.rcovar, col.ccovar))]
-    # calculate unadjusted spearman correlation matrix
-    corrhm <- Hmisc::rcorr(as.matrix(data), type = "spearman")
-
-    # Need to transpose pval and corrhm if there's only one row bc data.frame will switch the rows
-    # and columns when there's only one row. 
-    if(length(newmodeldata$rcovs)==1) {
-	corr <- t(data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs]))
-	n<-t(data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs]))
-    } else {
-    	corr <- data.frame(corrhm$r[newmodeldata$rcovs,newmodeldata$ccovs])
-        n <- data.frame(corrhm$n[newmodeldata$rcovs,newmodeldata$ccovs])
-    }
-    #    pval <- as.data.frame(corrhm$P[1:length(col.rcovar),-(1:length(col.rcovar))])
-    # Calculate p-values by hand to ensure that enough precision is printed:
-    	ttval <- sqrt(n--2) * corr / sqrt(1 - corr ** 2)
-    # From this t-statistic, loop through and calculate p-values
-    pval <- ttval
-    for (i in 1:length(newmodeldata$ccovs)) {
-      pval[, i] <-
-        as.vector(stats::pt(
-          as.matrix(abs(ttval[, i])),
-          df = n[, i] - 2,
-          lower.tail = FALSE
-        ) * 2)
-    }
-
-    #colnames(corr) <- colnames(corrhm$r)[-(1:length(col.rcovar))]
-    # Fix rownames when only one outcome is considered:
-    if (length(col.rcovar) == 1) {
-      rownames(corr) <- newmodeldata$rcovs
-      rownames(pval) <- newmodeldata$rcovs
-    }
-    if (length(col.ccovar) == 1) {
-      colnames(corr) <- newmodeldata$ccovs
-      colnames(pval) <- newmodeldata$ccovs
-    }
-    # no longer needed
-    #colnames(n) <- colnames(corrhm$n)[-(1:length(col.rcovar))]
-    #colnames(pval) <- colnames(corrhm$P)[-(1:length(col.rcovar))]
-
-
-    # If there are more than one exposure, then need to transpose - not sure why???
-#    if (length(col.ccovar) > 1 && length(col.rcovar) == 1) {
-#      corr = as.data.frame(t(corr))
-#      pval = as.data.frame(t(pval))
-#    }
-
-  }  else {
-    # calculate partial correlation matrix
-    print("running adjusted")
-
-    # Loop through and calculate cor, n, and p-values
-    pval <- corr <- n <- matrix(nrow = length(newmodeldata$rcovs),
-             ncol = length(newmodeldata$ccovs))
-    rownames(pval) = rownames(n) = rownames(corr) = newmodeldata$rcovs
-    colnames(pval) = paste0(newmodeldata$ccovs, ".p")
-    colnames(n) = paste0(newmodeldata$ccovs, ".n")
-    colnames(corr) = newmodeldata$ccovs
-    for (i in 1:length(newmodeldata$rcovs)) {
-    #  print(newmodeldata$rcovs[i])
-      for (j in 1:length(newmodeldata$ccovs)) {
-        if (newmodeldata$rcovs[i]!=newmodeldata$ccovs[j]) {
-        temp <- ppcor::pcor.test(newmodeldata$gdta[, newmodeldata$rcovs[i]],
-                                 newmodeldata$gdta[, newmodeldata$ccovs[j]],
-                                 newmodeldata$gdta[, newmodeldata$acovs],
-                                 method = "spearman")
-        pval[i, j] <- round(temp$p.value, digits = 20)
-        corr[i, j] <- round(temp$estimate, digits = 20)
-        n [i, j] <- temp$n
-        } else{
-          pval[i, j] <- 0
-          corr[i, j] <- 1
-          n[i, j] <- sum(!is.na(newmodeldata$gdta[, newmodeldata$ccovs[j]]))
-        }
-
-      }
-    }
-    pval <- as.data.frame(pval)
-    n <- as.data.frame(n)
-    corr <- as.data.frame(corr)
-
-    # Rename the adjusted covariate now to original (without dummies)
-    #modeldata$acovs=oldcol.adj
-    print("finished adjustment")
-
-  } # End else adjusted mode (length(col.adj) is not zero)
-
-  # create long data with pairwise correlations  ----------------------------------------------------
-  mycols <- 1:length(col.ccovar)
-  corr.togather <- cbind(corr, outcomespec = rownames(corr))
-  if(class(corr.togather)=="matrix") {corr.togather<-as.data.frame(corr.togather)}
-  corrlong <-
-    suppressWarnings(fixData(
-      data.frame(
-        cohort = cohort,
-        spec = modeldata$modelspec,
-        model = modeldata$modlabel,
-        tidyr::gather(corr.togather,
-                      "exposurespec", "corr", -outcomespec),
-        tidyr::gather(as.data.frame(n), "exposuren", "n", colnames(n)[mycols]),
-        tidyr::gather(as.data.frame(pval), "exposurep", "pvalue", colnames(pval)[mycols]),
-        adjspec = ifelse(
-          length(col.adj) == 0,
-          "None",
-          paste(newmodeldata$acovs, collapse = " ")
-        ),
-        adjvars = ifelse(
-          length(col.adj) == 0,
-          "None",
-          paste(modeldata$acovs, collapse = " ")
-        )
-      )
-    ) %>%
-    dplyr::select(-exposuren,-exposurep))
-
-  # patch in metabolite info for exposure or outcome by metabolite id  ------------------------
-  # Add in metabolite information for outcome
-  # look in metabolite metadata match by metabolite id
-  corrlong$outcomespec <- as.character(lapply(corrlong$outcomespec, function(x) {
-	myind <- which(names(metabdata$dict_metabnames)==x)
-	if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
-	return(x) }))
-
-  corrlong <- dplyr::left_join(
-    corrlong,
-    dplyr::select(
-      metabdata$metab,
-      metabid,
-      outcome_uid = uid_01,
-      outmetname = biochemical
-    ),
-    by = c("outcomespec" = metabdata$metabId)
-  ) %>%
-    dplyr::mutate(outcome_uid = ifelse(!is.na(outcome_uid), outcome_uid, outcomespec)) %>%
-    dplyr::mutate(outcome = ifelse(!is.na(outmetname), outmetname, outcomespec)) %>%
-    dplyr::select(-outmetname)
-
-
-  # Add in metabolite information and exposure labels:
-  # look in metabolite metadata
-  corrlong$exposurespec <- as.character(lapply(corrlong$exposurespec, function(x) {
-        myind <- which(names(metabdata$dict_metabnames)==x)
-        if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
-        return(x) }))
-  corrlong <- dplyr::left_join(
-    corrlong,
-    dplyr::select(
-      metabdata$metab,
-      metabid,
-      exposure_uid = uid_01,
-      expmetname = biochemical
-    ),
-    by = c("exposurespec" = metabdata$metabId)
-  ) %>%
-    #dplyr::mutate(exposure = ifelse(!is.na(expmetname), expmetname, modeldata$ccovs)) %>%
-    dplyr::mutate(exposure = ifelse(!is.na(expmetname), expmetname, exposurespec)) %>%
-    dplyr::mutate(exposure_uid = ifelse(!is.na(exposure_uid), exposure_uid, exposurespec)) %>%
-    dplyr::select(-expmetname)
-
-  # Add in metabolite info for adjusted variables
-  	corrlong$adjvars <- corrlong$adjspec <- 
-	      as.character(lapply(corrlong$adjspec, function(x) {
-  	      myind <- which(names(metabdata$dict_metabnames)==x)
-  	      if(length(myind==1)) {x=metabdata$dict_metabnames[myind]}
-  	      return(x) }))
-  	corrlong <- dplyr::left_join(
-  	  corrlong,
-  	  dplyr::select(
-  	    metabdata$metab,
-  	    metabid,
-  	    adj_uid = uid_01,
-  	    adjname = biochemical
-  	  ),
-  	  by = c("adjspec" = metabdata$metabId)
-  	) %>%
-  	  dplyr::mutate(adj = ifelse(!is.na(adjname), adjname, adjvars)) %>%
-  	  dplyr::mutate(adj_uid = ifelse(!is.na(adj_uid), adj_uid, adjvars)) %>%
-  	  dplyr::select(-adjname) 
-
-  # patch in variable labels for better display and cohortvariables------------------------------------------
-  # look in varmap
-  vmap <-
-    dplyr::select(metabdata$vmap, cohortvariable, vardefinition, varreference) %>%
-    mutate(
-      cohortvariable = tolower(cohortvariable),
-      vardefinition = ifelse(
-        regexpr("\\(", vardefinition) > -1,
-        substr(vardefinition, 0, regexpr("\\(", vardefinition) - 1),
-        vardefinition
-      )
-    )
-
-  # get good labels for the display of outcome and exposure
-  if (modeldata$modelspec == "Interactive") {
-    # fill in outcome vars from varmap if not a metabolite:
-    if(length(suppressWarnings(grep(corrlong$outcomespec,vmap$cohortvariable)) != 0)) {
-    	corrlong <-
-    	  dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "cohortvariable")) %>%
-    	  dplyr::mutate(
-    	    outcome_uid = ifelse(!is.na(varreference), varreference, outcomespec),
-    	    outcome = ifelse(
-    	      !is.na(outcome),
-    	      outcome,
-    	      ifelse(!is.na(vardefinition), vardefinition, outcomespec)
-    	    )
-    	  ) %>%
-    	  dplyr::select(-vardefinition, -varreference)
-    }
-
-    # fill in exposure vars from varmap if not a metabolite:
-    if(length(suppressWarnings(grep(corrlong$exposurespec,vmap$cohortvariable)) != 0)) {
-    	corrlong <-
-    	  dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "cohortvariable")) %>%
-    	  dplyr::mutate(
-    	    exposure_uid = ifelse(!is.na(varreference), varreference, exposurespec),
-    	    exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec)
-    	  ) %>%
-    	  dplyr::select(-vardefinition, -varreference)
-       }
-  }
-  else if (modeldata$modelspec == "Batch") {
-    # fill in outcome vars from varmap if not a metabolite
-    if(length(suppressWarnings(grep(corrlong$outcomespec,vmap$cohortvariable)) != 0)) {
-    	corrlong <-
-    	  dplyr::left_join(corrlong, vmap, by = c("outcomespec" = "varreference")) %>%
-    	  dplyr::mutate(
-    	    outcome_uid = ifelse(is.na(outcome_uid), outcomespec, outcome_uid),
-    	    outcome = ifelse(
-    	      !is.na(outcome),
-    	      outcome,
-    	      ifelse(!is.na(vardefinition), vardefinition, outcomespec)
-    	    ),
-    	    outcomespec = ifelse(!is.na(cohortvariable), cohortvariable, outcomespec)
-    	  ) %>%
-    	  dplyr::select(-vardefinition, -cohortvariable)
-    }
-
-    # fill in exposure vars from varmap if not a metabolite:
-    if(length(suppressWarnings(grep(corrlong$exposurespec,vmap$cohortvariable)) != 0)) {
-    	corrlong <-
-    	  dplyr::left_join(corrlong, vmap, by = c("exposurespec" = "varreference")) %>%
-    	  dplyr::mutate(
-    	    exposure_uid = exposurespec,
-    	    exposure = ifelse(
-    	      !is.na(exposure),
-    	      exposure,
-    	      ifelse(!is.na(vardefinition), vardefinition, exposurespec)
-    	    ),
-    	    exposure = ifelse(!is.na(vardefinition), vardefinition, exposurespec),
-    	    exposurespec = ifelse(!is.na(cohortvariable), cohortvariable, exposurespec)
-    	  ) %>%
-    	  dplyr::select(-vardefinition, -cohortvariable)
-   }
-  }
-
-  # Stop the clock
-  #  ptm <- base::proc.time() - ptm
-  #  print(paste("My ptm:", ptm))
-  #  attr(corrlong,"ptime") = paste("Processing time:",round(ptm[3],digits=6),"sec")
+  corrlong <- addMetabInfo(corrlong, newmodeldata, metabdata) 
+  corrlong <- runModel.setReturnDF(corrlong, newmodeldata$varMap)
 
   return(corrlong)
 }
-
-checkForSameVars <- function(v1, v2) {
-
-  # Variables should be "tolowered" at this point
-  ret <- NULL
-  n1  <- length(v1)
-  if (n1 != length(v2)) stop("Vectors do not have the same length")
-  v1  <- trimws(v1)
-  v2  <- trimws(v2)
-  tmp <- !is.na(v1) & !is.na(v2) & (nchar(v1) > 0) & (nchar(v2) > 0)
-  tmp[is.na(tmp)] <- FALSE
-  if (any(tmp)) {
-    rows <- (1:n1)[tmp]
-    for (row in rows) {
-      vars1 <- trimws(unlist(strsplit(v1[row], " ", fixed=TRUE)))
-      vars2 <- trimws(unlist(strsplit(v2[row], " ", fixed=TRUE)))
-      tmp   <- intersect(vars1, vars2)
-      if (length(tmp)) ret <- unique(c(ret, tmp))
-    }
-  }
-
-  ret
-
-} # END: checkForSameVars
 
