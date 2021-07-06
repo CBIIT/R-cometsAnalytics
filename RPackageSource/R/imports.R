@@ -14,5 +14,6 @@
 #' @importFrom tidyr gather
 #' @importFrom heatmaply heatmaply
 #' @importFrom Hmisc rcorr
-#' @importFrom stats cor
+#' @importFrom methods new
+#' @importFrom stats cor as.formula model.matrix
 NULL
