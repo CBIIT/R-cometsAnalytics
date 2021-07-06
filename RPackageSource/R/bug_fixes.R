@@ -205,6 +205,17 @@ runModel.setReturnDF <- function(x, varMap) {
     for (v in vars) x[, v] <- runModel.varMap(x[, v], varMap)
   }
 
+  # Set unadjusted columns to None
+  vv  <- c("adjspec", "adjvars", "adj_uid", "adj")
+  tmp <- vv %in% colnames(x)
+  vv  <- vv[tmp]
+  if (length(vv)) {
+    for (v in vv) {
+      tmp <- !nchar(trimws(x[, v, drop=TRUE]))
+      if (any(tmp)) x[tmp, v] <- "None"
+    }
+  }
+
   x
 
 } # END: runModel.setReturnDF
@@ -259,7 +270,9 @@ runModel.checkModelDesign <- function (modeldata, metabdata) {
   op     <- list(check.cor.method="spearman", check.cor.cutoff=0.97, check.illCond=TRUE,
                  colNamePrefix="...x")
   nunq   <- 2
-  minN   <- 25
+
+  minN   <- 1
+  
   varMap <- metabdata$dict_metabnames
 
   # Object for variables removed
