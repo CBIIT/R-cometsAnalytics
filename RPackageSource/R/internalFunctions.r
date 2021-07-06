@@ -632,6 +632,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
   
   # Check model design
   # Bug fix 03/15/2021
+
   newmodeldata <- try(runModel.checkModelDesign(modeldata, metabdata), silent=TRUE)
   if ("try-error" %in% class(newmodeldata)) return(NULL)
  
@@ -641,6 +642,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "") {
                  check.design=TRUE, max.nstrata=10,
                  DEBUG=0, 
                  colNamePrefix="...x", rowNamePrefix="r", check.n.unique.vals=2)
+
 
   tmp   <- runModel.runAllMetabs(newmodeldata, op)
 

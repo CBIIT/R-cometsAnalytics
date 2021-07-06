@@ -270,7 +270,9 @@ runModel.checkModelDesign <- function (modeldata, metabdata) {
   op     <- list(check.cor.method="spearman", check.cor.cutoff=0.97, check.illCond=TRUE,
                  colNamePrefix="...x")
   nunq   <- 2
+
   minN   <- 1
+  
   varMap <- metabdata$dict_metabnames
 
   # Object for variables removed
