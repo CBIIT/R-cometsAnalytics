@@ -565,3 +565,12 @@ getErrorMsgFromTryError <- function(obj, addToEnd=NULL) {
   ret
 
 } # END: getErrorMsgFromTryError
+
+expParms_deltaMethod <- function(beta, beta.se) {
+
+  ret.beta <- exp(beta)
+  ret.se   <- ret.beta*beta.se
+
+  list(exp.beta=ret.beta, exp.beta.se=ret.se)
+}
+

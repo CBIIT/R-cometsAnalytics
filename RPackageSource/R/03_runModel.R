@@ -41,18 +41,8 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
 
   # Check if options were obtained in getModelData
   if (modeldata$modelspec == getMode_batch()) {
-    if (!is.null(op)) {
-      tmp <- list()
-      msg <- paste0("options for runModel were obtained from the excel options sheet,",
-                    " not from the op list passed in")
-      tmp[[runModel.getWarningCol()]] <- "WARNING"
-      tmp[[runModel.getObjectCol()]]  <- "op"
-      tmp[[runModel.getMessageCol()]] <- msg
-      warning(msg)
-      nm              <- runModel.getWarningsListName()
-      modeldata[[nm]] <- runmodel.addWarning(modeldata[[nm, exact=TRUE]], tmp)
-    }
-    op <- modeldata$options 
+    modeldata <- runModel.checkOpBatch(modeldata, op)
+    op        <- modeldata$options 
   }
 
   op        <- runModel.checkOptions(op, modeldata)
@@ -67,6 +57,28 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
   ret
 
 } # END: runModel 
+
+# Function to check for passing in options with running in batch
+runModel.checkOpBatch <- function(modeldata, op) {
+
+  DEBUG <- 0
+  if (!is.null(op)) {
+    if (is.list(op)) DEBUG <- op[["DEBUG", exact=TRUE]]
+    tmp   <- list()
+    msg   <- paste0("options for runModel were obtained from the excel options sheet,",
+                    " not from the op list passed in")
+    tmp[[runModel.getWarningCol()]] <- "WARNING"
+    tmp[[runModel.getObjectCol()]]  <- "op"
+    tmp[[runModel.getMessageCol()]] <- msg
+    warning(msg)
+    nm              <- runModel.getWarningsListName()
+    modeldata[[nm]] <- runmodel.addWarning(modeldata[[nm, exact=TRUE]], tmp)
+    if (length(DEBUG)) modeldata$options$DEBUG <- DEBUG
+  }
+   
+  modeldata
+
+} # END: runModel.checkOpBatch
 
 # Function to check the return list
 runModel.checkRetlist <- function(ret, op) {
@@ -106,9 +118,95 @@ runModel.checkRetlist <- function(ret, op) {
     ret[[nm3]] <- obj3  
   }
 
+  # For confidence intervals
+  ret <- runModel.addCI(ret, op) 
+
+  # To exponentiate parameter estimates. This must be called after runModel.addCI.
+  ret <- runModel.expParms(ret, op)
+
   ret
 
 } # END: runModel.checkRetlist
+
+runModel.getEffectsCols <- function(obj, cols, ret.data=TRUE) {
+
+  ret <- list()
+
+  # Get the effects table
+  eff.df.nm <- getEffectsName()
+  x         <- obj[[eff.df.nm, exact=TRUE]]
+  if (!length(x)) return(ret)
+  if (!is.data.frame(x)) return(ret)
+  if (!nrow(x)) return(ret)
+  if (!all(cols %in% colnames(x))) return(ret)
+  
+  for (v in unique(cols)) ret[[v]] <- x[, v, drop=TRUE]
+  if (ret.data) ret$data___ <- x
+  
+  ret
+}
+
+runModel.expParms <- function(obj, op) {
+
+  nm <- getExpParmsOpName()
+  if (!op[[nm]]) return(obj)
+  if (!is.list(obj)) return(obj)
+
+  eff.v <- getEffectsEstName()
+  se.v  <- getEffectsEstSeName() 
+  tmp   <- runModel.getEffectsCols(obj, c(eff.v, se.v))
+  if (!length(tmp)) return(obj)
+  eff.vec <- tmp[[eff.v]]
+  se.vec  <- tmp[[se.v]]
+  x       <- tmp$data___
+
+  # Get new estimates
+  tmp                     <- expParms_deltaMethod(tmp[[eff.v]], tmp[[se.v]])
+  x[, eff.v]              <- tmp$exp.beta
+  x[, se.v]               <- tmp$exp.beta.se
+
+  # For confidence intervls
+  alpha <- op[[getAddCiOpName(), exact=TRUE]]
+  if (alpha > 0) {
+    zval <- qnorm((1-alpha)/2, lower.tail=FALSE)
+    cx   <- colnames(x)
+    lv   <- getEffectsLowerName()
+    uv   <- getEffectsUpperName()
+    if (lv %in% cx) x[, lv] <- exp(eff.vec - zval*se.vec)
+    if (uv %in% cx) x[, uv] <- exp(eff.vec + zval*se.vec)
+  }
+
+  obj[[getEffectsName()]] <- x
+
+  obj
+
+} # END: runModel.expParms
+
+runModel.addCI <- function(obj, op) {
+
+  alpha <- op[[getAddCiOpName(), exact=TRUE]]
+  if (alpha <= 0) return(obj)
+  if (!is.list(obj)) return(obj)
+
+  # Get the effects table cols
+  eff.v <- getEffectsEstName()
+  se.v  <- getEffectsEstSeName()
+  tmp   <- runModel.getEffectsCols(obj, c(eff.v, se.v))
+  if (!length(tmp)) return(obj)
+  eff.vec <- tmp[[eff.v]]
+  se.vec  <- tmp[[se.v]]
+  x       <- tmp$data___
+  zval    <- qnorm((1-alpha)/2, lower.tail=FALSE)
+    
+  x[, getEffectsLowerName()] <- eff.vec - zval*se.vec
+  x[, getEffectsUpperName()] <- eff.vec + zval*se.vec
+
+  obj[[getEffectsName()]] <- x
+
+  obj
+  
+
+} # END: runModel.addCI
 
 # Function to get the original variable name
 runModel.varMap <- function(vars, varMap) {
@@ -669,7 +767,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       fit    <- NULL
       ccovs2 <- ccovNames
       dcols  <- dcols0
- 
+
       if (nsubs >= minNsubs) {
         # Check design matrix if subjects were removed due to missing values
         if (checkDesign && (nsubs < n0)) {
@@ -680,6 +778,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
           ccovs2 <- tmp$expVar
         } 
         if (length(dcols)) {
+
           fit  <- try(runModel.callFunc(x[subset, dcols, drop=FALSE], y[subset], 
                       ccovs2, op), silent=TRUE)
         }

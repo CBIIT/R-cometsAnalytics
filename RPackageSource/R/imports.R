@@ -13,7 +13,7 @@
 #' @import plotly
 #' @import caret
 #' @import heatmaply
-#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq
+#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm
 #' @importFrom tidyr gather
 #' @importFrom broom glance tidy
 #' @importFrom stats cor

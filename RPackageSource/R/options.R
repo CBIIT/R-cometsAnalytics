@@ -1,4 +1,4 @@
-#' A list of 10:
+#' A list of 12:
 #' \itemize{
 #' \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
 #'                         design matrix. The default value is 0.97.}
@@ -22,6 +22,9 @@
 #'        and \code{\link{lm.options}} for options specific to
 #' \code{model="correlation", "lm", "glm"} respectively.        
 #'                      The default is NULL.} 
+#' \item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
+#'                         option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
+#'                         The default value is 0.95.}
 #' \item{\code{output.Effects}}{ A string to define the terms output in the returned Effects
 #'                            and ModelSummary data frames. Currently, it must be "exposure" or "all".
 #'                           If set to "all", then summary statistics for the exposure
@@ -29,6 +32,10 @@
 #'                            summary statistics for the exposure will be output.
 #'                            This option is ignored with \code{model = "correlation"}.
 #'                            The default is "exposure".}
+#' \item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate glm parameter estimates. 
+#'                         Standard errors are obtained from the delta method. 
+#'                         The default is NULL, so that estimates from glm models with 
+#'                         family="binomial" will be exponentiated, and not otherwise.}
 #' \item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
 #'                            ModelSummary data frame. Currently, it must be "anova" or "all".
 #'                            This option is ignored with \code{model = "correlation"}.
@@ -102,6 +109,15 @@ runModel.checkOptions <- function(op, modeldata) {
     op[[getOutEffectsOpName()]] <- getOutEffectsOpDefault()
     op[[getOutModSumOpName()]]  <- getOutModSumOpDefault()
   }
+
+  # The option getExpParmsOpName() might be NULL, so set to TRUE or FALSE based on the model
+  nm  <- getExpParmsOpName()
+  val <- op[[nm, exact=TRUE]]
+  if (!length(val)) {
+    val <- FALSE
+    if (op$glmFlag && (op$model.options$family == "binomial")) val <- TRUE
+    op[[nm]] <- val
+  } 
 
   op
 
@@ -186,7 +202,6 @@ checkModelOptions <- function(op, modeldata) {
     if (length(mop[["weights", exact=TRUE]])) mop$weightsFlag <- 1
     if (length(mop[["offset", exact=TRUE]]))  mop$offsetFlag  <- 1
   }
-
   op[[nm]] <- mop
 
   op
@@ -206,9 +221,13 @@ getValidGlobalOps <- function() {
 
   out.eff    <- getOutEffectsOpName()
   out.modSum <- getOutModSumOpName()
+  add.ci     <- getAddCiOpName()
+  exp.parms  <- getExpParmsOpName() 
 
   ops.char <- c("model", "check.cor.method", out.eff, out.modSum)
-  ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", "DEBUG", "DONOTRUN")
+  ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
+                add.ci, exp.parms, 
+                "DEBUG", "DONOTRUN")
   ops.log  <- c("check.illCond", "check.design")
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
@@ -217,8 +236,19 @@ getValidGlobalOps <- function() {
                    DEBUG=0, DONOTRUN=0)
   default[[out.eff]]    <- getOutEffectsOpDefault()
   default[[out.modSum]] <- getOutModSumOpDefault()
+  default[[add.ci]]     <- getAddCiOpDefault()
 
-  valid    <- names(default)
+  # Be careful with exp.parms option, as it can be NULL
+  defval <- getExpParmsOpDefault() 
+  if (!length(defval)) {
+    nms            <- names(default)
+    default        <- c(default, list(NULL))
+    names(default) <- c(nms, exp.parms)  
+  } else {
+    default[[exp.parms]] <- defval 
+  }
+  valid <- names(default)
+
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
        valid=valid, default=default)
 
@@ -238,7 +268,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
 
   opnames  <- trimws(opnames)
   opvalues <- trimws(opvalues)
-  
+
   ret <- list()
   # Loop over each element
   eq <- getOpStrEq()
@@ -246,14 +276,18 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
     name  <- opnames[i]
     value <- opvalues[i]
     if (!(name %in% valid)) stop(paste("ERROR: ", name, " is not a valid option", sep=""))
-    if (!nchar(value)) stop(paste("ERROR: ", name, "=", value, " is not valid", sep=""))
-    
-    # value must be converted to the correct type
-    if (name %in% ops.n) {
-      value <- as.numeric(value)
-    } else if (name %in% ops.l) {
-      # Logical value
-      value <- getLogicalValueFromStr(value) 
+    if (!nchar(value)) {
+      # An error was originally thrown, but perhaps set to NULL so it will be assigned the default value
+      #stop(paste("ERROR: ", name, "=", value, " is not valid", sep=""))
+      value <- NULL
+    } else {  
+      # value must be converted to the correct type
+      if (name %in% ops.n) {
+        value <- as.numeric(value)
+      } else if (name %in% ops.l) {
+        # Logical value
+        value <- getLogicalValueFromStr(value) 
+      }
     }
 
     ret[[name]] <- value
@@ -437,20 +471,25 @@ check.logical <- function(x, name) {
 
 } # END: check.logical
 
-check.range <- function(x, name, lower, upper) {
+check.range <- function(x, name, lower, upper, upper.inc=TRUE) {
 
   err <- 0
   n   <- length(x)
+  op1 <- ">= "
+  op2 <- "<= "
   if (!n || (n > 1) || !is.finite(x)) {
     err <- 1
   } else {
     if ((x < lower) || (x > upper)) err <- 1
+    if (!upper.inc && (x == upper)) {
+      err <- 1
+      op2 <- "< "
+    }
   }
   if (err) {
-    infFlag <- is.finite(upper)
-    if (!infFlag) {
-      msg <- paste("ERROR: ", name, " must be between ", 
-                   lower, " and ", upper, sep="")
+    if (is.finite(upper)) {
+      msg <- paste("ERROR: ", name, " must be ", op1,  
+                   lower, " and ", op2, upper, sep="")
     } else {
       msg <- paste("ERROR: ", name, " must be >= ", lower, sep="")
     }
@@ -516,6 +555,18 @@ checkOp_DONOTRUN <- function(x) {
 checkOp_model <- function(x) {
   runModel.check.model(x)
 } 
+checkOp_output.exp_parms <- function(x) {
+
+  if (!length(x)) {
+    ret <- NULL
+  } else {
+    ret <- check.logical(x, "output.exp_parms") 
+  }
+  ret
+} 
+checkOp_output.ci_alpha <- function(x) {
+  check.range(x, "output.ci_alpha", 0, 1, upper.inc=FALSE)
+}
 
 getOptionNameAndValue <- function(str, sep="=") {
 

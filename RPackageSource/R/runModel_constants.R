@@ -1,3 +1,5 @@
+# Strings that are visible to the end user of COMETS. This file makes it easy to
+#   change column names, options, etc.
 
 runmodel.getTimeAttr <- function() {"ptime"}
 
@@ -50,6 +52,10 @@ getOutEffectsOpVals      <- function() {c(getOutEffectsOpDefault(), "all")}
 getOutModSumOpName       <- function() {"output.ModelSummary"}
 getOutModSumOpDefault    <- function() {"anova"}
 getOutModSumOpVals       <- function() {c(getOutModSumOpDefault(), "all")}
+getExpParmsOpName        <- function() {"output.exp_parms"}
+getExpParmsOpDefault     <- function() {NULL}
+getAddCiOpName           <- function() {"output.ci_alpha"}
+getAddCiOpDefault        <- function() {0.95}
 
 
 # For Effects data frame
@@ -60,10 +66,17 @@ getEffectsExposurespecName <- function() {"exposurespec"}
 getEffectsCorrEstName      <- function() {"corr"}
 getEffectsPvalueName       <- function() {"pvalue"}
 getEffectsRunName          <- function() {"run"}
-getEffectsGlmCoefNames     <- function() {c(getEffectsTermName(), "estimate", "std.error", "statistic", 
-                                            getEffectsPvalueName())}
+getEffectsEstName          <- function() {"estimate"}
+getEffectsEstSeName        <- function() {"std.error"}
+getEffectsGlmCoefNames     <- function() {c(getEffectsTermName(), getEffectsEstName(), getEffectsEstSeName(), 
+                                          "statistic", getEffectsPvalueName())}
 getEffectsPcorCoefNames    <- function() {c(getEffectsTermName(), getEffectsCorrEstName(), 
                                             getEffectsPvalueName())}
+# Added later to Effects data frame
+getEffectsLowerName       <- function() {"estimate.lower"}
+getEffectsUpperName       <- function() {"estimate.upper"}
+
+
 
 # ModelSummary 
 getModelSummaryName        <- function() {"ModelSummary"}
