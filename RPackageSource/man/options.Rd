@@ -4,7 +4,7 @@
 \alias{options}
 \title{options list}
 \description{
-A list of 10:
+A list of 12:
 \itemize{
 \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
                         design matrix. The default value is 0.97.}
@@ -28,6 +28,9 @@ A list of 10:
        and \code{\link{lm.options}} for options specific to
 \code{model="correlation", "lm", "glm"} respectively.        
                      The default is NULL.} 
+\item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
+                        option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
+                        The default value is 0.95.}
 \item{\code{output.Effects}}{ A string to define the terms output in the returned Effects
                            and ModelSummary data frames. Currently, it must be "exposure" or "all".
                           If set to "all", then summary statistics for the exposure
@@ -35,6 +38,10 @@ A list of 10:
                            summary statistics for the exposure will be output.
                            This option is ignored with \code{model = "correlation"}.
                            The default is "exposure".}
+\item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate glm parameter estimates. 
+                        Standard errors are obtained from the delta method. 
+                        The default is NULL, so that estimates from glm models with 
+                        family="binomial" will be exponentiated, and not otherwise.}
 \item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
                            ModelSummary data frame. Currently, it must be "anova" or "all".
                            This option is ignored with \code{model = "correlation"}.

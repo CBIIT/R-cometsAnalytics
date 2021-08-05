@@ -12,6 +12,8 @@ all the below names may not appear in the data frame.
 \itemize{
 \item{\code{corr}}{ The correlation between \code{term} and the outcome}
 \item{\code{estimate}}{ The regression coefficient of \code{term}}
+\item{\code{estimate.lower}}{ The lower confidence limit for \code{term}}
+\item{\code{estimate.upper}}{ The upper confidence limit for \code{term}}
 \item{\code{exposurespec}}{ Exposure variable}
 \item{\code{outcomespec}}{ Outcome variable}
 \item{\code{pvalue}}{ The p-value of the test}
