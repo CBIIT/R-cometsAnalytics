@@ -1,4 +1,4 @@
-# [![Build Status](https://travis-ci.org/CBIIT/R-cometsAnalytics.svg?branch=wheelerb)](https://travis-ci.org/CBIIT/R-cometsAnalytics)
+# [![Build Status](https://travis-ci.com/CBIIT/R-cometsAnalytics.svg?branch=wheelerb)](https://travis-ci.com/CBIIT/R-cometsAnalytics)
 # [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=wheelerb)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
 
 # R Comets-Analytics
