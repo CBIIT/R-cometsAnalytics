@@ -6,7 +6,7 @@
 \description{
 The ModelSummary data frame contains one row of model
 summary results for each exposure/outcome combination.
-Depending on the model run, 
+Depending on the model run and options specified, 
 all the below names may not appear in the data frame.
 \itemize{
 \item{\code{adjspec}}{ Original adjustment variables specified}
