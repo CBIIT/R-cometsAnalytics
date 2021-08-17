@@ -75,7 +75,11 @@ getEffectsPcorCoefNames    <- function() {c(getEffectsTermName(), getEffectsCorr
 # Added later to Effects data frame
 getEffectsLowerName       <- function() {"estimate.lower"}
 getEffectsUpperName       <- function() {"estimate.upper"}
-
+# For exponeniated estimates
+getEffectsExpEstName      <- function() {"exp.estimate"}
+getEffectsExpEstSeName    <- function() {"exp.std.error"}
+getEffectsExpLowerName    <- function() {"exp.estimate.lower"}
+getEffectsExpUpperName    <- function() {"exp.estimate.upper"}
 
 
 # ModelSummary 

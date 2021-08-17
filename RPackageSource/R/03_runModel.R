@@ -118,11 +118,11 @@ runModel.checkRetlist <- function(ret, op) {
     ret[[nm3]] <- obj3  
   }
 
+  # To exponentiate parameter estimates. This must be called before runModel.addCI.
+  ret <- runModel.expParms(ret, op)
+
   # For confidence intervals
   ret <- runModel.addCI(ret, op) 
-
-  # To exponentiate parameter estimates. This must be called after runModel.addCI.
-  ret <- runModel.expParms(ret, op)
 
   ret
 
@@ -160,21 +160,12 @@ runModel.expParms <- function(obj, op) {
   se.vec  <- tmp[[se.v]]
   x       <- tmp$data___
 
-  # Get new estimates
-  tmp                     <- expParms_deltaMethod(tmp[[eff.v]], tmp[[se.v]])
-  x[, eff.v]              <- tmp$exp.beta
-  x[, se.v]               <- tmp$exp.beta.se
-
-  # For confidence intervls
-  alpha <- op[[getAddCiOpName(), exact=TRUE]]
-  if (alpha > 0) {
-    zval <- qnorm((1-alpha)/2, lower.tail=FALSE)
-    cx   <- colnames(x)
-    lv   <- getEffectsLowerName()
-    uv   <- getEffectsUpperName()
-    if (lv %in% cx) x[, lv] <- exp(eff.vec - zval*se.vec)
-    if (uv %in% cx) x[, uv] <- exp(eff.vec + zval*se.vec)
-  }
+  # Get new estimates and column names
+  eff.v2      <- getEffectsExpEstName()
+  se.v2       <- getEffectsExpEstSeName()
+  tmp         <- expParms_deltaMethod(tmp[[eff.v]], tmp[[se.v]])
+  x[, eff.v2] <- tmp$exp.beta
+  x[, se.v2]  <- tmp$exp.beta.se
 
   obj[[getEffectsName()]] <- x
 
@@ -188,6 +179,8 @@ runModel.addCI <- function(obj, op) {
   if (alpha <= 0) return(obj)
   if (!is.list(obj)) return(obj)
 
+  zval <- qnorm((1-alpha)/2, lower.tail=FALSE)
+
   # Get the effects table cols
   eff.v <- getEffectsEstName()
   se.v  <- getEffectsEstSeName()
@@ -196,16 +189,25 @@ runModel.addCI <- function(obj, op) {
   eff.vec <- tmp[[eff.v]]
   se.vec  <- tmp[[se.v]]
   x       <- tmp$data___
-  zval    <- qnorm((1-alpha)/2, lower.tail=FALSE)
-    
-  x[, getEffectsLowerName()] <- eff.vec - zval*se.vec
-  x[, getEffectsUpperName()] <- eff.vec + zval*se.vec
+  
+  # Confidence limits for estimate  
+  lv0      <- getEffectsLowerName()
+  uv0      <- getEffectsUpperName()
+  x[, lv0] <- eff.vec - zval*se.vec
+  x[, uv0] <- eff.vec + zval*se.vec
+
+  # For exponentiated estimates
+  if (op[[getExpParmsOpName()]]) {
+    lv      <- getEffectsExpLowerName()
+    uv      <- getEffectsExpUpperName()
+    x[, lv] <- exp(x[, lv0, drop=TRUE])
+    x[, uv] <- exp(x[, uv0, drop=TRUE])
+  }
 
   obj[[getEffectsName()]] <- x
 
   obj
   
-
 } # END: runModel.addCI
 
 # Function to get the original variable name

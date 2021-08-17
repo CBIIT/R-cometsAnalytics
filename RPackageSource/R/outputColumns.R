@@ -1,6 +1,6 @@
 #' The ModelSummary data frame contains one row of model
 #' summary results for each exposure/outcome combination.
-#' Depending on the model run, 
+#' Depending on the model run and options specified, 
 #' all the below names may not appear in the data frame.
 #' \itemize{
 #' \item{\code{adjspec}}{ Original adjustment variables specified}
@@ -50,13 +50,17 @@ NULL
 #' The Effects data frame contains the estimates
 #'  for each exposure, and  will contain multiple rows
 #'  for categorical exposure variables.
-#' Depending on the model run, 
+#' Depending on the model run and options specified, 
 #' all the below names may not appear in the data frame.
 #' \itemize{
 #' \item{\code{corr}}{ The correlation between \code{term} and the outcome}
 #' \item{\code{estimate}}{ The regression coefficient of \code{term}}
 #' \item{\code{estimate.lower}}{ The lower confidence limit for \code{term}}
 #' \item{\code{estimate.upper}}{ The upper confidence limit for \code{term}}
+#' \item{\code{exp.estimate}}{ The exponentiated regression coefficient of \code{term}}
+#' \item{\code{exp.estimate.lower}}{ The exponentiated lower confidence limit for \code{term}}
+#' \item{\code{exp.estimate.upper}}{ The exponentiated upper confidence limit for \code{term}}
+#' \item{\code{exp.std.error}}{ The standard error of \code{exp.estimate} from the delta method}
 #' \item{\code{exposurespec}}{ Exposure variable}
 #' \item{\code{outcomespec}}{ Outcome variable}
 #' \item{\code{pvalue}}{ The p-value of the test}
