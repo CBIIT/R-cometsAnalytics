@@ -36,6 +36,11 @@
 #'                         Standard errors are obtained from the delta method. 
 #'                         The default is NULL, so that estimates from glm models with 
 #'                         family="binomial" will be exponentiated, and not otherwise.}
+#' \item{\code{output.metab.cols}}{ Character vector of column names in the code{METABOLITES}
+#'                             sheet to be output in the \code{ModelSummary} and \code{Effects}
+#'                             data frames. Metabolite ids are matched first using the 
+#'                             \code{outcomespec} column and then using the \code{exposurespec} column.  
+#'                         The default is "metabolite_name".}
 #' \item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
 #'                            ModelSummary data frame. Currently, it must be "anova" or "all".
 #'                            This option is ignored with \code{model = "correlation"}.
@@ -223,11 +228,13 @@ getValidGlobalOps <- function() {
   out.modSum <- getOutModSumOpName()
   add.ci     <- getAddCiOpName()
   exp.parms  <- getExpParmsOpName() 
+  out.metabs <- getAddMetabColsOpName()
 
-  ops.char <- c("model", "check.cor.method", out.eff, out.modSum)
-  ops.num  <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
-                add.ci, exp.parms, 
-                "DEBUG", "DONOTRUN")
+  ops.char    <- c("model", "check.cor.method", out.eff, out.modSum)
+  ops.charVec <- c(out.metabs)
+  ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
+                   add.ci, exp.parms, 
+                   "DEBUG", "DONOTRUN")
   ops.log  <- c("check.illCond", "check.design")
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
@@ -237,6 +244,7 @@ getValidGlobalOps <- function() {
   default[[out.eff]]    <- getOutEffectsOpDefault()
   default[[out.modSum]] <- getOutModSumOpDefault()
   default[[add.ci]]     <- getAddCiOpDefault()
+  default[[out.metabs]] <- getAddMetabColsDefault()
 
   # Be careful with exp.parms option, as it can be NULL
   defval <- getExpParmsOpDefault() 
@@ -250,9 +258,17 @@ getValidGlobalOps <- function() {
   valid <- names(default)
 
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
-       valid=valid, default=default)
+       valid=valid, default=default, ops.charVec=ops.charVec)
 
 } # END: getValidGlobalOps 
+
+getCharVecFromStr <- function(str, sep) {
+
+  ret <- strsplit(str, sep, fixed=TRUE)
+  ret <- unlist(ret)
+  ret
+
+} # END: getCharVecFromStr
 
 # Parse and check global options from options sheet. Return a list of options.
 checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
@@ -261,6 +277,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
   def    <- tmp$default
   ops.n  <- tmp$ops.numeric
   ops.l  <- tmp$ops.logical
+  ops.cv <- tmp$ops.charVec
   valid  <- names(def)
 
   n <- length(opnames)
@@ -268,6 +285,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
 
   opnames  <- trimws(opnames)
   opvalues <- trimws(opvalues)
+  sep      <- getAddMetabColsSep()
 
   ret <- list()
   # Loop over each element
@@ -287,6 +305,9 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
       } else if (name %in% ops.l) {
         # Logical value
         value <- getLogicalValueFromStr(value) 
+      } else if (name %in% ops.cv) {
+        # Character vector
+        value <- getCharVecFromStr(value, sep) 
       }
     }
 
@@ -350,6 +371,10 @@ checkGlobalOpList <- function(op, name="options") {
   default <- tmp$default
   valid   <- names(default)
   ops.n   <- c(tmp$ops.numeric, tmp$ops.logical)
+  ops.cv  <- tmp$ops.charVec
+
+  # Special cases
+  spec1 <- getAddMetabColsOpName() 
 
   # Check the names and values
   if (n) {
@@ -359,15 +384,20 @@ checkGlobalOpList <- function(op, name="options") {
     for (i in 1:n) {
       nm  <- nms[i]
       val <- op[[i]]
+
       if (nm %in% ops.n) {
         tmp <- try(eval(parse(text=paste("checkOp_", nm, "(", val, ")", sep=""))),
                    silent=TRUE)
+      } else if (nm == spec1) {
+        tmp     <- try(checkOp_output.metab.cols(val), silent=TRUE)
+        op[[i]] <- tmp
       } else {
         tmp <- try(eval(parse(text=paste("checkOp_", nm, "('", val, "')", sep=""))),
             silent=TRUE)
       }
       if ("try-error" %in% class(tmp)) {
         print(tmp)
+        if (length(val) > 1) val <- paste0(val, collapse=",")
         stop(paste("ERROR: the option ", nm, getOpStrEq(), val, " is not valid", sep=""))
       }
     }
@@ -530,6 +560,23 @@ check.variableInData <- function(x, name, data, varMap, numeric=1, positive=0) {
 
 } # END: check.variableInData
 
+check.varnameVec <- function(x, name, min.len=0, tolower=1, returnOnMiss=NULL) {
+
+  len <- length(x)
+  if (!len) {
+    if (min.len) stop(paste0("ERROR: length(", name, ") = 0"))
+    return(NULL) 
+  }
+  if (!is.character(x)) stop(paste0("ERROR: ", name, " must be a character vector"))
+  if (!is.vector(x)) stop(paste0("ERROR: ", name, " must be a character vector"))
+  x <- trimws(x)
+  if (tolower) x <- tolower(x)
+  tmp <- nchar(x) > 0
+  x   <- x[tmp]
+  if (!length(x)) return(returnOnMiss)
+  x
+
+}
 
 checkOp_check.illCond <- function(x) {
   check.logical(x, "check.illCond") 
@@ -567,6 +614,13 @@ checkOp_output.exp_parms <- function(x) {
 checkOp_output.ci_alpha <- function(x) {
   check.range(x, "output.ci_alpha", 0, 1, upper.inc=FALSE)
 }
+checkOp_output.metab.cols <- function(x) {
+
+  ret <- check.varnameVec(x, getAddMetabColsOpName(), min.len=0, tolower=1, returnOnMiss="")
+  ret
+}
+
+
 
 getOptionNameAndValue <- function(str, sep="=") {
 

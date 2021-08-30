@@ -340,7 +340,6 @@ addMetabInfo <- function(corrlong, modeldata, metabdata) {
     dplyr::mutate(outcome = ifelse(!is.na(outmetname), outmetname, outcomespec)) %>%
     dplyr::select(-outmetname)
 
-
   # Add in metabolite information and exposure labels:
   # look in metabolite metadata
   corrlong$exposurespec <- as.character(lapply(corrlong$exposurespec, function(x) {

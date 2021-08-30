@@ -574,3 +574,52 @@ expParms_deltaMethod <- function(beta, beta.se) {
   list(exp.beta=ret.beta, exp.beta.se=ret.se)
 }
 
+nonEmptyDf <- function(x) {
+
+  if (!length(x)) return(0)
+  if (!is.data.frame(x)) return(0)
+  if (!nrow(x)) return(0)
+  if (!ncol(x)) return(0) 
+  1
+
+}
+
+nonEmptyDfHasCols <- function(x, cols) {
+
+  ret <- 0
+  if (nonEmptyDf(x)) {
+    tmp <- cols %in% colnames(x)
+    if (all(tmp)) ret <- 1
+  }
+  ret
+
+}
+
+addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, DEBUG=0) {
+
+  if (!length(x.add)) return(base.df)
+  if (!nonEmptyDfHasCols(base.df, base.id)) return(base.df)
+  if (!nonEmptyDfHasCols(x.df, x.id)) return(base.df)
+  base.cols <- colnames(base.df)
+  x.cols    <- colnames(x.df)
+  tmp       <- (x.add %in% x.cols) & !(x.add %in% base.cols)
+  rem       <- x.add[!tmp] 
+  x.add     <- x.add[tmp]
+  if (DEBUG && length(rem)) {
+    print("Removed columns:")
+    print(rem)
+  }
+  if (!length(x.add)) return(base.df)
+
+  # Initialize
+  for (v in x.add) base.df[, v] <- NA_character_
+  rows <- match(base.df[, base.id, drop=TRUE], x.df[, x.id, drop=TRUE])
+  tmp  <- !is.na(rows)
+  rows <- rows[tmp]
+  if (length(rows)) {
+    for (v in x.add) base.df[tmp, v] <- x.df[rows, v, drop=TRUE]
+  }
+
+  base.df
+
+}

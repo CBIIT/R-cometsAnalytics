@@ -49,6 +49,7 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
   op$cohort <- cohortLabel
   ret       <- runModel.start(modeldata, metabdata, op)
   ret       <- runModel.checkRetlist(ret, op) 
+  ret       <- runModel.addMetabCols(ret, metabdata, op)
 
   # Stop the clock
   ptm <- base::proc.time() - ptm
@@ -1209,5 +1210,46 @@ runModel.initSaveObjects <- function(defObj, modeldata, op) {
 
 } # END: runModel.initSaveObjects
 
+# Function to add metabolite columns on to data frames from runModel
+runModel.addMetabCols <- function(obj, metabdata, op) {
 
+  DEBUG <- op$DEBUG
+  if (DEBUG) print("Begin: runModel.addMetabCols")
+  add   <- op[[getAddMetabColsOpName(), exact=TRUE]]
+  if (DEBUG) print(add)
+  if (!length(add)) return(obj)
+  if (!any(nchar(add))) return(obj)
+  metab <- metabdata$metab
+  if (DEBUG) print(metab[1, , drop=FALSE])
+  metabcols       <- tolower(colnames(metab))
+  colnames(metab) <- metabcols
+  add             <- tolower(add)
+  tmp             <- add %in% metabcols
+  add             <- add[tmp]
+  if (DEBUG) print(add)
+  if (!length(add)) return(obj)
+  
+  metabidv <- metabdata$metabId
+  ov       <- getEffectsOutcomespecName()
+  ev       <- getEffectsExposurespecName()
+
+  nm       <- getModelSummaryName()
+  x        <- obj[[nm, exact=TRUE]]
+  if (length(x)) {
+    x         <- addColsToDF(x, ov, metab, metabidv, add, DEBUG=DEBUG) 
+    x         <- addColsToDF(x, ev, metab, metabidv, add, DEBUG=DEBUG) 
+    obj[[nm]] <- x
+  }
+
+  nm       <- getEffectsName()
+  x        <- obj[[nm, exact=TRUE]]
+  if (length(x)) {
+    x         <- addColsToDF(x, ov, metab, metabidv, add, DEBUG=DEBUG) 
+    x         <- addColsToDF(x, ev, metab, metabidv, add, DEBUG=DEBUG) 
+    obj[[nm]] <- x
+  }
+
+  obj
+
+}
 

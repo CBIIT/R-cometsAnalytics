@@ -56,6 +56,9 @@ getExpParmsOpName        <- function() {"output.exp_parms"}
 getExpParmsOpDefault     <- function() {NULL}
 getAddCiOpName           <- function() {"output.ci_alpha"}
 getAddCiOpDefault        <- function() {0.95}
+getAddMetabColsOpName    <- function() {"output.metab.cols"}
+getAddMetabColsDefault   <- function() {"metabolite_name"}
+getAddMetabColsSep       <- function() {","}
 
 
 # For Effects data frame
