@@ -32,7 +32,7 @@ A table with the subject ids in the first column and metabolites as the other co
 A table with the subject ids in the first column and covariates as the other columns. \cr
 \bold{VarMap} \cr
 A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
-and \code{VARTYPE}. The \code{COHORTVARIABLE} column must contain names that match the
+\code{VARTYPE}, and \code{VARDEFINITION}. The \code{COHORTVARIABLE} column must contain names that match the
 column names in the \bold{SubjectData} table. These names will be renamed to their
 corresponding name in the \code{VARREFERENCE} column. The \code{VARTYPE} column 
 should have values \code{continuous} or \code{categorical} for each row. \cr

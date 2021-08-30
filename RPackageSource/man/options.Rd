@@ -42,6 +42,11 @@ A list of 12:
                         Standard errors are obtained from the delta method. 
                         The default is NULL, so that estimates from glm models with 
                         family="binomial" will be exponentiated, and not otherwise.}
+\item{\code{output.metab.cols}}{ Character vector of column names in the code{METABOLITES}
+                            sheet to be output in the \code{ModelSummary} and \code{Effects}
+                            data frames. Metabolite ids are matched first using the 
+                            \code{outcomespec} column and then using the \code{exposurespec} column.  
+                        The default is "metabolite_name".}
 \item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
                            ModelSummary data frame. Currently, it must be "anova" or "all".
                            This option is ignored with \code{model = "correlation"}.
