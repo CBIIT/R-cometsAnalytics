@@ -96,7 +96,8 @@ exmodeldata2 <- COMETS::getModelData(exmetabdata, modelspec="Interactive",
 
 ### 3. Run Simple Unstratified Correlation Analysis
 The *runModel()* function is the main function for running a single model, and by
-default, a correlation analysis is performed. 
+default, a correlation analysis is performed. The string "DPP" is a label for the cohort
+ which will appear under the "cohort" column in the output.  
 ```{r}
 excorrdata  <- COMETS::runModel(exmodeldata2,exmetabdata,"DPP")
 ```
@@ -211,29 +212,17 @@ list with family set to "poisson".
   print(poisson_results)
 ```
 
-### 9. Confidence intervals for effects from lm or glm.
-Below is example code to compute 95% confidence intervals for the estimates from the 
-glm results above in the Effects data frame. Confidence intervals for the lm results
-are similar.
-```{r}
-  x <- glm_results$Effects
-  z <- qnorm((1 - 0.95)/2, lower.tail=FALSE)
-  x[, "estimate.lower"] <- x[, "estimate"] - z*x[, "std.error"]
-  x[, "estimate.upper"] <- x[, "estimate"] + z*x[, "std.error"]
-  print(x)
-```
-
-### 10. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
+### 9. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
 
 All models desginated in the input file can be run with one command, 
 and individual output Excel files or correlation results will be written
  in the current directory by default. The function returns a list of objects.
 
 ```{r eval=F}
- allresults <- COMETS::runAllModels(exmetabdata,writeTofile=F)
+ allresults <- COMETS::runAllModels(exmetabdata,writeTofile=TRUE)
 ```
 
-### 11. Backwards compatibility with older Excel files and runCorr.
+### 10. Backwards compatibility with older Excel files and runCorr.
 Older Excel files that do not have a 
   [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg)
  sheet can still be used with newer versions of the COMETS R package. The runCorr function is
