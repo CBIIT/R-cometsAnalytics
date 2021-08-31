@@ -1,10 +1,10 @@
 on:
   push:
     branches:
-      - master
+      - wheelerb
   pull_request:
     branches:
-      - master
+      - wheelerb
 
 name: R-CMD-check
 
