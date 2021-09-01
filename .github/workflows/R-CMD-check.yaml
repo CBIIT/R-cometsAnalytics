@@ -10,7 +10,7 @@ name: R-CMD-check
 
 defaults:
   run:
-    working-directory: scripts
+    working-directory: RPackageSource
 
 jobs:
   R-CMD-check:
