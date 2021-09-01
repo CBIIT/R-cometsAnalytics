@@ -8,6 +8,10 @@ on:
 
 name: R-CMD-check
 
+defaults:
+  run:
+    working-directory: scripts
+
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
