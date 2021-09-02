@@ -22,7 +22,11 @@
 
 on:
   push:
+    branches:
+      - wheelerb
   pull_request:
+    branches:
+      - wheelerb
 
 name: R-CMD-check-bioc
 
