@@ -30,9 +30,9 @@ on:
 
 name: R-CMD-check-bioc
 
-defaults:
-  run:
-    working-directory: RPackageSource
+#defaults:
+#  run:
+#    working-directory: RPackageSource
 
 ## These environment variables control whether to run GHA code later on that is
 ## specific to testthat, covr, and pkgdown.
