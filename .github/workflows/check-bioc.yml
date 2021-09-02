@@ -208,7 +208,7 @@ jobs:
         env:
           _R_CHECK_CRAN_INCOMING_: false
         run: |
-          rcmdcheck::rcmdcheck(
+          rcmdcheck::rcmdcheck(path="./RPackageSource",
               args = c("--no-build-vignettes", "--no-manual", "--timings"),
               build_args = c("--no-manual", "--no-resave-data"),
               error_on = "warning",
