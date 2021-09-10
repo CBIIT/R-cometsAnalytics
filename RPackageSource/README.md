@@ -1,6 +1,6 @@
 
 # [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=wheelerb)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
-[![Build status](https://github.com/CBIIT/R-cometsAnalytics/workflows/R-CMD-check.yaml/badge.svg?branch=wheelerb)](https://github.com/CBIIT/R-cometsAnalytics/actions)
+[![Build status](https://github.com/CBIIT/R-cometsAnalytics/workflows/R-CMD-check/badge.svg?branch=wheelerb)](https://github.com/CBIIT/R-cometsAnalytics/actions)
 
 # R Comets-Analytics
 
