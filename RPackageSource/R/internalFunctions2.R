@@ -595,14 +595,14 @@ nonEmptyDfHasCols <- function(x, cols) {
 
 }
 
-addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, DEBUG=0) {
+addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, init=1, DEBUG=0) {
 
   if (!length(x.add)) return(base.df)
   if (!nonEmptyDfHasCols(base.df, base.id)) return(base.df)
   if (!nonEmptyDfHasCols(x.df, x.id)) return(base.df)
   base.cols <- colnames(base.df)
   x.cols    <- colnames(x.df)
-  tmp       <- (x.add %in% x.cols) & !(x.add %in% base.cols)
+  tmp       <- (x.add %in% x.cols) 
   rem       <- x.add[!tmp] 
   x.add     <- x.add[tmp]
   if (DEBUG && length(rem)) {
@@ -612,7 +612,7 @@ addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, DEBUG=0) {
   if (!length(x.add)) return(base.df)
 
   # Initialize
-  for (v in x.add) base.df[, v] <- NA_character_
+  if (init) for (v in x.add) base.df[, v] <- NA_character_
   rows <- match(base.df[, base.id, drop=TRUE], x.df[, x.id, drop=TRUE])
   tmp  <- !is.na(rows)
   rows <- rows[tmp]

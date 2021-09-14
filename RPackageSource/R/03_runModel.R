@@ -1236,16 +1236,16 @@ runModel.addMetabCols <- function(obj, metabdata, op) {
   nm       <- getModelSummaryName()
   x        <- obj[[nm, exact=TRUE]]
   if (length(x)) {
-    x         <- addColsToDF(x, ov, metab, metabidv, add, DEBUG=DEBUG) 
-    x         <- addColsToDF(x, ev, metab, metabidv, add, DEBUG=DEBUG) 
+    x         <- addColsToDF(x, ov, metab, metabidv, add, init=1, DEBUG=DEBUG) 
+    x         <- addColsToDF(x, ev, metab, metabidv, add, init=0, DEBUG=DEBUG) 
     obj[[nm]] <- x
   }
 
   nm       <- getEffectsName()
   x        <- obj[[nm, exact=TRUE]]
   if (length(x)) {
-    x         <- addColsToDF(x, ov, metab, metabidv, add, DEBUG=DEBUG) 
-    x         <- addColsToDF(x, ev, metab, metabidv, add, DEBUG=DEBUG) 
+    x         <- addColsToDF(x, ov, metab, metabidv, add, init=1, DEBUG=DEBUG) 
+    x         <- addColsToDF(x, ev, metab, metabidv, add, init=0, DEBUG=DEBUG) 
     obj[[nm]] <- x
   }
 
