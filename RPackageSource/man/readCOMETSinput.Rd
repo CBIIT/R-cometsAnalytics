@@ -67,7 +67,7 @@ This sheet is optional, but is required when the \bold{Models} sheet contains th
 column \code{MODELSPEC}.
 }
 \examples{
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 

@@ -31,8 +31,8 @@ A list of 12:
 \item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
                         option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
                         The default value is 0.95.}
-\item{\code{output.Effects}}{ A string to define the terms output in the returned Effects
-                           and ModelSummary data frames. Currently, it must be "exposure" or "all".
+\item{\code{output.Effects}}{ A string to define the terms output in the returned \code{\link{Effects}}
+                           and \code{\link{ModelSummary}} data frames. Currently, it must be "exposure" or "all".
                           If set to "all", then summary statistics for the exposure
                            and adjustment variables will be output. Otherwise, only
                            summary statistics for the exposure will be output.
@@ -42,13 +42,13 @@ A list of 12:
                         Standard errors are obtained from the delta method. 
                         The default is NULL, so that estimates from glm models with 
                         family="binomial" will be exponentiated, and not otherwise.}
-\item{\code{output.metab.cols}}{ Character vector of column names in the code{METABOLITES}
-                            sheet to be output in the \code{ModelSummary} and \code{Effects}
+\item{\code{output.metab.cols}}{ Character vector of column names in the \code{METABOLITES}
+                            sheet to be output in the \code{\link{ModelSummary}} and \code{\link{Effects}}
                             data frames. Metabolite ids are matched first using the 
                             \code{outcomespec} column and then using the \code{exposurespec} column.  
                         The default is "metabolite_name".}
 \item{\code{output.ModelSummary}}{ A string to defines the columns output in the returned 
-                           ModelSummary data frame. Currently, it must be "anova" or "all".
+                           \code{\link{ModelSummary}} data frame. Currently, it must be "anova" or "all".
                            This option is ignored with \code{model = "correlation"}.
                            The default is "anova".}
 }

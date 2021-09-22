@@ -70,7 +70,7 @@ All metabolite variables specified should be listed in the \code{metabolite_name
   \code{model} option in \code{\link{options}}.
 }
 \examples{
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")

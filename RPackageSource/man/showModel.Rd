@@ -17,7 +17,7 @@ Function that displays the first N rows of each data frame
  in the the \code{\link{runModel}} output.
 }
 \examples{
-dir         <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir         <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile     <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")

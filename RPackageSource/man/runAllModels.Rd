@@ -26,7 +26,7 @@ the input Excel file.
 }
 \examples{
 \dontrun{
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 allmodeloutput <- runAllModels(exmetabdata)
