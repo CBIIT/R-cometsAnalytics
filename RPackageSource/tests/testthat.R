@@ -1,5 +1,5 @@
 library(testthat)
-library(COMETS)
+library(RcometsAnalytics)
 
-test_check("COMETS")
+test_check("RcometsAnalytics")
 
