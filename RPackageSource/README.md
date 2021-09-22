@@ -41,6 +41,11 @@ devtools::install_version('dplyr', version='0.8.5', repos='https://cloud.r-proje
 devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource")
 ```
 
+To load the package, type:
+```
+library(COMETS)
+```
+
 # Example Data
 We have provided an example input file for users to mimic when creating their own.  This data can be found in the folder inst/extdata.
 
