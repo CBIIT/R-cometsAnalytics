@@ -22,7 +22,7 @@
 #'          the \code{Options} sheet in the excel file. \cr
 #'
 #' @examples
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",

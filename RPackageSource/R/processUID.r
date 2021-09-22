@@ -7,13 +7,13 @@
 ## uncomment to run
 # processUID <- function() {
 #
-#dir <- system.file("R", package = "COMETS", mustWork = TRUE)
+#dir <- system.file("R", package = "RcometsAnalytics", mustWork = TRUE)
 # #library(tidyverse)
 # source(paste0(getwd(),"/R/internalFunctions.r"))
 # # initialize parameters:
 #  metid=uid_01=uidsource=hmdb=main_class=c()
 #
-# ## dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
+# ## dir <- system.file("extdata", package = "RcometsAnalytics", mustWork = TRUE)
 # xlsfile <- file.path(getwd(), "/inst/extdata/uid.xlsx")
 # masteruids = fixData(rio::import(xlsfile))
 #
@@ -115,7 +115,7 @@
 # ## ---------------------------------------------------------------------------
 # ## processcohorts function ----------------------------------------------------------
 # ## ---------------------------------------------------------------------------
-# dir <- system.file("extdata", package = "COMETS", mustWork = TRUE)
+# dir <- system.file("extdata", package = "RcometsAnalytics", mustWork = TRUE)
 # xlsfile <- file.path(dir, "cohorts.xlsx")
 # cohorts = readxl::read_excel(xlsfile,1)
 #

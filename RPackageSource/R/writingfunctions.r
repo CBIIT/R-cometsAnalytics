@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
@@ -45,7 +45,7 @@ OutputCSVResults <- function (filename,dataf,cohort=""){
 #' @return the filename of the XLSX file with results named with cohort
 #'
 #' @examples
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",

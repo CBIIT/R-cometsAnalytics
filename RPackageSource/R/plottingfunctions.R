@@ -10,7 +10,7 @@
 #' @return a distribution plot
 #'
 #' @examples
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotVar(exmetabdata)
@@ -52,7 +52,7 @@ plotVar <- function(cometsdata,
 #' @return a distribution plot
 #'
 #' @examples
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' plotMinvalues(exmetabdata)
@@ -90,7 +90,7 @@ plotMinvalues <- function(cometsdata,
 #' @param nlines number of lines to return (default 50)
 #' @return first 50 lines of output
 #' @examples
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
@@ -121,7 +121,7 @@ showCorr <- function(corr, nlines=50) {
 #' @param nlines number of lines to display (default 10)
 #' @return NULL
 #' @examples
-#' dir         <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir         <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile     <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
@@ -173,7 +173,7 @@ showModel <- function(obj, nlines=10) {
 #'
 #' @examples
 #' \dontrun{
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
@@ -198,7 +198,7 @@ showHeatmap <- function (ccorrList, strata=NULL,
 
   # order the rows according to sort by
   if (rowsortby == "metasc") {
-	exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
+	exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 
     ccorrmat$exposurespec <- suppressWarnings(
       factor(ccorrmat$exposurespec, levels =
@@ -263,7 +263,7 @@ showHeatmap <- function (ccorrList, strata=NULL,
 #' @references For colorscale reference: \code{\link[heatmaply]{RColorBrewer_colors}}
 #'
 #' @examples
-#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' modeldata <- getModelData(exmetabdata, modelspec="Interactive",

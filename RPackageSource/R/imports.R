@@ -1,6 +1,6 @@
 #' @docType package
-#' @name COMETS
-#' @title COMETS Analytics R package
+#' @name RcometsAnalytics
+#' @title RcometsAnalytics R package
 #' @description This R package supports all cohort-specific analyses of
 #'        the COMETS consortium \url{https://www.comets-analytics.org/}. 
 #' Data are not saved in the system but

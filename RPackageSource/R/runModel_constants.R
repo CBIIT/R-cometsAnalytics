@@ -1,4 +1,4 @@
-# Strings that are visible to the end user of COMETS. This file makes it easy to
+# Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
 runmodel.getTimeAttr <- function() {"ptime"}
