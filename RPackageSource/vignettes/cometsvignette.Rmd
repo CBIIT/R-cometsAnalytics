@@ -1,5 +1,5 @@
 ---
-title: "Running COMETS Analytics locally"
+title: "Running RcometsAnalytics locally"
 author: "Ewy Mathé, Ella Temprosa, Bill Wheeler"
 date: "`r Sys.Date()`"
 output: 
@@ -8,21 +8,21 @@ output:
     toc_float:
       collapsed: false
 vignette: >
-  %\VignetteIndexEntry{Running COMETS Analytics locally}
+  %\VignetteIndexEntry{Running RcometsAnalytics locally}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ## Introduction
 
-COMETS Analytics support all cohort-specific analyses of the COMETS consortium. 
+RcometsAnalytics supports all cohort-specific analyses of the COMETS consortium. 
 This collaborative work is done via the COMETS harmonization group activities. 
 For more information, see the COMETS [**website**](http://epi.grants.cancer.gov/comets/).
-This vignette demonstrates using the COMETS R package from the command line, while  
+This vignette demonstrates using the RcometsAnalytics R package from the command line, while  
  the [**tutorial**](https://cbiit.github.io/R-cometsAnalytics/Tutorial/docs/) 
- demonstrates using COMETS from the GUI. 
-Documentation of the COMETS R package can be found here
-  [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/COMETS-manual.pdf).
+ demonstrates using RcometsAnalytics from the GUI. 
+Documentation of the RcometsAnalytics R package can be found here
+  [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual.pdf).
 Each project could create their own vignette to run the analyses.
 
 ## Data Input Format
@@ -37,7 +37,7 @@ The required input file should be in excel format with the following 6 sheets:
   6. [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg) - sheet containing model specific options
 
 Complete documentation of the various sheets can be found in the package 
- [**documentation**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/COMETS-manual.pdf).
+ [**documentation**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual.pdf).
 An example input file is available [**HERE**](https://www.comets-analytics.org/examples/cometsInput.xlsx).
 
 ## Missing values
@@ -55,21 +55,21 @@ Input for this function is an Excel spreadsheet, per the description above.
 
 ```{r}
 # Retrieve the full path of the input data
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 
 # Read in and process the input data
-exmetabdata <- COMETS::readCOMETSinput(csvfile)
+exmetabdata <- RcometsAnalytics::readCOMETSinput(csvfile)
 ```
 
 To plot some the distribution of variances for each metabolite:
 ```{r, eval=T}
-COMETS::plotVar(exmetabdata,titlesize=12)
+RcometsAnalytics::plotVar(exmetabdata,titlesize=12)
 ```
 
 To plot the distribution of minimum/missing values:
 ```{r, eval=T}
-COMETS::plotMinvalues(exmetabdata,titlesize=12)
+RcometsAnalytics::plotMinvalues(exmetabdata,titlesize=12)
 ```
 
 ### 2. Get Model Data
@@ -82,7 +82,7 @@ The following call defines the "1 Gender adjusted" model from the Models
 sheet in the input file to be run.
 
 ```{r}
-exmodeldata <- COMETS::getModelData(exmetabdata,modlabel="1 Gender adjusted")
+exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modlabel="1 Gender adjusted")
 ```
 In Interactive mode, models are specified as parameters. 
 The model information needs to be read in with the function *getModelData()* and 
@@ -90,7 +90,7 @@ processed so the software knows which models to run.
 The following call defines the model with age and bmi_grp as the exposure variables,
  and includes only the subjects with age > 40 and bmi_grp > 2.
 ```{r}
-exmodeldata2 <- COMETS::getModelData(exmetabdata, modelspec="Interactive",
+exmodeldata2 <- RcometsAnalytics::getModelData(exmetabdata, modelspec="Interactive",
 	exposures=c("age","bmi_grp"), where=c("age>40","bmi_grp>2"))
 ```
 
@@ -99,23 +99,23 @@ The *runModel()* function is the main function for running a single model, and b
 default, a correlation analysis is performed. The string "DPP" is a label for the cohort
  which will appear under the "cohort" column in the output.  
 ```{r}
-excorrdata  <- COMETS::runModel(exmodeldata2,exmetabdata,"DPP")
+excorrdata  <- RcometsAnalytics::runModel(exmodeldata2,exmetabdata,"DPP")
 ```
 
 The output of the correlation analysis can then be compiled and output to an Excel file
  with the following function:
 ```{r, eval=F}
-COMETS::OutputListToExcel(filename="DPP_corr.xlsx", excorrdata)
+RcometsAnalytics::OutputListToExcel(filename="DPP_corr.xlsx", excorrdata)
 ```
 
 To view the first 3 lines of the correlation analysis output, simply type:
 ```{r}
-COMETS::showModel(excorrdata,nlines=3)
+RcometsAnalytics::showModel(excorrdata,nlines=3)
 ```
 
 To display the heatmap of the resulting correlation matrix, use the showheatmap function.
 ```{r in-text-fig, eval=T}
-COMETS::showHeatmap(excorrdata)
+RcometsAnalytics::showHeatmap(excorrdata)
 ```
 \
 \
@@ -125,15 +125,15 @@ use the showHClust function.
 This diplay requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r, eval=T}
-exmodeldata<-COMETS::getModelData(exmetabdata,modelspec = "Interactive",exposures = c("bmi_grp","age"))
-excorrdata  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
-COMETS::showHClust(excorrdata, showticklabels=FALSE)
+exmodeldata<-RcometsAnalytics::getModelData(exmetabdata,modelspec = "Interactive",exposures = c("bmi_grp","age"))
+excorrdata  <- RcometsAnalytics::runModel(exmodeldata,exmetabdata,"DPP")
+RcometsAnalytics::showHClust(excorrdata, showticklabels=FALSE)
 ```
 
 Results can be written to an output Excel file with the following command:
 
 ```{r eval=F}
-COMETS::OutputListToExcel("Model1.xlsx", excorrdata)
+RcometsAnalytics::OutputListToExcel("Model1.xlsx", excorrdata)
 ```
 
 ### 4. Run Stratified Correlation Analysis
@@ -143,14 +143,14 @@ is specified, then the strata will be defined by all unique combinations of the
 stratification variables. The following call will define a model stratified 
 by race_grp.
 ```{r}
-  exmodeldata2 <- COMETS::getModelData(exmetabdata,modelspec="Interactive",
+  exmodeldata2 <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive",
                    outcomes=c("lactose","lactate"),
 	            exposures=c("age","bmi_grp"),strvars="race_grp")
 ```
 
 The stratified correlation analysis is run by calling the *runModel()* function.          
 ```{r}
-  excorrdata2  <- COMETS::runModel(exmodeldata2,exmetabdata,"DPP")
+  excorrdata2  <- RcometsAnalytics::runModel(exmodeldata2,exmetabdata,"DPP")
 ```
 
 ### 5. Linear regression with lm
@@ -158,13 +158,13 @@ Call *getModelData()* to define a model which adjusts for age group,
 has lactose and lactate as outcome variables, and has age and bmi group 
 as the exposure variables.
 ```{r}
-  exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+  exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    outcomes=c("lactose","lactate"), exposures=c("age","bmi_grp"))
 ```
 To run a linear regression using the lm function, a list of options must be passed into
 *runModel()* with the model option set to "lm".
 ```{r}
-  lm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="lm"))
+  lm_results  <- RcometsAnalytics::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="lm"))
   print(lm_results)
 ```
 
@@ -175,7 +175,7 @@ linear regression.
 The Effects data frame will be the same as with lm, but the ModelSummary data frame
 will contain some different columns.
 ```{r}
-  glm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="glm"))
+  glm_results  <- RcometsAnalytics::runModel(exmodeldata, exmetabdata, "DPP", op=list(model="glm"))
   print(all.equal(lm_results$Effects, glm_results$Effects))
   print(glm_results$ModelSummary)
 ```
@@ -185,14 +185,14 @@ Call *getModelData()* to define a model which adjusts for age group,
 has nested_case as the outcome variable, and has lactose and lactate
 as the exposure variables. The variable nested_case must be a binary 0-1 variable.
 ```{r}
-  exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+  exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    outcomes="nested_case", exposures=c("lactose","lactate"))
 ```
 To run a logistic regression, the list of options op must also include a model.options 
 list with family set to "binomial".
 ```{r}
   op <- list(model="glm", model.options=list(family="binomial"))
-  glm_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=op)
+  glm_results  <- RcometsAnalytics::runModel(exmodeldata, exmetabdata, "DPP", op=op)
   print(glm_results)
 ```
 
@@ -201,14 +201,14 @@ Call *getModelData()* to define a model which adjusts for age group,
 has n_visits as the outcome variable, and has lactose and lactate
 as the exposure variables. The variable n_visits must be a non-negative integer valued variable.
 ```{r}
-  exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+  exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    outcomes="n_visits", exposures=c("lactose","lactate"))
 ```
 To run a Poisson regression, the list of options op must also include a model.options 
 list with family set to "poisson".
 ```{r}
   op <- list(model="glm", model.options=list(family="poisson"))
-  poisson_results  <- COMETS::runModel(exmodeldata, exmetabdata, "DPP", op=op)
+  poisson_results  <- RcometsAnalytics::runModel(exmodeldata, exmetabdata, "DPP", op=op)
   print(poisson_results)
 ```
 
@@ -219,22 +219,22 @@ and individual output Excel files or correlation results will be written
  in the current directory by default. The function returns a list of objects.
 
 ```{r eval=F}
- allresults <- COMETS::runAllModels(exmetabdata,writeTofile=TRUE)
+ allresults <- RcometsAnalytics::runAllModels(exmetabdata,writeTofile=TRUE)
 ```
 
 ### 10. Backwards compatibility with older Excel files and runCorr.
 Older Excel files that do not have a 
   [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg)
- sheet can still be used with newer versions of the COMETS R package. The runCorr function is
+ sheet can still be used with newer versions of the RcometsAnalytics R package. The runCorr function is
  kept in the package for backwards compatibility and will return a single data frame as in the
- older versions of COMETS. Below is a comparison of the output from a correlation analysis
+ older versions of RcometsAnalytics. Below is a comparison of the output from a correlation analysis
  using runCorr and runModel.
 ```{r}
- exmodeldata <- COMETS::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+ exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
                    outcomes=c("lactose","lactate"), exposures=c("age","bmi_grp"))
 
- old_corr  <- COMETS::runCorr(exmodeldata,exmetabdata,"DPP")
- new_corr  <- COMETS::runModel(exmodeldata,exmetabdata,"DPP")
+ old_corr  <- RcometsAnalytics::runCorr(exmodeldata,exmetabdata,"DPP")
+ new_corr  <- RcometsAnalytics::runModel(exmodeldata,exmetabdata,"DPP")
  print(old_corr)
  print(new_corr)
 ```
