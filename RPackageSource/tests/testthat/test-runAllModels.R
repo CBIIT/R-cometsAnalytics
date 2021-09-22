@@ -1,7 +1,7 @@
 
 context("runAllModels")
 
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 
 # Load the baseline data
 rdafile <- file.path(dir, "test_objects", "test_data.rda")
@@ -12,10 +12,10 @@ rdafile <- file.path(dir, "test_objects", "test_runAllModels.rda")
 load(rdafile)
 
 # Call the function to test
-obj <- COMETS::runAllModels(b_data, writeTofile=FALSE)
+obj <- RcometsAnalytics::runAllModels(b_data, writeTofile=FALSE)
 
 # Compare result to the baseline. 
-test_that("COMETS::runAllModels",
+test_that("RcometsAnalytics::runAllModels",
 {
   for (i in 1:length(b_obj)) {
     attr(b_obj[[i]], "ptime") <- NULL

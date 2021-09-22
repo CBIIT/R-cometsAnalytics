@@ -1,7 +1,7 @@
 
 context("getModelData_batch")
 
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 
 # Load the baseline data
 rdafile <- file.path(dir, "test_objects", "test_data.rda")
@@ -12,10 +12,10 @@ rdafile <- file.path(dir, "test_objects", "test_modeldata_batch.rda")
 load(rdafile)
 
 # Call the function to test
-obj <- COMETS::getModelData(b_data, modlabel=modlabel, modelspec="Batch")
+obj <- RcometsAnalytics::getModelData(b_data, modlabel=modlabel, modelspec="Batch")
 
 # Compare result to the baseline. 
-test_that("COMETS::getModelData",
+test_that("RcometsAnalytics::getModelData",
 {
   expect_equal(b_obj, obj)
 })

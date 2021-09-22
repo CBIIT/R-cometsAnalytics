@@ -1,7 +1,7 @@
 
 context("checkDesignMatCols")
 
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 
 # Load the baseline data
 rdafile <- file.path(dir, "test_objects", "test_data.rda")
@@ -12,10 +12,10 @@ rdafile <- file.path(dir, "test_objects", "test_checkDesignMat.rda")
 load(rdafile)
 
 # Call the function to test
-obj <- COMETS:::runModel.checkDesignMatCols(b_dmat, op)
+obj <- RcometsAnalytics:::runModel.checkDesignMatCols(b_dmat, op)
 
 # Compare result to the baseline. 
-test_that("COMETS:::runModel.checkDesignMatCols",
+test_that("RcometsAnalytics:::runModel.checkDesignMatCols",
 {
   expect_equal(b_obj, obj)
 })

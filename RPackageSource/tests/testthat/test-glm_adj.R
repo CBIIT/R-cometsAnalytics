@@ -1,7 +1,7 @@
 
 context("glm adj")
 
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 
 # Load the baseline data
 rdafile <- file.path(dir, "test_objects", "test_data.rda")
@@ -12,9 +12,9 @@ rdafile <- file.path(dir, "test_objects", "test_glm_adj.rda")
 load(rdafile)
 
 # Call the function to test
-obj <- COMETS::runModel(modeldata, b_data, cohort = "", op=op)
+obj <- RcometsAnalytics::runModel(modeldata, b_data, cohort = "", op=op)
 
-# Test independent of COMETS  
+# Test independent of RcometsAnalytics  
 pvals0  <- b_obj$Effects[, "pvalue", drop=TRUE]
 data    <- modeldata$gdta
 mv      <- "METAB"
@@ -31,7 +31,7 @@ for (i in 1:nmetabs) {
 # Compare result to the baseline. 
 attr(b_obj, "ptime") <- NULL
 attr(obj, "ptime")   <- NULL
-test_that("COMETS:: glm adj",
+test_that("RcometsAnalytics:: glm adj",
 {
   expect_equal(b_obj, obj)
   expect_equal(pvals0, pvals)
