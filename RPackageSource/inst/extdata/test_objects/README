@@ -2,9 +2,9 @@ The .rda files in this folder serve as the baseline objects for the unit test sc
 The main input Excel file from which these tests are based is testData.xlsx in this folder.
 These .rda files were created from saving objects from identical function calls in the test scripts.
 For example, in the test script test-readCometsInput.R, the object b_data in the test_data.rda file was created from the function call:
-  b_data <- COMETS::readCOMETSinput(f). 
-The baseline object then gets compared to the object data <- COMETS::readCOMETSinput(f) when the test script is executed.
-The unit tests are automatically run when R CMD check is invoked on the COMETS package.
+  b_data <- RcometsAnalytics::readCOMETSinput(f). 
+The baseline object then gets compared to the object data <- RcometsAnalytics::readCOMETSinput(f) when the test script is executed.
+The unit tests are automatically run when R CMD check is invoked on the RcometsAnalytics package.
 
 See the plots in folder https://github.com/CBIIT/R-cometsAnalytics/tree/v1.7/Differences_with_v1.6/plots for the
   differences in correlations and p-values between versions 1.6 and 1.7.
