@@ -245,7 +245,6 @@ runModel.getNewVarName <- function(vars, varMap) {
 
 } # END: runModel.getNewVarName
 
-
 runModel.setReturnDF <- function(x, varMap) {
 
   if (!length(x)) return(x)
@@ -502,6 +501,8 @@ runModel.defRetObj <- function(model, dmatCols0, op) {
     ret <- runModel.defRetObj.glm(dmatCols0, op)
   } else if (model == getLmModelName()) {
     ret <- runModel.defRetObj.lm(dmatCols0, op)
+  } else if (model == getCoxphModelName()) {
+    ret <- runModel.defRetObj.coxph(dmatCols0, op)
   } else {
     stop("INTERNAL CODING ERROR in runModel.defRetObj")
   }
@@ -593,8 +594,10 @@ runModel.callFunc <- function(x, y, expVars, op) {
     ret <- runModel.calcCorr(x, y, expVars, op)
   } else if (op$glmFlag) {
     ret <- runModel.callGLM(x, y, op)
-  } else {
+  } else if (op$lmFlag) {
     ret <- runModel.callLM(x, y, op)
+  } else {
+    ret <- runModel.callCoxph(x, y, op)
   }
 
   ret
@@ -605,9 +608,11 @@ runModel.tidy <- function(nsubs, fit, exposure, expVars, defObj, designMat, mode
 
   if (op$pcorrFlag) {
     ret <- runModel.tidyPcorr(nsubs, fit, expVars, defObj, designMat, modeldata$designMatCols)
-  } else {
+  } else if (op$glmFlag || op$lmFlag) {
     # runModel.tidyGLM is used for glm and lm
     ret <- runModel.tidyGLM(nsubs, fit, exposure, expVars, defObj, modeldata, op) 
+  } else {
+    ret <- runModel.tidyCoxph(nsubs, fit, exposure, expVars, defObj, modeldata, op) 
   }
 
   ret
@@ -662,12 +667,33 @@ runModel.getMaxModSumRows <- function(newmodeldata, op) {
 
 } # END: runModel.getMaxModSumRows
 
+runModel.getOutMessage <- function(msg1, msg2, sep="; ") {
+
+  flag1 <- nchar(msg1)
+  flag2 <- nchar(msg2)
+  if (!flag1 && !flag2) return("")
+  if (flag1 && flag2) {
+    ret <- paste0(msg1, sep, msg2)
+  } else if (flag1) {
+    ret <- msg1
+  } else {
+    ret <- msg2
+  }
+  ret
+
+} # END: runModel.getOutMessage
+
 runModel.updateOpForSubset <- function(op, subset) {
 
   nm  <- getModelOpsName()
   mop <- op[[nm, exact=TRUE]]
   if (mop$weightsFlag) mop$weights.vec <- (mop$weights.vec)[subset]
   if (mop$offsetFlag) mop$offset.vec   <- (mop$offset.vec)[subset]
+  if (mop$timeFlag) {
+    ntime <- mop$n.time.vars
+    mop$time1.vec <- (mop$time1.vec)[subset]
+    if (ntime > 1) mop$time2.vec   <- (mop$time2.vec)[subset]
+  }
   op[[nm]] <- mop
 
   op
@@ -775,6 +801,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       y      <- tmp$response
       subset <- tmp$subset
       op     <- tmp$op 
+      msg0   <- tmp$msg
 
       # Get the final subset of subjects to use 
       subset <- subset0 & subset
@@ -815,7 +842,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
       rname[runNumber]   <- rcovi
       cname[runNumber]   <- ccovj
       conv[runNumber]    <- tmp$converged
-      msgVec[runNumber]  <- tmp$msg
+      msgVec[runNumber]  <- runModel.getOutMessage(msg0, tmp$msg)
       adjVec[runNumber]  <- tmp$adj
       remVec[runNumber]  <- tmp$adj.rem
       fitMat[runNumber,] <- tmp$fit.stats
@@ -887,6 +914,8 @@ runModel.returnSaveObj <- function(rname, cname, term, coefMat, runRows1, runRow
       ret1$statistic                 <- NULL
       ret1$df                        <- NULL 
       ret1[[getEffectsPvalueName()]] <- NULL 
+    } else if (op$coxphFlag) {
+      ret1$converged                 <- NULL
     }
   }
 
@@ -900,6 +929,8 @@ runModel.getModelVectors <- function(modeldata, yvar, op) {
   subOrder <- modeldata$designSubOrder
   nm       <- getModelOpsName()
   mop      <- op[[nm]]
+  msg      <- ""
+  msgvec   <- rep(FALSE, 4)
 
   # response vector
   tmp      <- as.numeric(modeldata$gdta[[yvar]])  
@@ -907,25 +938,54 @@ runModel.getModelVectors <- function(modeldata, yvar, op) {
 
   # Determine the subset to use from the response
   subset <- runModel.getResponseSubs(y, mop$family)
+  if (!all(subset)) msgvec[1] <- TRUE
 
   # Get other vectors if needed and store them in op
   if (mop$weightsFlag) {
     tmp             <- as.numeric(modeldata$gdta[[modeldata$wgtcov]])  
     vec             <- tmp[subOrder]
     mop$weights.vec <- vec
-    subset          <- subset & (vec > 0) & is.finite(vec) 
+    tmp             <- (vec > 0) & is.finite(vec)
+    subset          <- subset & tmp
+    if (!all(tmp)) msgvec[2] <- TRUE
   }
   if (mop$offsetFlag) {
     tmp            <- as.numeric(modeldata$gdta[[modeldata$offcov]])  
     vec            <- tmp[subOrder]
     mop$offset.vec <- vec
-    subset         <- subset & is.finite(vec) 
+    tmp            <- is.finite(vec)
+    subset         <- subset & tmp
+    if (!all(tmp)) msgvec[3] <- TRUE
   }
+  if (mop$timeFlag) {
+    timecov        <- modeldata$timecov
+    tmp            <- as.numeric(modeldata$gdta[[timecov[1]]])  
+    vec            <- tmp[subOrder]
+    mop$time1.vec  <- vec
+    tmp            <- is.finite(vec) & (vec >= 0)
+    subset         <- subset & tmp
+    if (!all(tmp)) msgvec[4] <- TRUE
+    if (mop$n.time.var > 1) {
+      tmp            <- as.numeric(modeldata$gdta[[timecov[2]]])  
+      vec2           <- tmp[subOrder]
+      mop$time2.vec  <- vec2
+      tmp            <- is.finite(vec2) & (vec2 > vec)
+      subset         <- subset & tmp
+      if (!all(tmp)) msgvec[4] <- TRUE
+    }
+  }
+
   tmp <- is.na(subset)
   if (any(tmp)) subset[tmp] <- FALSE
   op[[nm]] <- mop
 
-  list(response=y, subset=subset, op=op)
+  if (any(msgvec)) {
+    tmp <- c("OUTCOME", "WEIGHTS", "OFFSET", "TIME")
+    msg <- infile.collapseVec(tmp[msgvec], sep=", ", begin="(", end=")", removeMiss=1)
+    msg <- paste0("Invalid values for ", msg, " have been removed")
+  }
+
+  list(response=y, subset=subset, op=op, msg=msg)
 
 } # END: runModel.getModelVectors 
 
@@ -1011,15 +1071,14 @@ runModel.getAdjVarStr <- function(nms, dmatCols0, replaceSpace=1) {
 } # END: runModel.getAdjVarStr 
 
 # Function to compute the Wald test (2 - sided)
-runModel.getWaldTest <- function(fit, parmNames, sfit=NULL, whichCov=NULL) {
+runModel.getWaldTest <- function(fit, parmNames, sfit=NULL) {
 
   # fit        Return object from glm, list with names "coefficients"
   #            and "cov.scaled", return object from snp.logistic or snp.matched.
   # parmNames  Character vector of parameters to test  
   # sfit       summary(fit)
-  # whichCov   For survival, robust or non-robust
 
-  tmp   <- runModel.getEstCov(fit, sfit=sfit, which=whichCov)
+  tmp   <- runModel.getEstCov(fit, sfit=sfit)
   parms <- tmp[["estimates", exact=TRUE]]
   cov   <- tmp[["cov", exact=TRUE]]
   ret   <- runModel.waldTest.main(parms, cov, parmNames)
@@ -1033,7 +1092,7 @@ runModel.getWaldPvalues <- function(exposure, expVars, parmList, fit, sfit=NULL)
 
   len   <- length(parmList)
   N     <- len + 1
-  tmp   <- runModel.getEstCov(fit, sfit=sfit, which=NULL)
+  tmp   <- runModel.getEstCov(fit, sfit=sfit)
   parms <- tmp[["estimates", exact=TRUE]]
   cov   <- tmp[["cov", exact=TRUE]]
   ret   <- rep(NA, N)
@@ -1055,7 +1114,7 @@ runModel.getWaldPvalues <- function(exposure, expVars, parmList, fit, sfit=NULL)
 }
 
 # Function to return point estimates and covariance matrix from an object
-runModel.getEstCov <- function(fit, sfit=NULL, which=NULL) {
+runModel.getEstCov <- function(fit, sfit=NULL) {
 
   clss <- class(fit)
   
@@ -1069,12 +1128,8 @@ runModel.getEstCov <- function(fit, sfit=NULL, which=NULL) {
     sigma <- sfit$sigma
     cov   <- (sfit$cov.unscaled)*sigma*sigma
   } else if (any(clss == "coxph")) {
-    parms <- fit$coefficients
-    if (!is.null(which)) {
-      cov <- fit[["which", exact=TRUE]]
-    } else {
-      cov <- fit$var
-    }
+    parms         <- fit$coefficients
+    cov           <- fit$var
     vnames        <- names(parms)
     rownames(cov) <- vnames
     colnames(cov) <- vnames
@@ -1131,10 +1186,18 @@ runModel.waldTest.main <- function(parms, cov, varnames) {
 
 } # END: runModel.waldTest.main
 
-runModel.getFormulaStr <- function(yvar, dmatCols) {
+runModel.getFormulaStr <- function(yvar, dmatCols, time1.var=NULL, time2.var=NULL, type=NULL) {
 
-  str <- paste(dmatCols, collapse=" + ", sep="")
-  str <- paste(yvar, " ~ ", str, sep="")
+  str0 <- paste(dmatCols, collapse=" + ", sep="")
+  if (is.null(time1.var)) {
+    str <- paste(yvar, " ~ ", str0, sep="")
+  } else {
+    str <- paste0("Surv(", time1.var, ", ")
+    if (!is.null(time2.var)) str <- paste0(str, time2.var, ", ")
+    str <- paste0(str, yvar)
+    if (!is.null(type)) str <- paste0(str, ", type=", type)
+    str <- paste0(str, ") ~ ", str0)
+  }
   str
 
 } # END: runModel.getFormulaStr

@@ -606,8 +606,7 @@ addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, init=1, DEBUG=0) {
   rem       <- x.add[!tmp] 
   x.add     <- x.add[tmp]
   if (DEBUG && length(rem)) {
-    print("Removed columns:")
-    print(rem)
+    print(paste0("Removed columns: ", paste0(rem, collapse=",")))
   }
   if (!length(x.add)) return(base.df)
 

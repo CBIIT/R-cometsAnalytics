@@ -44,7 +44,9 @@ getOldCorrModelName      <- function() {"runcorr"}
 getCorrModelName         <- function() {"correlation"}
 getGlmModelName          <- function() {"glm"}
 getLmModelName           <- function() {"lm"}
-getValidModelNames       <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName())}
+getCoxphModelName        <- function() {"coxph"}
+getValidModelNames       <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName(),
+                                          getCoxphModelName())}
 getMetabDataOpsName      <- function() {"options"} 
 getOutEffectsOpName      <- function() {"output.Effects"}
 getOutEffectsOpDefault   <- function() {"exposure"}
@@ -95,6 +97,10 @@ getModelSummaryGlmFitNames <- function() {c("null.deviance", "df.null", "logLik"
 getModelSummaryLmFitNames  <- function() {c("r.squared", "adj.r.squared", "sigma", "statistic",
                                             getEffectsPvalueName(), "df", "logLik", "AIC", "BIC", "deviance", 
                                             "df.residual", getModelSummaryNobsName())}
+getModelSummaryCoxphFitNames  <- function() {c("n", "nevent", "statistic.log", "p.value.log", "statistic.sc", 
+                                               "p.value.sc", "statistic.wald", "p.value.wald", "statistic.robust",
+                                               "p.value.robust", "r.squared", "r.squared.max", "concordance",
+                                               "std.error.concordance", "logLik", "AIC", "BIC", getModelSummaryNobsName())}
 
 # For input excel file
 getModelOptionsIdCol     <- function() {"modelspec"}
@@ -107,21 +113,22 @@ getVarMapSheetName       <- function() {"VarMap"}
 getModelsSheetName       <- function() {"Models"}
 getOptionsSheetName      <- function() {"ModelOptions"}
 getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput")}
-getModelFunctionCol   <- function() {"function"}
-getReqSheetNames      <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
-getReqMetabSheetCols  <- function() {c("metabolite_name")}
-getVarMapVarRefCol    <- function() {"VARREFERENCE"}
-getVarMapCohortVarCol <- function() {"COHORTVARIABLE"}
-getVarMapVarTypeCol   <- function() {"VARTYPE"}
-getReqVarMapSheetCols <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), getVarMapVarTypeCol())}
-getModelsModelCol     <- function() {"MODEL"}
-getModelsOutcomeCol   <- function() {"OUTCOMES"}
-getModelsExposureCol  <- function() {"EXPOSURE"}
-getModelsAdjCol       <- function() {"ADJUSTMENT"}
-getModelsStratCol     <- function() {"STRATIFICATION"}
-getModelsWhereCol     <- function() {"WHERE"}
-getReqModelsSheetCols <- function() {c(getModelsModelCol(), getModelsOutcomeCol(), getModelsExposureCol(), 
-                                       getModelsAdjCol(), getModelsStratCol(), getModelsWhereCol())}
+getModelFunctionCol      <- function() {"function"}
+getReqSheetNames         <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
+getReqMetabSheetCols     <- function() {c("metabolite_name")}
+getVarMapVarRefCol       <- function() {"VARREFERENCE"}
+getVarMapCohortVarCol    <- function() {"COHORTVARIABLE"}
+getVarMapVarTypeCol      <- function() {"VARTYPE"}
+getReqVarMapSheetCols    <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), getVarMapVarTypeCol())}
+getModelsModelCol        <- function() {"MODEL"}
+getModelsOutcomeCol      <- function() {"OUTCOMES"}
+getModelsExposureCol     <- function() {"EXPOSURE"}
+getModelsAdjCol          <- function() {"ADJUSTMENT"}
+getModelsStratCol        <- function() {"STRATIFICATION"}
+getModelsWhereCol        <- function() {"WHERE"}
+getModelsTimeCol         <- function() {"TIME"}
+getReqModelsSheetCols    <- function() {c(getModelsModelCol(), getModelsOutcomeCol(), getModelsExposureCol(), 
+                                          getModelsAdjCol(), getModelsStratCol(), getModelsWhereCol())}
 getReqModOpSheetCols  <- function() {c(getModelOptionsIdCol(), getModelFunctionCol(), getOptionNameCol(), getOptionValueCol())}
 getVarMapVarTypeCont  <- function() {"continuous"}
 getVarMapVarTypeCat   <- function() {"categorical"}

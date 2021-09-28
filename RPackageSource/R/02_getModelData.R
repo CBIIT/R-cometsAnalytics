@@ -13,6 +13,7 @@
 #' @param strvars   If Interactive, stratification covariates (see \code{details})
 #' @param wgtvar    If Interactive, a variable of weights (see \code{details})
 #' @param offvar    If Interactive, an offset variable (see \code{details})
+#' @param timevar   If Interactive, time variable(s) for survival models (see \code{details})
 #' @param where users can specify which subjects to perform the analysis on by specifying this parameter. 
 #'        'where' expects a vector of strings with a variable name, 
 #'        a comparison operator (e.g. "<", ">", "<=", ">=", "!=", "="), and a value.  
@@ -24,8 +25,8 @@
 #' @details All metabolite variables specified should be listed in the \code{metabolite_name}
 #'   column of the \code{Metabolites} sheet of the Excel file. All non-metabolite
 #'   variables should be listed in the \code{VARREFERENCE} column of the
-#'   \code{VarMap} sheet. The \code{wgtvar} and \code{offvar} are only used when the
-#'   model function is \code{\link[stats]{glm}} or \code{\link[stats]{lm}}, see the
+#'   \code{VarMap} sheet. The \code{wgtvar}, \code{offvar}, and \code{timevar} are only used
+#'   for specific models. See the
 #'   \code{model} option in \code{\link{options}}.
 #'
 #' @return a list comprising: \cr
@@ -57,7 +58,8 @@ getModelData <-  function(readData,
                           strvars   = NULL,
                           wgtvar    = NULL,
                           offvar    = NULL,
-			     where     = NULL) {
+                          timevar   = NULL,
+			  where     = NULL) {
 
   rowvars   <- outcomes
   colvars   <- exposures
@@ -70,6 +72,7 @@ getModelData <-  function(readData,
   scovs       <- NULL
   wgtcov      <- NULL
   offcov      <- NULL
+  timecov     <- NULL
   runCorrFlag <- 0
 
   # All original metabolite names
@@ -89,15 +92,20 @@ getModelData <-  function(readData,
     strvars <- checkVariableNames(strvars, "strvars",   default=NULL, only.unique=1)
     wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",    default=NULL, only.unique=1, max.n=1)
     offvar  <- checkVariableNames(offvar,  "offvar",    default=NULL, only.unique=1, max.n=1)
+    timevar <- checkVariableNames(timevar, "timevar",   default=NULL, only.unique=1, max.n=2)
 
     # Check that all variables that are input by user exist in the renamed data
-    allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar),allmetabStr))
+    allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar,timevar),allmetabStr))
     subjmetab <- as.character(lapply(colnames(readData$subjdata), function(x) {
         myind <- which(names(readData$dict_metabnames)==x)
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
         return(x) }))
-    if(any(is.na(match(allvars,subjmetab)))) {
-	stop("Check that user-input variables exist (should match VARREFERENCE column in VarMap Sheet)")
+    tmp <- is.na(match(allvars,subjmetab))
+    if(any(tmp)) {
+      msg <- infile.collapseVec(allvars[tmp], sep=", ", begin="<", end=">", removeMiss=1)
+      msg <- paste0("Check that user-input variable(s) ", msg, 
+                    " exist (should match VARREFERENCE column in VarMap Sheet)")
+      stop(msg)
     }
 
     # Rename outcome variables
@@ -130,6 +138,11 @@ getModelData <-  function(readData,
     # rename the offset variable
     if (!is.null(offvar)) {
       offcov <- runModel.getNewVarName(offvar, readData$dict_metabnames)
+    } 
+
+    # rename the time variable
+    if (!is.null(timevar)) {
+      timecov <- runModel.getNewVarName(timevar, readData$dict_metabnames)
     } 
 
     # Assign allvsall variable
@@ -185,6 +198,14 @@ getModelData <-  function(readData,
       scovs <- runModel.getNewVarName(unique(trimws(scovs)), readData$dict_metabnames)
     } 
 
+    # assign time vars -------------------------
+    timeColName <- tolower(getModelsTimeCol())
+    timeCol     <- mods[[timeColName, exact=TRUE]]
+    if (!is.null(timeCol) && !is.na(timeCol)) {
+      timecov <- as.vector(strsplit(timeCol, " ")[[1]])
+      timecov <- runModel.getNewVarName(unique(trimws(timecov)), readData$dict_metabnames)
+    } 
+
     # Get the options for this model
     options <- getAllOptionsForModel(mods, readData)
     if (is.null(options)) options <- list()
@@ -194,10 +215,10 @@ getModelData <-  function(readData,
     if (is.null(runCorrFlag)) runCorrFlag <- 0 
     options[[getOldCorrModelName()]] <- NULL
 
-    # Get weight and offset variables
-    wgtvar <- NULL
-    offvar <- NULL
-    mop    <- options[[getModelOpsName(), exact=TRUE]]
+    # Get weight, offset variables
+    wgtvar  <- NULL
+    offvar  <- NULL
+    mop     <- options[[getModelOpsName(), exact=TRUE]]
     if (length(mop)) {
       wgtvar <- mop[["weights", exact=TRUE]]
       if (length(wgtvar)) wgtcov <- runModel.getNewVarName(wgtvar, readData$dict_metabnames)
@@ -215,7 +236,7 @@ getModelData <-  function(readData,
   } # end if modelspec == "Batch"
 
   # Check that the variables exist in the renamed data
-  allvars <- c(rcovs,ccovs,acovs,scovs, wgtcov, offcov)
+  allvars <- c(rcovs,ccovs,acovs,scovs, wgtcov, offcov, timecov)
   tmp     <- is.na(match(allvars,colnames(readData$subjdata)))
   if (any(tmp)) {
     str <- paste(allvars[tmp], collapse=", ", sep="")
@@ -225,7 +246,7 @@ getModelData <-  function(readData,
   }
 
   # Check variables
-  tmp     <- checkAllVariables(rem.obj, rcovs, ccovs, adjvars=acovs, stratvars=scovs)
+  tmp     <- checkAllVariables(rem.obj, rcovs, ccovs, adjvars=acovs, stratvars=scovs, timevars=timecov)
   rem.obj <- tmp[["rem.obj", exact=TRUE]]
   rcovs   <- tmp[["outcomes", exact=TRUE]]
   ccovs   <- tmp[["exposures", exact=TRUE]]
@@ -233,13 +254,9 @@ getModelData <-  function(readData,
   # Keep only needed variables for the data -------------------------------
   # build list of variables
   covlist <- c(ccovs, rcovs)
-  if (!is.null(acovs)) {
-    covlist <- c(covlist, acovs)
-  }
-  if (!is.null(scovs)) {
-    covlist <- c(covlist, scovs)
-  }
-  covlist <- c(covlist, wgtcov, offcov)
+  if (!is.null(acovs)) covlist <- c(covlist, acovs)
+  if (!is.null(scovs)) covlist <- c(covlist, scovs)
+  covlist <- c(covlist, wgtcov, offcov, timecov)
   varMap  <- NULL
   if (length(wgtvar) || length(offvar)) {
     varMap        <- c(wgtvar, offvar)
@@ -278,8 +295,9 @@ getModelData <-  function(readData,
     stop("Too few samples for this model, so the model will not be run.")
   }
 
-  # Outcomes must be numeric
-  gdta <- convertVarsToNumeric(gdta, rcovs)
+  # Outcomes and time vars must be numeric
+  gdta <- convertVarsToNumeric(gdta, c(rcovs, timecov))
+
 
   # Create list for analyses  -------------------------------
   # list for subset data
@@ -298,6 +316,7 @@ getModelData <-  function(readData,
   scovs           = scovs,
   wgtcov          = wgtcov,
   offcov          = offcov,
+  timecov         = timecov,
   dict_metabnames = readData$dict_metabnames,
   modelspec       = modelspec,
   modlabel        = modlabel,

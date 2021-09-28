@@ -360,7 +360,7 @@ check2VariableSets_error <- function(baseSet, set2, baseName, set2Name) {
 } # END: check2VariableSets_error
 
 checkAllVariables <- function(rem.obj, outcomes, exposures, adjvars=NULL, 
-                              stratvars=NULL) {
+                              stratvars=NULL, timevars=NULL) {
 
   ny <- length(outcomes)
   ne <- length(exposures)
@@ -390,12 +390,19 @@ checkAllVariables <- function(rem.obj, outcomes, exposures, adjvars=NULL,
 
   if (length(stratvars)) {
     # Error if strat var is an exposure, outcome, adj
-    check2VariableSets_error(outcomes, stratvars, "outcome", "stratification") 
-    check2VariableSets_error(exposures, stratvars, "exposure", "stratification") 
-    check2VariableSets_error(adjvars, stratvars, "adjustment", "stratification") 
+    check2VariableSets_error(outcomes,  stratvars, "outcome",    "stratification") 
+    check2VariableSets_error(exposures, stratvars, "exposure",   "stratification") 
+    check2VariableSets_error(adjvars,   stratvars, "adjustment", "stratification") 
+  }
+
+  if (length(timevars)) {
+    # Error if time var is an exposure, outcome, adj
+    check2VariableSets_error(outcomes,  timevars, "outcome",    "time") 
+    check2VariableSets_error(exposures, timevars, "exposure",   "time") 
+    check2VariableSets_error(adjvars,   timevars, "adjustment", "time") 
   }
 
   list(rem.obj=rem.obj, outcomes=outcomes, exposures=exposures,
-       adjvars=adjvars, stratvars=stratvars)
+       adjvars=adjvars, stratvars=stratvars, timevars=timevars)
 
 } # END: checkAllVariables
