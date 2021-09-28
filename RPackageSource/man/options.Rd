@@ -22,11 +22,11 @@ A list of 12:
 \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
                    The default is 10.}
 \item{\code{model}}{ String for the model function. Currently, it must be one of
-                     "correlation", "lm", or "glm". The default is "correlation".} 
+                     "correlation", "lm", "glm", or "coxph". The default is "correlation".} 
 \item{\code{model.options}}{ List of options specific for the model. 
        See \code{\link{correlation.options}}, \code{\link{glm.options}},
-       and \code{\link{lm.options}} for options specific to
-\code{model="correlation", "lm", "glm"} respectively.        
+       \code{\link{lm.options}}, and  \code{\link{coxph.options}} for options specific to
+\code{model="correlation", "lm", "glm", "coxph"} respectively.        
                      The default is NULL.} 
 \item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
                         option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
