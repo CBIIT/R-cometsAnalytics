@@ -1,10 +1,10 @@
 on:
   push:
     branches:
-      - wheelerb
+      - v2.1.0-dev
   pull_request:
     branches:
-      - wheelerb
+      - v2.1.0-dev
 
 name: R-CMD-check
 
