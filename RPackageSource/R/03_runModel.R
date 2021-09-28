@@ -662,6 +662,18 @@ runModel.getMaxModSumRows <- function(newmodeldata, op) {
 
 } # END: runModel.getMaxModSumRows
 
+runModel.updateOpForSubset <- function(op, subset) {
+
+  nm  <- getModelOpsName()
+  mop <- op[[nm, exact=TRUE]]
+  if (mop$weightsFlag) mop$weights.vec <- (mop$weights.vec)[subset]
+  if (mop$offsetFlag) mop$offset.vec   <- (mop$offset.vec)[subset]
+  op[[nm]] <- mop
+
+  op
+
+} # END: runModel.updateOpForSubset
+
 runModel.runAllMetabs <- function(newmodeldata, op) {
 
   # Minimum number of subjects required
@@ -781,7 +793,9 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
           ccovs2 <- tmp$expVar
         } 
         if (length(dcols)) {
-
+          # Update vectors in op list for the final subset. Perhaps later change this to pass in the 
+          #   final subset to each model function.
+          op   <- runModel.updateOpForSubset(op, subset)
           fit  <- try(runModel.callFunc(x[subset, dcols, drop=FALSE], y[subset], 
                       ccovs2, op), silent=TRUE)
         }
