@@ -15,6 +15,7 @@ getModelData(
   wgtvar = NULL,
   offvar = NULL,
   timevar = NULL,
+  groupvar = NULL,
   where = NULL
 )
 }
@@ -39,6 +40,8 @@ the Models sheet). If interactive, then the model label.}
 \item{offvar}{If Interactive, an offset variable (see \code{details})}
 
 \item{timevar}{If Interactive, time variable(s) for survival models (see \code{details})}
+
+\item{groupvar}{If Interactive, a group variable for conditional logistic models (see \code{details})}
 
 \item{where}{users can specify which subjects to perform the analysis on by specifying this parameter. 
    'where' expects a vector of strings with a variable name, 
