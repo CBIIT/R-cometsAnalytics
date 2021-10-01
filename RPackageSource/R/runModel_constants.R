@@ -45,8 +45,9 @@ getCorrModelName         <- function() {"correlation"}
 getGlmModelName          <- function() {"glm"}
 getLmModelName           <- function() {"lm"}
 getCoxphModelName        <- function() {"coxph"}
+getClogitModelName       <- function() {"clogit"}
 getValidModelNames       <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName(),
-                                          getCoxphModelName())}
+                                          getCoxphModelName(), getClogitModelName())}
 getMetabDataOpsName      <- function() {"options"} 
 getOutEffectsOpName      <- function() {"output.Effects"}
 getOutEffectsOpDefault   <- function() {"exposure"}
@@ -101,6 +102,7 @@ getModelSummaryCoxphFitNames  <- function() {c("n", "nevent", "statistic.log", "
                                                "p.value.sc", "statistic.wald", "p.value.wald", "statistic.robust",
                                                "p.value.robust", "r.squared", "r.squared.max", "concordance",
                                                "std.error.concordance", "logLik", "AIC", "BIC", getModelSummaryNobsName())}
+getModelSummaryClogitFitNames <- function() {getModelSummaryCoxphFitNames()}
 
 # For input excel file
 getModelOptionsIdCol     <- function() {"modelspec"}
@@ -127,6 +129,7 @@ getModelsAdjCol          <- function() {"ADJUSTMENT"}
 getModelsStratCol        <- function() {"STRATIFICATION"}
 getModelsWhereCol        <- function() {"WHERE"}
 getModelsTimeCol         <- function() {"TIME"}
+getModelsGroupCol        <- function() {"GROUP"}
 getReqModelsSheetCols    <- function() {c(getModelsModelCol(), getModelsOutcomeCol(), getModelsExposureCol(), 
                                           getModelsAdjCol(), getModelsStratCol(), getModelsWhereCol())}
 getReqModOpSheetCols  <- function() {c(getModelOptionsIdCol(), getModelFunctionCol(), getOptionNameCol(), getOptionValueCol())}

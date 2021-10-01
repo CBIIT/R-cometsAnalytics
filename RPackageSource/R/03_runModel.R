@@ -503,6 +503,8 @@ runModel.defRetObj <- function(model, dmatCols0, op) {
     ret <- runModel.defRetObj.lm(dmatCols0, op)
   } else if (model == getCoxphModelName()) {
     ret <- runModel.defRetObj.coxph(dmatCols0, op)
+  } else if (model == getClogitModelName()) {
+    ret <- runModel.defRetObj.clogit(dmatCols0, op)
   } else {
     stop("INTERNAL CODING ERROR in runModel.defRetObj")
   }
@@ -596,8 +598,12 @@ runModel.callFunc <- function(x, y, expVars, op) {
     ret <- runModel.callGLM(x, y, op)
   } else if (op$lmFlag) {
     ret <- runModel.callLM(x, y, op)
-  } else {
+  } else if (op$coxphFlag) {
     ret <- runModel.callCoxph(x, y, op)
+  } else if (op$clogitFlag) {
+    ret <- runModel.callClogit(x, y, op)
+  } else {
+    stop("INTERNAL CODING ERROR in runModel.callFunc")
   }
 
   ret
@@ -611,8 +617,10 @@ runModel.tidy <- function(nsubs, fit, exposure, expVars, defObj, designMat, mode
   } else if (op$glmFlag || op$lmFlag) {
     # runModel.tidyGLM is used for glm and lm
     ret <- runModel.tidyGLM(nsubs, fit, exposure, expVars, defObj, modeldata, op) 
-  } else {
+  } else if (op$coxphFlag) {
     ret <- runModel.tidyCoxph(nsubs, fit, exposure, expVars, defObj, modeldata, op) 
+  } else {
+    ret <- runModel.tidyClogit(nsubs, fit, exposure, expVars, defObj, modeldata, op) 
   }
 
   ret
@@ -694,6 +702,7 @@ runModel.updateOpForSubset <- function(op, subset) {
     mop$time1.vec <- (mop$time1.vec)[subset]
     if (ntime > 1) mop$time2.vec   <- (mop$time2.vec)[subset]
   }
+  if (mop$groupFlag) mop$group.vec <- (mop$group.vec)[subset]
   op[[nm]] <- mop
 
   op
@@ -914,7 +923,7 @@ runModel.returnSaveObj <- function(rname, cname, term, coefMat, runRows1, runRow
       ret1$statistic                 <- NULL
       ret1$df                        <- NULL 
       ret1[[getEffectsPvalueName()]] <- NULL 
-    } else if (op$coxphFlag) {
+    } else if (op$coxphFlag || op$clogitFlag) {
       ret1$converged                 <- NULL
     }
   }
@@ -930,7 +939,7 @@ runModel.getModelVectors <- function(modeldata, yvar, op) {
   nm       <- getModelOpsName()
   mop      <- op[[nm]]
   msg      <- ""
-  msgvec   <- rep(FALSE, 4)
+  msgvec   <- rep(FALSE, 5)
 
   # response vector
   tmp      <- as.numeric(modeldata$gdta[[yvar]])  
@@ -975,12 +984,22 @@ runModel.getModelVectors <- function(modeldata, yvar, op) {
     }
   }
 
+  if (mop$groupFlag) {
+    tmp            <- modeldata$gdta[[modeldata$groupcov]]
+    vec            <- tmp[subOrder]
+    mop$group.vec  <- vec
+    tmp            <- is.finite(vec)
+    subset         <- subset & tmp
+    if (!all(tmp)) msgvec[5] <- TRUE
+  }
+
+
   tmp <- is.na(subset)
   if (any(tmp)) subset[tmp] <- FALSE
   op[[nm]] <- mop
 
   if (any(msgvec)) {
-    tmp <- c("OUTCOME", "WEIGHTS", "OFFSET", "TIME")
+    tmp <- c("OUTCOME", "WEIGHTS", "OFFSET", "TIME", "GROUP")
     msg <- infile.collapseVec(tmp[msgvec], sep=", ", begin="(", end=")", removeMiss=1)
     msg <- paste0("Invalid values for ", msg, " have been removed")
   }
@@ -1127,7 +1146,7 @@ runModel.getEstCov <- function(fit, sfit=NULL) {
     if (!length(sfit)) sfit <- summary(fit)
     sigma <- sfit$sigma
     cov   <- (sfit$cov.unscaled)*sigma*sigma
-  } else if (any(clss == "coxph")) {
+  } else if (any(clss == "coxph")) {  # For coxph, clogit
     parms         <- fit$coefficients
     cov           <- fit$var
     vnames        <- names(parms)
@@ -1186,12 +1205,13 @@ runModel.waldTest.main <- function(parms, cov, varnames) {
 
 } # END: runModel.waldTest.main
 
-runModel.getFormulaStr <- function(yvar, dmatCols, time1.var=NULL, time2.var=NULL, type=NULL) {
+runModel.getFormulaStr <- function(yvar, dmatCols, time1.var=NULL, time2.var=NULL, type=NULL, strata.var=NULL) {
 
   str0 <- paste(dmatCols, collapse=" + ", sep="")
   if (is.null(time1.var)) {
     str <- paste(yvar, " ~ ", str0, sep="")
-  } else {
+    if (!is.null(strata.var)) str <- paste0(str, " + strata(", strata.var, ")")  # For clogit
+  } else { # For coxph
     str <- paste0("Surv(", time1.var, ", ")
     if (!is.null(time2.var)) str <- paste0(str, time2.var, ", ")
     str <- paste0(str, yvar)

@@ -14,6 +14,7 @@
 #' @param wgtvar    If Interactive, a variable of weights (see \code{details})
 #' @param offvar    If Interactive, an offset variable (see \code{details})
 #' @param timevar   If Interactive, time variable(s) for survival models (see \code{details})
+#' @param groupvar  If Interactive, a group variable for conditional logistic models (see \code{details})
 #' @param where users can specify which subjects to perform the analysis on by specifying this parameter. 
 #'        'where' expects a vector of strings with a variable name, 
 #'        a comparison operator (e.g. "<", ">", "<=", ">=", "!=", "="), and a value.  
@@ -59,6 +60,7 @@ getModelData <-  function(readData,
                           wgtvar    = NULL,
                           offvar    = NULL,
                           timevar   = NULL,
+                          groupvar  = NULL,
 			  where     = NULL) {
 
   rowvars   <- outcomes
@@ -73,6 +75,7 @@ getModelData <-  function(readData,
   wgtcov      <- NULL
   offcov      <- NULL
   timecov     <- NULL
+  groupcov    <- NULL
   runCorrFlag <- 0
 
   # All original metabolite names
@@ -86,16 +89,17 @@ getModelData <-  function(readData,
     if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables")}
 
     # Normalize variables so that it is consistent with readCOMETSinput
-    rowvars <- checkVariableNames(rowvars, "outcomes",  default=allmetabStr, only.unique=1)
-    colvars <- checkVariableNames(colvars, "exposures", default="",   only.unique=1)
-    adjvars <- checkVariableNames(adjvars, "adjvars",   default=NULL, only.unique=1)
-    strvars <- checkVariableNames(strvars, "strvars",   default=NULL, only.unique=1)
-    wgtvar  <- checkVariableNames(wgtvar,  "wgtvar",    default=NULL, only.unique=1, max.n=1)
-    offvar  <- checkVariableNames(offvar,  "offvar",    default=NULL, only.unique=1, max.n=1)
-    timevar <- checkVariableNames(timevar, "timevar",   default=NULL, only.unique=1, max.n=2)
+    rowvars  <- checkVariableNames(rowvars,  "outcomes",  default=allmetabStr, only.unique=1)
+    colvars  <- checkVariableNames(colvars,  "exposures", default="",   only.unique=1)
+    adjvars  <- checkVariableNames(adjvars,  "adjvars",   default=NULL, only.unique=1)
+    strvars  <- checkVariableNames(strvars,  "strvars",   default=NULL, only.unique=1)
+    wgtvar   <- checkVariableNames(wgtvar,   "wgtvar",    default=NULL, only.unique=1, max.n=1)
+    offvar   <- checkVariableNames(offvar,   "offvar",    default=NULL, only.unique=1, max.n=1)
+    timevar  <- checkVariableNames(timevar,  "timevar",   default=NULL, only.unique=1, max.n=2)
+    groupvar <- checkVariableNames(groupvar, "groupvar",  default=NULL, only.unique=1, max.n=1)
 
     # Check that all variables that are input by user exist in the renamed data
-    allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar,timevar),allmetabStr))
+    allvars <- c(setdiff(c(rowvars,colvars,adjvars,strvars,wgtvar,offvar,timevar,groupvar),allmetabStr))
     subjmetab <- as.character(lapply(colnames(readData$subjdata), function(x) {
         myind <- which(names(readData$dict_metabnames)==x)
         if(length(myind==1)) {x=readData$dict_metabnames[myind]}
@@ -143,6 +147,11 @@ getModelData <-  function(readData,
     # rename the time variable
     if (!is.null(timevar)) {
       timecov <- runModel.getNewVarName(timevar, readData$dict_metabnames)
+    } 
+
+    # rename the group variable
+    if (!is.null(groupvar)) {
+      groupcov <- runModel.getNewVarName(groupvar, readData$dict_metabnames)
     } 
 
     # Assign allvsall variable
@@ -206,6 +215,14 @@ getModelData <-  function(readData,
       timecov <- runModel.getNewVarName(unique(trimws(timecov)), readData$dict_metabnames)
     } 
 
+    # assign group vars -------------------------
+    groupColName <- tolower(getModelsGroupCol())
+    groupCol     <- mods[[groupColName, exact=TRUE]]
+    if (!is.null(groupCol) && !is.na(groupCol)) {
+      groupcov <- as.vector(strsplit(groupCol, " ")[[1]])
+      groupcov <- runModel.getNewVarName(unique(trimws(groupcov)), readData$dict_metabnames)
+    } 
+
     # Get the options for this model
     options <- getAllOptionsForModel(mods, readData)
     if (is.null(options)) options <- list()
@@ -256,7 +273,7 @@ getModelData <-  function(readData,
   covlist <- c(ccovs, rcovs)
   if (!is.null(acovs)) covlist <- c(covlist, acovs)
   if (!is.null(scovs)) covlist <- c(covlist, scovs)
-  covlist <- c(covlist, wgtcov, offcov, timecov)
+  covlist <- c(covlist, wgtcov, offcov, timecov, groupcov)
   varMap  <- NULL
   if (length(wgtvar) || length(offvar)) {
     varMap        <- c(wgtvar, offvar)
@@ -317,6 +334,7 @@ getModelData <-  function(readData,
   wgtcov          = wgtcov,
   offcov          = offcov,
   timecov         = timecov,
+  groupcov        = groupcov,
   dict_metabnames = readData$dict_metabnames,
   modelspec       = modelspec,
   modlabel        = modlabel,

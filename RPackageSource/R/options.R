@@ -16,11 +16,11 @@
 #' \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
 #'                    The default is 10.}
 #' \item{\code{model}}{ String for the model function. Currently, it must be one of
-#'                      "correlation", "lm", "glm", or "coxph". The default is "correlation".} 
+#'                      "correlation", "lm", "glm", "coxph", or "clogit". The default is "correlation".} 
 #' \item{\code{model.options}}{ List of options specific for the model. 
 #'        See \code{\link{correlation.options}}, \code{\link{glm.options}},
-#'        \code{\link{lm.options}}, and  \code{\link{coxph.options}} for options specific to
-#' \code{model="correlation", "lm", "glm", "coxph"} respectively.        
+#'        \code{\link{lm.options}}, \code{\link{coxph.options}} and \code{\link{clogit.options}} for options specific to \cr
+#' \code{model="correlation", "lm", "glm", "coxph", "clogit"} respectively.        
 #'                      The default is NULL.} 
 #' \item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
 #'                         option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
@@ -168,6 +168,8 @@ getDefaultModelOptions <- function(model) {
     ret <- runModel.getDefaultLmOptions()
   } else if (model == getCoxphModelName()) {
     ret <- runModel.getDefaultCoxphOptions()
+  } else if (model == getClogitModelName()) {
+    ret <- runModel.getDefaultClogitOptions()
   } else {
     stop("INTERNAL CODING ERROR in getDefaultModelOptions")
   }
@@ -178,14 +180,15 @@ getDefaultModelOptions <- function(model) {
 
 checkModelOptions <- function(op, modeldata) {
 
-  op$pcorrFlag <- 0
-  op$glmFlag   <- 0
-  op$lmFlag    <- 0
-  op$coxphFlag <- 0
-  model        <- op$model
-  corrName     <- getCorrModelName()
-  nm           <- getModelOpsName()
-  mop          <- op[[nm, exact=TRUE]]
+  op$pcorrFlag  <- 0
+  op$glmFlag    <- 0
+  op$lmFlag     <- 0
+  op$coxphFlag  <- 0
+  op$clogitFlag <- 0
+  model         <- op$model
+  corrName      <- getCorrModelName()
+  nm            <- getModelOpsName()
+  mop           <- op[[nm, exact=TRUE]]
   
   if (model == corrName) {
     op$pcorrFlag <- 1
@@ -203,6 +206,10 @@ checkModelOptions <- function(op, modeldata) {
     op$coxphFlag <- 1
     mop          <- runModel.checkCoxphOpList(mop, modeldata, name=nm)
     mop$family   <- "binomial"
+  } else if (model == getClogitModelName()) {
+    op$clogitFlag <- 1
+    mop           <- runModel.checkClogitOpList(mop, modeldata, name=nm)
+    mop$family    <- "binomial"
   } else {
     stop("INTERNAL CODING ERROR in checkModelOptions")
   }
@@ -211,7 +218,8 @@ checkModelOptions <- function(op, modeldata) {
   mop$weightsFlag <- 0
   mop$offsetFlag  <- 0
   mop$timeFlag    <- 0
-  if (op$glmFlag || op$lmFlag || op$coxphFlag) {
+  mop$groupFlag   <- 0
+  if (op$glmFlag || op$lmFlag || op$coxphFlag || op$clogitFlag) {
     if (length(mop[["weights", exact=TRUE]])) mop$weightsFlag <- 1
   }
   if (op$glmFlag || op$lmFlag) {
@@ -222,11 +230,20 @@ checkModelOptions <- function(op, modeldata) {
     timecov <- modeldata[["timecov", exact=TRUE]]
     len     <- length(timecov)
     if (!len) stop(paste0("ERROR: no time variables specified for ", model, " model."))
-    if (len > 1) stop(paste0("ERROR: only one or two time variables can be specified for ", model, " model."))
+    if (len > 2) stop(paste0("ERROR: only one or two time variables can be specified for ", model, " model."))
     mop$n.time.vars <- len
     mop$time1.var   <- timecov[1]
     if (len > 1) mop$time2.var <- timecov[2]
     mop$timeFlag <- 1
+  }
+  if (op$clogitFlag) {
+    # Add info for group
+    groupcov <- modeldata[["groupcov", exact=TRUE]]
+    len      <- length(groupcov)
+    if (!len) stop(paste0("ERROR: no group variable specified for ", model, " model."))
+    if (len > 1) stop(paste0("ERROR: only one group variable can be specified for ", model, " model."))
+    mop$group.var <- groupcov
+    mop$groupFlag <- 1
   }
 
   op[[nm]] <- mop

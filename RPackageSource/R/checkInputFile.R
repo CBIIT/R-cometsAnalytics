@@ -160,7 +160,7 @@ checkModelsCols <- function(x) {
         x[, col] <- checkVariableNames(x[, col, drop=TRUE], str, stopOnMissError=0) 
       }
     }
-    cols <- tolower(c(getModelsAdjCol(), getModelsStratCol(), getModelsTimeCol()))
+    cols <- tolower(c(getModelsAdjCol(), getModelsStratCol(), getModelsTimeCol(), getModelsGroupCol()))
     for (col in cols) {
       if (col %in% cx) {
         str      <- paste0(nm, " sheet, ", toupper(col), " column")
@@ -221,7 +221,8 @@ infile.getAllVarsFromModels <- function(Models) {
   if (!length(Models)) return(all)
 
   vars    <- tolower(c(getModelsOutcomeCol(), getModelsExposureCol(), 
-                       getModelsAdjCol(), getModelsStratCol(), getModelsTimeCol()))
+                       getModelsAdjCol(), getModelsStratCol(), 
+                       getModelsTimeCol(), getModelsGroupCol()))
   str     <- "all metabolites"
   allFlag <- 0
 
@@ -786,6 +787,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
   wv      <- tolower(getModelsWhereCol())
   iv      <- tolower(getModelOptionsIdCol())
   tv      <- tolower(getModelsTimeCol())
+  gv      <- tolower(getModelsGroupCol())
   mflag   <- mv %in% cx
   oflag   <- ov %in% cx
   eflag   <- ev %in% cx
@@ -794,6 +796,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
   wflag   <- wv %in% cx
   iflag   <- iv %in% cx
   tflag   <- tv %in% cx
+  gflag   <- gv %in% cx
   MV      <- toupper(mv)
   OV      <- toupper(ov)
   EV      <- toupper(ev)
@@ -802,6 +805,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
   WV      <- toupper(wv)
   IV      <- toupper(iv)
   TV      <- toupper(tv)
+  GV      <- toupper(gv)
 
   allMetabs0 <- tolower(getAllMetabsName())
   allMetabs1 <- getAllMetabsNewName()
@@ -821,12 +825,17 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
   if (wflag) wvec <- tolower(unlist(x[, wv, drop=TRUE]))
   if (iflag) ivec <- trimws(unlist(x[, iv, drop=TRUE]))
   if (tflag) tvec <- trimws(unlist(x[, tv, drop=TRUE]))
-  
+  if (gflag) gvec <- trimws(unlist(x[, gv, drop=TRUE]))
+
   allcols <- trimws(tolower(allcols))
   osflag  <- oflag && sflag
   esflag  <- eflag && sflag
   asflag  <- aflag && sflag 
   otflag  <- oflag && tflag
+  ogflag  <- oflag && gflag
+  egflag  <- eflag && gflag
+  agflag  <- aflag && gflag
+  sgflag  <- sflag && gflag
 
   if (modOpFlag) {
     if (iv %in% colnames(ModelOptions)) {
@@ -850,6 +859,12 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
     if (aflag) avars <- trimws(unlist(strsplit(avec[i], " ", fixed=TRUE)))
     if (sflag) svars <- trimws(unlist(strsplit(svec[i], " ", fixed=TRUE)))
     if (tflag) tvars <- trimws(unlist(strsplit(tvec[i], " ", fixed=TRUE)))
+    if (gflag) gvars <- trimws(unlist(strsplit(gvec[i], " ", fixed=TRUE)))
+
+    # Check length
+    if (tflag) err <- err + infile.checkForMaxNvars(row, TV, tvars, maxlen=2, sheet=nm) 
+    if (gflag) err <- err + infile.checkForMaxNvars(row, GV, gvars, maxlen=1, sheet=nm) 
+
     if (wflag) {
       wstr  <- wvec[i]
       wvars <- wstr
@@ -879,12 +894,17 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
     if (sflag) err <- err + infile.checkForVarsInData(row, SV, svars, allcols, sheet=nm)
     if (wflag) err <- err + infile.checkForVarsInData(row, WV, wvars, allcols, sheet=nm)
     if (tflag) err <- err + infile.checkForVarsInData(row, TV, tvars, allcols, sheet=nm)
+    if (gflag) err <- err + infile.checkForVarsInData(row, GV, gvars, allcols, sheet=nm)
 
     # Check for overlapping variables
     if (osflag) err <- err + infile.checkForOverlappingVars(row, OV, SV, ovars, svars, sheet=nm)
     if (esflag) err <- err + infile.checkForOverlappingVars(row, EV, SV, evars, svars, sheet=nm)
     if (asflag) err <- err + infile.checkForOverlappingVars(row, AV, SV, avars, svars, sheet=nm)
     if (otflag) err <- err + infile.checkForOverlappingVars(row, OV, TV, ovars, tvars, sheet=nm)
+    if (ogflag) err <- err + infile.checkForOverlappingVars(row, OV, GV, ovars, gvars, sheet=nm)
+    if (egflag) err <- err + infile.checkForOverlappingVars(row, EV, GV, evars, gvars, sheet=nm)
+    if (agflag) err <- err + infile.checkForOverlappingVars(row, AV, GV, avars, gvars, sheet=nm)
+    if (sgflag) err <- err + infile.checkForOverlappingVars(row, SV, GV, svars, gvars, sheet=nm)
 
     if (iflag) err <- err + infile.checkForReservedWords(row, IV, ival, reserved, sheet=nm)
 
@@ -894,6 +914,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
       if (eflag) err <- err + infile.checkVarsInVarRef(row, EV, evars, vref, metabs, sheet=nm) 
       if (aflag) err <- err + infile.checkVarsInVarRef(row, AV, avars, vref, metabs, sheet=nm) 
       if (tflag) err <- err + infile.checkVarsInVarRef(row, TV, tvars, vref, metabs, sheet=nm) 
+      if (gflag) err <- err + infile.checkVarsInVarRef(row, GV, gvars, vref, metabs, sheet=nm) 
     }
  
     # Check that variables do not contain id variables
@@ -902,6 +923,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
     if (aflag) err <- err + infile.checkForInvalidVars(row, AV, avars, invalid, sheet=nm) 
     if (sflag) err <- err + infile.checkForInvalidVars(row, SV, svars, invalid, sheet=nm)
     if (tflag) err <- err + infile.checkForInvalidVars(row, TV, tvars, invalid, sheet=nm)
+    if (gflag) err <- err + infile.checkForInvalidVars(row, GV, gvars, invalid, sheet=nm)
 
     # Check that MODELSPEC column has a corresponding row in the model options sheet
     if (iflag && modOpFlag && !is.na(ival) && !(ival %in% modOpsIds)) {
@@ -1093,6 +1115,26 @@ infile.checkForInvalidVars <- function(row, colName, vec, invalid, sheet="Models
   err
 
 } # END: infile.checkForInvalidVars
+
+infile.checkForMaxNvars <- function(row, colName, vec, maxlen=1, sheet="Models") {
+
+  err  <- 0
+  if (length(vec) > maxlen) {
+    err  <- 1
+    msg  <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
+                   " The column ", toupper(colName), " should only contain ")
+    if (maxlen == 1) {
+      msg <- paste0(msg, "a single variable.\n")
+    } else {
+      msg <- paste0(msg, "at most ", maxlen, " variables.\n")
+    }   
+    cat(msg)
+  }
+
+  err
+
+} # END: infile.checkForMaxNVars
+
 
 infile.checkVarsInVarRef <- function(row, colName, vars, varRefVec, metabs, sheet="Models") {
 
