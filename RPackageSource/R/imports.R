@@ -19,7 +19,7 @@
 #' @importFrom stats cor
 #' @importFrom MASS ginv
 #' @importFrom subselect trim.matrix
-#' @importFrom survival coxph Surv clogit
+#' @importFrom survival coxph Surv clogit strata
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runCorr}} (correlation analysis) \cr
