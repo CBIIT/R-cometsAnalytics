@@ -1,6 +1,6 @@
 
-# [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=wheelerb)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
-[![Build status](https://github.com/CBIIT/R-cometsAnalytics/workflows/R-CMD-check/badge.svg?branch=wheelerb)](https://github.com/CBIIT/R-cometsAnalytics/actions)
+# [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=v2.0.0-dev)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
+[![Build status](https://github.com/CBIIT/R-cometsAnalytics/workflows/R-CMD-check/badge.svg?branch=v2.0.0-dev)](https://github.com/CBIIT/R-cometsAnalytics/actions)
 
 # R Comets-Analytics
 
@@ -11,7 +11,7 @@
 To install R Comets-Analytics, simply type the following:
 
 ```
-devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource@wheelerb")
+devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource@v2.0.0-dev")
 ```
 # Loading the package
 To install the R package, simply type the following:
