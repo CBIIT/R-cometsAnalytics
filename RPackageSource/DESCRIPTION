@@ -3,7 +3,7 @@ Type: Package
 Title: Comets Analytics for consortium based metabolomic analyses
 Version: 1.7.0.0
 Author: Ella Temprosa, Ewy Mathe
-Maintainer: Ewy Mathe <ewy.mathe@osumc.edu>, Ella Temprosa <ella@bsc.gwu.edu>
+Maintainer: Ewy Mathe <ewy.mathe@osumc.edu>
 Description: This R package support all cohort-specific analyses of the COMETS
     consortium. Data are not saved in the system but output must be downloaded and
     submitted for meta-analyses. This package can be used in several ways: supports
