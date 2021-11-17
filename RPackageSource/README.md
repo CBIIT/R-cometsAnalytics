@@ -1,6 +1,6 @@
 
-# [![Build Status](https://travis-ci.com/CBIIT/R-cometsAnalytics.svg?branch=master)](https://travis-ci.com/CBIIT/R-cometsAnalytics)
 # [![Build status](https://ci.appveyor.com/api/projects/status/github/CBIIT/R-cometsAnalytics?branch=master)](https://ci.appveyor.com/project/Mathelab/r-cometsanalytics)
+[![Build status](https://github.com/CBIIT/R-cometsAnalytics/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/CBIIT/R-cometsAnalytics/actions)
 
 
 # R Comets-Analytics
