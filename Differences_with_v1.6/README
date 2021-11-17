@@ -1,5 +1,0 @@
-The figures in the plots folder illustrate differences in correlations and p-values between versions 1.6 and 1.7. 
-The differences are due to bug fixes in version 1.7, and are based on models from the .../extdata/cometsInput.xlsx file.
-For adjusted models with all continuous variables, the results will be identical between the two versions.
-For unadjusted models with a continuous exposure, the correlations will be the same between the two versions, but the p-values will be slightly different.
-For models with a categorical exposure, the results will be different between the two versions in general.
