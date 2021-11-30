@@ -38,6 +38,11 @@ runAllModels <- function(readData, cohortLabel="", writeTofile=T) {
       myobj   <- mymod
       errFlag <- 1 
     }
+    if (errFlag) {
+      msg <- getErrorMsgFromTryError(myobj, addToEnd=NULL)
+      msg <- paste0("ERROR: model ", i, " failed with message ", msg, "\n")
+      cat(msg)
+    }
     results[[i]] <- myobj
     if (writeTofile && !errFlag) {
       i2    <- gsub('/', '_', i, fixed=TRUE)
