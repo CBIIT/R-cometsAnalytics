@@ -1,4 +1,17 @@
-CHANGES IN VERSION 1.5.0.0
+CHANGES IN VERSION 2.1.0.0
+--------------------------
+
+NEW FEATURES
+
+    o Survival and conditional logistic regression models are now included for analyses. 
+    o Options for merging model results together and specifying the type of output file are now available.
+
+NOTES
+
+    o For correlation analyses the "corr" column in the Effects data frame has been renamed to "estimate".
+
+
+CHANGES IN VERSION 2.0.0.0
 --------------------------
 
 NEW FEATURES
@@ -9,5 +22,9 @@ NEW FEATURES
 BUG FIXES
 
     o The t-statistic computation for unadjusted correlation analyses has been updated.
-    o Correlation analyses with categorical exposure variables have been updated.
+    o Correlation analyses with categorical variables have been fixed.
 
+NOTES
+
+    o Correlation results will be the same with version 1.6 for adjusted models with ALL continuous (non-dummy) variables.
+    o Correlation results will NOT be the same with version 1.6 for any categorical exposure.
