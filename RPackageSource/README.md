@@ -32,5 +32,7 @@ We have provided an example input file for users to mimic when creating their ow
 
 # Contact
 
-If you encounter any issues, please report an issue in the Issue tab or email Ewy Mathé at Ewy.Mathe@osumc.edu or Ella Temprosa at ella@bsc.gwu.edu.  We are always open to comments so please reach out to us should you have any questions or suggestions .
+If you encounter any issues, please report an issue in the Issue tab or email comets.analytics@gmail.com. We are always open to comments so please reach out to us should you have any questions or suggestions .
 
+# News
+To see a history of new features, changes, bug fixes, etc., see the [NEWS](https://github.com/CBIIT/R-cometsAnalytics/blob/v2.1.0-dev/RPackageSource/NEWS) file.
