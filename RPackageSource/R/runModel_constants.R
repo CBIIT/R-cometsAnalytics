@@ -2,6 +2,8 @@
 #   change column names, options, etc.
 
 runmodel.getTimeAttr <- function() {"ptime"}
+class_runCorr        <- function() {"runCorr"}
+class_runModel       <- function() {"runModel"}
 
 # Delimiter in output lists of variable names
 runModel.getVarSep    <- function() {" "}
@@ -34,42 +36,57 @@ runModel.getExpRemFromDesign <- function() {"exposure removed from design matrix
 runModel.getExpNotEstimated <- function() {"exposure could not be estimated"}
 
 # For option strings
-getNoFamilyValue         <- function() {""}
-getOpStrSep              <- function() {";"}
-getOpStrEq               <- function() {"="}
-getStrataSep             <- function() {","}
-getWhereSep              <- function() {","}
-getModelOpsName          <- function() {"model.options"}
-getOldCorrModelName      <- function() {"runcorr"}
-getCorrModelName         <- function() {"correlation"}
-getGlmModelName          <- function() {"glm"}
-getLmModelName           <- function() {"lm"}
-getCoxphModelName        <- function() {"coxph"}
-getClogitModelName       <- function() {"clogit"}
-getValidModelNames       <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName(),
-                                          getCoxphModelName(), getClogitModelName())}
-getMetabDataOpsName      <- function() {"options"} 
-getOutEffectsOpName      <- function() {"output.Effects"}
-getOutEffectsOpDefault   <- function() {"exposure"}
-getOutEffectsOpVals      <- function() {c(getOutEffectsOpDefault(), "all")}
-getOutModSumOpName       <- function() {"output.ModelSummary"}
-getOutModSumOpDefault    <- function() {"anova"}
-getOutModSumOpVals       <- function() {c(getOutModSumOpDefault(), "all")}
-getExpParmsOpName        <- function() {"output.exp_parms"}
-getExpParmsOpDefault     <- function() {NULL}
-getAddCiOpName           <- function() {"output.ci_alpha"}
-getAddCiOpDefault        <- function() {0.95}
-getAddMetabColsOpName    <- function() {"output.metab.cols"}
-getAddMetabColsDefault   <- function() {"metabolite_name"}
-getAddMetabColsSep       <- function() {","}
-
+getNoFamilyValue          <- function() {""}
+getOpStrSep               <- function() {";"}
+getOpStrEq                <- function() {"="}
+getStrataSep              <- function() {","}
+getWhereSep               <- function() {","}
+getModelOpsName           <- function() {"model.options"}
+getOldCorrModelName       <- function() {"runcorr"}
+getCorrModelName          <- function() {"correlation"}
+getGlmModelName           <- function() {"glm"}
+getLmModelName            <- function() {"lm"}
+getCoxphModelName         <- function() {"coxph"}
+getClogitModelName        <- function() {"clogit"}
+getValidModelNames        <- function() {c(getCorrModelName(), getGlmModelName(), getLmModelName(),
+                                           getCoxphModelName(), getClogitModelName())}
+getMetabDataOpsName       <- function() {"options"} 
+getOutEffectsOpName       <- function() {"output.Effects"}
+getOutEffectsOpDefault    <- function() {"exposure"}
+getOutEffectsOpVals       <- function() {c(getOutEffectsOpDefault(), "all")}
+getOutModSumOpName        <- function() {"output.ModelSummary"}
+getOutModSumOpDefault     <- function() {"anova"}
+getOutModSumOpVals        <- function() {c(getOutModSumOpDefault(), "all")}
+getExpParmsOpName         <- function() {"output.exp_parms"}
+getExpParmsOpDefault      <- function() {NULL}
+getAddCiOpName            <- function() {"output.ci_alpha"}
+getAddCiOpDefault         <- function() {0.95}
+getAddMetabColsOpName     <- function() {"output.metab.cols"}
+getAddMetabColsDefault    <- function() {"metabolite_name"}
+getAddMetabColsSep        <- function() {","}
+getOutTypeOpName          <- function() {"output.type"}
+getOutTypeOpRda           <- function() {"rda"}
+getOutTypeOpVals          <- function() {c(getOutTypeOpRda(), "xlsx")}
+getOutTypeOpDefault       <- function() {"xlsx"} 
+getOutCommonColsOpName    <- function() {"output.common.cols"}
+getOutCommonColsOpDefault <- function() {1} # 0 or 1
+getOutMergeOpName         <- function() {"output.merge"}
+getOutMergeOpNone         <- function() {"none"}
+getOutMergeOpAll          <- function() {"all"}
+getOutMergeOpByModelFunc  <- function() {"by_function"}
+getOutMergeOpByModelSpec  <- function() {"by_modelspec"}
+getOutMergeOpVals         <- function() {c(getOutMergeOpAll(), getOutMergeOpNone(), 
+                                           getOutMergeOpByModelFunc(), getOutMergeOpByModelSpec())}
+getOutMergeOpDefault      <- function() {getOutMergeOpNone()} 
+getOutMergeAllStr         <- function() {"all_models"}
 
 # For Effects data frame
 getEffectsName             <- function() {"Effects"}
 getEffectsTermName         <- function() {"term"}
 getEffectsOutcomespecName  <- function() {"outcomespec"}
 getEffectsExposurespecName <- function() {"exposurespec"}
-getEffectsCorrEstName      <- function() {"corr"}
+getEffectsCorrEstOldName   <- function() {"corr"}
+getEffectsCorrEstName      <- function() {"estimate"}
 getEffectsPvalueName       <- function() {"pvalue"}
 getEffectsRunName          <- function() {"run"}
 getEffectsEstName          <- function() {"estimate"}
@@ -92,6 +109,8 @@ getEffectsExpUpperName    <- function() {"exp.estimate.upper"}
 getModelSummaryName        <- function() {"ModelSummary"}
 getModelSummaryNobsName    <- function() {"nobs"}
 getModelSummaryFunCol      <- function() {"model_function"}
+getModelSummaryModelCol    <- function() {"model"}
+getModelSummaryModelNumCol <- function() {"model_number"}
 getModelSummaryRunModeName <- function() {"runmode"}
 getModelSummaryGlmFitNames <- function() {c("null.deviance", "df.null", "logLik", "AIC", "BIC", "deviance", 
                                             "df.residual", getModelSummaryNobsName())}
@@ -145,3 +164,7 @@ runModel.getOptionsThatAreVars <- function() {c("weights", "offset")}
 
 runModel.testModelString  <- function() {"Begin testing models in Models sheet... \n"}
 runModel.testModelString2 <- function() {"Finished testing models in Models sheet. \n"}
+
+runModel.getRetSheetNames <- function() {c(getModelSummaryName(), getEffectsName(), 
+                                           runModel.getWarningsListName())}
+

@@ -472,7 +472,7 @@ getModelOptionsFromSheet <- function(op, opTable, modelFunc) {
 
 } # END: getModelOptionsFromSheet
 
-getAllOptionsForModel <- function(mods, readData) {
+getAllOptionsForModel <- function(mods, readData, only.modelFunction=0) {
 
   opTable <- readData[[getMetabDataOpsName(), exact=TRUE]]
   if (!length(opTable)) return(NULL)
@@ -492,6 +492,7 @@ getAllOptionsForModel <- function(mods, readData) {
 
   # Get the model function
   modelFunc <- getModelFunFromSheet(opTable2)
+  if (only.modelFunction) return(modelFunc)
 
   # If the model function is runCorr, then we don't need to worry about any options
   nm <- getOldCorrModelName()
@@ -503,6 +504,7 @@ getAllOptionsForModel <- function(mods, readData) {
 
   # Get global options
   op <- getGlobalOptionsFromSheet(opTable)
+  if ("try-error" %in% class(op)) stop(op)
   if (is.null(op)) op <- list()
 
   op$model  <- modelFunc

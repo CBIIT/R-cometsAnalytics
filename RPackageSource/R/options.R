@@ -1,4 +1,4 @@
-#' A list of 12:
+#' A list of 16:
 #' \itemize{
 #' \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
 #'                         design matrix. The default value is 0.97.}
@@ -45,6 +45,21 @@
 #'                            \code{\link{ModelSummary}} data frame. Currently, it must be "anova" or "all".
 #'                            This option is ignored with \code{model = "correlation"}.
 #'                            The default is "anova".}
+#' \item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
+#'                            See \code{output.common.cols} and \code{output.merge}. \cr
+#'                            The default is "xlsx".}
+#' \item{\code{output.common.cols}}{ 0 or 1 to only output the common column names from the model results when the
+#'                                 model results are merged together (\code{output.merge != none}).
+#'                            The default is 1.}
+#' \item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_modelspec" or "none".
+#'                             This option is used to merge model results together in order to reduce
+#'                             the number of output files. Setting to "all" will merge all model results together
+#'                             and output them to a single file. Setting to "by_function" will merge results from the
+#'                             same model function together and output to a file with the model function contained
+#'                             in the output file name. Similarly for "by_modelspec", where the MODELSPEC column in the 
+#'                             MODELS sheet of the input Excel file is used to identify the models that will be 
+#'                             merged together. Setting to "none" will not merge results.
+#'                             The default is "none".}
 #' }
 #'
 #' @name options
@@ -268,13 +283,17 @@ getValidGlobalOps <- function() {
   add.ci     <- getAddCiOpName()
   exp.parms  <- getExpParmsOpName() 
   out.metabs <- getAddMetabColsOpName()
+  out.type   <- getOutTypeOpName()
+  out.common <- getOutCommonColsOpName()
+  out.merge  <- getOutMergeOpName()
 
-  ops.char    <- c("model", "check.cor.method", out.eff, out.modSum)
+  ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
+                   out.type, out.merge)
   ops.charVec <- c(out.metabs)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
                    add.ci, exp.parms, 
                    "DEBUG", "DONOTRUN")
-  ops.log  <- c("check.illCond", "check.design")
+  ops.log  <- c("check.illCond", "check.design", out.common)
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
                    check.design=TRUE, max.nstrata=10,
@@ -284,6 +303,9 @@ getValidGlobalOps <- function() {
   default[[out.modSum]] <- getOutModSumOpDefault()
   default[[add.ci]]     <- getAddCiOpDefault()
   default[[out.metabs]] <- getAddMetabColsDefault()
+  default[[out.type]]   <- getOutTypeOpDefault()
+  default[[out.common]] <- getOutCommonColsOpDefault()
+  default[[out.merge]]  <- getOutMergeOpDefault()
 
   # Be careful with exp.parms option, as it can be NULL
   defval <- getExpParmsOpDefault() 
@@ -522,6 +544,29 @@ check.string <- function(obj, valid, parm) {
 
 } # END: check.string
 
+check.number <- function(obj, valid, parm) {
+
+  # obj:   Numeric (length 1)
+  # valid: Numeric vector of valid values
+  # parm:  The name of the argument being checked
+
+  errFlag <- 0
+ 
+  # Check for errors
+  if ((length(obj) != 1) || !is.numeric(obj) || !(obj %in% valid)) {
+    errFlag <- 1 
+  }
+
+  if (errFlag) {
+    msg <- paste(valid, collapse=", ")
+    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
+    stop(msg)
+  }
+
+  obj
+
+} # END: check.number
+
 check.logical <- function(x, name) {
 
   err <- 0
@@ -658,8 +703,31 @@ checkOp_output.metab.cols <- function(x) {
   ret <- check.varnameVec(x, getAddMetabColsOpName(), min.len=0, tolower=1, returnOnMiss="")
   ret
 }
+checkOp_output.common.cols <- function(x) {
 
-
+  if (!length(x)) {
+    ret <- getOutCommonColsOpDefault()
+  } else {
+    ret <- check.logical(x, getOutCommonColsOpName()) 
+  }
+  ret
+} 
+checkOp_output.type <- function(x) {
+  if (!length(x)) {
+    ret <- getOutTypeOpDefault()
+  } else {
+    ret <- check.string(x, getOutTypeOpVals(), getOutTypeOpName())
+  }
+  ret
+}
+checkOp_output.merge <- function(x) {
+  if (!length(x)) {
+    ret <- getOutMergeOpDefault()
+  } else {
+    ret <- check.string(x, getOutMergeOpVals(), getOutMergeOpName())
+  }
+  ret
+}
 
 getOptionNameAndValue <- function(str, sep="=") {
 

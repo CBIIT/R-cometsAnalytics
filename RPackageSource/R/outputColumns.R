@@ -22,6 +22,7 @@
 #' \item{\code{message}}{ Error message produced from the modeling function}
 #' \item{\code{model}}{ Model label from \code{\link{getModelData}}}
 #' \item{\code{model_function}}{ Model function used in \code{\link{runModel}}}
+#' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' \item{\code{nobs}}{ Number of observations used}
 #' \item{\code{null.deviance}}{ Deviance of the NULL model}
 #' \item{\code{outcome}}{ Outcome variable}
@@ -62,6 +63,8 @@ NULL
 #' \item{\code{exp.estimate.upper}}{ The exponentiated upper confidence limit for \code{term}}
 #' \item{\code{exp.std.error}}{ The standard error of \code{exp.estimate} from the delta method}
 #' \item{\code{exposurespec}}{ Exposure variable}
+#' \item{\code{model}}{ Model label from \code{\link{getModelData}}}
+#' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' \item{\code{outcomespec}}{ Outcome variable}
 #' \item{\code{pvalue}}{ The p-value of the test}
 #' \item{\code{run}}{ Run number that can be used to link with the
@@ -86,6 +89,8 @@ NULL
 #' \item{\code{object}}{ The object that produced the warning or error. This is
 #'                       typically a variable or a particular stratum.}
 #' \item{\code{message}}{ Message describing the warning or error}
+#' \item{\code{model}}{ Model label from \code{\link{getModelData}}}
+#' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' }
 #'
 #' @name Errors_Warnings

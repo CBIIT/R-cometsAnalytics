@@ -54,6 +54,7 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
   # Stop the clock
   ptm <- base::proc.time() - ptm
   attr(ret, "ptime") <- paste("Processing time:", round(ptm[3], digits=3), "sec")
+  class(ret) <- class_runModel()
        
   ret
 

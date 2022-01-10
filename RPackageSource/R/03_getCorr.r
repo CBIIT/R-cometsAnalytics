@@ -36,6 +36,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
 
   # For backwards compatibility, convert the output from runModel to old format
   ret <- newVersionOutToOldOut(ret)
+  class(ret) <- c(class(ret), class_runCorr())
 
   ret
 }
