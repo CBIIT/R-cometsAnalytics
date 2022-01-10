@@ -7,7 +7,7 @@
 showHeatmap(
   ccorrList,
   strata = NULL,
-  rowsortby = "corr",
+  rowsortby = "estimate",
   plothgt = 700,
   plotwid = 800,
   colscale = "RdYlBu"

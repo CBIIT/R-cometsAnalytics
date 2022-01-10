@@ -19,6 +19,8 @@ all the below names may not appear in the data frame.
 \item{\code{exp.estimate.upper}}{ The exponentiated upper confidence limit for \code{term}}
 \item{\code{exp.std.error}}{ The standard error of \code{exp.estimate} from the delta method}
 \item{\code{exposurespec}}{ Exposure variable}
+\item{\code{model}}{ Model label from \code{\link{getModelData}}}
+\item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 \item{\code{outcomespec}}{ Outcome variable}
 \item{\code{pvalue}}{ The p-value of the test}
 \item{\code{run}}{ Run number that can be used to link with the

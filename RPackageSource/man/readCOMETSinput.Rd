@@ -53,8 +53,9 @@ The \code{WHERE} column is used to define a subset of subjects to include in the
 and has the form \code{variable operator value}, where \code{operator} can be one of the
 following \code{>, <, >=, <= !=, =}.
 An example \code{WHERE} condition is \code{age > 50}, which will include all subjects older
-than 50 in the analysis. Multiple \code{WHERE} conditions must be separated by a \code{&}. 
-For example, \code{age > 50 & bmi >= 22} will include the subjects older than 50 AND with
+than 50 in the analysis. Multiple \code{WHERE} conditions must be separated by a comma and are
+logically connected with the \code{&} operator. 
+For example, the \code{WHERE} condition \code{age > 50 , bmi >= 22} will include the subjects older than 50 AND with
 bmi >= 22. Values in the \code{MODELSPEC} column must match with the \code{MODELSPEC} column
 in the \bold{ModelOptions} sheet. The \code{TIME} column is only required when survival models are run.
 This column can contain a single time variable or two time variables separated by a space.

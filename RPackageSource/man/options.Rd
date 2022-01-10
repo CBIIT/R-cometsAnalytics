@@ -4,7 +4,7 @@
 \alias{options}
 \title{options list}
 \description{
-A list of 12:
+A list of 16:
 \itemize{
 \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
                         design matrix. The default value is 0.97.}
@@ -51,6 +51,21 @@ A list of 12:
                            \code{\link{ModelSummary}} data frame. Currently, it must be "anova" or "all".
                            This option is ignored with \code{model = "correlation"}.
                            The default is "anova".}
+\item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
+                           See \code{output.common.cols} and \code{output.merge}. \cr
+                           The default is "xlsx".}
+\item{\code{output.common.cols}}{ 0 or 1 to only output the common column names from the model results when the
+                                model results are merged together (\code{output.merge != none}).
+                           The default is 1.}
+\item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_modelspec" or "none".
+                            This option is used to merge model results together in order to reduce
+                            the number of output files. Setting to "all" will merge all model results together
+                            and output them to a single file. Setting to "by_function" will merge results from the
+                            same model function together and output to a file with the model function contained
+                            in the output file name. Similarly for "by_modelspec", where the MODELSPEC column in the 
+                            MODELS sheet of the input Excel file is used to identify the models that will be 
+                            merged together. Setting to "none" will not merge results.
+                            The default is "none".}
 }
 }
 \details{
