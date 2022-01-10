@@ -1,4 +1,4 @@
-CHANGES IN VERSION 1.5.0.0
+CHANGES IN VERSION 2.0.0.0
 --------------------------
 
 NEW FEATURES
@@ -9,5 +9,9 @@ NEW FEATURES
 BUG FIXES
 
     o The t-statistic computation for unadjusted correlation analyses has been updated.
-    o Correlation analyses with categorical exposure variables have been updated.
+    o Correlation analyses with categorical variables have been fixed.
 
+NOTES
+
+    o Correlation results will be the same with version 1.6 for adjusted models with ALL continuous (non-dummy) variables.
+    o Correlation results will NOT be the same with version 1.6 for any categorical exposure.
