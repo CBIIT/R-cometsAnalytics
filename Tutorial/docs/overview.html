@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>COMETS Analytics Tutorial</title>
+  <meta name="description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="COMETS Analytics Tutorial" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:image" content="static/COMETSLogo.png" />
+  <meta property="og:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="COMETS Analytics Tutorial" />
+  
+  <meta name="twitter:description" content="This tutorial provides an overview and detailed instructions for the use of COMETS analytics" />
+  <meta name="twitter:image" content="static/COMETSLogo.png" />
+
+<meta name="author" content="CAT Work group">
+
+
+<meta name="date" content="2018-09-16">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="index.html">
+<link rel="next" href="quickstart.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="tufte.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">COMETS Analytics Tutorial</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a></li>
+<li class="chapter" data-level="1" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i><b>1</b> Get Started with Sample File</a><ul>
+<li class="chapter" data-level="1.1" data-path="quickstart.html"><a href="quickstart.html#sample-input-file"><i class="fa fa-check"></i><b>1.1</b> Sample Input file</a></li>
+<li class="chapter" data-level="1.2" data-path="quickstart.html"><a href="quickstart.html#quick-analysis"><i class="fa fa-check"></i><b>1.2</b> Quick Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="cohortanalyses.html"><a href="cohortanalyses.html"><i class="fa fa-check"></i><b>2</b> Conduct Cohort Data Analyses</a><ul>
+<li class="chapter" data-level="2.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-1-data-preparation"><i class="fa fa-check"></i><b>2.1</b> Step 1 Data Preparation</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#metabolites"><i class="fa fa-check"></i><b>2.1.1</b> Metabolites</a></li>
+<li class="chapter" data-level="2.1.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#subject-metabolites"><i class="fa fa-check"></i><b>2.1.2</b> Subject Metabolites</a></li>
+<li class="chapter" data-level="2.1.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#subject-data"><i class="fa fa-check"></i><b>2.1.3</b> Subject Data</a></li>
+<li class="chapter" data-level="2.1.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#varmap"><i class="fa fa-check"></i><b>2.1.4</b> Varmap</a></li>
+<li class="chapter" data-level="2.1.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#models"><i class="fa fa-check"></i><b>2.1.5</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-2-harmonization"><i class="fa fa-check"></i><b>2.2</b> Step 2 Harmonization</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#harmonization-file"><i class="fa fa-check"></i><b>2.2.1</b> Harmonization file</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-3-data-and-model-integrity"><i class="fa fa-check"></i><b>2.3</b> Step 3 Data and Model Integrity</a></li>
+<li class="chapter" data-level="2.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-4-model-specification"><i class="fa fa-check"></i><b>2.4</b> Step 4 Model Specification</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#create-input-file-model-specification"><i class="fa fa-check"></i><b>2.4.1</b> Create input file: Model specification</a></li>
+<li class="chapter" data-level="2.4.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#interactive"><i class="fa fa-check"></i><b>2.4.2</b> Interactive</a></li>
+<li class="chapter" data-level="2.4.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#batch"><i class="fa fa-check"></i><b>2.4.3</b> Batch</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-5-correlation-analyses-output"><i class="fa fa-check"></i><b>2.5</b> Step 5 Correlation Analyses Output</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="cohortanalyses.html"><a href="cohortanalyses.html#metabolite-tagging"><i class="fa fa-check"></i><b>2.5.1</b> Metabolite tagging</a></li>
+<li class="chapter" data-level="2.5.2" data-path="cohortanalyses.html"><a href="cohortanalyses.html#create-subset-of-tagged-metabolites"><i class="fa fa-check"></i><b>2.5.2</b> Create subset of ‘Tagged’ metabolites</a></li>
+<li class="chapter" data-level="2.5.3" data-path="cohortanalyses.html"><a href="cohortanalyses.html#create-a-heatmap"><i class="fa fa-check"></i><b>2.5.3</b> Create A heatmap</a></li>
+<li class="chapter" data-level="2.5.4" data-path="cohortanalyses.html"><a href="cohortanalyses.html#the-heatmap"><i class="fa fa-check"></i><b>2.5.4</b> The heatmap</a></li>
+<li class="chapter" data-level="2.5.5" data-path="cohortanalyses.html"><a href="cohortanalyses.html#the-heatmap-2"><i class="fa fa-check"></i><b>2.5.5</b> The heatmap (2)</a></li>
+<li class="chapter" data-level="2.5.6" data-path="cohortanalyses.html"><a href="cohortanalyses.html#annotations-and-hierarchical-clustering"><i class="fa fa-check"></i><b>2.5.6</b> Annotations and hierarchical clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="cohortanalyses.html"><a href="cohortanalyses.html#step-6-send-for-meta-analyses"><i class="fa fa-check"></i><b>2.6</b> Step 6 Send for Meta-analyses</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="manual.html"><a href="manual.html"><i class="fa fa-check"></i><b>3</b> Manual</a><ul>
+<li class="chapter" data-level="3.1" data-path="manual.html"><a href="manual.html#register"><i class="fa fa-check"></i><b>3.1</b> Registration and Account Set-up</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="technical.html"><a href="technical.html"><i class="fa fa-check"></i><b>4</b> Technical Details</a><ul>
+<li class="chapter" data-level="4.1" data-path="technical.html"><a href="technical.html#preharmonization"><i class="fa fa-check"></i><b>4.1</b> Preharmonization</a></li>
+<li class="chapter" data-level="4.2" data-path="technical.html"><a href="technical.html#harmonization"><i class="fa fa-check"></i><b>4.2</b> Harmonization</a></li>
+<li class="chapter" data-level="4.3" data-path="technical.html"><a href="technical.html#integrity-checks"><i class="fa fa-check"></i><b>4.3</b> Integrity checks</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="technical.html"><a href="technical.html#data"><i class="fa fa-check"></i><b>4.3.1</b> Data</a></li>
+<li class="chapter" data-level="4.3.2" data-path="technical.html"><a href="technical.html#models-1"><i class="fa fa-check"></i><b>4.3.2</b> Models</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="technical.html"><a href="technical.html#correlation-analyses"><i class="fa fa-check"></i><b>4.4</b> Correlation Analyses</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="technical.html"><a href="technical.html#details"><i class="fa fa-check"></i><b>4.4.1</b> Details</a></li>
+<li class="chapter" data-level="4.4.2" data-path="technical.html"><a href="technical.html#output"><i class="fa fa-check"></i><b>4.4.2</b> Output</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="technical.html"><a href="technical.html#linear-models"><i class="fa fa-check"></i><b>4.5</b> Linear Models</a><ul>
+<li class="chapter" data-level="4.5.1" data-path="technical.html"><a href="technical.html#details-1"><i class="fa fa-check"></i><b>4.5.1</b> Details</a></li>
+<li class="chapter" data-level="4.5.2" data-path="technical.html"><a href="technical.html#output-1"><i class="fa fa-check"></i><b>4.5.2</b> Output</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="technical.html"><a href="technical.html#logistic-models"><i class="fa fa-check"></i><b>4.6</b> Logistic Models</a><ul>
+<li class="chapter" data-level="4.6.1" data-path="technical.html"><a href="technical.html#details-2"><i class="fa fa-check"></i><b>4.6.1</b> Details</a></li>
+<li class="chapter" data-level="4.6.2" data-path="technical.html"><a href="technical.html#output-2"><i class="fa fa-check"></i><b>4.6.2</b> Output</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="technical.html"><a href="technical.html#meta-analyses"><i class="fa fa-check"></i><b>4.7</b> Meta-Analyses</a><ul>
+<li class="chapter" data-level="4.7.1" data-path="technical.html"><a href="technical.html#details-3"><i class="fa fa-check"></i><b>4.7.1</b> Details</a></li>
+<li class="chapter" data-level="4.7.2" data-path="technical.html"><a href="technical.html#output-3"><i class="fa fa-check"></i><b>4.7.2</b> Output</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="http://www.comets-analytics.org" target="blank">Comets Analytics</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">COMETS Analytics Tutorial</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="overview" class="section level1 unnumbered">
+<h1>Overview</h1>
+<p>Comets Analytics serves as the infrastructure to facilitate and coordinate data analysis efforts. Each cycle of analyses consists of 5 steps described below to bundle multiple projects to minimize burden on cohort analytic resources.<br />
+<img src="static/COMETScycle.PNG" width="80%" style="display: block; margin: auto;" /></p>
+<p>This tutorial serves as a guide through this cycle. You can register for access to Comets Analytics using the instructions in <a href="manual.html#register">3.1</a> <a href="manual.html#register">Registration and Account Set-up</a> For a quick walk-through the cycle using the sample input file, see the [Quick Start]. Once you are ready to conduct your cohort-specific analyses, see the [Step-by-Step Guide]. For details, refer to the <a href="technical.html#technical">4</a> <a href="technical.html#technical">Technical Details</a> and [FAQ] for anwers to commonly asked questions.</p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="quickstart.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/ellatemprosa/cometstutorial/index.Rmd",
+"text": "Edit"
+},
+"download": ["catutorial.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
