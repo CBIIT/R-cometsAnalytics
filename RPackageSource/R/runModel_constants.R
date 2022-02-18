@@ -97,7 +97,7 @@ getModelSummaryLmFitNames  <- function() {c("r.squared", "adj.r.squared", "sigma
                                             "df.residual", getModelSummaryNobsName())}
 
 # For input excel file
-getModelOptionsIdCol     <- function() {"modelspec"}
+getModelOptionsIdCol     <- function() {"model_type"} # originally called modelspec
 getOptionNameCol         <- function() {"option"}
 getOptionValueCol        <- function() {"value"}
 getMetabSheetName        <- function() {"Metabolites"}
@@ -105,7 +105,7 @@ getSubMetabSheetName     <- function() {"SubjectMetabolites"}
 getSubDataSheetName      <- function() {"SubjectData"}
 getVarMapSheetName       <- function() {"VarMap"}
 getModelsSheetName       <- function() {"Models"}
-getOptionsSheetName      <- function() {"ModelOptions"}
+getOptionsSheetName      <- function() {"Model_Types"} # Originally called ModelOptions
 getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput")}
 getModelFunctionCol   <- function() {"function"}
 getReqSheetNames      <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
