@@ -32,10 +32,10 @@
 #'                            summary statistics for the exposure will be output.
 #'                            This option is ignored with \code{model = "correlation"}.
 #'                            The default is "exposure".}
-#' \item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate glm parameter estimates. 
+#' \item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate parameter estimates. 
 #'                         Standard errors are obtained from the delta method. 
-#'                         The default is NULL, so that estimates from glm models with 
-#'                         family="binomial" will be exponentiated, and not otherwise.}
+#'                         The default is NULL, so that estimates from logistic regression and survival models
+#'                         will be exponentiated, and not otherwise.}
 #' \item{\code{output.metab.cols}}{ Character vector of column names in the \code{METABOLITES}
 #'                             sheet to be output in the \code{\link{ModelSummary}} and \code{\link{Effects}}
 #'                             data frames. Metabolite ids are matched first using the 
@@ -48,15 +48,12 @@
 #' \item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
 #'                            See \code{output.common.cols} and \code{output.merge}. \cr
 #'                            The default is "xlsx".}
-#' \item{\code{output.common.cols}}{ 0 or 1 to only output the common column names from the model results when the
-#'                                 model results are merged together (\code{output.merge != none}).
-#'                            The default is 1.}
-#' \item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_modelspec" or "none".
+#' \item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_model_type" or "none".
 #'                             This option is used to merge model results together in order to reduce
 #'                             the number of output files. Setting to "all" will merge all model results together
 #'                             and output them to a single file. Setting to "by_function" will merge results from the
 #'                             same model function together and output to a file with the model function contained
-#'                             in the output file name. Similarly for "by_modelspec", where the MODELSPEC column in the 
+#'                             in the output file name. Similarly for "by_model_type", where the MODEL_TYPE column in the 
 #'                             MODELS sheet of the input Excel file is used to identify the models that will be 
 #'                             merged together. Setting to "none" will not merge results.
 #'                             The default is "none".}
@@ -136,6 +133,7 @@ runModel.checkOptions <- function(op, modeldata) {
   if (!length(val)) {
     val <- FALSE
     if (op$glmFlag && (op$model.options$family == "binomial")) val <- TRUE
+    if (op$coxphFlag || op$clogitFlag) val <- TRUE
     op[[nm]] <- val
   } 
 

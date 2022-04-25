@@ -5,6 +5,9 @@ runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
 
+runCorrDepMsg_batch  <- function() {"runCorr is deprecated, use FUNCTION=correlation instead"}
+runCorrDepMsg_inter  <- function() {"runCorr is deprecated, call runModel instead"}
+
 # Delimiter in output lists of variable names
 runModel.getVarSep    <- function() {" "}
 runModel.getOldVarSep <- function() {" "}
@@ -69,12 +72,12 @@ getOutTypeOpRda           <- function() {"rda"}
 getOutTypeOpVals          <- function() {c(getOutTypeOpRda(), "xlsx")}
 getOutTypeOpDefault       <- function() {"xlsx"} 
 getOutCommonColsOpName    <- function() {"output.common.cols"}
-getOutCommonColsOpDefault <- function() {1} # 0 or 1
+getOutCommonColsOpDefault <- function() {0} # 0 or 1
 getOutMergeOpName         <- function() {"output.merge"}
 getOutMergeOpNone         <- function() {"none"}
 getOutMergeOpAll          <- function() {"all"}
 getOutMergeOpByModelFunc  <- function() {"by_function"}
-getOutMergeOpByModelSpec  <- function() {"by_modelspec"}
+getOutMergeOpByModelSpec  <- function() {"by_model_type"}
 getOutMergeOpVals         <- function() {c(getOutMergeOpAll(), getOutMergeOpNone(), 
                                            getOutMergeOpByModelFunc(), getOutMergeOpByModelSpec())}
 getOutMergeOpDefault      <- function() {getOutMergeOpNone()} 
@@ -124,7 +127,7 @@ getModelSummaryCoxphFitNames  <- function() {c("n", "nevent", "statistic.log", "
 getModelSummaryClogitFitNames <- function() {getModelSummaryCoxphFitNames()}
 
 # For input excel file
-getModelOptionsIdCol     <- function() {"modelspec"}
+getModelOptionsIdCol     <- function() {"model_type"}
 getOptionNameCol         <- function() {"option"}
 getOptionValueCol        <- function() {"value"}
 getMetabSheetName        <- function() {"Metabolites"}
@@ -132,7 +135,7 @@ getSubMetabSheetName     <- function() {"SubjectMetabolites"}
 getSubDataSheetName      <- function() {"SubjectData"}
 getVarMapSheetName       <- function() {"VarMap"}
 getModelsSheetName       <- function() {"Models"}
-getOptionsSheetName      <- function() {"ModelOptions"}
+getOptionsSheetName      <- function() {"Model_Types"}
 getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput")}
 getModelFunctionCol      <- function() {"function"}
 getReqSheetNames         <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 

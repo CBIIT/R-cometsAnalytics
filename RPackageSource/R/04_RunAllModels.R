@@ -153,12 +153,11 @@ getOutExtension <- function(out.type) {
 # Function to create output file name
 getOutFileName <- function(cohortLabel, model, out.type) {
 
-  fname0  <- cohortLabel
-  fname0  <- gsub('/', '_', fname0, fixed = TRUE)
-  fname0  <- gsub('\\', '_', fname0, fixed = TRUE)
-  i2      <- gsub('/', '_', model, fixed=TRUE)
-  i2      <- gsub('\\', '_', i2, fixed=TRUE)
-  fname   <- paste0(i2, ".", fname0, ".", Sys.Date(), getOutExtension(out.type))
+  # Replace non-alphanumeric chars with underscore
+  searchStr <- "[^[:alnum:]._-]"
+  str.model <- gsub(searchStr, "_", model)
+  str.label <- gsub(searchStr, "_", cohortLabel)
+  fname     <- paste0(str.model, "_", str.label, "_", Sys.Date(), getOutExtension(out.type))
   fname
 
 } # END: getOutFileName

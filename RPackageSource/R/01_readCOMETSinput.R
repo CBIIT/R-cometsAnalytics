@@ -3,7 +3,7 @@
 #'
 #' @param file path of Excel file to be read in. This file must contain sheets
 #' with names \bold{Metabolites}, \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
-#' and optionally \bold{Models}, \bold{ModelOptions} (see details).
+#' and optionally \bold{Models}, \bold{Model_Types} (see details).
 #' @return a list comprising of data and information needed for \code{\link{getModelData}}.
 #'
 #' @details Additional information regarding each sheet in the input Excel file is given below. 
@@ -29,7 +29,7 @@
 #' \bold{Models} \cr
 #' A table where each row represents a model to be run, and with columns \code{MODEL}, 
 #' \code{OUTCOMES}, \code{EXPOSURE}, \code{ADJUSTMENT},
-#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODELSPEC}, \code{TIME}, \code{GROUP}. All variable names in this
+#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODEL_TYPE}, \code{TIME}, \code{GROUP}. All variable names in this
 #' table must match variable names in the \code{VARREFERENCE} column of the \bold{VarMap} sheet.
 #' The \code{MODEL} column is a label for the model. The \code{OUTCOMES} and \code{EXPOSURE} columns define the 
 #' outcome and exposure variables for the model. Use \code{All metabolites} to specify
@@ -46,20 +46,20 @@
 #' than 50 in the analysis. Multiple \code{WHERE} conditions must be separated by a comma and are
 #' logically connected with the \code{&} operator. 
 #' For example, the \code{WHERE} condition \code{age > 50 , bmi >= 22} will include the subjects older than 50 AND with
-#' bmi >= 22. Values in the \code{MODELSPEC} column must match with the \code{MODELSPEC} column
-#' in the \bold{ModelOptions} sheet. The \code{TIME} column is only required when survival models are run.
+#' bmi >= 22. Values in the \code{MODEL_TYPE} column must match with the \code{MODEL_TYPE} column
+#' in the \bold{Model_Types} sheet. The \code{TIME} column is only required when survival models are run.
 #' This column can contain a single time variable or two time variables separated by a space.
 #' The \code{GROUP} column is only required when conditional logistic regression models are run.
 #' This column can contain only a single variable that defines the groups (sets, strata).
 #' This sheet is not required when running in interactive mode, but is required when
 #' running in batch mode. \cr
 
-#' \bold{ModelOptions} \cr
-#' A table where each row specifies an option and has columns \code{MODELSPEC}, \code{FUNCTION},
+#' \bold{Model_Types} \cr
+#' A table where each row specifies an option and has columns \code{MODEL_TYPE}, \code{FUNCTION},
 #' \code{OPTION}, and \code{VALUE}. For an example sheet and additional information about this
 #' sheet, see the Excel file \code{/extdata/cometsInput.xlsx}.
 #' This sheet is optional, but is required when the \bold{Models} sheet contains the 
-#' column \code{MODELSPEC}.
+#' column \code{MODEL_TYPE}.
 #'
 #' @examples
 #' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
@@ -115,7 +115,7 @@ readCOMETSinput <- function(file) {
     dta.models <- readExcelSheet(file, modelsSheet, sheets, optional=1) 
     dta.models <- checkModelsCols(dta.models)
     
-    # Read in the options if models sheet has a MODELSPEC column
+    # Read in the options if models sheet has a MODEL_TYPE column
     modnm <- getModelOptionsIdCol()
     if (modnm %in% colnames(dta.models)) {
       opnm        <- getOptionsSheetName()

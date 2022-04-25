@@ -925,7 +925,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
     if (tflag) err <- err + infile.checkForInvalidVars(row, TV, tvars, invalid, sheet=nm)
     if (gflag) err <- err + infile.checkForInvalidVars(row, GV, gvars, invalid, sheet=nm)
 
-    # Check that MODELSPEC column has a corresponding row in the model options sheet
+    # Check that MODEL_TYPE column has a corresponding row in the model options sheet
     if (iflag && modOpFlag && !is.na(ival) && !(ival %in% modOpsIds)) {
       err <- err + 1
       msg <- paste0("ERROR on row ", row, " of the ", nm, " sheet. ", IV, "=", ival, 
