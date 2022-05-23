@@ -228,30 +228,31 @@ filterCOMETSinput <- function(readData,where=NULL) {
   # create rules for each filter
   for (i in 1:length(myfilts)) {
     myrule <- myfilts[i]
+
     if (length(grep("<=",myrule))>0) {
       mysplit <- strsplit(myrule,"<=")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)  
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) <= gsub(" ","",as.numeric(mysplit[2]))) )
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) <= as.numeric(mysplit[2])) )
     } else if(length(grep(">=",myrule))>0) {
       mysplit <- strsplit(myrule,">=")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) >= gsub(" ","",as.numeric(mysplit[2]))) )
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) >= as.numeric(mysplit[2])) )
     } else if(length(grep("<",myrule))>0) {
       mysplit <- strsplit(myrule,"<")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) < gsub(" ","",as.numeric(mysplit[2]))) )
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) < as.numeric(mysplit[2])) )
     } else if(length(grep(">",myrule))>0) {
       mysplit <- strsplit(myrule,">")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(gsub(" ","",mysplit[2]))) )
+                         which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(mysplit[2])) )
     } else if (length(grep("!=",myrule))>0) {
       tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=1)   
       samplesToKeep <- c(samplesToKeep, tmp)  
