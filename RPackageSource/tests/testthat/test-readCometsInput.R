@@ -13,6 +13,9 @@ f <- file.path(dir, "test_objects", b_f)
 # Call the function to test
 data  <- RcometsAnalytics::readCOMETSinput(f)
 
+b_data$input.file <- NULL
+data$input.file   <- NULL
+
 # Compare result to the baseline. 
 test_that("RcometsAnalytics::readCOMETSinput",
 {

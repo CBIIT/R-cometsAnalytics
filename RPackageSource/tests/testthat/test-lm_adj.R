@@ -17,6 +17,10 @@ obj <- RcometsAnalytics::runModel(modeldata, b_data, cohort = "", op=op)
 # Compare result to the baseline.
 attr(b_obj, "ptime") <- NULL
 attr(obj, "ptime")   <- NULL 
+if (is.list(b_obj) && is.list(obj)) {
+  b_obj$Info <- NULL
+  obj$Info   <- NULL
+}
 test_that("RcometsAnalytics:: lm adj",
 {
   expect_equal(b_obj, obj)
