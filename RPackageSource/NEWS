@@ -1,5 +1,5 @@
-CHANGES IN VERSION 2.1.0.0
---------------------------
+CHANGES IN VERSION 2.1.0
+------------------------
 
 NEW FEATURES
 
@@ -11,13 +11,18 @@ NOTES
     o For correlation analyses the "corr" column in the Effects data frame has been renamed to "estimate".
 
 
-CHANGES IN VERSION 2.0.0.0
---------------------------
+CHANGES IN VERSION 2.0.0
+------------------------
 
 NEW FEATURES
 
     o Generalized linear models are now included for analyses. 
     o User-controlled options are now available.
+    o Output is now written to Excel files.
+
+
+CHANGES IN VERSION 1.7.0
+------------------------
 
 BUG FIXES
 
