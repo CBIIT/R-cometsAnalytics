@@ -396,8 +396,10 @@ newVersionOutToOldOut <- function(x) {
   effn <- getEffectsName()
   ms   <- x[[msn, exact=TRUE]]
   eff  <- x[[effn, exact=TRUE]]
-  if (!length(ms) || !length(eff)) return(x)
 
+  if (!length(ms) || !length(eff)) return(x)
+  info   <- x[[getInfoTableDfName(), exact=TRUE]]
+  
   # Merge data frames, if stratified run, then include strata to match rows
   cms  <- colnames(ms)
   ceff <- colnames(eff)
@@ -417,6 +419,11 @@ newVersionOutToOldOut <- function(x) {
   rm(ms, eff)
   gc()
   ret <- as.data.frame(ret, stringsAsFactors=FALSE)
+
+  # Add in some variables
+  ret[, "cohort"] <- getInfoTableValue(info, "cohort", ifNotFound="")
+  ret[, "model"]  <- getInfoTableValue(info, "op$model", ifNotFound="")
+  ret[, "spec"]   <- getInfoTableValue(info, "run type", ifNotFound="")
 
   # Old and new column names. NOTE _NO_COL1_ and _NO_COL2_ are placeholders
   old.req <- c("cohort", "spec", "model", "outcomespec", "exposurespec",
@@ -553,19 +560,6 @@ parseStratVar <- function(vec, sep) {
 
 } # END: parseStratVar
 
-getErrorMsgFromTryError <- function(obj, addToEnd=NULL) {
-
-  ret <- NULL
-  if ("try-error" %in% class(obj)) {
-    msg <- attr(obj, "condition")
-    ret <- msg[["message", exact=TRUE]]
-  }
-  if (length(addToEnd) && length(ret)) ret <- paste0(ret, addToEnd) 
-
-  ret
-
-} # END: getErrorMsgFromTryError
-
 expParms_deltaMethod <- function(beta, beta.se) {
 
   ret.beta <- exp(beta)
@@ -574,51 +568,4 @@ expParms_deltaMethod <- function(beta, beta.se) {
   list(exp.beta=ret.beta, exp.beta.se=ret.se)
 }
 
-nonEmptyDf <- function(x) {
 
-  if (!length(x)) return(0)
-  if (!is.data.frame(x)) return(0)
-  if (!nrow(x)) return(0)
-  if (!ncol(x)) return(0) 
-  1
-
-}
-
-nonEmptyDfHasCols <- function(x, cols) {
-
-  ret <- 0
-  if (nonEmptyDf(x)) {
-    tmp <- cols %in% colnames(x)
-    if (all(tmp)) ret <- 1
-  }
-  ret
-
-}
-
-addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, init=1, DEBUG=0) {
-
-  if (!length(x.add)) return(base.df)
-  if (!nonEmptyDfHasCols(base.df, base.id)) return(base.df)
-  if (!nonEmptyDfHasCols(x.df, x.id)) return(base.df)
-  base.cols <- colnames(base.df)
-  x.cols    <- colnames(x.df)
-  tmp       <- (x.add %in% x.cols) 
-  rem       <- x.add[!tmp] 
-  x.add     <- x.add[tmp]
-  if (DEBUG && length(rem)) {
-    print(paste0("Removed columns: ", paste0(rem, collapse=",")))
-  }
-  if (!length(x.add)) return(base.df)
-
-  # Initialize
-  if (init) for (v in x.add) base.df[, v] <- NA_character_
-  rows <- match(base.df[, base.id, drop=TRUE], x.df[, x.id, drop=TRUE])
-  tmp  <- !is.na(rows)
-  rows <- rows[tmp]
-  if (length(rows)) {
-    for (v in x.add) base.df[tmp, v] <- x.df[rows, v, drop=TRUE]
-  }
-
-  base.df
-
-}

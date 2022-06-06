@@ -263,6 +263,7 @@ readCOMETSinput <- function(file) {
                         "n", "stratavar", "strata")
 
   dtalist[[getMetabDataOpsName()]] <- dta.options
+  dtalist[[getInputFileOpsName()]] <- file
 
   # Test the models in the Models sheet 
   err <- infile.checkAllModels(dtalist)
@@ -273,7 +274,6 @@ readCOMETSinput <- function(file) {
     cat(msg)
     warning(msg)
   } 
-
   return(dtalist)
 
 }

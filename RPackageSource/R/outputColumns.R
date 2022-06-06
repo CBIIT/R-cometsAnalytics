@@ -36,9 +36,9 @@
 #' \item{\code{stratavar}}{ Stratum variable(s)}
 #' \item{\code{strata}}{ Stratum level(s)}
 #' \item{\code{term}}{ Variable in the model}
-#' \item{\code{wald.pvalue}}{ P-value from the Wald test of the given variable. 
+#' \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
 #'                           Note that this test may be a multi-df test if the
-#'                           variable is categorical.}
+#'                           exposure is categorical.}
 #' }
 #'
 #' @name ModelSummary
@@ -102,3 +102,42 @@ NULL
 #' 
 NULL
 
+#' Columns in the ChemEnrich table. 
+#'
+#' @name ChemEnrich
+#' @title Chemical Class Enrichment 
+#' @details See \code{\link[RaMP]{chemicalClassEnrichment}} for details.
+#' 
+NULL
+
+#' Columns in Table1. 
+#' Depending on the model run and options specified, 
+#' all the below names may not appear in the data frame.
+#' \itemize{
+#' \item{\code{category}}{ Category for categorical variables only}
+#' \item{\code{in.model}}{ How variable enters the model (outcome, exposure, 
+#'      adjustment, time, group, weight, offset)}
+#' \item{\code{max}}{ Maximum value}
+#' \item{\code{mean}}{ Mean value}
+#' \item{\code{median}}{ Median value}
+#' \item{\code{min}}{ Minimum value}
+#' \item{\code{n}}{ Number of non-missing observations}
+#' \item{\code{n.missing}}{ Number of missing observations}
+#' \item{\code{n.outcomeEqual0}}{ Number of non-missing observations with \code{outcome = 0}}
+#' \item{\code{n.outcomeEqual1}}{ Number of non-missing observations with \code{outcome = 1}}
+#' \item{\code{n.unique}}{ Number of unique non-missing observations}
+#' \item{\code{quartile1}}{ 25th percentile}
+#' \item{\code{quartile3}}{ 75th percentile}
+#' \item{\code{stratavar}}{ Stratum variable(s)}
+#' \item{\code{strata}}{ Stratum level(s)}
+#' \item{\code{type}}{ Either continuous or categorical}
+#' \item{\code{variable}}{ Variable name in the model}
+#' }
+#' @name Table1
+#' @title Non-metabolite Variable Summary Table
+#' @details The columns \code{max}, \code{mean}, \code{median},
+#'        \code{min}, \code{n.missing}, \code{n.unique},
+#'        \code{quartile1}, and \code{quartile3} are for
+#'      continuous variables only. 
+#' 
+NULL

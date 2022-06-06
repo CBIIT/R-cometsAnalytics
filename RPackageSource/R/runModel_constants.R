@@ -1,9 +1,11 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
+getVersionNumber     <- function() {"2.0.6.0"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
+getInputFileOpsName  <- function() {"input.file"}
 
 runCorrDepMsg_batch  <- function() {"runCorr is deprecated, use FUNCTION=correlation instead"}
 runCorrDepMsg_inter  <- function() {"runCorr is deprecated, call runModel instead"}
@@ -44,6 +46,7 @@ getOpStrSep               <- function() {";"}
 getOpStrEq                <- function() {"="}
 getStrataSep              <- function() {","}
 getWhereSep               <- function() {","}
+getOpModelName            <- function() {"model"}
 getModelOpsName           <- function() {"model.options"}
 getOldCorrModelName       <- function() {"runcorr"}
 getCorrModelName          <- function() {"correlation"}
@@ -107,7 +110,6 @@ getEffectsExpEstSeName    <- function() {"exp.std.error"}
 getEffectsExpLowerName    <- function() {"exp.estimate.lower"}
 getEffectsExpUpperName    <- function() {"exp.estimate.upper"}
 
-
 # ModelSummary 
 getModelSummaryName        <- function() {"ModelSummary"}
 getModelSummaryNobsName    <- function() {"nobs"}
@@ -162,12 +164,53 @@ getVarMapVarTypeVals  <- function() {c(getVarMapVarTypeCont(), getVarMapVarTypeC
 getVarRef_metabId    <- function() {"metabolite_id"}
 getVarRef_subjectId  <- function() {"id"}
 
+
 # Model options that specify variables
 runModel.getOptionsThatAreVars <- function() {c("weights", "offset")}
 
 runModel.testModelString  <- function() {"Begin testing models in Models sheet... \n"}
 runModel.testModelString2 <- function() {"Finished testing models in Models sheet. \n"}
 
-runModel.getRetSheetNames <- function() {c(getModelSummaryName(), getEffectsName(), 
-                                           runModel.getWarningsListName())}
+# options for RaMP
+getRampPvalOpName              <- function() {"chemEnrich.adjPvalue"}
+getRampPvalOpDefault           <- function() {0.05}
+getRampPvalAdjMethod           <- function() {"BH"}
+getRampCallChemEnrichOpName    <- function() {"chemEnrich"}
+getRampCallChemEnrichOpDefault <- function() {0}
+getRampOpName                  <- function() {"ramp.options"} # Name of list in the main options list
+getRampChemEnrichDfName        <- function() {"ChemEnrich"} # Name of the data frame in return list from runModel
+
+getTable1DfName                <- function() {"Table1"} 
+
+# Info table
+getInfoTableDfName             <- function() {"Info"}
+getInfoTableNameCol            <- function() {"name"}
+getInfoTableValueCol           <- function() {"value"}
+getInfoTable2plusVars          <- function() {"*"}
+getInfoTableOutcomeName        <- function() {"outcome"}
+getInfoTableExposureName       <- function() {"exposure"}
+getInfoTableStrataName         <- function() {"strata"}
+getInfoTableModelFuncName      <- function() {"op$model"}
+getInfoTableFamilyName         <- function() {"model.options$family"}
+getInfoTableCohortName         <- function() {"cohort"}
+
+
+getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffectsName(),
+                                                runModel.getWarningsListName(),
+                                                getRampChemEnrichDfName(), getTable1DfName(),
+                                                getInfoTableDfName())
+                                             }
+
+# Meta analysis
+metaOp_methodName              <- function() {"method"}
+metaOp_methodDefault           <- function() {"fixed"}
+metaOp_minNcohortName          <- function() {"min.n.cohort"}
+metaOp_minNcohortDefault       <- function() {2}
+metaModelNameNumberSep         <- function() {" "}
+metaRetListResultsTable        <- function() {"Results"}
+getHarmMetabIdCol              <- function() {"metabolite_name"}
+getMetaNcohortCol              <- function() {"n.cohort"}
+getMetaMessageCol              <- function() {"message"}
+getMetaDirectionCol            <- function() {"direction"}
+
 

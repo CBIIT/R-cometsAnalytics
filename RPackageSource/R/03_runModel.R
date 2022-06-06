@@ -7,7 +7,8 @@
 #' @param op list of options when running in \code{Interactive} mode (see \code{\link{options}}).
 #'
 #' @return A list of objects with names \code{\link{ModelSummary}},
-#'        \code{\link{Effects}}, and \code{\link{Errors_Warnings}}. \cr
+#'        \code{\link{Effects}}, \code{\link{Errors_Warnings}},
+#'        \code{\link{Table1}}, \code{Info}, and possibly \code{\link{ChemEnrich}}. \cr
 #' \bold{Important: check the \code{adjvars.removed} column in the
 #'  \code{\link{ModelSummary}} data frame to see if any adjustment variables
 #'  were dropped from the model, and use caution interpreting results
@@ -44,12 +45,14 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
     modeldata <- runModel.checkOpBatch(modeldata, op)
     op        <- modeldata$options 
   }
-
   op        <- runModel.checkOptions(op, modeldata)
   op$cohort <- cohortLabel
+
   ret       <- runModel.start(modeldata, metabdata, op)
   ret       <- runModel.checkRetlist(ret, op) 
   ret       <- runModel.addMetabCols(ret, metabdata, op)
+  ret       <- runModel.getTable1(ret, modeldata, op) 
+  ret       <- runModel.getInfoDF(ret, modeldata, metabdata, op) 
 
   # Stop the clock
   ptm <- base::proc.time() - ptm
@@ -82,35 +85,45 @@ runModel.checkOpBatch <- function(modeldata, op) {
 
 } # END: runModel.checkOpBatch
 
+runModel.getEmptyErrorWarn <- function() {
+
+  c1  <- runModel.getWarningCol() 
+  c2  <- runModel.getObjectCol()  
+  c3  <- runModel.getMessageCol() 
+  str <- paste("data.frame(", c1, "=character(0), ", c2, "=character(0), ",
+                              c3, "=character(0), stringsAsFactors=FALSE)", sep="")
+  ret <- eval(parse(text=str))   
+  ret
+
+}
+
 # Function to check the return list
 runModel.checkRetlist <- function(ret, op) {
 
-  # Add model function to model summary
   nm1  <- getModelSummaryName() # Sheet name
-  col  <- getModelSummaryFunCol()
-  df   <- ret[[nm1, exact=TRUE]]
-  if (!is.null(df)) {
-    if (!is.data.frame(df)) stop("INTERNAL CODING ERROR in runModel.checkRetlist")
-    df[, col]  <- op$model
-    ret[[nm1]] <- df
-  }
+  nm2  <- getEffectsName()
+  nm3  <- runModel.getWarningsListName()
+
+  # Add model function to model summary
+  #col  <- getModelSummaryFunCol()
+  #df   <- ret[[nm1, exact=TRUE]]
+  #if (!is.null(df)) {
+  #  if (!is.data.frame(df)) stop("INTERNAL CODING ERROR in runModel.checkRetlist")
+  #  str        <- op$model
+  #  if (op$glmFlag) str <- paste0(str, " family=", op$model.options$family)
+  #  df[, col]  <- str
+  #  ret[[nm1]] <- df
+  #}
 
   # Check for errors/warnings data frame
-  nm3 <- runModel.getWarningsListName()
   df  <- ret[[nm3, exact=TRUE]]
   if (is.null(df)) {
-    c1  <- runModel.getWarningCol() 
-    c2  <- runModel.getObjectCol()  
-    c3  <- runModel.getMessageCol() 
-    str <- paste("data.frame(", c1, "=character(0), ", c2, "=character(0), ",
-                                c3, "=character(0), stringsAsFactors=FALSE)", sep="")
-    ret[[nm3]] <- eval(parse(text=str))   
+    ret[[nm3]] <- runModel.getEmptyErrorWarn()
   }
 
   # Re-arrange order of sheets if needed
   nms <- names(ret)
   if ((nms[1] == nm3) && (length(nms) > 1)) {
-    nm2        <- getEffectsName()
     obj1       <- ret[[nm1, exact=TRUE]]
     obj2       <- ret[[nm2, exact=TRUE]]
     obj3       <- ret[[nm3, exact=TRUE]]
@@ -264,8 +277,14 @@ runModel.setReturnDF <- function(x, varMap) {
     for (v in vars[tmp]) x[, v] <- as.numeric(x[, v])
   }
 
-  # Remove adj column (duplicated information)
-  if ("adj" %in% colnames(x)) x$adj <- NULL
+  # Remove columns
+  rem <- c("adj", "cohort", getModelSummaryFunCol(), 
+           getModelSummaryRunModeName(), getModelSummaryModelCol())
+  tmp <- rem %in% colnames(x)
+  rem <- rem[tmp]
+  if (length(rem)) {
+    for (v in rem) x[[v]] <- NULL
+  }
 
   # Make sure terms and exposure columns that have metabolites have
   #   the metabolite name instead of ...j
@@ -303,8 +322,6 @@ runModel.combineResObjects <- function(base, new, strat, stratNum) {
 
 runModel.combineResults <- function(base, new, strat, stratNum) {
 
-  ms.nm <- getModelSummaryName()
-  ef.nm <- getEffectsName()
   wr.nm <- runModel.getWarningsListName()
 
   if (!length(base)) base <- list()
@@ -320,16 +337,17 @@ runModel.combineResults <- function(base, new, strat, stratNum) {
     return(base)
   }
 
-  obj1 <- base[[ms.nm, exact=TRUE]]
-  obj2 <- new[[ms.nm, exact=TRUE]]
-  base[[ms.nm]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
+  nms <- getAllRetSheetNames()
+  nms <- nms[!(nms %in% getTable1DfName())]
+  n   <- length(nms)
+  if (!n) stop("INTERNAL CODING ERROR")
 
-  obj1 <- base[[ef.nm, exact=TRUE]]
-  obj2 <- new[[ef.nm, exact=TRUE]]
-  base[[ef.nm]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
-
-  obj2 <- new[[wr.nm, exact=TRUE]]
-  base[[wr.nm]] <- runModel.combineResObjects(warn1, obj2, strat, stratNum)
+  for (i in 1:n) {
+    nm         <- nms[i]
+    obj1       <- base[[nm, exact=TRUE]]
+    obj2       <- new[[nm, exact=TRUE]]
+    base[[nm]] <- runModel.combineResObjects(obj1, obj2, strat, stratNum) 
+  }
 
   base
 
@@ -483,12 +501,20 @@ runModel.main <- function(modeldata, metabdata, op) {
   # Make sure certain columns in the retured data frames are numeric
   ret  <- runModel.setReturnDF(ret,  modeldata$varMap)
   ret2 <- runModel.setReturnDF(ret2, modeldata$varMap)
+  
+  # Chemical enrichment using RaMP
+  retChem <- NULL
+  if (op[[getRampCallChemEnrichOpName()]]) {
+    retChem <- try(runModel.chemClassEnrichment(ret2, metabdata, op), silent=TRUE) 
+    rem.obj <- runmodel.checkForError(retChem, warnStr="ERROR", objStr="runModel.chemClassEnrichment", rem.obj=rem.obj) 
+  } 
   if (length(rem.obj)) rem.obj <- runModel.setReturnDF(rem.obj, modeldata$varMap)
 
   retlist          <- list()
   retlist[[ms.nm]] <- ret
   retlist[[ef.nm]] <- ret2
   retlist[[wr.nm]] <- rem.obj
+  if (is.data.frame(retChem)) retlist[[getRampChemEnrichDfName()]] <- retChem
 
   retlist
 
@@ -1351,3 +1377,21 @@ runModel.addMetabCols <- function(obj, metabdata, op) {
 
 }
 
+runModel.chemClassEnrichment <- function(df, metabdata, op) {
+
+  if (is.list(op)) {
+    ramp_op <- op[[getRampOpName(), exact=TRUE]]
+  } else {
+    ramp_op <- NULL
+  }
+  ret <- chemClassEnrichment(df, metabdata, op=ramp_op)
+  ret
+} 
+
+runModel.getInfoDF <- function(ret, modeldata, metabdata, op) {
+
+  if (!is.list(ret)) return(ret)
+  x <- try(getInfoTableDF(modeldata, metabdata, op), silent=TRUE)
+  ret[[getInfoTableDfName()]] <- x
+  ret
+}

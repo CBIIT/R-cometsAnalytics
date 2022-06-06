@@ -13,18 +13,23 @@
 #' @import plotly
 #' @import caret
 #' @import heatmaply
-#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm
+#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm p.adjust
 #' @importFrom tidyr gather
 #' @importFrom broom glance tidy
 #' @importFrom stats cor
 #' @importFrom MASS ginv
 #' @importFrom subselect trim.matrix
 #' @importFrom survival coxph Surv clogit strata
+#' @importFrom RaMP setConnectionToRaMP chemicalClassEnrichment
+#' @importFrom stringr str_locate
+#' @importFrom utils sessionInfo
+#' @importFrom mixmeta mixmeta
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runCorr}} (correlation analysis) \cr
-#' \code{\link{runModel}} (correlation, glm, lm, or coxph) \cr
+#' \code{\link{runModel}} (correlation, glm, lm, coxph, or clogit) \cr
 #' \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
+#' \code{\link{chemClassEnrichment}} (run RaMP::chemicalClassEnrichment) \cr
 #' \bold{Functions for graphics:} \cr
 #' \code{\link{plotVar}} (metabolite variance distribution plot) \cr
 #' \code{\link{plotMinvalues}} (distribution of missing values) \cr

@@ -162,93 +162,12 @@ getOutFileName <- function(cohortLabel, model, out.type) {
 
 } # END: getOutFileName
 
-df.add.cols <- function(addToDf, x, x.cols, miss.num=NA, miss.char="") {
-
-  tmp    <- !(x.cols %in% colnames(addToDf)) & (x.cols %in% colnames(x))
-  x.cols <- x.cols[tmp]
-  n.cols <- length(x.cols)
-  if (!n.cols) return(addToDf)
-  for (i in 1:n.cols) {
-    col <- x.cols[i]
-    if (is.numeric(x[, col, drop=TRUE])) {
-      addToDf[, col] <- miss.num
-    } else {
-      addToDf[, col] <- miss.char
-    }
-  }
-  addToDf
-
-} # END: df.add.col
-
-df.rbind.common <- function(base, new, doNotRemoveCols=NULL) {
-
-  ok.base <- nonEmptyDf(base)
-  ok.new  <- nonEmptyDf(new)
-  if (ok.base && !ok.new) {
-    return(base)
-  } else if (!ok.base && ok.new) {
-    return(new)
-  } else if (!ok.base && !ok.new) {
-    # Watch out for data frames with no rows, try not to return NULL
-    if (is.data.frame(base)) return(base) 
-    if (is.data.frame(new)) return(new) 
-    return(NULL)
-  }
-
-  cx.base <- colnames(base)
-  cx.new  <- colnames(new)
-  tmp     <- (cx.base %in% cx.new) | (cx.base %in% doNotRemoveCols)
-  cx.keep <- cx.base[tmp]
-  if (!length(cx.keep)) stop("INTERNAL CODING ERROR 1 in df.rbind.common")  
-  base    <- base[, cx.keep, drop=FALSE]
-  tmp     <- (cx.new %in% cx.base) | (cx.new %in% doNotRemoveCols)
-  cx.keep <- cx.new[tmp]
-  if (!length(cx.keep)) stop("INTERNAL CODING ERROR 2 in df.rbind.common")  
-  new     <- new[, cx.keep, drop=FALSE]
-  base    <- df.add.cols(base, new, colnames(new),  miss.num=NA, miss.char="")
-  new     <- df.add.cols(new, base, colnames(base), miss.num=NA, miss.char="")
-  cx.base <- colnames(base)
-  cx.new  <- colnames(new)
-  if (!all(cx.new %in% cx.base)) stop("INTERNAL CODING ERROR 3 in df.rbind.common")
-  ret     <- rbind(base, new[, cx.base, drop=FALSE])
-  ret
-
-} # END: df.rbind.common
-
-df.rbind.all <- function(base, new) {
-
-  ok.base <- nonEmptyDf(base)
-  ok.new  <- nonEmptyDf(new)
-  if (ok.base && !ok.new) {
-    return(base)
-  } else if (!ok.base && ok.new) {
-    return(new)
-  } else if (!ok.base && !ok.new) {
-    # Watch out for data frames with no rows, try not to return NULL
-    if (is.data.frame(base)) return(base) 
-    if (is.data.frame(new)) return(new) 
-    return(NULL)
-  }
-
-  base    <- df.add.cols(base, new, colnames(new),  miss.num=NA, miss.char="")
-  new     <- df.add.cols(new, base, colnames(base), miss.num=NA, miss.char="")
-  cx.base <- colnames(base)
-  cx.new  <- colnames(new)
-  if (!all(cx.new %in% cx.base)) stop("INTERNAL CODING ERROR 1 in df.rbind.all")
-  ret     <- rbind(base, new[, cx.base, drop=FALSE])
-  ret
-
-} # END: df.rbind.all
-
 combine2Lists <- function(l1, l2, op) {
 
   ret             <- list()
   common          <- op[[getOutCommonColsOpName(), exact=TRUE]]
   doNotRemoveCols <- op$doNotRemoveCols
-  ms.nm           <- getModelSummaryName()
-  ef.nm           <- getEffectsName()
-  wr.nm           <- runModel.getWarningsListName()
-  for (nm in c(ms.nm, ef.nm, wr.nm)) {
+  for (nm in getAllRetSheetNames()) {
     df1 <- l1[[nm,exact=TRUE]]
     df2 <- l2[[nm,exact=TRUE]]
     if (common) {
@@ -308,9 +227,6 @@ combine2ModelObj <- function(obj1, obj2, op) {
   ret          <- NULL
   n1           <- length(obj1)
   n2           <- length(obj2)
-  ms.nm        <- getModelSummaryName()
-  ef.nm        <- getEffectsName()
-  wr.nm        <- runModel.getWarningsListName()
   cls1         <- class(obj1)
   cls2         <- class(obj2)
   cls.runCorr  <- class_runCorr()
@@ -345,10 +261,9 @@ getModelFunctionName <- function(runModelObj) {
   if (!n) return(ret)
   if (nonEmptyDf(runModelObj)) return(getOldCorrModelName())
   if (is.list(runModelObj)) {
-    modDfNm <- getModelSummaryName()
-    modCol  <- getModelSummaryFunCol()
-    tmp     <- tmp[[modDfNm, exact=TRUE]]
-    if (nonEmptyDfHasCols(tmp, modCol)) ret <- tmp[1, modCol, drop=TRUE]
+    nm  <- getInfoTableDfName()
+    x   <- runModelObj[[nm, exact=TRUE]]
+    ret <- getInfoTableValue(x, getOpModelName(), ifNotFound=NULL)
   }
 
   ret
@@ -394,10 +309,8 @@ updateModelObj <- function(obj, model, modelNumber) {
   if (any(cls %in% class_runCorr())) {
     ret <- updateModelDF(ret, model, modelNumber)
   } else if (any(cls %in% class_runModel())) {
-    ms <- getModelSummaryName()
-    ef <- getEffectsName()
-    wr <- runModel.getWarningsListName()
-    for (nm in c(ms, ef, wr)) {
+    nms <- getAllRetSheetNames() 
+    for (nm in nms) {
       tmp <- ret[[nm, exact=TRUE]]
       if (!is.null(tmp)) ret[[nm]] <- updateModelDF(tmp, model, modelNumber)
     }
@@ -515,7 +428,7 @@ runAllModels.getMergeStr <- function(readData, mymod, modelIndex, op) {
 
   if (val == getOutMergeOpByModelFunc()) {
     if (!("try-error" %in% class(mymod))) ret <- mymod$options$model
-    if (ret == "") ret <- getModelFuncFromData(readData, modelIndex)
+    #if (ret == "") ret <- getModelFuncFromData(readData, modelIndex)
   } else {
     ret <- readData$mods[modelIndex, getModelOptionsIdCol(), drop=TRUE]
   }
@@ -544,6 +457,7 @@ runAllModels.orderDfVars <- function(x) {
   if ((length(cx) == length(cx2)) && !all(cx == cx2)) {
     x <- x[, cx2, drop=FALSE]
   }
+
   x
 
 } # END: runAllModels.orderDfVars
@@ -552,10 +466,16 @@ runAllModels.orderObjVars <- function(obj) {
 
   cls <- class(obj)
   if (class_runModel() %in% cls) {
-    sheets <- runModel.getRetSheetNames()
+    tsheet <- getTable1DfName()
+    sheets <- getAllRetSheetNames()
     for (sheet in sheets) {
-      x            <- obj[[sheet, exact=TRUE]]
-      obj[[sheet]] <- runAllModels.orderDfVars(x) 
+      x <- obj[[sheet, exact=TRUE]]
+      x <- runAllModels.orderDfVars(x) 
+      if ((sheet == tsheet) && nonEmptyDf(x)) {
+        cols <- getTable1ColNames()$cols
+        x    <- orderVars(x, cols)
+      }
+      obj[[sheet]] <- x
     }
   } else if (class_runCorr() %in% cls) {
     obj <- runAllModels.orderDfVars(obj) 

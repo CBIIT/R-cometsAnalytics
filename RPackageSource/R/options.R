@@ -1,4 +1,4 @@
-#' A list of 16:
+#' A list of 18:
 #' \itemize{
 #' \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
 #'                         design matrix. The default value is 0.97.}
@@ -57,6 +57,11 @@
 #'                             MODELS sheet of the input Excel file is used to identify the models that will be 
 #'                             merged together. Setting to "none" will not merge results.
 #'                             The default is "none".}
+#' \item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
+#'                            The default is 1.}
+#' \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
+#'                             chemical class enrichment.
+#'                            The default is 0.05.}
 #' }
 #'
 #' @name options
@@ -92,8 +97,7 @@ NULL
 runModel.checkOptions <- function(op, modeldata) {
 
   if (!length(op)) op <- list()
-  if (!is.list(op)) stop("op must be a list")
-   
+  if (!is.list(op)) stop("op must be a list") 
   valid <- getAllOptionNames()
 
   # Check for valid names in the list
@@ -268,7 +272,7 @@ checkModelOptions <- function(op, modeldata) {
 getAllOptionNames <- function() {
 
   tmp   <- getValidGlobalOps()$valid
-  valid <- c(tmp, getModelOpsName())
+  valid <- c(tmp, getModelOpsName(), getRampOpName())
 
   valid
 
@@ -284,14 +288,16 @@ getValidGlobalOps <- function() {
   out.type   <- getOutTypeOpName()
   out.common <- getOutCommonColsOpName()
   out.merge  <- getOutMergeOpName()
+  chemEnrich <- getRampCallChemEnrichOpName()
+  cE.pval    <- getRampPvalOpName()
 
   ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
                    out.type, out.merge)
   ops.charVec <- c(out.metabs)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
-                   add.ci, exp.parms, 
+                   add.ci, exp.parms, cE.pval,
                    "DEBUG", "DONOTRUN")
-  ops.log  <- c("check.illCond", "check.design", out.common)
+  ops.log  <- c("check.illCond", "check.design", out.common, chemEnrich)
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
                    check.design=TRUE, max.nstrata=10,
@@ -304,6 +310,8 @@ getValidGlobalOps <- function() {
   default[[out.type]]   <- getOutTypeOpDefault()
   default[[out.common]] <- getOutCommonColsOpDefault()
   default[[out.merge]]  <- getOutMergeOpDefault()
+  default[[chemEnrich]] <- getRampCallChemEnrichOpDefault()
+  default[[cE.pval]]    <- getRampPvalOpDefault()
 
   # Be careful with exp.parms option, as it can be NULL
   defval <- getExpParmsOpDefault() 
@@ -381,7 +389,6 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
 } # END: checkGlobalOpsFromCharVecs
 
 checkOptionListNames <- function(op, valid, name) {
-
     if (!length(op)) return(NULL)
 
     # Names cannot be ""
@@ -615,8 +622,8 @@ check.range <- function(x, name, lower, upper, upper.inc=TRUE) {
 check.list <- function(x, name, valid) {
 
   if (!is.list(x)) stop(paste("ERROR: ", name, " must be a list", sep=""))
-  ret <- checkOptionListNames(x, valid, name) 
-  ret 
+  checkOptionListNames(x, valid, name) 
+  NULL 
 
 } # END: check.list
 
@@ -725,6 +732,36 @@ checkOp_output.merge <- function(x) {
     ret <- check.string(x, getOutMergeOpVals(), getOutMergeOpName())
   }
   ret
+}
+checkOp_chemEnrich <- function(x) {
+
+  if (!length(x)) {
+    ret <- getRampCallChemEnrichOpDefault()
+  } else {
+    ret <- check.logical(x, getRampCallChemEnrichOpName()) 
+  }
+  ret
+} 
+checkOp_chemEnrich.adjPvalue <- function(x) {
+ if (!length(x)) {
+    ret <- getRampPvalOpDefault()
+  } else {
+    ret <- check.range(x, "chemEnrich.adjPvalue", 0, 1)
+  }
+  ret
+} 
+
+checkFiles <- function(filevec, name="filevec") {
+
+  if (!length(filevec)) stop("ERROR: No files specified")
+  if (!is.character(filevec)) stop(paste0("ERROR: ", name, " must be a character vector of files"))
+  filevec <- trimws(filevec)
+  tmp     <- !file.exists(filevec)
+  if (any(tmp)) {
+    print(filevec[tmp])
+    stop("ERROR: the above file(s) do not exist")
+  }
+  filevec
 }
 
 getOptionNameAndValue <- function(str, sep="=") {
