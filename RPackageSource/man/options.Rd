@@ -4,7 +4,7 @@
 \alias{options}
 \title{options list}
 \description{
-A list of 16:
+A list of 18:
 \itemize{
 \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
                         design matrix. The default value is 0.97.}
@@ -63,6 +63,11 @@ A list of 16:
                             MODELS sheet of the input Excel file is used to identify the models that will be 
                             merged together. Setting to "none" will not merge results.
                             The default is "none".}
+\item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
+                           The default is 1.}
+\item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
+                            chemical class enrichment.
+                           The default is 0.05.}
 }
 }
 \details{

@@ -42,9 +42,9 @@ all the below names may not appear in the data frame.
 \item{\code{stratavar}}{ Stratum variable(s)}
 \item{\code{strata}}{ Stratum level(s)}
 \item{\code{term}}{ Variable in the model}
-\item{\code{wald.pvalue}}{ P-value from the Wald test of the given variable. 
+\item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
-                          variable is categorical.}
+                          exposure is categorical.}
 }
 }
 \details{
