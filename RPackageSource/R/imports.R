@@ -20,7 +20,6 @@
 #' @importFrom MASS ginv
 #' @importFrom subselect trim.matrix
 #' @importFrom survival coxph Surv clogit strata
-#' @importFrom RaMP setConnectionToRaMP chemicalClassEnrichment
 #' @importFrom stringr str_locate
 #' @importFrom utils sessionInfo
 #' @importFrom mixmeta mixmeta
@@ -29,7 +28,6 @@
 #' \code{\link{runCorr}} (correlation analysis) \cr
 #' \code{\link{runModel}} (correlation, glm, lm, coxph, or clogit) \cr
 #' \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
-#' \code{\link{chemClassEnrichment}} (run RaMP::chemicalClassEnrichment) \cr
 #' \bold{Functions for graphics:} \cr
 #' \code{\link{plotVar}} (metabolite variance distribution plot) \cr
 #' \code{\link{plotMinvalues}} (distribution of missing values) \cr
