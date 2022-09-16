@@ -64,7 +64,7 @@ A list of 18:
                             merged together. Setting to "none" will not merge results.
                             The default is "none".}
 \item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
-                           The default is 1.}
+                           The default is 0.}
 \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
                             chemical class enrichment.
                            The default is 0.05.}
