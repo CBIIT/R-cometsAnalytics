@@ -9,6 +9,14 @@ The unit tests are automatically run when R CMD check is invoked on the RcometsA
 See the plots in folder https://github.com/CBIIT/R-cometsAnalytics/tree/v1.7/Differences_with_v1.6/plots for the
   differences in correlations and p-values between versions 1.6 and 1.7.
 
+Survival model:
+Simulations were run to compare SAS PROC PHREG to the R coxph function in the survival package.
+The option ties="exact" in R corresponds to the ties=discrete in SAS.
+The fitted results between the two software is similar: 
+  the maximum difference between the estimated parameters is on the order of 10^-5 with 
+  no covariate adjustments, and 10^-4 with three continuous and 5 categorical covariates.
+
+
 History:
 2021-05-17 New test object files were created due to the change in output columns on the
            returned data frames from runModel. These changes are associated with the new
