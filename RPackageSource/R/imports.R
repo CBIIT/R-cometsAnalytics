@@ -22,7 +22,6 @@
 #' @importFrom survival coxph Surv clogit strata
 #' @importFrom stringr str_locate
 #' @importFrom utils sessionInfo
-#' @importFrom mixmeta mixmeta
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runCorr}} (correlation analysis) \cr
