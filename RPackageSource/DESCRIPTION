@@ -14,7 +14,7 @@ Description: This R package support all cohort-specific analyses of the COMETS
 Depends: R (>= 3.5.0)
 Imports: readxl, rio, dplyr, plyr, plotly, tidyr, heatmaply, stringr,
         data.table, caret, subselect, broom, psych, MASS, ppcor,
-        survival, mixmeta
+        survival
 Suggests: Hmisc, knitr, testthat, rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
