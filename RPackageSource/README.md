@@ -25,7 +25,7 @@ library(RcometsAnalytics)
 [Click here](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v2.1.pdf) to view the user manual for the COMETS R package.
 
 # Vignette
-[Click here](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/cometsvignette_v2.0.html) to view a detailed vignette that outlines the basic steps of the software.
+[Click here](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/cometsvignette_v2.1.html) to view a detailed vignette that outlines the basic steps of the software.
 
 # Example Data
 We have provided an example input file for users to mimic when creating their own.  This data can be found in the folder inst/extdata.
