@@ -4,6 +4,8 @@ CHANGES IN VERSION 2.1.0
 NEW FEATURES
 
     o Survival and conditional logistic regression models are now included for analyses. 
+    o The output from runModel now includes a "Table 1" data frame containing summary information for model variables. 
+    o The output from runModel now includes an "Info" data frame containing model and session information. 
     o Options for merging model results together and specifying the type of output file are now available.
 
 NOTES
