@@ -3,7 +3,7 @@ CHANGES IN VERSION 2.1.0
 
 NEW FEATURES
 
-    o Survival and conditional logistic regression models are now included for analyses. 
+    o Survival and conditional logistic regression models are now included for analyses. See NOTES.
     o The output from runModel now includes a "Table 1" data frame containing summary information for model variables. 
     o The output from runModel now includes an "Info" data frame containing model and session information. 
     o Options for merging model results together and specifying the type of output file are now available.
@@ -11,6 +11,9 @@ NEW FEATURES
 NOTES
 
     o For correlation analyses the "corr" column in the Effects data frame has been renamed to "estimate".
+    o For survival models in batch mode, set the FUNCTION column in the MODEL_TYPES sheet to coxph and set the TIME column in the MODELS sheet to the time-to-event variable.
+    o For conditional logistic models in batch mode, set the FUNCTION column in the MODEL_TYPES sheet to clogit and set the GROUP column in the MODELS sheet to the matched set variable.
+
 
 
 CHANGES IN VERSION 2.0.0
