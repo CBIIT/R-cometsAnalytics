@@ -2,15 +2,15 @@
 title: "Running RcometsAnalytics locally"
 author: "Ewy Mathé, Ella Temprosa, Bill Wheeler"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
-    toc: true
+    toc: yes
     toc_float:
-      collapsed: false
-vignette: >
-  %\VignetteIndexEntry{Running RcometsAnalytics locally}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+      collapsed: no
+  pdf_document:
+    toc: yes
+vignette: |
+  %\VignetteIndexEntry{Running RcometsAnalytics locally} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 ---
 
 ## Introduction
@@ -33,8 +33,8 @@ The required input file should be in excel format with the following 6 sheets:
   2. [**SubjectMetabolites**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/SubjectMetabolites.jpg) - abundances in columns and subject in rows
   3. [**SubjectData**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/SubjectData.jpg) - other exposure and adjustment variables
   4. [**VarMap**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/VarMap.jpg) - maps the variables needed to conduct the cohort specific analysis. Specify the name of variables under CohortVariable column.
-  5. [**Models**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/Models.jpg) - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
-  6. [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg) - sheet containing model specific options
+  5. [**Models**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/Models_v2.1.JPG) - models used to conduct COMETS analysis. Outcomes, exposures and adjustment can specify multiple covariates delimited by spaces (ie: age bmi).
+  6. [**Model_Types**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/Model_Types_v2.1.JPG) - sheet containing model specific options
 
 Complete documentation of the various sheets can be found in the package 
  [**documentation**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual.pdf).
@@ -212,7 +212,43 @@ list with family set to "poisson".
   print(poisson_results)
 ```
 
-### 9. Run Analysis on all models defined in the input Excell sheet ('super-batch' mode)
+### 9. Cox proportional hazards regression (survival model) 
+Call *getModelData()* to define a model which adjusts for age group, 
+has event as the outcome variable, time as the time-to-event variable, 
+and has lactose and lactate as the exposure variables. 
+The variable event must be binary, coded as 0 for non-events and 1 for events.
+The variable time must be positive.
+```{r}
+  exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+                   outcomes="event", timevar="time", exposures=c("lactose","lactate"))
+```
+To run a survival model, the list of options op must also include a model.options 
+list with model set to "coxph".
+```{r}
+  op <- list(model="coxph")
+  coxph_results  <- RcometsAnalytics::runModel(exmodeldata, exmetabdata, "DPP", op=op)
+  print(coxph_results$ModelSummary)
+```
+
+### 10. Conditional logistic regression model
+Call *getModelData()* to define a model which adjusts for age group, 
+has nested_case as the outcome variable, matchedSet as the group variable, 
+and has lactose and lactate as the exposure variables. 
+The variable nested_case must be binary, coded as 0 for controls and 1 for cases.
+The variable matchedSet defines the matched sets of groups in the data.
+```{r}
+  exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
+                   outcomes="nested_case", groupvar="matchedSet", exposures=c("lactose","lactate"))
+```
+To run a survival model, the list of options op must also include a model.options 
+list with model set to "clogit".
+```{r}
+  op <- list(model="clogit")
+  clogit_results  <- RcometsAnalytics::runModel(exmodeldata, exmetabdata, "DPP", op=op)
+  print(clogit_results$ModelSummary)
+```
+
+### 11. Run Analysis on all models defined in the input Excel sheet ('super-batch' mode)
 
 All models desginated in the input file can be run with one command, 
 and individual output Excel files or correlation results will be written
@@ -220,23 +256,6 @@ and individual output Excel files or correlation results will be written
 
 ```{r eval=F}
  allresults <- RcometsAnalytics::runAllModels(exmetabdata,writeTofile=TRUE)
-```
-
-### 10. Backwards compatibility with older Excel files and runCorr.
-Older Excel files that do not have a 
-  [**ModelOptions**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/ModelOptions.jpg)
- sheet can still be used with newer versions of the RcometsAnalytics R package. The runCorr function is
- kept in the package for backwards compatibility and will return a single data frame as in the
- older versions of RcometsAnalytics. Below is a comparison of the output from a correlation analysis
- using runCorr and runModel.
-```{r}
- exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modelspec="Interactive", adjvars="age_grp",
-                   outcomes=c("lactose","lactate"), exposures=c("age","bmi_grp"))
-
- old_corr  <- RcometsAnalytics::runCorr(exmodeldata,exmetabdata,"DPP")
- new_corr  <- RcometsAnalytics::runModel(exmodeldata,exmetabdata,"DPP")
- print(old_corr)
- print(new_corr)
 ```
 
 
