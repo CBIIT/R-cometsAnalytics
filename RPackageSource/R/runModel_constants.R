@@ -85,6 +85,11 @@ getOutMergeOpVals         <- function() {c(getOutMergeOpAll(), getOutMergeOpNone
                                            getOutMergeOpByModelFunc(), getOutMergeOpByModelSpec())}
 getOutMergeOpDefault      <- function() {getOutMergeOpNone()} 
 getOutMergeAllStr         <- function() {"all_models"}
+getOutfileSpCharSep       <- function() {"_"}
+getOutfileCohortSep       <- function() {"__"}
+getOutfileModelPart       <- function() {1}
+getOutfileCohortPart      <- function() {2}
+
 
 # For Effects data frame
 getEffectsName             <- function() {"Effects"}

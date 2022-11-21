@@ -153,14 +153,31 @@ getOutExtension <- function(out.type) {
 # Function to create output file name
 getOutFileName <- function(cohortLabel, model, out.type) {
 
-  # Replace non-alphanumeric chars with underscore
-  searchStr <- "[^[:alnum:]._-]"
-  str.model <- gsub(searchStr, "_", model)
-  str.label <- gsub(searchStr, "_", cohortLabel)
-  fname     <- paste0(str.model, "_", str.label, "_", Sys.Date(), getOutExtension(out.type))
+  # Have file names in the form model__cohort__date, so it can easily be parsed
+  sep <- getOutfileCohortSep()
+
+  # Normalize strings
+  str.model <- normOutFileStr(model)
+  str.label <- normOutFileStr(cohortLabel)
+  fname     <- paste0(str.model, sep, str.label, sep, Sys.Date(), getOutExtension(out.type))
   fname
 
 } # END: getOutFileName
+
+normOutFileStr <- function(str) {
+
+  # Replace non-alphanumeric chars with a blank space
+  searchStr <- "[^[:alnum:]._-]"
+  ret       <- gsub(searchStr, " ", str)
+
+  # Compress multiple blanks
+  ret <- gsub("\\s+", " ", trimws(ret)) 
+
+  # Replace blank with other char
+  ret <- gsub(" ", getOutfileSpCharSep(), ret) 
+
+  ret
+}
 
 combine2Lists <- function(l1, l2, op) {
 
