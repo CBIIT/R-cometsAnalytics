@@ -228,6 +228,7 @@ filterCOMETSinput <- function(readData,where=NULL) {
   # create rules for each filter
   for (i in 1:length(myfilts)) {
     myrule <- myfilts[i]
+
     if (length(grep("<=",myrule))>0) {
       mysplit <- strsplit(myrule,"<=")[[1]]
       myvar = gsub(" ","",mysplit[1])

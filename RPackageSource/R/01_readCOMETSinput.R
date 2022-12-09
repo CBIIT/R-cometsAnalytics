@@ -29,7 +29,7 @@
 #' \bold{Models} \cr
 #' A table where each row represents a model to be run, and with columns \code{MODEL}, 
 #' \code{OUTCOMES}, \code{EXPOSURE}, \code{ADJUSTMENT},
-#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODEL_TYPE}, \code{TIME}, \code{GROUP}. All variable names in this
+#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODEL_TYPE}. All variable names in this
 #' table must match variable names in the \code{VARREFERENCE} column of the \bold{VarMap} sheet.
 #' The \code{MODEL} column is a label for the model. The \code{OUTCOMES} and \code{EXPOSURE} columns define the 
 #' outcome and exposure variables for the model. Use \code{All metabolites} to specify
@@ -47,10 +47,7 @@
 #' logically connected with the \code{&} operator. 
 #' For example, the \code{WHERE} condition \code{age > 50 , bmi >= 22} will include the subjects older than 50 AND with
 #' bmi >= 22. Values in the \code{MODEL_TYPE} column must match with the \code{MODEL_TYPE} column
-#' in the \bold{Model_Types} sheet. The \code{TIME} column is only required when survival models are run.
-#' This column can contain a single time variable or two time variables separated by a space.
-#' The \code{GROUP} column is only required when conditional logistic regression models are run.
-#' This column can contain only a single variable that defines the groups (sets, strata).
+#' in the \bold{Model_Types} sheet. 
 #' This sheet is not required when running in interactive mode, but is required when
 #' running in batch mode. \cr
 
@@ -128,7 +125,7 @@ readCOMETSinput <- function(file) {
     }
   } else {
     msg <- paste0("NOTE: the ", modelsSheet, " sheet was not found in input excel file.",
-                  " Assuming RcometsAnalytics will be run in interactive mode.\n")
+                  " Assuming COMETS will be run in interactive mode.\n")
     cat(msg)
   } 
 
@@ -263,7 +260,6 @@ readCOMETSinput <- function(file) {
                         "n", "stratavar", "strata")
 
   dtalist[[getMetabDataOpsName()]] <- dta.options
-  dtalist[[getInputFileOpsName()]] <- file
 
   # Test the models in the Models sheet 
   err <- infile.checkAllModels(dtalist)
@@ -274,6 +270,7 @@ readCOMETSinput <- function(file) {
     cat(msg)
     warning(msg)
   } 
+
   return(dtalist)
 
 }
@@ -285,7 +282,7 @@ readCOMETSinput <- function(file) {
 #'
 #' @examples
 #' \dontrun{
-#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
+#' dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
 #' allmodeloutput <- runAllModels(exmetabdata)
@@ -302,7 +299,7 @@ runDescrip<- function(readData){
         catvars<-names(readData$subjdata)[which(sapply(readData$subjdata, is.factor)==TRUE)]
 
         msdata<-readData$subjdata %>%
-                select_(catvars)
+                select(catvars)
         msdata <- suppressWarnings(data.table::melt(readData$subjdata,measure.vars=catvars))
         sumcat <- msdata %>%
         group_by(variable, value) %>%
