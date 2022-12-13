@@ -28,6 +28,7 @@ all the below names may not appear in the data frame.
 \item{\code{message}}{ Error message produced from the modeling function}
 \item{\code{model}}{ Model label from \code{\link{getModelData}}}
 \item{\code{model_function}}{ Model function used in \code{\link{runModel}}}
+\item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 \item{\code{nobs}}{ Number of observations used}
 \item{\code{null.deviance}}{ Deviance of the NULL model}
 \item{\code{outcome}}{ Outcome variable}
@@ -41,9 +42,9 @@ all the below names may not appear in the data frame.
 \item{\code{stratavar}}{ Stratum variable(s)}
 \item{\code{strata}}{ Stratum level(s)}
 \item{\code{term}}{ Variable in the model}
-\item{\code{wald.pvalue}}{ P-value from the Wald test of the given variable. 
+\item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
-                          variable is categorical.}
+                          exposure is categorical.}
 }
 }
 \details{

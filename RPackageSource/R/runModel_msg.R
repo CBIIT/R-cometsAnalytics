@@ -1,4 +1,19 @@
 
+runmodel.checkForError <- function(obj, warnStr="ERROR", objStr="", rem.obj=NULL, msg=NULL) {
+
+  if ("try-error" %in% class(obj)) {
+    #if (is.null(msg)) msg <- runModel.getErrorMsg(obj)
+    if (is.null(msg)) msg <- getErrorMsgFromTryError(obj, addToEnd=NULL)
+    tmp <- list()
+    tmp[[runModel.getWarningCol()]] <- warnStr
+    tmp[[runModel.getObjectCol()]]  <- objStr
+    tmp[[runModel.getMessageCol()]] <- msg
+    rem.obj <- runmodel.addWarning(rem.obj, tmp)
+  }
+  rem.obj
+
+}
+
 runmodel.addWarning <- function(obj, newList) {
 
   if (!length(newList)) return(obj)
@@ -68,6 +83,18 @@ runModel.getRemMessage <- function(rem.obj, vars, collapse=NULL, varMap=NULL) {
 
 } # END: runModel.getRemMessage
 
+getErrorMsgFromTryError <- function(obj, addToEnd=NULL) {
+
+  ret <- NULL
+  if ("try-error" %in% class(obj)) {
+    msg <- attr(obj, "condition")
+    ret <- msg[["message", exact=TRUE]]
+  }
+  if (length(addToEnd) && length(ret)) ret <- paste0(ret, addToEnd) 
+
+  ret
+
+} # END: getErrorMsgFromTryError
 
 runModel.getErrorMsg <- function(obj) {
 

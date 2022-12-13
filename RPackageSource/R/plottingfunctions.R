@@ -183,7 +183,7 @@ showModel <- function(obj, nlines=10) {
 #' @export
 
 showHeatmap <- function (ccorrList, strata=NULL,
-       rowsortby = "corr",
+       rowsortby = "estimate",
        plothgt=700,
        plotwid=800,
        colscale="RdYlBu") {
@@ -217,7 +217,8 @@ showHeatmap <- function (ccorrList, strata=NULL,
         ccorrmat=rbind(ccorrmat,ccorrmat)
   }
 
-  plotly::plot_ly(z = signif(ccorrmat$corr,2), x = ccorrmat$exposurespec,
+  corrv <- getCorrEstNameFromDF(ccorrmat)
+  plotly::plot_ly(z = signif(ccorrmat[[corrv]],2), x = ccorrmat$exposurespec,
 	   y = ccorrmat$outcomespec,
 	   type="heatmap", colorscale = colscale,
 	   colorbar = list(title = "Correlation"),
@@ -286,7 +287,8 @@ showHClust <- function (ccorrList, strata=NULL,
   tname <- getEffectsTermName()
   if (!(tname %in% colnames(ccorrmat))) tname <- "exposurespec"
   oname <- getEffectsOutcomespecName()
-  cname <- getEffectsCorrEstName()
+  #cname <- getEffectsCorrEstName()
+  cname <- getCorrEstNameFromDF(ccorrmat)
 
   # Note, using outcome spec, not outcome because multiple outcomespec can map to 
   # the same outcome (which is the harmonized id)
@@ -294,9 +296,7 @@ showHClust <- function (ccorrList, strata=NULL,
     ccorrmat %>% dplyr::select(all_of(oname), all_of(tname), all_of(cname)) %>% 
 	tidyr::spread(tname, cname)
   rownames(excorr) <- excorr[, 1]
-
   ncols <- ncol(excorr)
-
   if (ncols <= 2) stop("Cannot run heatmap because there is only one exposure variable")
  
   # Get 10 colors
@@ -339,12 +339,25 @@ subset_ccorrmat <- function(ccorrmat, strata.number, print=1) {
       cat(msg)
     }
   }
-  tmp      <- is.finite(ccorrmat[, getEffectsCorrEstName()])
+
+  corrv    <- getCorrEstNameFromDF(ccorrmat)
+  tmp      <- is.finite(ccorrmat[, corrv])
   ccorrmat <- ccorrmat[tmp, , drop=FALSE]
   if (!nrow(ccorrmat)) stop("ERROR: correlation matrix contains all non-finite values")
 
   ccorrmat
 }
+
+getCorrEstNameFromDF <- function(x) {
+
+  cx  <- colnames(x)
+  ret <- getEffectsCorrEstName()
+  if (ret %in% cx) return(ret)
+  ret <- getEffectsCorrEstOldName()
+  if (ret %in% cx) return(ret)
+  stop("ERROR: correlation column not found")
+
+} # END: getCorrEstNameFromDF
 
 get_ccorrmat <- function(obj) {
   
@@ -355,6 +368,8 @@ get_ccorrmat <- function(obj) {
   } else if (is.list(obj)) {
     ret <- obj[[getEffectsName(), exact=TRUE]]
   }
+  class(ret) <- "data.frame"
+
   ret
 
 } 

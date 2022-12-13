@@ -17,7 +17,8 @@ runModel(modeldata, metabdata, cohortLabel = "", op = NULL)
 }
 \value{
 A list of objects with names \code{\link{ModelSummary}},
-       \code{\link{Effects}}, and \code{\link{Errors_Warnings}}. \cr
+       \code{\link{Effects}}, \code{\link{Errors_Warnings}},
+       \code{\link{Table1}}, \code{Info}. \cr
 \bold{Important: check the \code{adjvars.removed} column in the
  \code{\link{ModelSummary}} data frame to see if any adjustment variables
  were dropped from the model, and use caution interpreting results

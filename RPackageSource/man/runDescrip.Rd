@@ -17,7 +17,7 @@ This function provides a description of the input data (for categorical data, th
 }
 \examples{
 \dontrun{
-dir <- system.file("extdata", package="COMETS", mustWork=TRUE)
+dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
 allmodeloutput <- runAllModels(exmetabdata)

@@ -1,11 +1,11 @@
 #' @docType package
-#' @name RcometsAnalytics
+#' @name RcometsAnalytics-package
+#' @alias RcometsAnalytics
 #' @title RcometsAnalytics R package
 #' @description This R package supports all cohort-specific analyses of
 #'        the COMETS consortium \url{https://www.comets-analytics.org/}. 
 #' Data are not saved in the system but
 #'        output must be downloaded and submitted for meta-analyses.
-#'  import only functions needed
 #' @importFrom readxl read_excel
 #' @importFrom plyr mapvalues
 #' @import dplyr
@@ -13,16 +13,19 @@
 #' @import plotly
 #' @import caret
 #' @import heatmaply
-#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm
+#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm p.adjust
 #' @importFrom tidyr gather
 #' @importFrom broom glance tidy
 #' @importFrom stats cor
 #' @importFrom MASS ginv
 #' @importFrom subselect trim.matrix
+#' @importFrom survival coxph Surv clogit strata
+#' @importFrom stringr str_locate
+#' @importFrom utils sessionInfo
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runCorr}} (correlation analysis) \cr
-#' \code{\link{runModel}} (correlation, glm or lm) \cr
+#' \code{\link{runModel}} (correlation, glm, lm, coxph, or clogit) \cr
 #' \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
 #' \bold{Functions for graphics:} \cr
 #' \code{\link{plotVar}} (metabolite variance distribution plot) \cr

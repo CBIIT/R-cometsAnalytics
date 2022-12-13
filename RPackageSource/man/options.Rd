@@ -4,7 +4,7 @@
 \alias{options}
 \title{options list}
 \description{
-A list of 12:
+A list of 18:
 \itemize{
 \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
                         design matrix. The default value is 0.97.}
@@ -22,11 +22,11 @@ A list of 12:
 \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
                    The default is 10.}
 \item{\code{model}}{ String for the model function. Currently, it must be one of
-                     "correlation", "lm", or "glm". The default is "correlation".} 
+                     "correlation", "lm", "glm", "coxph", or "clogit". The default is "correlation".} 
 \item{\code{model.options}}{ List of options specific for the model. 
        See \code{\link{correlation.options}}, \code{\link{glm.options}},
-       and \code{\link{lm.options}} for options specific to
-\code{model="correlation", "lm", "glm"} respectively.        
+       \code{\link{lm.options}}, \code{\link{coxph.options}} and \code{\link{clogit.options}} for options specific to \cr
+\code{model="correlation", "lm", "glm", "coxph", "clogit"} respectively.        
                      The default is NULL.} 
 \item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
                         option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
@@ -38,10 +38,10 @@ A list of 12:
                            summary statistics for the exposure will be output.
                            This option is ignored with \code{model = "correlation"}.
                            The default is "exposure".}
-\item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate glm parameter estimates. 
+\item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate parameter estimates. 
                         Standard errors are obtained from the delta method. 
-                        The default is NULL, so that estimates from glm models with 
-                        family="binomial" will be exponentiated, and not otherwise.}
+                        The default is NULL, so that estimates from logistic regression and survival models
+                        will be exponentiated, and not otherwise.}
 \item{\code{output.metab.cols}}{ Character vector of column names in the \code{METABOLITES}
                             sheet to be output in the \code{\link{ModelSummary}} and \code{\link{Effects}}
                             data frames. Metabolite ids are matched first using the 
@@ -51,6 +51,23 @@ A list of 12:
                            \code{\link{ModelSummary}} data frame. Currently, it must be "anova" or "all".
                            This option is ignored with \code{model = "correlation"}.
                            The default is "anova".}
+\item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
+                           See \code{output.common.cols} and \code{output.merge}. \cr
+                           The default is "xlsx".}
+\item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_model_type" or "none".
+                            This option is used to merge model results together in order to reduce
+                            the number of output files. Setting to "all" will merge all model results together
+                            and output them to a single file. Setting to "by_function" will merge results from the
+                            same model function together and output to a file with the model function contained
+                            in the output file name. Similarly for "by_model_type", where the MODEL_TYPE column in the 
+                            MODELS sheet of the input Excel file is used to identify the models that will be 
+                            merged together. Setting to "none" will not merge results.
+                            The default is "none".}
+\item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
+                           The default is 0.}
+\item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
+                            chemical class enrichment.
+                           The default is 0.05.}
 }
 }
 \details{

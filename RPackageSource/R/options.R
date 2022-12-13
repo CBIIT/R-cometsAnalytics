@@ -1,4 +1,4 @@
-#' A list of 12:
+#' A list of 18:
 #' \itemize{
 #' \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
 #'                         design matrix. The default value is 0.97.}
@@ -16,11 +16,11 @@
 #' \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
 #'                    The default is 10.}
 #' \item{\code{model}}{ String for the model function. Currently, it must be one of
-#'                      "correlation", "lm", or "glm". The default is "correlation".} 
+#'                      "correlation", "lm", "glm", "coxph", or "clogit". The default is "correlation".} 
 #' \item{\code{model.options}}{ List of options specific for the model. 
 #'        See \code{\link{correlation.options}}, \code{\link{glm.options}},
-#'        and \code{\link{lm.options}} for options specific to
-#' \code{model="correlation", "lm", "glm"} respectively.        
+#'        \code{\link{lm.options}}, \code{\link{coxph.options}} and \code{\link{clogit.options}} for options specific to \cr
+#' \code{model="correlation", "lm", "glm", "coxph", "clogit"} respectively.        
 #'                      The default is NULL.} 
 #' \item{\code{output.ci_alpha}}{ Confidence interval level for estimated from glm models. This
 #'                         option must be a number >= 0 and < 1, where 0 is for not creating confidence intervals.
@@ -32,10 +32,10 @@
 #'                            summary statistics for the exposure will be output.
 #'                            This option is ignored with \code{model = "correlation"}.
 #'                            The default is "exposure".}
-#' \item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate glm parameter estimates. 
+#' \item{\code{output.exp_parms}}{ TRUE, FALSE or NULL to exponentiate parameter estimates. 
 #'                         Standard errors are obtained from the delta method. 
-#'                         The default is NULL, so that estimates from glm models with 
-#'                         family="binomial" will be exponentiated, and not otherwise.}
+#'                         The default is NULL, so that estimates from logistic regression and survival models
+#'                         will be exponentiated, and not otherwise.}
 #' \item{\code{output.metab.cols}}{ Character vector of column names in the \code{METABOLITES}
 #'                             sheet to be output in the \code{\link{ModelSummary}} and \code{\link{Effects}}
 #'                             data frames. Metabolite ids are matched first using the 
@@ -45,6 +45,23 @@
 #'                            \code{\link{ModelSummary}} data frame. Currently, it must be "anova" or "all".
 #'                            This option is ignored with \code{model = "correlation"}.
 #'                            The default is "anova".}
+#' \item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
+#'                            See \code{output.common.cols} and \code{output.merge}. \cr
+#'                            The default is "xlsx".}
+#' \item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_model_type" or "none".
+#'                             This option is used to merge model results together in order to reduce
+#'                             the number of output files. Setting to "all" will merge all model results together
+#'                             and output them to a single file. Setting to "by_function" will merge results from the
+#'                             same model function together and output to a file with the model function contained
+#'                             in the output file name. Similarly for "by_model_type", where the MODEL_TYPE column in the 
+#'                             MODELS sheet of the input Excel file is used to identify the models that will be 
+#'                             merged together. Setting to "none" will not merge results.
+#'                             The default is "none".}
+#' \item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
+#'                            The default is 0.}
+#' \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
+#'                             chemical class enrichment.
+#'                            The default is 0.05.}
 #' }
 #'
 #' @name options
@@ -80,8 +97,7 @@ NULL
 runModel.checkOptions <- function(op, modeldata) {
 
   if (!length(op)) op <- list()
-  if (!is.list(op)) stop("op must be a list")
-   
+  if (!is.list(op)) stop("op must be a list") 
   valid <- getAllOptionNames()
 
   # Check for valid names in the list
@@ -121,6 +137,7 @@ runModel.checkOptions <- function(op, modeldata) {
   if (!length(val)) {
     val <- FALSE
     if (op$glmFlag && (op$model.options$family == "binomial")) val <- TRUE
+    if (op$coxphFlag || op$clogitFlag) val <- TRUE
     op[[nm]] <- val
   } 
 
@@ -166,6 +183,10 @@ getDefaultModelOptions <- function(model) {
     ret <- runModel.getDefaultGlmOptions()
   } else if (model == getLmModelName()) {
     ret <- runModel.getDefaultLmOptions()
+  } else if (model == getCoxphModelName()) {
+    ret <- runModel.getDefaultCoxphOptions()
+  } else if (model == getClogitModelName()) {
+    ret <- runModel.getDefaultClogitOptions()
   } else {
     stop("INTERNAL CODING ERROR in getDefaultModelOptions")
   }
@@ -176,13 +197,15 @@ getDefaultModelOptions <- function(model) {
 
 checkModelOptions <- function(op, modeldata) {
 
-  op$pcorrFlag <- 0
-  op$glmFlag   <- 0
-  op$lmFlag    <- 0
-  model        <- op$model
-  corrName     <- getCorrModelName()
-  nm           <- getModelOpsName()
-  mop          <- op[[nm, exact=TRUE]]
+  op$pcorrFlag  <- 0
+  op$glmFlag    <- 0
+  op$lmFlag     <- 0
+  op$coxphFlag  <- 0
+  op$clogitFlag <- 0
+  model         <- op$model
+  corrName      <- getCorrModelName()
+  nm            <- getModelOpsName()
+  mop           <- op[[nm, exact=TRUE]]
   
   if (model == corrName) {
     op$pcorrFlag <- 1
@@ -196,6 +219,14 @@ checkModelOptions <- function(op, modeldata) {
     op$lmFlag  <- 1
     mop        <- runModel.checkLmOpList(mop, modeldata, name=nm)
     mop$family <- getNoFamilyValue()
+  } else if (model == getCoxphModelName()) {
+    op$coxphFlag <- 1
+    mop          <- runModel.checkCoxphOpList(mop, modeldata, name=nm)
+    mop$family   <- "binomial"
+  } else if (model == getClogitModelName()) {
+    op$clogitFlag <- 1
+    mop           <- runModel.checkClogitOpList(mop, modeldata, name=nm)
+    mop$family    <- "binomial"
   } else {
     stop("INTERNAL CODING ERROR in checkModelOptions")
   }
@@ -203,10 +234,35 @@ checkModelOptions <- function(op, modeldata) {
   # Determine if weights or offset was specified
   mop$weightsFlag <- 0
   mop$offsetFlag  <- 0
-  if (op$glmFlag || op$lmFlag) {
+  mop$timeFlag    <- 0
+  mop$groupFlag   <- 0
+  if (op$glmFlag || op$lmFlag || op$coxphFlag || op$clogitFlag) {
     if (length(mop[["weights", exact=TRUE]])) mop$weightsFlag <- 1
+  }
+  if (op$glmFlag || op$lmFlag) {
     if (length(mop[["offset", exact=TRUE]]))  mop$offsetFlag  <- 1
   }
+  if (op$coxphFlag) {
+    # Add info for time vars
+    timecov <- modeldata[["timecov", exact=TRUE]]
+    len     <- length(timecov)
+    if (!len) stop(paste0("ERROR: no time variables specified for ", model, " model."))
+    if (len > 2) stop(paste0("ERROR: only one or two time variables can be specified for ", model, " model."))
+    mop$n.time.vars <- len
+    mop$time1.var   <- timecov[1]
+    if (len > 1) mop$time2.var <- timecov[2]
+    mop$timeFlag <- 1
+  }
+  if (op$clogitFlag) {
+    # Add info for group
+    groupcov <- modeldata[["groupcov", exact=TRUE]]
+    len      <- length(groupcov)
+    if (!len) stop(paste0("ERROR: no group variable specified for ", model, " model."))
+    if (len > 1) stop(paste0("ERROR: only one group variable can be specified for ", model, " model."))
+    mop$group.var <- groupcov
+    mop$groupFlag <- 1
+  }
+
   op[[nm]] <- mop
 
   op
@@ -216,7 +272,7 @@ checkModelOptions <- function(op, modeldata) {
 getAllOptionNames <- function() {
 
   tmp   <- getValidGlobalOps()$valid
-  valid <- c(tmp, getModelOpsName())
+  valid <- c(tmp, getModelOpsName(), getRampOpName())
 
   valid
 
@@ -229,13 +285,19 @@ getValidGlobalOps <- function() {
   add.ci     <- getAddCiOpName()
   exp.parms  <- getExpParmsOpName() 
   out.metabs <- getAddMetabColsOpName()
+  out.type   <- getOutTypeOpName()
+  out.common <- getOutCommonColsOpName()
+  out.merge  <- getOutMergeOpName()
+  chemEnrich <- getRampCallChemEnrichOpName()
+  cE.pval    <- getRampPvalOpName()
 
-  ops.char    <- c("model", "check.cor.method", out.eff, out.modSum)
+  ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
+                   out.type, out.merge)
   ops.charVec <- c(out.metabs)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
-                   add.ci, exp.parms, 
+                   add.ci, exp.parms, cE.pval,
                    "DEBUG", "DONOTRUN")
-  ops.log  <- c("check.illCond", "check.design")
+  ops.log  <- c("check.illCond", "check.design", out.common, chemEnrich)
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
                    check.cor.cutoff=0.97, check.nsubjects=25, 
                    check.design=TRUE, max.nstrata=10,
@@ -245,6 +307,11 @@ getValidGlobalOps <- function() {
   default[[out.modSum]] <- getOutModSumOpDefault()
   default[[add.ci]]     <- getAddCiOpDefault()
   default[[out.metabs]] <- getAddMetabColsDefault()
+  default[[out.type]]   <- getOutTypeOpDefault()
+  default[[out.common]] <- getOutCommonColsOpDefault()
+  default[[out.merge]]  <- getOutMergeOpDefault()
+  default[[chemEnrich]] <- getRampCallChemEnrichOpDefault()
+  default[[cE.pval]]    <- getRampPvalOpDefault()
 
   # Be careful with exp.parms option, as it can be NULL
   defval <- getExpParmsOpDefault() 
@@ -322,7 +389,6 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
 } # END: checkGlobalOpsFromCharVecs
 
 checkOptionListNames <- function(op, valid, name) {
-
     if (!length(op)) return(NULL)
 
     # Names cannot be ""
@@ -483,6 +549,29 @@ check.string <- function(obj, valid, parm) {
 
 } # END: check.string
 
+check.number <- function(obj, valid, parm) {
+
+  # obj:   Numeric (length 1)
+  # valid: Numeric vector of valid values
+  # parm:  The name of the argument being checked
+
+  errFlag <- 0
+ 
+  # Check for errors
+  if ((length(obj) != 1) || !is.numeric(obj) || !(obj %in% valid)) {
+    errFlag <- 1 
+  }
+
+  if (errFlag) {
+    msg <- paste(valid, collapse=", ")
+    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
+    stop(msg)
+  }
+
+  obj
+
+} # END: check.number
+
 check.logical <- function(x, name) {
 
   err <- 0
@@ -533,8 +622,8 @@ check.range <- function(x, name, lower, upper, upper.inc=TRUE) {
 check.list <- function(x, name, valid) {
 
   if (!is.list(x)) stop(paste("ERROR: ", name, " must be a list", sep=""))
-  ret <- checkOptionListNames(x, valid, name) 
-  ret 
+  checkOptionListNames(x, valid, name) 
+  NULL 
 
 } # END: check.list
 
@@ -619,8 +708,61 @@ checkOp_output.metab.cols <- function(x) {
   ret <- check.varnameVec(x, getAddMetabColsOpName(), min.len=0, tolower=1, returnOnMiss="")
   ret
 }
+checkOp_output.common.cols <- function(x) {
 
+  if (!length(x)) {
+    ret <- getOutCommonColsOpDefault()
+  } else {
+    ret <- check.logical(x, getOutCommonColsOpName()) 
+  }
+  ret
+} 
+checkOp_output.type <- function(x) {
+  if (!length(x)) {
+    ret <- getOutTypeOpDefault()
+  } else {
+    ret <- check.string(x, getOutTypeOpVals(), getOutTypeOpName())
+  }
+  ret
+}
+checkOp_output.merge <- function(x) {
+  if (!length(x)) {
+    ret <- getOutMergeOpDefault()
+  } else {
+    ret <- check.string(x, getOutMergeOpVals(), getOutMergeOpName())
+  }
+  ret
+}
+checkOp_chemEnrich <- function(x) {
 
+  if (!length(x)) {
+    ret <- getRampCallChemEnrichOpDefault()
+  } else {
+    ret <- check.logical(x, getRampCallChemEnrichOpName()) 
+  }
+  ret
+} 
+checkOp_chemEnrich.adjPvalue <- function(x) {
+ if (!length(x)) {
+    ret <- getRampPvalOpDefault()
+  } else {
+    ret <- check.range(x, "chemEnrich.adjPvalue", 0, 1)
+  }
+  ret
+} 
+
+checkFiles <- function(filevec, name="filevec") {
+
+  if (!length(filevec)) stop("ERROR: No files specified")
+  if (!is.character(filevec)) stop(paste0("ERROR: ", name, " must be a character vector of files"))
+  filevec <- trimws(filevec)
+  tmp     <- !file.exists(filevec)
+  if (any(tmp)) {
+    print(filevec[tmp])
+    stop("ERROR: the above file(s) do not exist")
+  }
+  filevec
+}
 
 getOptionNameAndValue <- function(str, sep="=") {
 

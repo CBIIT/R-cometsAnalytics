@@ -13,6 +13,8 @@ obj <- RcometsAnalytics:::newVersionOutToOldOut(b_corr)
 # Compare result to the baseline. 
 attr(b_runCorr, "ptime") <- NULL
 attr(obj, "ptime")       <- NULL 
+class(b_runCorr)         <- "data.frame"
+class(obj)               <- "data.frame"
 
 test_that("RcometsAnalytics:::newVersionOutToOldOut",
 {

@@ -26,6 +26,13 @@
 #' corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 #' @export
 runCorr <- function(modeldata, metabdata, cohort = "") {
+  # Warning, runCorr is deprecated
+  spec <- modeldata$modelspec
+  if (spec == getMode_batch()) {
+    warning(runCorrDepMsg_batch())
+  } else {
+    warning(runCorrDepMsg_inter())
+  }
   calcCorr(modeldata, metabdata, cohort=cohort) 
 }
 
@@ -36,6 +43,7 @@ calcCorr <- function(modeldata, metabdata, cohort = "", op=NULL) {
 
   # For backwards compatibility, convert the output from runModel to old format
   ret <- newVersionOutToOldOut(ret)
+  class(ret) <- c(class(ret), class_runCorr())
 
   ret
 }

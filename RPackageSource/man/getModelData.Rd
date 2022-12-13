@@ -14,6 +14,8 @@ getModelData(
   strvars = NULL,
   wgtvar = NULL,
   offvar = NULL,
+  timevar = NULL,
+  groupvar = NULL,
   where = NULL
 )
 }
@@ -36,6 +38,10 @@ the Models sheet). If interactive, then the model label.}
 \item{wgtvar}{If Interactive, a variable of weights (see \code{details})}
 
 \item{offvar}{If Interactive, an offset variable (see \code{details})}
+
+\item{timevar}{If Interactive, time variable(s) for survival models (see \code{details})}
+
+\item{groupvar}{If Interactive, a group variable for conditional logistic models (see \code{details})}
 
 \item{where}{users can specify which subjects to perform the analysis on by specifying this parameter. 
    'where' expects a vector of strings with a variable name, 
@@ -65,8 +71,8 @@ Prepares data for the models to be run as specified in the input.  Can be run in
 All metabolite variables specified should be listed in the \code{metabolite_name}
   column of the \code{Metabolites} sheet of the Excel file. All non-metabolite
   variables should be listed in the \code{VARREFERENCE} column of the
-  \code{VarMap} sheet. The \code{wgtvar} and \code{offvar} are only used when the
-  model function is \code{\link[stats]{glm}} or \code{\link[stats]{lm}}, see the
+  \code{VarMap} sheet. The \code{wgtvar}, \code{offvar}, and \code{timevar} are only used
+  for specific models. See the
   \code{model} option in \code{\link{options}}.
 }
 \examples{

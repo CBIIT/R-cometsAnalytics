@@ -20,6 +20,10 @@ test_that("RcometsAnalytics::runAllModels",
   for (i in 1:length(b_obj)) {
     attr(b_obj[[i]], "ptime") <- NULL
     attr(obj[[i]], "ptime")   <- NULL
+    if (is.list(b_obj[[i]]) && is.list(obj[[i]])) {
+      b_obj[[i]]$Info         <- NULL
+      obj[[i]]$Info           <- NULL
+    }
     expect_equal(b_obj[[i]], obj[[i]])
   }
 })

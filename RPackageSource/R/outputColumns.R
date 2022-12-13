@@ -22,6 +22,7 @@
 #' \item{\code{message}}{ Error message produced from the modeling function}
 #' \item{\code{model}}{ Model label from \code{\link{getModelData}}}
 #' \item{\code{model_function}}{ Model function used in \code{\link{runModel}}}
+#' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' \item{\code{nobs}}{ Number of observations used}
 #' \item{\code{null.deviance}}{ Deviance of the NULL model}
 #' \item{\code{outcome}}{ Outcome variable}
@@ -35,9 +36,9 @@
 #' \item{\code{stratavar}}{ Stratum variable(s)}
 #' \item{\code{strata}}{ Stratum level(s)}
 #' \item{\code{term}}{ Variable in the model}
-#' \item{\code{wald.pvalue}}{ P-value from the Wald test of the given variable. 
+#' \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
 #'                           Note that this test may be a multi-df test if the
-#'                           variable is categorical.}
+#'                           exposure is categorical.}
 #' }
 #'
 #' @name ModelSummary
@@ -62,6 +63,8 @@ NULL
 #' \item{\code{exp.estimate.upper}}{ The exponentiated upper confidence limit for \code{term}}
 #' \item{\code{exp.std.error}}{ The standard error of \code{exp.estimate} from the delta method}
 #' \item{\code{exposurespec}}{ Exposure variable}
+#' \item{\code{model}}{ Model label from \code{\link{getModelData}}}
+#' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' \item{\code{outcomespec}}{ Outcome variable}
 #' \item{\code{pvalue}}{ The p-value of the test}
 #' \item{\code{run}}{ Run number that can be used to link with the
@@ -86,6 +89,8 @@ NULL
 #' \item{\code{object}}{ The object that produced the warning or error. This is
 #'                       typically a variable or a particular stratum.}
 #' \item{\code{message}}{ Message describing the warning or error}
+#' \item{\code{model}}{ Model label from \code{\link{getModelData}}}
+#' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' }
 #'
 #' @name Errors_Warnings
@@ -97,3 +102,42 @@ NULL
 #' 
 NULL
 
+#' Columns in the ChemEnrich table. 
+#'
+#' @name ChemEnrich
+#' @title Chemical Class Enrichment 
+#' @details See \code{\link[RaMP]{chemicalClassEnrichment}} for details.
+#' 
+NULL
+
+#' Columns in Table1. 
+#' Depending on the model run and options specified, 
+#' all the below names may not appear in the data frame.
+#' \itemize{
+#' \item{\code{category}}{ Category for categorical variables only}
+#' \item{\code{in.model}}{ How variable enters the model (outcome, exposure, 
+#'      adjustment, time, group, weight, offset)}
+#' \item{\code{max}}{ Maximum value}
+#' \item{\code{mean}}{ Mean value}
+#' \item{\code{median}}{ Median value}
+#' \item{\code{min}}{ Minimum value}
+#' \item{\code{n}}{ Number of non-missing observations}
+#' \item{\code{n.missing}}{ Number of missing observations}
+#' \item{\code{n.outcomeEqual0}}{ Number of non-missing observations with \code{outcome = 0}}
+#' \item{\code{n.outcomeEqual1}}{ Number of non-missing observations with \code{outcome = 1}}
+#' \item{\code{n.unique}}{ Number of unique non-missing observations}
+#' \item{\code{quartile1}}{ 25th percentile}
+#' \item{\code{quartile3}}{ 75th percentile}
+#' \item{\code{stratavar}}{ Stratum variable(s)}
+#' \item{\code{strata}}{ Stratum level(s)}
+#' \item{\code{type}}{ Either continuous or categorical}
+#' \item{\code{variable}}{ Variable name in the model}
+#' }
+#' @name Table1
+#' @title Non-metabolite Variable Summary Table
+#' @details The columns \code{max}, \code{mean}, \code{median},
+#'        \code{min}, \code{n.missing}, \code{n.unique},
+#'        \code{quartile1}, and \code{quartile3} are for
+#'      continuous variables only. 
+#' 
+NULL

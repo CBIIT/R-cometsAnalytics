@@ -10,6 +10,8 @@ Columns in the Errors_Warnings table.
 \item{\code{object}}{ The object that produced the warning or error. This is
                       typically a variable or a particular stratum.}
 \item{\code{message}}{ Message describing the warning or error}
+\item{\code{model}}{ Model label from \code{\link{getModelData}}}
+\item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 }
 }
 \details{
