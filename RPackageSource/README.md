@@ -32,13 +32,13 @@ library(RcometsAnalytics)
 # Documentation and Example Data
 
 ## Vignette
-To view a detailed vignette that outlines the basic steps for running analyses using the RcometsAnalytics package [Click here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v2.0.html).
+To view a detailed vignette that outlines the basic steps for running analyses using the RcometsAnalytics package [Click here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v2.1.html).
 
 ## Example Data
 We have provided an example input file for users to mimic when creating their own.  This data can be found in the folder inst/extdata.
 
 ## Manual
-To view the user manual listing all the documentation for functions contained within the RcometsAnalytics package, [Click here](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual.pdf) 
+To view the user manual listing all the documentation for functions contained within the RcometsAnalytics package, [Click here](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v2.1.pdf) 
 
 # Citation
 When using the COMETS Analytics web application and/or this associate package, please cite the following manuscript:
