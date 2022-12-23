@@ -4,7 +4,7 @@
 \alias{runModel}
 \title{Main function for running the models}
 \usage{
-runModel(modeldata, metabdata, cohortLabel = "", op = NULL)
+runModel(modeldata, metabdata, cohortLabel = "", op = NULL, out.file = NULL)
 }
 \arguments{
 \item{modeldata}{list from function \code{\link{getModelData}}}
@@ -14,6 +14,9 @@ runModel(modeldata, metabdata, cohortLabel = "", op = NULL)
 \item{cohortLabel}{cohort label (e.g DPP, NCI, Shanghai)}
 
 \item{op}{list of options when running in \code{Interactive} mode (see \code{\link{options}}).}
+
+\item{out.file}{NULL or the name of an output file to save the results.
+The file extension must be ".xlsx" or ".rda".}
 }
 \value{
 A list of objects with names \code{\link{ModelSummary}},

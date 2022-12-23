@@ -24,4 +24,8 @@ Data are not saved in the system but
 \code{\link{OutputCSVResults}} (write to .csv file) \cr
 \code{\link{OutputXLSResults}} (write to excel file) \cr
 \code{\link{OutputListToExcel}} (write list of data frames to excel file with multiple sheets) \cr
+\bold{Functions for meta-analysis:} \cr
+\code{\link{runMeta}} (run a single meta-analysis) \cr
+\code{\link{runAllMeta}} (run multiple meta-analyses) \cr
+\code{\link{meta_calc}} (main calculation function for meta-analysis) \cr
 }

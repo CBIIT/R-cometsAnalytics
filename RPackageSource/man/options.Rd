@@ -4,7 +4,7 @@
 \alias{options}
 \title{options list}
 \description{
-A list of 18:
+A list of 19:
 \itemize{
 \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
                         design matrix. The default value is 0.97.}
@@ -19,6 +19,9 @@ A list of 18:
 \item{\code{check.illCond}}{ TRUE or FALSE to check for an ill-conditioned design matrix.
                      The default is TRUE.}
 \item{\code{check.nsubjects}}{ Minimum number of subjects. The default is 25.}
+\item{\code{max.npairwise}}{ The maximum number of metabolites to process the 
+                            "all pairwise correlations" model.
+                   The default is 100.}
 \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
                    The default is 10.}
 \item{\code{model}}{ String for the model function. Currently, it must be one of

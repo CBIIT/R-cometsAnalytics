@@ -34,7 +34,7 @@ This function is a special case of \code{\link{runModel}}
 dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted", 
+modeldata <- getModelData(exmetabdata,exposures="age",modlabel="1 Gender adjusted",
 	outcomes=c("lactose","lactate"), modelspec="Interactive")
 corrmatrix <- runCorr(modeldata,exmetabdata, "DPP")
 }
