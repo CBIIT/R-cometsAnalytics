@@ -1,10 +1,10 @@
 on:
   push:
     branches:
-      - master
+      - v3.0-dev
   pull_request:
     branches:
-      - master
+      - v3.0-dev
 
 name: R-CMD-check
 
