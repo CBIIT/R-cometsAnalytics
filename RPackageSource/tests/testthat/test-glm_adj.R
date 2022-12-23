@@ -29,12 +29,10 @@ for (i in 1:nmetabs) {
 }
 
 # Compare result to the baseline. 
+b_obj$Info[1, 2]     <- ""
+obj$Info[1, 2]       <- ""
 attr(b_obj, "ptime") <- NULL
 attr(obj, "ptime")   <- NULL
-if (is.list(b_obj) && is.list(obj)) {
-  b_obj$Info <- NULL
-  obj$Info   <- NULL
-}
 test_that("RcometsAnalytics:: glm adj",
 {
   expect_equal(b_obj, obj)
