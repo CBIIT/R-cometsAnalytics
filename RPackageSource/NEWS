@@ -1,3 +1,14 @@
+CHANGES IN VERSION 3.0.0
+------------------------
+
+NEW FEATURES
+
+    o Meta-analyses can now be performed using the runAllMeta and runMeta functions. 
+    o The runMeta function now includes an option to save the output to a file.
+    
+
+
+
 CHANGES IN VERSION 2.1.0
 ------------------------
 
