@@ -1,0 +1,105 @@
+---
+title: "Running meta-analyses with RcometsAnalytics locally"
+author: "Ewy Mathé, Ella Temprosa, Bill Wheeler"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+  pdf_document:
+    toc: yes
+vignette: |
+  %\VignetteIndexEntry{Running RcometsAnalytics locally} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+RcometsAnalytics supports all cohort-specific analyses and meta-analyses of the R COMETS Analytics consortium. 
+This collaborative work is done via the COMETS Data Infrastructure interest group activities. 
+For more information, see the COMETS [**website**](http://epi.grants.cancer.gov/comets/).
+This vignette demonstrates using the RcometsAnalytics R package to run a meta-analysis 
+from the command line assuming that the user does not already have model output files.
+The first three steps are similar to steps found in the vignette for running models locally:
+[**Comets_vignette**](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v2.1.html).
+
+## Meta-analysis Background Information
+A meta-analysis is performed by combining the results from more than one cohort in order to 
+increase the power of association tests. Each set of cohort results should be from the
+same underlying model, and each cohort should be independent from all other
+cohorts, that is, no overlapping subjects between any two cohorts. 
+This package will conduct both fixed-effects and random-effects meta-analyses based
+on the DerSimonian-Laird method.
+
+## RcometsAnalytics R package
+The main functions for performing meta-analyses in the RcometsAnalytics R package are 
+*runMeta()* and *runAllMeta()*. Both functions require that the model output from 
+each cohort has been saved to a file. The function *meta_calc()* is the core function 
+that performs the calculations.
+Documentation of the RcometsAnalytics R package can be found here
+  [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual.pdf).
+
+## Data Input Format
+The files input to the *runMeta()* meta-analysis function contain the output from the *runModel()* function.
+These files can be Excel files with extension .xlsx or R object files with extension .rda.
+Each file should contain the results from a single model run from one of the cohorts.
+
+## Example Workflow with two cohorts
+Let "cohort_1" and "cohort_2" be the names of the two cohorts. For each cohort, we will run the 
+same model using the *runModel()* function, save the model output, and then run a meta-analysis
+using the *runMeta()* function.
+
+### 1. Load Data 
+For each cohort, load the cohort's data with the *readCOMETSinput()* function.
+
+```{r}
+# Retrieve the full paths of each input data
+dir   <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
+file1 <- file.path(dir, "cohort_1.xlsx")
+file2 <- file.path(dir, "cohort_2.xlsx")
+
+# Read in and process the input data
+data1 <- RcometsAnalytics::readCOMETSinput(file1)
+data2 <- RcometsAnalytics::readCOMETSinput(file2)
+```
+
+### 2. Get Model Data
+
+Get the model data for each cohort. The model must be the same for all cohorts.
+The model to be run will have age as a continuous exposure variable, all metabolites
+as the outcome variables, and bmi as a categorical adjustment variable.
+
+```{r}
+modeldata1 <- RcometsAnalytics::getModelData(data1, modelspec="Interactive", 
+                          adjvars="bmi_grp", outcomes=NULL, exposures="age")
+modeldata2 <- RcometsAnalytics::getModelData(data2, modelspec="Interactive", 
+                          adjvars="bmi_grp", outcomes=NULL, exposures="age")
+```
+
+### 3. Correlation Analysis
+The *runModel()* function will first be called to obtain the results from each
+cohort for a correlation analysis. Since the meta-analysis function *runMeta()*
+requires files for input, the results from *runModel()* will be saved to files.
+The files *runMeta()* accepts have the extension ".xlsx" or ".rda".  
+```{r}
+outfile1  <- paste0(getwd(), "/", "corr_results1.xlsx")
+outfile2  <- paste0(getwd(), "/", "corr_results2.rda")
+results1  <- RcometsAnalytics::runModel(modeldata1, data1, "cohort_1", out.file=outfile1)
+results2  <- RcometsAnalytics::runModel(modeldata2, data2, "cohort_2", out.file=outfile2)
+```
+
+### 4. Meta Analysis of Correlation Results
+Run the meta-analysis with the *runMeta()* function, and then display
+the first five rows of the results.
+```{r}
+ret <- RcometsAnalytics::runMeta(c(outfile1, outfile2))
+ret$Results[1:5,]
+
+# Delete the results files from each cohort
+file.remove(c(outfile1, outfile2))
+```
+
+
+```{r}
+sessionInfo()
+```
