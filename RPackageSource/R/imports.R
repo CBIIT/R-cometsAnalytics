@@ -21,7 +21,7 @@
 #' @importFrom subselect trim.matrix
 #' @importFrom survival coxph Surv clogit strata
 #' @importFrom stringr str_locate
-#' @importFrom utils sessionInfo
+#' @importFrom utils sessionInfo untar unzip read.table
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runCorr}} (correlation analysis) \cr
@@ -36,4 +36,8 @@
 #' \code{\link{OutputCSVResults}} (write to .csv file) \cr
 #' \code{\link{OutputXLSResults}} (write to excel file) \cr
 #' \code{\link{OutputListToExcel}} (write list of data frames to excel file with multiple sheets) \cr
+#' \bold{Functions for meta-analysis:} \cr
+#' \code{\link{runMeta}} (run a single meta-analysis) \cr
+#' \code{\link{runAllMeta}} (run multiple meta-analyses) \cr
+#' \code{\link{meta_calc}} (main calculation function for meta-analysis) \cr
 NULL

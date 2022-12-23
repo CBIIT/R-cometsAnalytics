@@ -367,12 +367,17 @@ getCovNames_allMetabs <- function(varString, allmetabs, varMap) {
 
 } # END: getCovNames_allMetabs
 
-getGlobalOptionsFromSheet <- function(opTable) {
+getGlobalOptionsFromSheet <- function(opTable, meta=0) {
 
   # Global options can now also be in the model options part of the table
 
-  modnm   <- getModelOptionsIdCol()
-  tmp     <- opTable[, modnm] %in% getGlobalOptionName()
+  if (!meta) {
+    modnm   <- getModelOptionsIdCol()
+    tmp     <- opTable[, modnm] %in% getGlobalOptionName()
+  } else {
+    modnm   <- tolower(getMetaOpFileModelTypeCol())
+    tmp     <- tolower(opTable[, modnm]) %in% tolower(getMetaGlobalOptionName())
+  }
   opTable <- opTable[tmp, , drop=FALSE]
   if (!nrow(opTable)) return(NULL)
 
@@ -385,7 +390,7 @@ getGlobalOptionsFromSheet <- function(opTable) {
   if (!nrow(opTable)) return(NULL)
 
   # Check the names and values and put them in a list
-  ret <- checkGlobalOpsFromCharVecs(opTable[, opNameCol], opTable[, opValCol])
+  ret <- checkGlobalOpsFromCharVecs(opTable[, opNameCol], opTable[, opValCol], meta=meta)
 
   ret
 

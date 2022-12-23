@@ -76,11 +76,12 @@ run1Model <- function(mymod, readData, cohortLabel="") {
 
 } # END: run1Model
 
-writeObjectToFile <- function(modelResults, cohortLabel, model, op) {
+writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
 
   out.type <- op[[getOutTypeOpName(), exact=TRUE]] 
   rdaFlag  <- out.type == getOutTypeOpRda()
   fname    <- getOutFileName(cohortLabel, model, out.type)
+  if (!is.null(dir)) fname <- paste0(dir, fname)
   if (rdaFlag) {
     save(modelResults, file=fname)
   } else {

@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.0.6.0"}
+getVersionNumber     <- function() {"2.9.0.3"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -72,7 +72,8 @@ getAddMetabColsDefault    <- function() {"metabolite_name"}
 getAddMetabColsSep        <- function() {","}
 getOutTypeOpName          <- function() {"output.type"}
 getOutTypeOpRda           <- function() {"rda"}
-getOutTypeOpVals          <- function() {c(getOutTypeOpRda(), "xlsx")}
+getOutTypeOpExcel         <- function() {"xlsx"}
+getOutTypeOpVals          <- function() {c(getOutTypeOpRda(), getOutTypeOpExcel())}
 getOutTypeOpDefault       <- function() {"xlsx"} 
 getOutCommonColsOpName    <- function() {"output.common.cols"}
 getOutCommonColsOpDefault <- function() {0} # 0 or 1
@@ -85,6 +86,9 @@ getOutMergeOpVals         <- function() {c(getOutMergeOpAll(), getOutMergeOpNone
                                            getOutMergeOpByModelFunc(), getOutMergeOpByModelSpec())}
 getOutMergeOpDefault      <- function() {getOutMergeOpNone()} 
 getOutMergeAllStr         <- function() {"all_models"}
+getMaxNpairwiseOpName     <- function() {"max.npairwise"}
+getMaxNpairwiseOpDefault  <- function() {100}
+
 getOutfileSpCharSep       <- function() {"_"}
 getOutfileCohortSep       <- function() {"__"}
 getOutfileModelPart       <- function() {1}
@@ -132,6 +136,8 @@ getModelSummaryCoxphFitNames  <- function() {c("n", "nevent", "statistic.log", "
                                                "p.value.robust", "r.squared", "r.squared.max", "concordance",
                                                "std.error.concordance", "logLik", "AIC", "BIC", getModelSummaryNobsName())}
 getModelSummaryClogitFitNames <- function() {getModelSummaryCoxphFitNames()}
+getModelSummaryOutUidCol  <- function() {"outcome_uid"}
+getModelSummaryExpUidCol  <- function() {"exposure_uid"}
 
 # For input excel file
 getModelOptionsIdCol     <- function() {"model_type"}
@@ -149,6 +155,7 @@ getReqSheetNames         <- function() {c(getMetabSheetName(), getSubMetabSheetN
 getReqMetabSheetCols     <- function() {c("metabolite_name")}
 getVarMapVarRefCol       <- function() {"VARREFERENCE"}
 getVarMapCohortVarCol    <- function() {"COHORTVARIABLE"}
+getVarMapVarDefCol       <- function() {"VARDEFINITION"}
 getVarMapVarTypeCol      <- function() {"VARTYPE"}
 getReqVarMapSheetCols    <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), getVarMapVarTypeCol())}
 getModelsModelCol        <- function() {"MODEL"}
@@ -198,7 +205,7 @@ getInfoTableStrataName         <- function() {"strata"}
 getInfoTableModelFuncName      <- function() {"op$model"}
 getInfoTableFamilyName         <- function() {"model.options$family"}
 getInfoTableCohortName         <- function() {"cohort"}
-
+getInfoTableModelNmName        <- function() {"model name"}
 
 getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffectsName(),
                                                 runModel.getWarningsListName(),
@@ -207,15 +214,57 @@ getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffect
                                              }
 
 # Meta analysis
+getMetaModelsSheetName         <- function() {"Models"}
+getMetaModelTypeSheetName      <- function() {"Model_Types"}
+getMetaOpFileModelsCol         <- function() {"MODEL"}
+getMetaOpFileModelTypeCol      <- function() {"MODEL_TYPE"}
+getMetaGlobalOptionName        <- function() {"GLOBAL"}
 metaOp_methodName              <- function() {"method"}
 metaOp_methodDefault           <- function() {"fixed"}
+metaOp_methodVals              <- function() {c(metaOp_methodDefault(), "random")}
 metaOp_minNcohortName          <- function() {"min.n.cohort"}
 metaOp_minNcohortDefault       <- function() {2}
+metaOp_cohortMinSubs           <- function() {"min.nsub.cohort"}
+metaOp_cohortMinSubsDefault    <- function() {25}
+metaOp_totalMinSubs            <- function() {"min.nsub.total"}
+metaOp_totalMinSubsDefault     <- function() {50}
+metaOp_save.mem                <- function() {"save.mem"}
+metaOp_save.memDefault         <- function() {1}
+metaOp_cohorts.include         <- function() {"cohorts.include"}
+metaOp_cohorts.exclude         <- function() {"cohorts.exclude"}
+metaOp_models                  <- function() {"models"}
 metaModelNameNumberSep         <- function() {" "}
 metaRetListResultsTable        <- function() {"Results"}
 getHarmMetabIdCol              <- function() {"metabolite_name"}
+getMetaBetaCol                 <- function() {"meta.estimate"}
+getMetaBetaSeCol               <- function() {"meta.std.error"}
+getMetaPvalueCol               <- function() {"meta.pvalue"}
+getMetaFixedBetaCol            <- function() {"fixed.estimate"}
+getMetaFixedBetaSeCol          <- function() {"fixed.std.error"}
+getMetaFixedPvalueCol          <- function() {"fixed.pvalue"}
+getMetaFixedBetaLCol           <- function() {"fixed.estimate.L"}
+getMetaFixedBetaUCol           <- function() {"fixed.estimate.U"}
+getMetaRandomBetaCol           <- function() {"random.estimate"}
+getMetaRandomBetaSeCol         <- function() {"random.std.error"}
+getMetaRandomPvalueCol         <- function() {"random.pvalue"}
+getMetaRandomBetaLCol          <- function() {"random.estimate.L"}
+getMetaRandomBetaUCol          <- function() {"random.estimate.U"}
 getMetaNcohortCol              <- function() {"n.cohort"}
+getMetaNsubCol                 <- function() {"n.sub"}
+getMetaHetPvalueCol            <- function() {"het.pvalue"}
 getMetaMessageCol              <- function() {"message"}
 getMetaDirectionCol            <- function() {"direction"}
+getMetaIdCol                   <- function() {"id"}
+getMetaEpsForCorr              <- function() {1e-6}
+getMetaLabelForOutFiles        <- function() {"meta"}
+getMetaValidExt                <- function() {c("xlsx", "rda", "zip", "tar", "tar.gz")}
+getMetaIdNamesSep              <- function() {":::"}
+getMetaIdNamesUidCols          <- function() {c(getModelSummaryOutUidCol(), getModelSummaryExpUidCol(), getEffectsTermName())}
+getMetaIdNamesStratCols        <- function() {c(runModel.getStrataColName(), runModel.getStrataNumColName())}
+getMetaStratSep                <- function() {"."}
+
+# For non-COMETS output
+cometsReqOutSheetNames         <- function() {c(getEffectsName(), getModelSummaryName(), getInfoTableDfName())}
+filelistSheetOp                <- function() {"sheet"}
 
 

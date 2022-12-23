@@ -265,6 +265,9 @@ readCOMETSinput <- function(file) {
   dtalist[[getMetabDataOpsName()]] <- dta.options
   dtalist[[getInputFileOpsName()]] <- file
 
+  # Check vardefinition for categorical variables
+  vardef_catvars(dtalist$vmap, dtalist$subjdata) 
+
   # Test the models in the Models sheet 
   err <- infile.checkAllModels(dtalist)
   if (err) {

@@ -110,3 +110,16 @@ OutputListToExcel <- function(filename, obj) {
   filename
 }
 
+saveObjectByFileExt <- function(obj, out.file) {
+
+  f <- tolower(out.file)
+  if (isRdaFile(f)) {
+    save(obj, file=out.file)
+  } else if (isExcelFile(f)) {
+    OutputListToExcel(out.file, obj)
+  } else {
+    stop("ERROR: incorrect file extension")
+  }
+  NULL
+
+} 

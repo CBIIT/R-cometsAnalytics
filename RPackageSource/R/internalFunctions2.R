@@ -188,19 +188,6 @@ updateWhereStr <- function(whereStr, varMap) {
 
 } # END: updateWhereStr
 
-# Function to check that an object is a string
-isString <- function(obj) {
-
-  if ((length(obj) == 1) && is.character(obj)) {
-    ret <- TRUE
-  } else {
-    ret <- FALSE
-  }
-
-  ret
-
-} # END: isString
-
 # Function to order columns in a matrix or data frame
 orderVars <- function(data, order) {
 
@@ -568,4 +555,6 @@ expParms_deltaMethod <- function(beta, beta.se) {
   list(exp.beta=ret.beta, exp.beta.se=ret.se)
 }
 
-
+getVecFromStr <- function(str, delimiter=",") {
+  unlist(strsplit(str, delimiter, fixed=TRUE))
+}

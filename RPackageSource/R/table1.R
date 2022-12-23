@@ -108,7 +108,6 @@ getTable1 <- function(modeldata, op) {
         contFlag <- 0
         ncatVar  <- ncatVar + 1
       }
-
       if (contFlag) {
         contvec    <- table1_getContVec(vec)   
         tmp        <- is.finite(vec)
@@ -153,7 +152,6 @@ getTable1 <- function(modeldata, op) {
     cx  <- cx[tmp]
     if (length(cx)) ret <- ret[, cx, drop=FALSE] 
   }
-
   ret
 }
 

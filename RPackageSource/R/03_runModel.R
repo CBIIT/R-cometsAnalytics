@@ -5,6 +5,8 @@
 #' @param metabdata metabolite data list from \code{\link{readCOMETSinput}}
 #' @param cohortLabel cohort label (e.g DPP, NCI, Shanghai)
 #' @param op list of options when running in \code{Interactive} mode (see \code{\link{options}}).
+#' @param out.file NULL or the name of an output file to save the results.
+#'          The file extension must be ".xlsx" or ".rda".
 #'
 #' @return A list of objects with names \code{\link{ModelSummary}},
 #'        \code{\link{Effects}}, \code{\link{Errors_Warnings}},
@@ -31,7 +33,7 @@
 #' obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' @export
 
-runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
+runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NULL) {
 
   ptm <- base::proc.time() # start processing time
 
@@ -39,6 +41,7 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
   runModel.checkModeldata(modeldata)
   runModel.checkMetabdata(metabdata)
   if (!isString(cohortLabel)) stop("ERROR: cohortLabel must be a string")
+  if (length(out.file)) out.file <- check_out.file(out.file, valid.ext=getOutTypeOpVals())
 
   # Check if options were obtained in getModelData
   if (modeldata$modelspec == getMode_batch()) {
@@ -59,6 +62,8 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL) {
   attr(ret, "ptime") <- paste("Processing time:", round(ptm[3], digits=3), "sec")
   class(ret) <- class_runModel()
        
+  if (length(out.file)) try(saveObjectByFileExt(ret, out.file))
+
   ret
 
 } # END: runModel 
@@ -370,6 +375,14 @@ runModel.getStratVec <- function(gdta, scovs) {
 runModel.start <- function(modeldata, metabdata, op) {
    
   if (op$DEBUG) print(op)  
+
+  nm <- getMaxNpairwiseOpName()
+  m  <- op[[nm, exact=TRUE]]
+  if ((length(modeldata$rcovs) > m) && (length(modeldata$ccovs) > m)) {
+    msg <- paste("ERROR: the number of models exceeds the max number allowed ",
+                 "set by option '", nm, "'", sep="")
+    stop(msg)        
+  }
 
   # Object for warning messages
   wr.nm    <- runModel.getWarningsListName()

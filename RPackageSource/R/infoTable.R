@@ -17,6 +17,23 @@ getInfoTableValue <- function(infoTable, name, ifNotFound=NULL, check.len=1) {
 
 }
 
+infoTable_normNames <- function(infoTable) {
+
+  if (nonEmptyDf(infoTable)) {
+    cx   <- colnames(infoTable)
+    nmv  <- getInfoTableNameCol()
+    valv <- getInfoTableValueCol()
+    if (!all(c(nmv, valv) %in% cx)) stop("INTERNAL CODING ERROR 1")
+
+    tmp  <- infoTable[, nmv, drop=TRUE] %in% getInfoTableModelNmName()
+    if (any(tmp)) infoTable[tmp, valv] <- meta_normModelStr(infoTable[tmp, valv, drop=TRUE])
+    tmp  <- infoTable[, nmv, drop=TRUE] %in% getInfoTableCohortName()
+    if (any(tmp)) infoTable[tmp, valv] <- meta_normCohortStr(infoTable[tmp, valv, drop=TRUE])
+  }
+  infoTable
+
+}
+
 updateInfoTableVecs <- function(nms, op, namevec, valuevec, namestr) {
 
   if (length(nms)) {
@@ -90,6 +107,45 @@ getInfoTableDF <- function(modeldata, metabdata, op) {
   vals      <- c(yv, ev, sv)
   namevec   <- c(namevec, nms)
   valuevec  <- c(valuevec, vals)
+
+  ret <- data.frame(name=namevec, value=valuevec, stringsAsFactors=FALSE)
+  ret
+}
+
+getInfoTableDF.meta <- function(op) {
+
+  si        <- sessionInfo()
+  mydate    <- as.character(Sys.time())
+  rversion  <- si$R.version$version.string
+  if (!length(rversion)) rversion <- ""
+  os        <- si$running
+  if (!length(os)) os <- ""
+  cversion  <- si$otherPkgs$RcometsAnalytics$Version
+  if (!length(cversion)) cversion <- getVersionNumber()
+  cohorts  <- op$cohorts
+  ncohorts <- length(cohorts)
+  if (!ncohorts) cohorts <- ""
+  cohorts <- paste0(cohorts, collapse=", ")
+  modelName <- op[["models", exact=TRUE]]
+  if (length(modelName) > 1) modelName <- modelName[1]
+  if (!length(modelName)) modelName <- ""
+
+  namevec   <- c("date", 
+                 "RcometsAnalytics version", "R version", "operating system",
+                 "model name", "cohorts")
+  valuevec  <- c(mydate, 
+                 cversion, rversion, os,
+                 modelName, cohorts) 
+
+  # Get meta options
+  tmp       <- meta_check_op(NULL)
+  global    <- names(tmp)
+  exc       <- c("DEBUG", "DONOTRUN")
+  tmp       <- !(global %in% exc)
+  global    <- global[tmp]
+  tmp       <- updateInfoTableVecs(global, op, namevec, valuevec, "op$")
+  namevec   <- tmp$namevec
+  valuevec  <- tmp$valuevec
 
   ret <- data.frame(name=namevec, value=valuevec, stringsAsFactors=FALSE)
   ret

@@ -1,4 +1,4 @@
-#' A list of 18:
+#' A list of 19:
 #' \itemize{
 #' \item{\code{check.cor.cutoff}}{ Cutoff value to remove highly correlated columns in the
 #'                         design matrix. The default value is 0.97.}
@@ -13,6 +13,9 @@
 #' \item{\code{check.illCond}}{ TRUE or FALSE to check for an ill-conditioned design matrix.
 #'                      The default is TRUE.}
 #' \item{\code{check.nsubjects}}{ Minimum number of subjects. The default is 25.}
+#' \item{\code{max.npairwise}}{ The maximum number of metabolites to process the 
+#'                             "all pairwise correlations" model.
+#'                    The default is 100.}
 #' \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
 #'                    The default is 10.}
 #' \item{\code{model}}{ String for the model function. Currently, it must be one of
@@ -278,7 +281,9 @@ getAllOptionNames <- function() {
 
 } # END: getAllOptionNames
 
-getValidGlobalOps <- function() {
+getValidGlobalOps <- function(meta=0) {
+
+  if (meta) return(getValidGlobalMetaOps())
 
   out.eff    <- getOutEffectsOpName()
   out.modSum <- getOutModSumOpName()
@@ -290,12 +295,13 @@ getValidGlobalOps <- function() {
   out.merge  <- getOutMergeOpName()
   chemEnrich <- getRampCallChemEnrichOpName()
   cE.pval    <- getRampPvalOpName()
+  allpair    <- getMaxNpairwiseOpName()
 
   ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
                    out.type, out.merge)
   ops.charVec <- c(out.metabs)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
-                   add.ci, exp.parms, cE.pval,
+                   add.ci, exp.parms, cE.pval, allpair, 
                    "DEBUG", "DONOTRUN")
   ops.log  <- c("check.illCond", "check.design", out.common, chemEnrich)
   default  <- list(check.cor.method="spearman", check.illCond=TRUE, 
@@ -312,6 +318,7 @@ getValidGlobalOps <- function() {
   default[[out.merge]]  <- getOutMergeOpDefault()
   default[[chemEnrich]] <- getRampCallChemEnrichOpDefault()
   default[[cE.pval]]    <- getRampPvalOpDefault()
+  default[[allpair]]    <- getMaxNpairwiseOpDefault()
 
   # Be careful with exp.parms option, as it can be NULL
   defval <- getExpParmsOpDefault() 
@@ -338,9 +345,9 @@ getCharVecFromStr <- function(str, sep) {
 } # END: getCharVecFromStr
 
 # Parse and check global options from options sheet. Return a list of options.
-checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
+checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
 
-  tmp    <- getValidGlobalOps()
+  tmp    <- getValidGlobalOps(meta=meta)
   def    <- tmp$default
   ops.n  <- tmp$ops.numeric
   ops.l  <- tmp$ops.logical
@@ -360,6 +367,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
   for (i in 1:n) {
     name  <- opnames[i]
     value <- opvalues[i]
+
     if (!(name %in% valid)) stop(paste("ERROR: ", name, " is not a valid option", sep=""))
     if (!nchar(value)) {
       # An error was originally thrown, but perhaps set to NULL so it will be assigned the default value
@@ -382,62 +390,26 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues) {
   }
 
   # Check the values
-  ret <- try(checkGlobalOpList(ret, name="options"), silent=TRUE)
+  ret <- try(checkGlobalOpList(ret, name="options", meta=meta), silent=TRUE)
   
   ret
 
 } # END: checkGlobalOpsFromCharVecs
 
-checkOptionListNames <- function(op, valid, name) {
-    if (!length(op)) return(NULL)
-
-    # Names cannot be ""
-    nms <- trimws(names(op))
-    tmp <- nchar(nms) < 1
-    if (any(tmp)) {
-      print(op)
-      stop(paste("ERROR: the above ", name, " list is not valid", sep="")) 
-    }
-    tmp <- !(nms %in% valid)
-    if (any(tmp)) {
-      err <- paste(nms[tmp], collapse=",", sep="")
-      if (length(err) > 1) {
-        stop(paste("ERROR: ", err, " are not valid option names for ", name, sep=""))
-      } else {
-        stop(paste("ERROR: ", err, " is not a valid option name for ", name, sep=""))
-      }
-    }  
-
-    NULL
-
-} # END: checkOptionListNames
-
-checkRequiredListNames <- function(x, req, name) {
-
-  if (!length(x)) stop(paste0(name, " has length 0"))
-  if (!is.list(x)) stop(paste0(name, " must be a list"))
-
-  tmp  <- !(req %in% names(x))
-  miss <- req[tmp]
-  if (length(miss)) {
-    tmp <- paste0(miss, collapse=", ")
-    msg <- paste0("ERROR: the objects ", tmp, " are not in ", name)
-    stop(msg)  
-  }
-  
-  NULL
-
-} # END: checkRequiredListNames
-
-checkGlobalOpList <- function(op, name="options") {
+checkGlobalOpList <- function(op, name="options", meta=0) {
 
   n       <- length(op)
   if (n && !is.list(op)) stop(paste("ERROR: ", name, " must be a list", sep=""))
-  tmp     <- getValidGlobalOps()
+  tmp     <- getValidGlobalOps(meta=meta)
   default <- tmp$default
   valid   <- names(default)
   ops.n   <- c(tmp$ops.numeric, tmp$ops.logical)
   ops.cv  <- tmp$ops.charVec
+  if (meta) {
+    FSTR <- "checkMetaOp_"
+  } else {
+    FSTR <- "checkOp_"
+  }
 
   # Special cases
   spec1 <- getAddMetabColsOpName() 
@@ -452,13 +424,13 @@ checkGlobalOpList <- function(op, name="options") {
       val <- op[[i]]
 
       if (nm %in% ops.n) {
-        tmp <- try(eval(parse(text=paste("checkOp_", nm, "(", val, ")", sep=""))),
+        tmp <- try(eval(parse(text=paste(FSTR, nm, "(", val, ")", sep=""))),
                    silent=TRUE)
       } else if (nm == spec1) {
         tmp     <- try(checkOp_output.metab.cols(val), silent=TRUE)
         op[[i]] <- tmp
       } else {
-        tmp <- try(eval(parse(text=paste("checkOp_", nm, "('", val, "')", sep=""))),
+        tmp <- try(eval(parse(text=paste(FSTR, nm, "('", val, "')", sep=""))),
             silent=TRUE)
       }
       if ("try-error" %in% class(tmp)) {
@@ -524,108 +496,6 @@ checkOp_output.ModelSummary <- function(str, name=NULL) {
   str
 
 } 
-
-# Function to check an argument 
-check.string <- function(obj, valid, parm) {
-
-  # obj:   A character string (length 1)
-  # valid: Character vector of valid values
-  # parm:  The name of the argument being checked
-
-  errFlag <- 0
- 
-  # Check for errors
-  if (!isString(obj)) errFlag <- 1 
-  obj <- trimws(obj)
-  if (!(obj %in% valid)) errFlag <- 1
-
-  if (errFlag) {
-    msg <- paste(valid, collapse=", ")
-    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
-    stop(msg)
-  }
-
-  obj
-
-} # END: check.string
-
-check.number <- function(obj, valid, parm) {
-
-  # obj:   Numeric (length 1)
-  # valid: Numeric vector of valid values
-  # parm:  The name of the argument being checked
-
-  errFlag <- 0
- 
-  # Check for errors
-  if ((length(obj) != 1) || !is.numeric(obj) || !(obj %in% valid)) {
-    errFlag <- 1 
-  }
-
-  if (errFlag) {
-    msg <- paste(valid, collapse=", ")
-    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
-    stop(msg)
-  }
-
-  obj
-
-} # END: check.number
-
-check.logical <- function(x, name) {
-
-  err <- 0
-  n   <- length(x)
-  if (!n || (n > 1)) {
-    err <- 1
-  } else {
-    if ((x != 0) && (x != 1)) err <- 1
-  }
-  if (err) {
-    msg <- paste("ERROR: ", name, " must be TRUE or FALSE", sep="")
-    stop(msg)
-  }
-
-  x
-
-} # END: check.logical
-
-check.range <- function(x, name, lower, upper, upper.inc=TRUE) {
-
-  err <- 0
-  n   <- length(x)
-  op1 <- ">= "
-  op2 <- "<= "
-  if (!n || (n > 1) || !is.finite(x)) {
-    err <- 1
-  } else {
-    if ((x < lower) || (x > upper)) err <- 1
-    if (!upper.inc && (x == upper)) {
-      err <- 1
-      op2 <- "< "
-    }
-  }
-  if (err) {
-    if (is.finite(upper)) {
-      msg <- paste("ERROR: ", name, " must be ", op1,  
-                   lower, " and ", op2, upper, sep="")
-    } else {
-      msg <- paste("ERROR: ", name, " must be >= ", lower, sep="")
-    }
-    stop(msg)
-  }
-
-  x
-
-} # END: check.range
-
-check.list <- function(x, name, valid) {
-
-  if (!is.list(x)) stop(paste("ERROR: ", name, " must be a list", sep=""))
-  checkOptionListNames(x, valid, name) 
-  NULL 
-
-} # END: check.list
 
 check.variableInData <- function(x, name, data, varMap, numeric=1, positive=0) {
 
@@ -750,18 +620,42 @@ checkOp_chemEnrich.adjPvalue <- function(x) {
   }
   ret
 } 
+checkOp_max.npairwise <- function(x) {
+  check.range(x, "max.npairwise", 2, Inf)
+}
 
-checkFiles <- function(filevec, name="filevec") {
 
-  if (!length(filevec)) stop("ERROR: No files specified")
-  if (!is.character(filevec)) stop(paste0("ERROR: ", name, " must be a character vector of files"))
-  filevec <- trimws(filevec)
-  tmp     <- !file.exists(filevec)
-  if (any(tmp)) {
-    print(filevec[tmp])
-    stop("ERROR: the above file(s) do not exist")
+checkMetaFiles <- function(filevec, name="filevec", valid.ext=NULL) {
+
+  filevec <- unique(checkFiles(filevec, name=name))
+  if (is.null(valid.ext)) valid.ext <- getMetaValidExt()
+
+  # Check extensions
+  dotExt <- paste0(".", valid.ext)
+  ok     <- checkFileExtensions(filevec, checkForExt=dotExt)
+  if (!all(ok)) {
+    print(filevec[!ok])
+    stop("ERROR: the above file(s) do not have the correct file extension")
   }
   filevec
+}
+
+checkMetaFilesFolders <- function(x, name="filesFolders") {
+
+  x     <- checkFiles(x, name=name)
+  tmp   <- dir.exists(x)
+  dirs  <- x[tmp]  
+  files <- x[!tmp]
+  if (length(files)) {
+    # Check extensions
+    dotExt <- paste0(".", getMetaValidExt())
+    ok     <- checkFileExtensions(files, checkForExt=dotExt)
+    if (!all(ok)) {
+      print(files[!ok])
+      stop("ERROR: the above file(s) do not have the correct file extension or are not valid directories")
+    }
+  }
+  x
 }
 
 getOptionNameAndValue <- function(str, sep="=") {
