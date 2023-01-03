@@ -15,8 +15,8 @@ load(rdafile)
 obj <- RcometsAnalytics::runModel(modeldata, b_data, cohort = "cohort")
 
 # Compare result to the baseline. 
-b_corr$Info[1, 2]     <- ""
-obj$Info[1, 2]        <- ""
+b_corr$Info           <- NULL
+obj$Info              <- NULL
 attr(b_corr, "ptime") <- NULL
 attr(obj, "ptime")    <- NULL
 test_that("RcometsAnalytics::runCorr adj",

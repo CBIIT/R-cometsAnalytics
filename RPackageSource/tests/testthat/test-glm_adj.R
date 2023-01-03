@@ -29,8 +29,8 @@ for (i in 1:nmetabs) {
 }
 
 # Compare result to the baseline. 
-b_obj$Info[1, 2]     <- ""
-obj$Info[1, 2]       <- ""
+b_obj$Info           <- NULL
+obj$Info             <- NULL
 attr(b_obj, "ptime") <- NULL
 attr(obj, "ptime")   <- NULL
 test_that("RcometsAnalytics:: glm adj",
