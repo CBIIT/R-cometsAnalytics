@@ -47,8 +47,14 @@ meta_main <- function(filevec, modelName, op) {
 
   # Determine if this is a correlation model
   modfunc <- getInfoTableValue(file.info.list[[1]]$info, getInfoTableModelFuncName(), ifNotFound=NULL, check.len=1) 
-  if (is.null(modfunc)) stop("INTERNAL CODING ERROR")
+  if (is.null(modfunc)) stop("INTERNAL CODING ERROR: model function")
   op$corr.model <- (modfunc == getCorrModelName()) 
+
+  # Determine if this is a stratified model
+  ret <- getInfoTableValue(file.info.list[[1]]$info, runModel.getStrataNumColName(), ifNotFound=NULL, check.len=1) 
+  if (is.null(ret)) stop("INTERNAL CODING ERROR: strata")
+  if (is.na(ret)) ret <- ""
+  op$strat.model <- nchar(ret) > 0
 
   ret <- meta_getFinalDataAndRun(ids, nsubs, data.list, op) 
 
@@ -64,6 +70,7 @@ meta_setReturnObj <- function(df, op) {
   wnm  <- runModel.getWarningsListName()
   wobj <- op[[wnm, exact=TRUE]]
   if (is.null(wobj)) wobj <- runModel.getEmptyErrorWarn() 
+  if (op$strat.model) df <- meta_strat_het_test(df, op)
   if (op$corr.model) df <- meta_FisherZtoCorr(df, alpha=0.95)
 
   # Check min nbumber of cohorts and sample size
@@ -361,7 +368,7 @@ meta_loadEffects <- function(f, cols, numvars, modnum, infoTable) {
   x
 }
 
-meta_getIdNames <- function(x) {
+meta_getIdNames <- function(x, strata.cols=TRUE) {
 
   sep <- getMetaIdNamesSep()
   cx  <- colnames(x)
@@ -369,7 +376,7 @@ meta_getIdNames <- function(x) {
   vv2 <- getMetaIdNamesStratCols()
   if (!all(vv1 %in% cx)) stop("INTERNAL CODING ERROR 1 in meta_getIdNames")
   ret <- paste(x[, vv1[1], drop=TRUE], x[, vv1[2], drop=TRUE], x[, vv1[3], drop=TRUE], sep=sep)
-  if (all(vv2 %in% cx)) {
+  if (strata.cols && all(vv2 %in% cx)) {
     ret <- paste(ret, x[, vv2[1], drop=TRUE], x[, vv2[2], drop=TRUE], sep=sep)
   }
 
@@ -665,6 +672,9 @@ meta_getFileInfo <- function(f, normModelNames=1) {
 
 meta_initFileCheck <- function(filevec, op) {
 
+  DEBUG    <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_initFileCheck\n")
+
   wrnm     <- runModel.getWarningsListName()
   wobj     <- op[[wrnm, exact=TRUE]]
   infolist <- list()
@@ -703,6 +713,8 @@ meta_initFileCheck <- function(filevec, op) {
   if (m < op[[metaOp_minNcohortName()]]) stop("ERROR: too few cohorts left after exclusions")
   if (any(duplicated(cohorts))) stop("ERROR: cohort names are not unique")
   op[[wrnm]] <- wobj
+
+  if (DEBUG) cat("End: meta_initFileCheck\n")
 
   list(file.info.list=infolist, op=op)
 
@@ -763,7 +775,7 @@ meta_check_beta_se <- function(beta, se) {
   NULL
 }
 
-meta_core <- function(beta, se) {
+meta_core <- function(beta, se, only.ret.Q=FALSE) {
 
   if (is.vector(beta)) dim(beta) <- c(1, length(beta))
   if (is.vector(se)) dim(se) <- c(1, length(se))
@@ -791,8 +803,16 @@ meta_core <- function(beta, se) {
   # Cochran's Q statistic
   tmp  <- beta - betaf
   q    <- rowSums(tmp*tmp*w)
-  tmp  <- NULL
-  gc()
+  phet <- pchisq(q, df=ncohort-1, lower.tail=FALSE)
+  
+  if (only.ret.Q) {
+    tmp <- ncohort %in% 0
+    if (any(tmp)) phet[tmp]      <- NA
+    ret                          <- list()
+    ret[[getMetaHetPvalueCol()]] <- phet
+    ret[[getMetaNcohortCol()]]   <- ncohort
+    return(ret)
+  }
   
   # Random effects
   tmp       <- pmax(0, (q-(ncohort-1))/(rowSumsW - (rowSums(w*w)/rowSumsW)))
@@ -803,6 +823,7 @@ meta_core <- function(beta, se) {
   tmp       <- NULL
   if (missFlag) wgt[miss] <- 0
   miss      <- NULL
+  rm(tmp, q)
   gc()
   rsumWrand <- rowSums(wgt)
   wgt       <- wgt/rsumWrand
@@ -814,7 +835,6 @@ meta_core <- function(beta, se) {
   
   # P-values
   pvaluef  <- 2*pnorm(abs(betaf/sef), lower.tail=FALSE)
-  phet     <- pchisq(q, df=ncohort-1, lower.tail=FALSE)
   pvaluer  <- 2*pnorm(abs(betar/ser), lower.tail=FALSE)
 
   tmp <- ncohort %in% 0
@@ -825,7 +845,6 @@ meta_core <- function(beta, se) {
     betar[tmp]   <- NA
     ser[tmp]     <- NA
     pvaluer[tmp] <- NA
-    q[tmp]       <- NA
     phet[tmp]    <- NA
   }
   ret <- list()
@@ -841,4 +860,92 @@ meta_core <- function(beta, se) {
   ret  
 }
 
+meta_strat_het_test <- function(df, op) {
+
+  svarCol <- runModel.getStrataColName()
+  svalCol <- runModel.getStrataNumColName()
+  tmp     <- c(svarCol, svalCol)
+  if (!nonEmptyDfHasCols(df, tmp, allcols=1, ignoreCase=0)) return(df)
+  
+  ret     <- df # Return data frame with added columns
+
+  # Remove any strata if needed
+  svar <- unique(unlist(df[, svarCol, drop=TRUE]))
+  if (length(svar) != 1) stop("INTERNAL CODING ERROR with strata")
+  rem.list <- op[[metaOp_strataToExcludeFromHetTest(), exact=TRUE]]
+  if (length(rem.list)) rem.list <- rem.list[[svar, exact=TRUE]]
+  if (length(rem.list)) {
+    tmp <- !(df[, svalCol, drop=TRUE] %in% rem.list)
+    if (!all(tmp)) df <- df[tmp, , drop=FALSE]
+  }
+
+  # Get the ids for all rows
+  ids     <- meta_getIdNames(df, strata.cols=FALSE)
+  strata  <- unlist(df[, svalCol, drop=TRUE]) 
+  ustrata <- unique(strata)
+  uids    <- unique(ids)
+  
+  # Perform Cochran's Q test for both fixed and random effects
+  bcol   <- getMetaFixedBetaCol()
+  secol  <- getMetaFixedBetaSeCol()
+  fixed  <- meta_strat_het_test_main(unlist(df[, bcol]), unlist(df[, secol]), 
+                                     ids, uids, strata, ustrata)
+  bcol   <- getMetaRandomBetaCol()
+  secol  <- getMetaRandomBetaSeCol()
+  random <- meta_strat_het_test_main(unlist(df[, bcol]), unlist(df[, secol]), 
+                                     ids, uids, strata, ustrata)
+
+  # Add columns to data frame
+  ret <- meta_strat_het_test_add(ret, uids, fixed, random)
+
+  ret
+}
+
+meta_strat_het_test_main <- function(beta, se, ids, uids, strata, ustrata) {
+
+  N          <- length(uids)
+  Ns         <- length(ustrata)
+  bmat       <- matrix(data=NA, nrow=N, ncol=Ns)
+  smat       <- bmat
+  for (i in 1:Ns) {
+    tmp     <- strata %in% ustrata[i]
+    beta2   <- beta[tmp]
+    se2     <- se[tmp]
+    strata2 <- strata[tmp]
+    rows    <- match(uids, ids[tmp])
+    tmp     <- !is.na(rows)
+    rows    <- rows[tmp]
+    if (!length(rows)) next
+    bmat[tmp, i] <- beta2[rows]
+    smat[tmp, i] <- se2[rows]
+  }
+  ret <- meta_core(bmat, smat, only.ret.Q=TRUE)
+  ret  
+}
+
+meta_strat_het_test_add <- function(ret, uids, fixed, random) {
+
+  ids  <- meta_getIdNames(ret, strata.cols=FALSE)
+  rows <- match(ids, uids)
+  tmp  <- !is.na(rows)
+  rows <- rows[tmp]
+  if (!length(rows)) return(ret)
+
+  hetpCol       <- getMetaHetPvalueCol() 
+  ncohortCol    <- getMetaNcohortCol()  
+  pv            <- getMetaStrataHetFixedPCol()
+  dfv           <- getMetaStrataHetFixedDfCol()
+  ret[, pv]     <- NA
+  ret[, dfv]    <- NA
+  ret[tmp, pv]  <- fixed[[hetpCol]][rows]
+  ret[tmp, dfv] <- fixed[[ncohortCol]][rows] - 1
+  pv            <- getMetaStrataHetRandomPCol()
+  dfv           <- getMetaStrataHetRandomDfCol()
+  ret[, pv]     <- NA
+  ret[, dfv]    <- NA
+  ret[tmp, pv]  <- random[[hetpCol]][rows]
+  ret[tmp, dfv] <- random[[ncohortCol]][rows] - 1
+
+  ret
+} 
 

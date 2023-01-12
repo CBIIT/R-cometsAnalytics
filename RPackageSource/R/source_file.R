@@ -16,10 +16,12 @@ getFileExt <- function(f, tolower=1, tarflag=1) {
 }
 
 loadFile <- function(fobj, sheets=NULL) {
-  
+ 
   if (is.list(fobj)) {
     f <- fobj$file
     if (is.null(sheets)) sheets <- fobj[[filelistSheetOp(), exact=TRUE]]
+  } else {
+    f <- fobj
   }
   f   <- trimws(f)
   ext <- getFileExt(f, tolower=1) 

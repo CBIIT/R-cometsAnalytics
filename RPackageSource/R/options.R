@@ -347,12 +347,12 @@ getCharVecFromStr <- function(str, sep) {
 # Parse and check global options from options sheet. Return a list of options.
 checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
 
-  tmp    <- getValidGlobalOps(meta=meta)
-  def    <- tmp$default
-  ops.n  <- tmp$ops.numeric
-  ops.l  <- tmp$ops.logical
-  ops.cv <- tmp$ops.charVec
-  valid  <- names(def)
+  tmp      <- getValidGlobalOps(meta=meta)
+  def      <- tmp$default
+  ops.n    <- tmp$ops.numeric
+  ops.l    <- tmp$ops.logical
+  ops.cv   <- tmp$ops.charVec
+  valid    <- names(def)
 
   n <- length(opnames)
   if (!n) return(def)
@@ -360,6 +360,11 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
   opnames  <- trimws(opnames)
   opvalues <- trimws(opvalues)
   sep      <- getAddMetabColsSep()
+
+  # Special case
+  nm    <- metaOp_strataToExcludeFromHetTest()
+  sp1   <- c(nm, paste0(nm, ".", 1:999))
+  flag1 <- 0
 
   ret <- list()
   # Loop over each element
@@ -383,11 +388,17 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
       } else if (name %in% ops.cv) {
         # Character vector
         value <- getCharVecFromStr(value, sep) 
+      } else if (name %in% sp1) {
+        value <- meta_excStratOpStr2List(value, name)
+        flag1 <- 1
       }
     }
 
     ret[[name]] <- value
   }
+
+  # Special case
+  if (flag1) ret <- meta_excStratOp_setList(ret)
 
   # Check the values
   ret <- try(checkGlobalOpList(ret, name="options", meta=meta), silent=TRUE)

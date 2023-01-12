@@ -68,13 +68,21 @@ getModelTypeOptionsFromSheet <- function(op, model) {
     stop(paste0("ERROR: missing option names in ", getMetaModelTypeSheetName(), " sheet"))
   }
 
-  # Check for duplicate names
-  tmp <- duplicated(opnames)
+  # Check for duplicate names. metaOp_strataToExcludeFromHetTest is a special case
+  tmp0 <- opnames %in% metaOp_strataToExcludeFromHetTest()
+  tmp  <- (duplicated(opnames)) & !tmp0
   if (any(tmp)) {
     str <- paste(opnames[tmp], collapse=", ", sep="")
     msg <- paste0("ERROR: the options ", str, " appear more than once in the ",
                   getMetaModelTypeSheetName(), " sheet")
     stop(msg)
+  }
+
+  # Special case: metaOp_strataToExcludeFromHetTest
+  m <- sum(tmp0) 
+  if (m > 1) {
+    # Temporarily rename option to prevent overwriting the option later
+    opnames[tmp0] <- paste0(opnames[tmp0], ".", 1:m)
   }
 
   # Get the global options
@@ -187,6 +195,44 @@ meta_check_opFile <- function(x, nm="opfile") {
   }
 
   x
+}
+
+meta_excStratOpStr2List <- function(str, name) {
+
+  vec <- strsplit(str, ":", fixed=TRUE)
+  vec <- trimws(vec)
+  tmp <- nchar(vec) > 0
+  vec <- vec[tmp]
+  if (length(vec) != 2) stop(paste0(name, " = ", str, " is not correctly specified"))
+  var        <- tolower(trimws(vec[1]))
+  values     <- strsplit(vec[2], ",", fixed=TRUE)
+  ret        <- list()
+  ret[[var]] <- values
+  ret
+}
+
+meta_excStratOp_setList <- function(oplist) {
+
+  nms <- names(oplist)
+  if (!length(nms)) return(oplist)
+  nm  <- metaOp_strataToExcludeFromHetTest()
+  sp1 <- c(nm, paste0(nm, ".", 1:999)) 
+  tmp <- nms %in% sp1
+  sp1 <- nms[tmp]
+  m   <- length(sp1)
+  if (!m) return(oplist)
+  lst <- list()
+  for (nm2 in sp1) {
+    obj <- oplist[[nm2, exact=TRUE]]
+    if (is.null(obj)) next
+    var           <- names(obj)
+    val           <- obj[[1]]
+    lst[[var]]    <- val
+    oplist[[nm2]] <- NULL
+  }
+  if (!length(oplist)) oplist <- list()
+  oplist[[nm]] <- lst
+  oplist
 }
 
 checkMetaOp_min.n.cohort <- function(x) {

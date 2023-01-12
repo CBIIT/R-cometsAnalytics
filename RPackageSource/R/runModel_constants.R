@@ -232,6 +232,7 @@ metaOp_save.mem                <- function() {"save.mem"}
 metaOp_save.memDefault         <- function() {1}
 metaOp_cohorts.include         <- function() {"cohorts.include"}
 metaOp_cohorts.exclude         <- function() {"cohorts.exclude"}
+metaOp_strataToExcludeFromHetTest <- function() {"strata.exclude.het.test"}
 metaOp_models                  <- function() {"models"}
 metaModelNameNumberSep         <- function() {" "}
 metaRetListResultsTable        <- function() {"Results"}
@@ -252,6 +253,10 @@ getMetaRandomBetaUCol          <- function() {"random.estimate.U"}
 getMetaNcohortCol              <- function() {"n.cohort"}
 getMetaNsubCol                 <- function() {"n.sub"}
 getMetaHetPvalueCol            <- function() {"het.pvalue"}
+getMetaStrataHetFixedPCol      <- function() {"strata.fixed.het.pvalue"}
+getMetaStrataHetFixedDfCol     <- function() {"strata.fixed.het.df"}
+getMetaStrataHetRandomPCol     <- function() {"strata.random.het.pvalue"}
+getMetaStrataHetRandomDfCol    <- function() {"strata.random.het.df"}
 getMetaMessageCol              <- function() {"message"}
 getMetaDirectionCol            <- function() {"direction"}
 getMetaIdCol                   <- function() {"id"}
