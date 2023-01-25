@@ -16,7 +16,8 @@ getModelData(
   offvar = NULL,
   timevar = NULL,
   groupvar = NULL,
-  where = NULL
+  where = NULL,
+  exposurerefs = NULL
 )
 }
 \arguments{
@@ -50,6 +51,10 @@ the Models sheet). If interactive, then the model label.}
    with age > 50 AND bmi > 22.  
 Note that when running in Batch mode, rules in the \code{WHERE} column
 of the \code{Models} sheet must be separated by a comma.}
+
+\item{exposurerefs}{If Interactive, a vector of exposure reference levels for
+categorical exposure variables. If specified, then this vector must
+have the same length as \code{exposures}.}
 }
 \value{
 a list comprising: \cr

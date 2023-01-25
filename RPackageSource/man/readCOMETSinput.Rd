@@ -32,10 +32,18 @@ A table with the subject ids in the first column and metabolites as the other co
 A table with the subject ids in the first column and covariates as the other columns. \cr
 \bold{VarMap} \cr
 A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
-\code{VARTYPE}, and \code{VARDEFINITION}. The \code{COHORTVARIABLE} column must contain names that match the
+\code{VARTYPE}, \code{VARDEFINITION}, and \code{ACCEPTED_VALUES}. 
+The \code{COHORTVARIABLE} column must contain names that match the
 column names in the \bold{SubjectData} table. These names will be renamed to their
 corresponding name in the \code{VARREFERENCE} column. The \code{VARTYPE} column 
-should have values \code{continuous} or \code{categorical} for each row. \cr
+should have values \code{continuous} or \code{categorical} for each row. The
+\code{ACCEPTED_VALUES} column defines the allowed values that the variable
+should have, and an error will be thrown if the variable is outside of
+the accepeted values. For a categorical variable, \code{ACCEPTED_VALUES} should be a 
+comma separated list of values such as '1, 2, 3'. For a continuous variable,
+\code{ACCEPTED_VALUES} should be a range of the form: 
+(a, b), (a, b], [a, b), or [a, b], where parentheses denote exclusion of the value,
+and brackets denote inclusion of the value. \cr
 \bold{Models} \cr
 A table where each row represents a model to be run, and with columns \code{MODEL}, 
 \code{OUTCOMES}, \code{EXPOSURE}, \code{ADJUSTMENT},

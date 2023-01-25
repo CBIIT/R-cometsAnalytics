@@ -24,5 +24,11 @@ A list of options for the runMeta function
 \item{\code{output.type}}{ Type of output file, either "xlsx" for an Excel worksheet
                            or "rda" for an R object file created with the \code{save()} function.
                      The default is "xlsx".}
+\item{\code{strata.exclude.het.test}}{ A list of stratification levels to be excluded from
+                     the test for heterogeneity.
+     This list has the form list(var1=vec1, var2=vec2, ...), where var1, var2, ... are stratification
+     variables, and vec1, vec2, ... are vectors of stratification levels to be removed
+     from the test.
+                     The default is NULL.}
 }
 }
