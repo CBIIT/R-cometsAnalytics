@@ -949,3 +949,25 @@ meta_strat_het_test_add <- function(ret, uids, fixed, random) {
   ret
 } 
 
+meta_relevel_terms_main <- function(df, var, from, to) {
+
+  tv      <- tolower(getEffectsTermName())
+  var     <- tolower(var)
+  varfrom <- paste0(var, ".", from)
+  varto   <- paste0(var, ".", to)
+  vec     <- df[, tv, drop=TRUE]
+  len     <- length(vec)
+  ret     <- rep("", len)
+  eff     <- getEffectsName()
+  for (i in 1:length(varfrom)) {
+    tmp <- vec %in% varfrom[i]
+    if (!any(tmp)) {
+      msg <- paste0(tv, "='", varfrom[i], "' not found in ", eff, " data frame")
+      warning(msg)
+    }
+    ret[tmp] <- varto[i]
+  }
+  df[, tv] <- ret
+
+  df
+}

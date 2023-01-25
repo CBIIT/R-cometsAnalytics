@@ -62,6 +62,12 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
   err <- infile.checkSheets(dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames, dta.op) 
   if (err) stop("ERROR in Excel file. See above ERROR message(s).")
 
+  # Check accepted values
+  checkAcceptedValues(dta.sdata, dta.vmap)
+
+  # Check exposure reference 
+  checkExposureRef(dta.vmap, dta.models)
+
   # rename subjid in dta.smetab sheet for merging later on
   cv             <- tolower(getVarMapCohortVarCol())
   refv           <- tolower(getVarMapVarRefCol())
@@ -75,6 +81,238 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
   ret <- list(dta.smetab=dta.smetab, dta.metab=dta.metab, dta.sdata=dta.sdata, integritymessage=msg)
 
   ret
+
+}
+
+checkExposureRef <- function(dta.vmap, dta.models) {
+
+  if (!length(dta.models)) return(NULL)
+  # Get all categorical variables
+  typev   <- tolower(getVarMapVarTypeCol())
+  refv    <- tolower(getVarMapVarRefCol())
+  tmp     <- tolower(dta.vmap[, typev, drop=TRUE]) %in% tolower(getVarMapVarTypeCat())
+  catvars <- dta.vmap[tmp, refv, drop=TRUE]
+  if (!length(catvars)) return(NULL)
+  tmp      <- tolower(dta.vmap[, typev, drop=TRUE]) %in% tolower(getVarMapVarTypeCont())
+  contvars <- dta.vmap[tmp, refv, drop=TRUE]
+
+  # Get exposure variables
+  expv               <- tolower(getModelsExposureCol())
+  exprefv            <- tolower(getModelsExpRefCol())
+  strs               <- tolower(c(getAllMetabsName(), getAllMetabsNewName()))
+  dta.models[, expv] <- trimws(tolower(dta.models[, expv]))
+
+  # Remove rows with "All metabolites"
+  tmp                <- !(dta.models[, expv, drop=TRUE] %in% strs)
+  dta.models         <- dta.models[tmp, , drop=FALSE]
+  if (!nrow(dta.models)) return(NULL)
+
+  # Remove any cont variable
+  tmp        <- !(dta.models[, expv, drop=TRUE] %in% contvars)
+  dta.models <- dta.models[tmp, , drop=FALSE]
+  if (!nrow(dta.models)) return(NULL)
+
+  # Determine if exp ref col is in the data
+  expRefColFlag <- exprefv %in% colnames(dta.models)
+
+  # Get accepted values for any remaining categorical variable
+  sep     <- runModel.getVarSep()
+  allvars <- unique(parseStr(dta.models[, expv, drop=TRUE], sep=sep))
+  tmp     <- allvars %in% catvars
+  allvars <- allvars[tmp]
+  if (!length(allvars)) return(NULL)
+  acc.list <- list()
+  rows     <- match(allvars, dta.vmap[, refv, drop=TRUE])
+  tmp      <- is.na(rows)
+  if (any(tmp)) {
+    str <- paste0(allvars[tmp], collapse=", ")
+    msg <- paste0("ERROR: matching variable name(s) '", str, 
+                  "' to ", toupper(refv), " column")
+    stop(msg)
+  }
+  vec <- dta.vmap[, tolower(getVarMapAccValsCol()), drop=TRUE]
+  for (i in 1:length(allvars)) {
+    v             <- allvars[i]
+    row           <- rows[i]
+    accvals       <- parseAccValues(vec[row], TRUE)
+    acc.list[[v]] <- accvals
+  }
+
+  # Loop over remaining rows
+  expvec    <- dta.models[, expv, drop=TRUE]
+  exprefvec <- as.character(dta.models[, exprefv, drop=TRUE]) 
+  modelsv   <- tolower(getModelsModelCol())
+  for (i in 1:length(expvec)) {
+    vars  <- parseStr(expvec[i], sep=sep) 
+    nvars <- length(vars)
+    if (!nvars) next
+    tmp0  <- vars %in% catvars
+    if (!any(tmp0)) next
+    
+    # Some of vars are categorical
+    if (!expRefColFlag) {
+      msg <- paste0("ERROR: ", toupper(exprefv), " column needed in ", 
+                    toupper(getModelsSheetName()),
+                    " sheet for categorical exposure variables")
+      stop(msg)
+    }
+    # Parse to get ref levels
+    refvals <- parseStr(exprefvec[i], sep=sep) 
+
+    # There should be 1 ref val for each variable
+    if (length(refvals) != nvars) {
+      msg <- paste0("ERROR with ", toupper(exprefv), 
+                    " column for model '", dta.models[i, modelsv, drop=TRUE], "',",
+                    " length(", toupper(expv), ")!=length(", toupper(exprefv), ")")
+      stop(msg)
+    }
+
+    # Check that the ref levels are in the accepted values column of varmap sheet
+    cvars <- vars[tmp0]
+    refs  <- refvals[tmp0]
+    for (j in 1:length(cvars)) {
+      ref <- refs[j]
+      v   <- cvars[j]
+      if (!(ref %in% acc.list[[v, exact=TRUE]])) {
+        msg <- paste0("ERROR: ", toupper(exprefv), "=", ref, 
+                      " for variable ", v, 
+                      " in model '", dta.models[i, modelsv, drop=TRUE], "'",
+                      " is not listed in the ",
+                      toupper(getVarMapAccValsCol()), " column")
+        stop(msg) 
+      }
+    }
+  }
+  NULL
+}
+
+checkAcceptedValues <- function(dta.sdata, dta.vmap) {
+
+  # Check cont and categorical variables
+  colnames(dta.sdata) <- tolower(colnames(dta.sdata))
+  colnames(dta.vmap)  <- tolower(colnames(dta.vmap))
+  vtypeCol            <- tolower(getVarMapVarTypeCol())   
+  accvalCol           <- tolower(getVarMapAccValsCol())
+  vrefCol             <- tolower(getVarMapVarRefCol())
+  cont.str            <- tolower(getVarMapVarTypeCont())
+  cat.str             <- tolower(getVarMapVarTypeCat())   
+  types               <- tolower(dta.vmap[, vtypeCol, drop=TRUE])
+  accvals             <- dta.vmap[, accvalCol, drop=TRUE]
+  vars                <- tolower(dta.vmap[, vrefCol, drop=TRUE])
+  tmp                 <- (types %in% c(cont.str, cat.str)) & (vars %in% colnames(dta.sdata))
+  types               <- trimws(types[tmp])
+  accvals             <- trimws(accvals[tmp])
+  vars                <- trimws(vars[tmp])
+  n                   <- length(types)
+  if (!n) return(NULL)
+  catflag <- types == cat.str
+  for (i in 1:n) {
+
+    # Special case of group variable for conditional logistic regression
+    if (toupper(accvals[i]) == "NA") next
+
+    obj <- parseAccValues(accvals[i], catflag[i])
+    if (!length(obj)) {
+      msg <- paste0("ERROR with ", toupper(accvalCol), " of variable ", vars[i], 
+                    " in ", toupper(getVarMapSheetName()), " sheet")
+      stop(msg)
+    }
+    checkAccValuesInData(dta.sdata, vars[i], obj, catflag[i]) 
+  }
+
+}
+
+checkAccValuesInData <- function(sdata, var, obj, catflag) {
+
+  vec <- sdata[, var, drop=TRUE]
+  if (catflag) {
+    vec <- trimws(vec)
+    tmp <- !(vec %in% obj)
+    if (any(tmp)) {
+      vec <- unique(vec[tmp])
+      str <- paste0(vec, collapse=", ")
+      msg <- paste0("ERROR: the value(s) '", str, "' of variable ", var, 
+                    " are not ACCEPTED VALUES in the ", toupper(getVarMapSheetName()), 
+                    " sheet")
+      stop(msg) 
+    }
+  } else {
+
+    # Continuous
+    #list(min=vec[1], max=vec[2], include.min=inc1, include.max=inc2)
+    vec <- as.numeric(vec)
+    a   <- obj$min
+    if (obj$include.min) {
+      tmp <- vec >= a
+    } else {
+      tmp <- vec >= a
+    }
+    flag1 <- contAccValuesVecAllOk(tmp)
+    b     <- obj$max
+    if (obj$include.max) {
+      tmp <- vec <= b
+    } else {
+      tmp <- vec < b
+    }
+    flag2 <- contAccValuesVecAllOk(tmp)
+    if (!flag1 || !flag2) {
+      msg <- paste0("ERROR: variable ", var, " contains invalid values according to the ",
+                    getVarMapAccValsCol(), " column of the ",
+                    toupper(getVarMapSheetName()), " sheet")
+      stop(msg) 
+    }
+  }
+  
+  NULL
+}
+
+contAccValuesVecAllOk <- function(vec) {
+
+  # Return TRUE if all good, FALSE otherwise
+  tmp <- is.na(vec)
+  if (any(tmp)) vec[tmp] <- TRUE
+  all(vec)
+ 
+}
+
+parseAccValues <- function(valstr, cat.flag) {
+
+  ret <- NULL
+  if (!length(valstr)) return(ret)
+  valstr <- trimws(valstr)
+  nc     <- nchar(valstr)
+  if (!nc) return(ret)
+  sep    <- getVarMapAccValsSep()
+
+  if (cat.flag) {
+    # Categorical
+    ret <- getVecFromStr(valstr, delimiter=sep)
+    ret <- trimws(ret)
+    tmp <- nchar(ret) > 0
+    ret <- ret[tmp]
+  } else {
+    # Continuous
+    c1 <- substr(valstr, 1, 1)
+    c2 <- substr(valstr, nc, nc)
+    if (!(c1 %in% c("(", "["))) return(ret)
+    if (!(c2 %in% c(")", "]"))) return(ret)
+    str <- tolower(valstr)
+    for (x in c("(", ")", "[", "]")) str <- gsub(x, "", str, fixed=TRUE)
+    vec <- getVecFromStr(str, delimiter=sep)
+    vec <- trimws(vec)
+    tmp <- nchar(vec) > 0
+    vec <- vec[tmp]
+    if (length(vec) != 2) return(ret)
+    vec <- as.numeric(vec)
+    tmp <- is.na(vec) | is.nan(vec)
+    if (any(tmp)) return(ret)
+    if (vec[1] >= vec[2]) return(ret)
+    inc1 <- c1 == "["
+    inc2 <- c2 == "]" 
+    ret <- list(min=vec[1], max=vec[2], include.min=inc1, include.max=inc2)
+  }
+  if (!length(ret)) ret <- NULL
+  ret  
 
 }
 

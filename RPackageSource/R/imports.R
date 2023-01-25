@@ -1,6 +1,5 @@
 #' @docType package
 #' @name RcometsAnalytics-package
-#' @alias RcometsAnalytics
 #' @title RcometsAnalytics R package
 #' @description This R package supports all cohort-specific analyses of
 #'        the COMETS consortium \url{https://www.comets-analytics.org/}. 
@@ -13,7 +12,7 @@
 #' @import plotly
 #' @import caret
 #' @import heatmaply
-#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm p.adjust
+#' @importFrom stats model.matrix glm.fit lm cor as.formula cov cov2cor pnorm pt glm.control pchisq qnorm p.adjust relevel
 #' @importFrom tidyr gather
 #' @importFrom broom glance tidy
 #' @importFrom stats cor

@@ -586,7 +586,7 @@ runModel.getResponseSubs <- function(y, family) {
 
 } # END: runModel.getResponseSubs
 
-runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
+runModel.updateDesignMat <- function(modeldata, expVar, catvar, expref) {
 
   eStartCol  <- modeldata$designMatExpStartCol
   designMat  <- modeldata$designMat
@@ -597,6 +597,11 @@ runModel.updateDesignMat <- function(modeldata, expVar, catvar) {
   designMat[, modeldata$designMatExpCols] <- NA
 
   if (catvar) {
+    # Set reference
+    if (length(expref)) {
+      modeldata$gdta[, expVar] <- relevel(modeldata$gdta[, expVar], expref)
+    }
+
     # Get dummy variables
     mat              <- runModel.getDummyVars(modeldata$gdta, expVar)
     expNames         <- colnames(mat)
@@ -764,6 +769,7 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   DEBUG        <- op$DEBUG
   if (DEBUG) print(rem.obj)
   tooFewSubs   <- runModel.getTooFewSubsStr()
+  exprefs      <- newmodeldata[["exposurerefs", exact=TRUE]]
 
   # Get a default summary object when model fails 
   defObj <- runModel.defRetObj(op$model, dmatCols0, op)
@@ -794,14 +800,27 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   } else {
     CVEC <- numeric(0)
   }
-  runNumber <- index1
+  runNumber   <- index1
+  exprefsFlag <- length(exprefs)
     
   # Loop over each exposure in the outer loop
   for (j in seq_along(CVEC)) {
-    ccovj <- ccovs[j]
+    ccovj  <- ccovs[j]
+
+    # Check reference
+    if (exprefsFlag) {
+      expref <- exprefs[j]
+      if (!(expref %in% levels(newmodeldata$gdta[, ccovj, drop=TRUE]))) {
+        rem.obj <- runModel.addRemVars(rem.obj, ccovj, "exposures", 
+                    runModel.expRefInvalid() , varMap=varMap, errType="ERROR")
+        next
+      }
+    } else {
+      expref <- NULL 
+    }
 
     # Update the design matrix for this exposure var 
-    tmp       <- runModel.updateDesignMat(newmodeldata, ccovj, isfactor[j])
+    tmp       <- runModel.updateDesignMat(newmodeldata, ccovj, isfactor[j], expref)
     x         <- tmp$designMat
     ccovNames <- tmp$expNames  # ccovj or dummy variables for this exposure
     tmp       <- NULL

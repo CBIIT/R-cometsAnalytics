@@ -22,6 +22,9 @@
 #'        with age > 50 AND bmi > 22.  
 #'     Note that when running in Batch mode, rules in the \code{WHERE} column
 #'     of the \code{Models} sheet must be separated by a comma.
+#' @param exposurerefs  If Interactive, a vector of exposure reference levels for
+#'        categorical exposure variables. If specified, then this vector must
+#'        have the same length as \code{exposures}.
 #'
 #' @details All metabolite variables specified should be listed in the \code{metabolite_name}
 #'   column of the \code{Metabolites} sheet of the Excel file. All non-metabolite
@@ -51,17 +54,18 @@
 #' @export
 
 getModelData <-  function(readData,
-                          modelspec = "Batch",
-                          modlabel  = "",
-                          outcomes  = "All metabolites",
-                          exposures = "",
-                          adjvars   = NULL,
-                          strvars   = NULL,
-                          wgtvar    = NULL,
-                          offvar    = NULL,
-                          timevar   = NULL,
-                          groupvar  = NULL,
-			  where     = NULL) {
+                          modelspec    = "Batch",
+                          modlabel     = "",
+                          outcomes     = "All metabolites",
+                          exposures    = "",
+                          adjvars      = NULL,
+                          strvars      = NULL,
+                          wgtvar       = NULL,
+                          offvar       = NULL,
+                          timevar      = NULL,
+                          groupvar     = NULL,
+			  where        = NULL,
+                          exposurerefs = NULL) {
 
   rowvars   <- outcomes
   colvars   <- exposures
@@ -162,6 +166,10 @@ getModelData <-  function(readData,
       }
     } 
 
+    # Check exposurerefs
+    m <- length(exposurerefs)
+    if (m && (m != length(exposures))) stop("ERROR: length(exposurerefs) != length(exposures)")
+
     # end if modelspec is "Interactive"
 
   } else if (modelspec == getMode_batch()) {
@@ -250,6 +258,10 @@ getModelData <-  function(readData,
       where <- NULL
     }
 
+    # Get the exposure refs, checked when readCometsInput is called
+    exposurerefs <- mods[[tolower(getModelsExpRefCol()), exact=TRUE]]
+    if (!is.character(exposurerefs)) exposurerefs <- NULL
+    if (length(exposurerefs)) exposurerefs <- parseStr(exposurerefs, sep=runModel.getVarSep())   
   } # end if modelspec == "Batch"
 
   # Check that the variables exist in the renamed data
@@ -341,8 +353,10 @@ getModelData <-  function(readData,
   where           = where,
   allvsall        = allvsall,
   varMap          = varMap,
-  options         = options
+  options         = options,
+  exposurerefs    = exposurerefs
   )
+
   ret[[runModel.getWarningsListName()]] <- rem.obj
   ret[[getOldCorrModelName()]]          <- runCorrFlag
 

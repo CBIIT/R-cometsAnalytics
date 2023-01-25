@@ -1,5 +1,4 @@
-#' Results table 
-#'  
+#' @description{
 #' The Results data frame contains the estimates
 #'  from the meta-analyses.
 #' Depending on the model run and options specified, 
@@ -28,12 +27,14 @@
 #' \item{\code{stratavar}}{ Stratum variable(s)}
 #' \item{\code{strata}}{ Stratum level(s)}
 #' }
+#' }
 #'
+#' @name MetaOutputColumns
+#' @title Meta Analysis Output Columns
 #' @details 
 #'  Correlation models will not contain columns for \code{fixed.std.error} and
 #'           \code{random.std.error}. Instead, there will be columns for 
 #'           lower and upper confidence limits of \code{fixed.estimate} and
 #'           \code{random.estimate}.
 #'  
-#'
 NULL

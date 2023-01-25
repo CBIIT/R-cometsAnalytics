@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.3"}
+getVersionNumber     <- function() {"2.9.0.4"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -33,6 +33,8 @@ runModel.getWarningsListName  <- function() {"Errors_Warnings"}
 runModel.getUnknownErrorStr   <- function() {"unknown error"}
 runModel.getTooFewSubsStr     <- function() {"too few subjects"}
 runModel.getStratTooFewSubStr <- function() {"Stratum contains to few subjects"}
+runModel.expRefInvalid        <- function() {"exposure reference level is not valid"}
+
 
 # Message when exposure has been removed from design matrix
 runModel.getExpRemFromDesign <- function() {"exposure removed from design matrix"}
@@ -157,7 +159,10 @@ getVarMapVarRefCol       <- function() {"VARREFERENCE"}
 getVarMapCohortVarCol    <- function() {"COHORTVARIABLE"}
 getVarMapVarDefCol       <- function() {"VARDEFINITION"}
 getVarMapVarTypeCol      <- function() {"VARTYPE"}
-getReqVarMapSheetCols    <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), getVarMapVarTypeCol())}
+getVarMapAccValsCol      <- function() {"ACCEPTED_VALUES"}
+getVarMapAccValsSep      <- function() {","}
+getReqVarMapSheetCols    <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), 
+                                          getVarMapVarTypeCol(), getVarMapAccValsCol())}
 getModelsModelCol        <- function() {"MODEL"}
 getModelsOutcomeCol      <- function() {"OUTCOMES"}
 getModelsExposureCol     <- function() {"EXPOSURE"}
@@ -166,6 +171,7 @@ getModelsStratCol        <- function() {"STRATIFICATION"}
 getModelsWhereCol        <- function() {"WHERE"}
 getModelsTimeCol         <- function() {"TIME"}
 getModelsGroupCol        <- function() {"GROUP"}
+getModelsExpRefCol       <- function() {"EXPOSURE_REFERENCE"}
 getReqModelsSheetCols    <- function() {c(getModelsModelCol(), getModelsOutcomeCol(), getModelsExposureCol(), 
                                           getModelsAdjCol(), getModelsStratCol(), getModelsWhereCol())}
 getReqModOpSheetCols  <- function() {c(getModelOptionsIdCol(), getModelFunctionCol(), getOptionNameCol(), getOptionValueCol())}
@@ -214,10 +220,10 @@ getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffect
                                              }
 
 # Meta analysis
-getMetaModelsSheetName         <- function() {"Models"}
-getMetaModelTypeSheetName      <- function() {"Model_Types"}
+getMetaModelsSheetName         <- function() {"Meta_Models"}
+getMetaModelTypeSheetName      <- function() {"Meta_Types"}
 getMetaOpFileModelsCol         <- function() {"MODEL"}
-getMetaOpFileModelTypeCol      <- function() {"MODEL_TYPE"}
+getMetaOpFileModelTypeCol      <- function() {"META_TYPE"}
 getMetaGlobalOptionName        <- function() {"GLOBAL"}
 metaOp_methodName              <- function() {"method"}
 metaOp_methodDefault           <- function() {"fixed"}

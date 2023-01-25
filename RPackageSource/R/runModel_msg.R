@@ -38,7 +38,8 @@ runmodel.addWarning <- function(obj, newList) {
 
 } # END: runModel.addWarning
 
-runModel.addRemVars <- function(obj, vars, type, reason, printWarning=1, varMap=NULL) {
+runModel.addRemVars <- function(obj, vars, type, reason, printWarning=1, varMap=NULL,
+                                errType="WARNING") {
 
   if (!is.null(varMap)) vars <- runModel.varMap(vars, varMap)
 
@@ -47,7 +48,7 @@ runModel.addRemVars <- function(obj, vars, type, reason, printWarning=1, varMap=
   c2        <- runModel.getObjectCol()
   c3        <- runModel.getMessageCol()
   tmp       <- list()
-  tmp[[c1]] <- "WARNING"
+  tmp[[c1]] <- errType
   tmp[[c2]] <- vars
   tmp[[c3]] <- msg
   obj       <- runmodel.addWarning(obj, tmp)

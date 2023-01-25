@@ -21,20 +21,34 @@
 
 #' \bold{VarMap} \cr
 #' A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
-#' \code{VARTYPE}, and \code{VARDEFINITION}. The \code{COHORTVARIABLE} column must contain names that match the
+#' \code{VARTYPE}, \code{VARDEFINITION}, and \code{ACCEPTED_VALUES}. 
+#' The \code{COHORTVARIABLE} column must contain names that match the
 #' column names in the \bold{SubjectData} table. These names will be renamed to their
 #' corresponding name in the \code{VARREFERENCE} column. The \code{VARTYPE} column 
-#' should have values \code{continuous} or \code{categorical} for each row. \cr
+#' should have values \code{continuous} or \code{categorical} for each row. The
+#' \code{ACCEPTED_VALUES} column defines the allowed values that the variable
+#' should have, and an error will be thrown if the variable is outside of
+#' the accepeted values. For a categorical variable, \code{ACCEPTED_VALUES} should be a 
+#' comma separated list of values such as '1, 2, 3'. For a continuous variable,
+#' \code{ACCEPTED_VALUES} should be a range of the form: 
+#' (a, b), (a, b], [a, b), or [a, b], where parentheses denote exclusion of the value,
+#' and brackets denote inclusion of the value. Use Inf or -Inf to denote
+#' infinity or minus infinity. \cr
 
 #' \bold{Models} \cr
 #' A table where each row represents a model to be run, and with columns \code{MODEL}, 
 #' \code{OUTCOMES}, \code{EXPOSURE}, \code{ADJUSTMENT},
-#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODEL_TYPE}, \code{TIME}, \code{GROUP}. All variable names in this
+#'  \code{STRATIFICATION}, \code{WHERE}, and optionally \code{MODEL_TYPE}, \code{TIME}, 
+#' \code{GROUP}, and \code{EXPOSURE_REFERENCE}. 
+#' All variable names in this
 #' table must match variable names in the \code{VARREFERENCE} column of the \bold{VarMap} sheet.
 #' The \code{MODEL} column is a label for the model. The \code{OUTCOMES} and \code{EXPOSURE} columns define the 
 #' outcome and exposure variables for the model. Use \code{All metabolites} to specify
 #' that all metabolite variables are to be included as outcomes or exposures, otherwise 
-#' use a space separated list of variable names. The \code{ADJUSTMENT} column contains a
+#' use a space separated list of variable names. For any categorical exposure variable,
+#' the \code{EXPOSURE_REFERENCE} column is required to specify the reference level. 
+#' The reference level must match one of the \code{ACCEPTED_VALUES} in the \bold{VarMap} sheet.
+#' The \code{ADJUSTMENT} column contains a
 #' space separated list of covariate adjustment variables; use an empty cell for no covariate adjustment.
 #' The \code{STRATIFICATION} column is used for stratified analyses, with a space separated list
 #' of stratification variables. If more than one stratification variable is specified, then the strata

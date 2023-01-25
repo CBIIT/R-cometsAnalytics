@@ -2,12 +2,12 @@
 #' @title Options file for meta-analyses
 #' @description An Excel file containing models and options for the runAllMeta function
 #' @details
-#' The file should contain sheets \bold{MODELS} and \bold{MODEL_TYPES}. 
-#' Each sheet is optional. The \bold{MODELS} sheet should have a column
+#' The file should contain sheets \bold{META_MODELS} and \bold{META_TYPES}. 
+#' Each sheet is optional. The \bold{META_MODELS} sheet should have a column
 #' called \code{MODEL} containing the models for meta-analysis. 
 #' This list of models can be a subset of models defined by the input files.
 #' This sheet can also have a optional column called \code{MODEL_TYPE} that
-#' links to the \bold{MODEL_TYPES} sheet defining the options for each model.
+#' links to the \bold{META_TYPES} sheet defining the options for each model.
 #' See the example file in /inst/extdata/cometsMetaInput.xlsx.
 #'
 NULL
