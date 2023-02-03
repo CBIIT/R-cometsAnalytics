@@ -18,8 +18,8 @@ Imports: readxl, rio, dplyr, plyr, plotly, tidyr, heatmaply, stringr,
 Suggests: Hmisc, knitr, testthat, rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 NeedsCompilation: no
 URL: http://comets-analytics.org/
 BugReports: https://github.com/CBIIT/nci-webtools-comets-analytics/issues
-Packaged: 2023-01-24 20:49:00 UTC; wheelerwi
+Packaged: 2023-02-03 16:16:17 UTC; wheelerwi
