@@ -162,7 +162,7 @@ getVarMapVarTypeCol      <- function() {"VARTYPE"}
 getVarMapAccValsCol      <- function() {"ACCEPTED_VALUES"}
 getVarMapAccValsSep      <- function() {","}
 getReqVarMapSheetCols    <- function() {c(getVarMapVarRefCol(), getVarMapCohortVarCol(), 
-                                          getVarMapVarTypeCol(), getVarMapAccValsCol())}
+                                          getVarMapVarTypeCol())}
 getModelsModelCol        <- function() {"MODEL"}
 getModelsOutcomeCol      <- function() {"OUTCOMES"}
 getModelsExposureCol     <- function() {"EXPOSURE"}
@@ -240,6 +240,11 @@ metaOp_cohorts.include         <- function() {"cohorts.include"}
 metaOp_cohorts.exclude         <- function() {"cohorts.exclude"}
 metaOp_strataToExcludeFromHetTest <- function() {"strata.exclude.het.test"}
 metaOp_models                  <- function() {"models"}
+metaDataOp_renameLevels        <- function() {"rename.levels"}
+metaDataOp_renameLevels.var    <- function() {"var"}
+metaDataOp_renameLevels.old    <- function() {"old"}
+metaDataOp_renameLevels.new    <- function() {"new"}
+
 metaModelNameNumberSep         <- function() {" "}
 metaRetListResultsTable        <- function() {"Results"}
 getHarmMetabIdCol              <- function() {"metabolite_name"}
@@ -278,4 +283,16 @@ getMetaStratSep                <- function() {"."}
 cometsReqOutSheetNames         <- function() {c(getEffectsName(), getModelSummaryName(), getInfoTableDfName())}
 filelistSheetOp                <- function() {"sheet"}
 
+mrf_precedenceOpName           <- function() {"precedence"}
+mrf_precedenceNobs             <- function() {"nobs"}
+mrf_precedenceData             <- function() {"data"}
+mrf_precedenceDefault          <- function() {mrf_precedenceNobs()}
+mrf_precedenceValid            <- function() {c(mrf_precedenceNobs(), mrf_precedenceData())}
+mrf_consistencyOpName          <- function() {"check.consistency"}
+mrf_consistencyDefault         <- function() {TRUE}
+
+
+mrf_InfoMrgSep                 <- function() {"||"}
+mrf_FileCol                    <- function() {"file"}
+mrf_runSep                     <- function() {"_"}
 

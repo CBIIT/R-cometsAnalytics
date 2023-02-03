@@ -806,18 +806,18 @@ runModel.runAllMetabs <- function(newmodeldata, op) {
   # Loop over each exposure in the outer loop
   for (j in seq_along(CVEC)) {
     ccovj  <- ccovs[j]
+    expref <- NULL 
 
     # Check reference
-    if (exprefsFlag) {
+    if (exprefsFlag && isfactor[j]) {
       expref <- exprefs[j]
-      if (!(expref %in% levels(newmodeldata$gdta[, ccovj, drop=TRUE]))) {
+      if (is.na(expref)) expref <- NULL
+      if (length(expref) && !(expref %in% levels(newmodeldata$gdta[, ccovj, drop=TRUE]))) expref <- NULL
+      if (!length(expref)) {  
         rem.obj <- runModel.addRemVars(rem.obj, ccovj, "exposures", 
-                    runModel.expRefInvalid() , varMap=varMap, errType="ERROR")
-        next
+                    runModel.expRefInvalid() , varMap=varMap, errType="WARNING")
       }
-    } else {
-      expref <- NULL 
-    }
+    } 
 
     # Update the design matrix for this exposure var 
     tmp       <- runModel.updateDesignMat(newmodeldata, ccovj, isfactor[j], expref)

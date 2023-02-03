@@ -21,7 +21,7 @@
 
 #' \bold{VarMap} \cr
 #' A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
-#' \code{VARTYPE}, \code{VARDEFINITION}, and \code{ACCEPTED_VALUES}. 
+#' \code{VARTYPE}, \code{VARDEFINITION}, and optionally \code{ACCEPTED_VALUES}. 
 #' The \code{COHORTVARIABLE} column must contain names that match the
 #' column names in the \bold{SubjectData} table. These names will be renamed to their
 #' corresponding name in the \code{VARREFERENCE} column. The \code{VARTYPE} column 

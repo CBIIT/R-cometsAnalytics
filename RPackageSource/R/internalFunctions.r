@@ -191,8 +191,10 @@ checkAcceptedValues <- function(dta.sdata, dta.vmap) {
   # Check cont and categorical variables
   colnames(dta.sdata) <- tolower(colnames(dta.sdata))
   colnames(dta.vmap)  <- tolower(colnames(dta.vmap))
-  vtypeCol            <- tolower(getVarMapVarTypeCol())   
   accvalCol           <- tolower(getVarMapAccValsCol())
+  if (!(accvalCol %in% colnames(dta.vmap))) return(NULL)
+
+  vtypeCol            <- tolower(getVarMapVarTypeCol())   
   vrefCol             <- tolower(getVarMapVarRefCol())
   cont.str            <- tolower(getVarMapVarTypeCont())
   cat.str             <- tolower(getVarMapVarTypeCat())   
@@ -397,9 +399,26 @@ Harmonize<-function(dtalist){
     names(foundhmdb)<-gsub("hmdb_id",cohorthmdb,names(foundhmdb))
     names(finharmlistg)<-gsub("hmdb_id",cohorthmdb,names(finharmlistg))
 
-    finharmlistg<-finharmlistg %>%
-      filter(!is.na(uid_01)) %>% # take the ones with the previous match
-      union_all(foundhmdb)       # union with the non-matches
+    finharmlistg <- finharmlistg %>% filter(!is.na(uid_01)) # take the ones with the previous match
+
+    #################################################################
+    # The code below was giving an error because finharmlistg and 
+    #   foundhmdb did not have the same columns. To fix, add column
+    #   names to one or both:
+    if (nrow(foundhmdb) && nrow(finharmlistg)) {
+      c1   <- colnames(finharmlistg)
+      c2   <- colnames(foundhmdb)
+      add  <- c1[!(c1 %in% c2)]
+      if (length(add)) foundhmdb[, add] <- NA
+      c2   <- colnames(foundhmdb)
+      add  <- c2[!(c2 %in% c1)]
+      if (length(add)) finharmlistg[, add] <- NA
+    }
+ 
+    #finharmlistg<-finharmlistg %>%
+    #  filter(!is.na(uid_01)) %>% # take the ones with the previous match
+    #  union_all(foundhmdb)       # union with the non-matches
+    #################################################################
 
     # fix found hmdb name
     names(finharmlistg)<-gsub(".cohort.comets",".comets",names(finharmlistg))

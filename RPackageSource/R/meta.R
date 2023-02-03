@@ -368,14 +368,26 @@ meta_loadEffects <- function(f, cols, numvars, modnum, infoTable) {
   x
 }
 
-meta_getIdNames <- function(x, strata.cols=TRUE) {
+meta_getIdNames <- function(x, strata.cols=TRUE, term.col=TRUE) {
 
+  # Currently, x must be combined model summary and effects sheets
   sep <- getMetaIdNamesSep()
   cx  <- colnames(x)
   vv1 <- getMetaIdNamesUidCols()
+  if (!term.col) {
+    tv  <- getEffectsTermName()
+    tmp <- !(vv1 %in% tv)
+    vv1 <- vv1[tmp]  
+  }
+  nvv1 <- length(vv1)
+  if (!nvv1) stop("INTERNAL CODING ERROR 0 in meta_getIdNames")
+
   vv2 <- getMetaIdNamesStratCols()
   if (!all(vv1 %in% cx)) stop("INTERNAL CODING ERROR 1 in meta_getIdNames")
-  ret <- paste(x[, vv1[1], drop=TRUE], x[, vv1[2], drop=TRUE], x[, vv1[3], drop=TRUE], sep=sep)
+  ret <- x[, vv1[1], drop=TRUE]
+  if (nvv1 > 1) {
+    for (i in 2:nvv1) ret <- paste(ret, x[, vv1[i], drop=TRUE], sep=sep)
+  }
   if (strata.cols && all(vv2 %in% cx)) {
     ret <- paste(ret, x[, vv2[1], drop=TRUE], x[, vv2[2], drop=TRUE], sep=sep)
   }
@@ -955,19 +967,82 @@ meta_relevel_terms_main <- function(df, var, from, to) {
   var     <- tolower(var)
   varfrom <- paste0(var, ".", from)
   varto   <- paste0(var, ".", to)
-  vec     <- df[, tv, drop=TRUE]
+  vec     <- tolower(df[, tv, drop=TRUE])
+  if (!any(varfrom %in% vec)) return(df)
   len     <- length(vec)
-  ret     <- rep("", len)
+  ret     <- vec
   eff     <- getEffectsName()
   for (i in 1:length(varfrom)) {
     tmp <- vec %in% varfrom[i]
     if (!any(tmp)) {
       msg <- paste0(tv, "='", varfrom[i], "' not found in ", eff, " data frame")
       warning(msg)
+    } else {
+      ret[tmp] <- varto[i]
     }
-    ret[tmp] <- varto[i]
   }
   df[, tv] <- ret
 
   df
 }
+
+meta_relevel_strata_main <- function(df, var, from, to) {
+
+  svar    <- tolower(runModel.getStrataColName())
+  sval    <- tolower(runModel.getStrataNumColName())
+  var     <- tolower(var)
+  vecvar  <- tolower(df[, svar, drop=TRUE])
+  if (!(var %in% vecvar)) return(df)
+
+  varfrom <- tolower(from)
+  varto   <- tolower(to)
+  vecval  <- tolower(df[, sval, drop=TRUE])
+  len     <- length(vecvar)
+  ret     <- vecval
+  tmp0    <- vecvar %in% var
+  eff     <- getEffectsName()
+  for (i in 1:length(varfrom)) {
+    tmp <- tmp0 & (vecval %in% varfrom[i])
+    if (!any(tmp)) {
+      msg <- paste0(var, "='", varfrom[i], "' not found in ", eff, " data frame")
+      warning(msg)
+    } else {
+      ret[tmp] <- varto[i]
+    }
+  }
+  df[, sval] <- ret
+
+  df
+}
+
+meta_relevel_data <- function(df, df.list) {
+
+  nm  <- metaDataOp_renameLevels()
+  lst <- df.list[[nm, exact=TRUE]]
+  len <- length(lst)
+  if (!len) return(df)
+
+  tv    <- tolower(getEffectsTermName())
+  if (!nonEmptyDfHasCols(df, tv, allcols=1, ignoreCase=1)) return(df)
+
+  cx    <- tolower(colnames(df))
+  svar  <- tolower(runModel.getStrataColName())
+  sval  <- tolower(runModel.getStrataNumColName())
+  sFlag <- (svar %in% cx) && (sval %in% cx) 
+  varnm <- metaDataOp_renameLevels.var()
+  oldnm <- metaDataOp_renameLevels.old()
+  newnm <- metaDataOp_renameLevels.new()
+  
+  for (i in 1:len) {
+    tmp <- lst[[i]]
+    var <- tmp[[varnm, exact=TRUE]]
+    old <- tmp[[oldnm, exact=TRUE]]
+    new <- tmp[[newnm, exact=TRUE]]
+
+    # Try both term and strata
+    df <- meta_relevel_terms_main(df, var, old, new)
+    if (sFlag) df <- meta_relevel_strata_main(df, var, old, new)
+  }
+  df
+}
+
