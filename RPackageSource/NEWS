@@ -4,8 +4,12 @@ CHANGES IN VERSION 3.0.0
 NEW FEATURES
 
     o Meta-analyses can now be performed using the runAllMeta and runMeta functions. 
-    o The runMeta function now includes an option to save the output to a file.
-    
+    o The runModel function now includes an option to save the output to a file.
+    o The Models sheet of the input Excel file now has an "EXPOSURE_REFERENCE" column to specify the reference level of a categorical variable.
+    o The VarMap sheet of the input Excel file now has an "ACCEPTED_VALUES" column to specify the valid values for each variable.
+    o The readCOMETSinput function now has the argument mode ("Interactive" or "Batch") for the model in which it is called.
+    o The ModelSummary table now has a column called "exposure.covariances" containing exposure covariances for non-correlation models.
+    o The VARDEFINITION column of the VarMap sheet is now checked when readCOMETSinput is called.
 
 
 
@@ -24,7 +28,7 @@ NOTES
     o For correlation analyses the "corr" column in the Effects data frame has been renamed to "estimate".
     o For survival models in batch mode, set the FUNCTION column in the MODEL_TYPES sheet to coxph and set the TIME column in the MODELS sheet to the time-to-event variable.
     o For conditional logistic models in batch mode, set the FUNCTION column in the MODEL_TYPES sheet to clogit and set the GROUP column in the MODELS sheet to the matched set variable.
-
+    o The runCorr function is now deprecated. In interactive mode, use the runModel function instead. In batch mode, use FUNCTION=correlation.
 
 
 CHANGES IN VERSION 2.0.0
