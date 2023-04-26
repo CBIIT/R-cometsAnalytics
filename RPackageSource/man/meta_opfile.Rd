@@ -4,7 +4,7 @@
 \alias{meta_opfile}
 \title{Options file for meta-analyses}
 \description{
-An Excel file containing models and options for the runAllMeta function
+An Excel file containing models and options for the \code{\link{runAllMeta}} function
 }
 \details{
 The file should contain sheets \bold{META_MODELS} and \bold{META_TYPES}. 

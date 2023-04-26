@@ -8,10 +8,10 @@ runAllMeta(filesFolders, out.dir, opfile = NULL)
 }
 \arguments{
 \item{filesFolders}{Character vector of files and/or folders that contain
-the output files from \code{\link{runAllModels}}. Valid file
-extensions are ".xlsx", ".rda", ".zip", ".tar", and ".tar.gz". 
+the output files from \code{\link{runAllModels}}. 
+Valid file extensions are ".xlsx", ".rda", ".zip", ".tar", and ".tar.gz". 
 Zip and tar files must contain files with extensions
-".xlsx" or ".rda".}
+".xlsx" or ".rda". See details.}
 
 \item{out.dir}{Output directory to save the results for each model.}
 
@@ -21,4 +21,18 @@ The default is NULL.}
 }
 \description{
 This function allows users to run meta-analyses on all models or a subset of models
+}
+\details{
+The names of the files output from \code{\link{runAllModels}} will be
+       of the form \cr
+       <model name>__<cohort name>__<date>.xlsx or \cr
+       <model name>__<cohort name>__<date>.rda. \cr
+       These output files from
+       \code{\link{runAllModels}} can be bundled together into zip or tar files.
+       There is no file name requirement for the zip and tar files.
+
+       The steps used to obtain the initial set of files to include in the meta-analyses are:\cr
+       1. Recursively list all files found in any folder of \code{filesFolders}. \cr
+       2. Unzip or untar any zip or tar file. \cr
+       3. Remove files that do not have a file name of the forms above. \cr
 }

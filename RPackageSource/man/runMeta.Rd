@@ -4,12 +4,18 @@
 \alias{runMeta}
 \title{This function allows users to run a single meta-analysis}
 \usage{
-runMeta(filevec, op = NULL)
+runMeta(file.obj, op = NULL)
 }
 \arguments{
-\item{filevec}{Character vector of files that contain
-the output files from \code{\link{runModel}} or \code{\link{runAllModels}}. 
-Valid file extensions are ".xlsx", and ".rda".}
+\item{file.obj}{Character vector of file names or a list,
+where each element of the list is a file name or a
+list of type \code{\link{file.list}}.
+The files can be output files from
+\code{\link{runModel}} or \code{\link{runAllModels}}. 
+If all the files are from \code{\link{runModel}} or \code{\link{runAllModels}},
+\code{file.obj} can be a vector. A list is required if any of the
+files are not from \code{\link{runModel}} and \code{\link{runAllModels}},
+or if any of the files requires changes.}
 
 \item{op}{A list containing the options to use.
 See \code{\link{meta_options}}.

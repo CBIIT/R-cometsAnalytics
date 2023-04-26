@@ -5,12 +5,18 @@
 \title{Read in Excel file that contains metabolite data, covariate data, 
 models, and model options.}
 \usage{
-readCOMETSinput(file)
+readCOMETSinput(file, mode = "Batch")
 }
 \arguments{
 \item{file}{path of Excel file to be read in. This file must contain sheets
 with names \bold{Metabolites}, \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
 and optionally \bold{Models}, \bold{Model_Types} (see details).}
+
+\item{mode}{How is this function being called (Interactive or Batch). 
+When running in Batch mode, all models in the \bold{Models} sheet must be valid;
+otherwise an error will be thrown. When running in Interactive mode, a warning
+will be given if the \bold{Models} sheet contains errors.
+The default is Batch.}
 }
 \value{
 a list comprising of data and information needed for \code{\link{getModelData}}.

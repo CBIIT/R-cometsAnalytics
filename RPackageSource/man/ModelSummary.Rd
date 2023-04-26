@@ -45,6 +45,15 @@ all the below names may not appear in the data frame.
 \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
                           exposure is categorical.}
+\item{\code{exposure.covariances}}{ String of exposure reference level, dummy variable
+             names and covariances 
+                                   for a categorical exposure
+                                   variable in a non-correlation model.
+                                   This covariances can be used for changing the
+                                   reference level of the categorical exposure variable.
+  The string has the form:
+    "ref|v1,v2,...,vm|cov(v1,v2),cov(v1,v3),cov(v2,v3),cov(v1,v4),...,cov(vm-1, vm)",
+   where ref is the reference level and v1, v2, ..., vm are the dummy variable names.}
 }
 }
 \details{

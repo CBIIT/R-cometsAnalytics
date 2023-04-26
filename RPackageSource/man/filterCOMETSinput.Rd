@@ -7,7 +7,7 @@
 filterCOMETSinput(readData, where = NULL)
 }
 \arguments{
-\item{readData}{list from readComets}
+\item{readData}{list from readComets or readData$subjdata}
 
 \item{where}{users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator ("<", ">", "=","<=",">="), and a value.  For example, "where = c("Gender=Female")".}
 }

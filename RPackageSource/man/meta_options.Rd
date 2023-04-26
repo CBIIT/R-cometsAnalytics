@@ -4,7 +4,7 @@
 \alias{meta_options}
 \title{Meta-analysis options}
 \description{
-A list of options for the runMeta function
+A list of options for the \code{\link{runMeta}} function
 }
 \details{
 \itemize{
@@ -30,5 +30,18 @@ A list of options for the runMeta function
      variables, and vec1, vec2, ... are vectors of stratification levels to be removed
      from the test.
                      The default is NULL.}
+\item{\code{dups.allow}}{ TRUE or FALSE to allow for duplicated metabolite results in a file.
+                     If TRUE, the result with the largest \code{nobs} will be used.
+                     The default is FALSE.}
+\item{\code{stopOnFileError}}{ TRUE or FALSE to stop processing when a problem with any
+                                  one of the input files is encountered. If FALSE, then
+                          the files containing errors will be removed from the analysis.
+                     The default is TRUE.}
+\item{\code{oneModelCheck}}{ TRUE or FALSE to check for consistent files when each file
+                             consists of results from a single model. If TRUE, then each
+                             file must have the same model name, model function, exposure
+                             (or outcome) and for a categorical exposure variable, the same
+                             reference value.
+                     The default is TRUE.}
 }
 }

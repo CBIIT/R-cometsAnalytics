@@ -21,7 +21,7 @@ A list of 19:
 \item{\code{check.nsubjects}}{ Minimum number of subjects. The default is 25.}
 \item{\code{max.npairwise}}{ The maximum number of metabolites to process the 
                             "all pairwise correlations" model.
-                   The default is 100.}
+                   The default is 1000.}
 \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
                    The default is 10.}
 \item{\code{model}}{ String for the model function. Currently, it must be one of
@@ -57,15 +57,6 @@ A list of 19:
 \item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
                            See \code{output.common.cols} and \code{output.merge}. \cr
                            The default is "xlsx".}
-\item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_model_type" or "none".
-                            This option is used to merge model results together in order to reduce
-                            the number of output files. Setting to "all" will merge all model results together
-                            and output them to a single file. Setting to "by_function" will merge results from the
-                            same model function together and output to a file with the model function contained
-                            in the output file name. Similarly for "by_model_type", where the MODEL_TYPE column in the 
-                            MODELS sheet of the input Excel file is used to identify the models that will be 
-                            merged together. Setting to "none" will not merge results.
-                            The default is "none".}
 \item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
                            The default is 0.}
 \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
