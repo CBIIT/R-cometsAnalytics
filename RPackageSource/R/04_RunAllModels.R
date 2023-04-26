@@ -94,7 +94,7 @@ writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
 getModelFuncFromData <- function(readData, model.index) {
 
   mods <- readData$mods[model.index, , drop=FALSE]
-  ret  <- try(getAllOptionsForModel(mods, readData, only.modelFunction=1), silent=TRUE)
+  ret  <- try(getAllOptionsForModel(mods, readData, only.modelFunction=1), silent=FALSE)
   if ("try-error" %in% class(ret)) ret <- "_UNKNOWN_ERROR_"
 
   ret 
@@ -426,6 +426,9 @@ runAllModels.getOptions <- function(readData) {
   op      <- default.list(op, valid, default)
   for (nm in valid) ret[[nm]] <- op[[nm]]
   
+  # Turn off output.merge option
+  ret[[getOutMergeOpName()]] <- getOutMergeOpNone()
+
   ret
 
 } # END: runAllModels.getOptions

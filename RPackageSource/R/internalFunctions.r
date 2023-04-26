@@ -58,9 +58,9 @@ fixData <- function(dta,compbl=FALSE) {
 #' @param dta.op dta.op
 checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames, dta.op) {
 
-  cat("Running Integrity Check...\n")
+  cat(msg_rci_7())
   err <- infile.checkSheets(dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,dict_metabnames, dta.op) 
-  if (err) stop("ERROR in Excel file. See above ERROR message(s).")
+  if (err) stop(msg_rci_8())
 
   # Check accepted values
   checkAcceptedValues(dta.sdata, dta.vmap)
@@ -76,7 +76,7 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
   subjid.smetab  <- names(dict_metabnames)[which(dict_metabnames==subjid)] 
   colnames(dta.smetab)[which(colnames(dta.smetab)==subjid.smetab)] <- subjidNew
 
-  msg <- "Passed all integrity checks, analyses can proceed. If you are part of COMETS, please download metabolite list below and submit to the COMETS harmonization group."
+  msg <- msg_rci_9()
 
   ret <- list(dta.smetab=dta.smetab, dta.metab=dta.metab, dta.sdata=dta.sdata, integritymessage=msg)
 
@@ -126,9 +126,8 @@ checkExposureRef <- function(dta.vmap, dta.models) {
   tmp      <- is.na(rows)
   if (any(tmp)) {
     str <- paste0(allvars[tmp], collapse=", ")
-    msg <- paste0("ERROR: matching variable name(s) '", str, 
-                  "' to ", toupper(refv), " column")
-    stop(msg)
+    msg <- c(str, toupper(refv))
+    stop(msg_rci_10(msg))
   }
   vec <- dta.vmap[, tolower(getVarMapAccValsCol()), drop=TRUE]
   for (i in 1:length(allvars)) {
@@ -151,20 +150,16 @@ checkExposureRef <- function(dta.vmap, dta.models) {
     
     # Some of vars are categorical
     if (!expRefColFlag) {
-      msg <- paste0("ERROR: ", toupper(exprefv), " column needed in ", 
-                    toupper(getModelsSheetName()),
-                    " sheet for categorical exposure variables")
-      stop(msg)
+      stop(msg_rci_11(toupper(exprefv)))
     }
     # Parse to get ref levels
     refvals <- parseStr(exprefvec[i], sep=sep) 
 
     # There should be 1 ref val for each variable
     if (length(refvals) != nvars) {
-      msg <- paste0("ERROR with ", toupper(exprefv), 
-                    " column for model '", dta.models[i, modelsv, drop=TRUE], "',",
-                    " length(", toupper(expv), ")!=length(", toupper(exprefv), ")")
-      stop(msg)
+      msg <- c(toupper(exprefv), dta.models[i, modelsv, drop=TRUE], 
+               toupper(expv), toupper(exprefv))
+      stop(msg_rci_12(msg))
     }
 
     # Check that the ref levels are in the accepted values column of varmap sheet
@@ -174,12 +169,8 @@ checkExposureRef <- function(dta.vmap, dta.models) {
       ref <- refs[j]
       v   <- cvars[j]
       if (!(ref %in% acc.list[[v, exact=TRUE]])) {
-        msg <- paste0("ERROR: ", toupper(exprefv), "=", ref, 
-                      " for variable ", v, 
-                      " in model '", dta.models[i, modelsv, drop=TRUE], "'",
-                      " is not listed in the ",
-                      toupper(getVarMapAccValsCol()), " column")
-        stop(msg) 
+        msg <- c(toupper(exprefv), ref, v, dta.models[i, modelsv, drop=TRUE])
+        stop(msg_rci_13(msg)) 
       }
     }
   }
@@ -215,9 +206,8 @@ checkAcceptedValues <- function(dta.sdata, dta.vmap) {
 
     obj <- parseAccValues(accvals[i], catflag[i])
     if (!length(obj)) {
-      msg <- paste0("ERROR with ", toupper(accvalCol), " of variable ", vars[i], 
-                    " in ", toupper(getVarMapSheetName()), " sheet")
-      stop(msg)
+      msg <- c(toupper(accvalCol), vars[i], toupper(getVarMapSheetName()))
+      stop(msg_rci_14(msg))
     }
     checkAccValuesInData(dta.sdata, vars[i], obj, catflag[i]) 
   }
@@ -233,10 +223,8 @@ checkAccValuesInData <- function(sdata, var, obj, catflag) {
     if (any(tmp)) {
       vec <- unique(vec[tmp])
       str <- paste0(vec, collapse=", ")
-      msg <- paste0("ERROR: the value(s) '", str, "' of variable ", var, 
-                    " are not ACCEPTED VALUES in the ", toupper(getVarMapSheetName()), 
-                    " sheet")
-      stop(msg) 
+      msg <- c(str, var, getQuotedVecStr(obj))
+      stop(msg_rci_15(msg)) 
     }
   } else {
 
@@ -258,10 +246,8 @@ checkAccValuesInData <- function(sdata, var, obj, catflag) {
     }
     flag2 <- contAccValuesVecAllOk(tmp)
     if (!flag1 || !flag2) {
-      msg <- paste0("ERROR: variable ", var, " contains invalid values according to the ",
-                    getVarMapAccValsCol(), " column of the ",
-                    toupper(getVarMapSheetName()), " sheet")
-      stop(msg) 
+      msg <- c(var, getQuotedVecStr(obj))
+      stop(msg_rci_16(msg)) 
     }
   }
   
@@ -311,7 +297,7 @@ parseAccValues <- function(valstr, cat.flag) {
     if (vec[1] >= vec[2]) return(ret)
     inc1 <- c1 == "["
     inc2 <- c2 == "]" 
-    ret <- list(min=vec[1], max=vec[2], include.min=inc1, include.max=inc2)
+    ret <- list(min=vec[1], max=vec[2], include.min=inc1, include.max=inc2, obj=valstr)
   }
   if (!length(ret)) ret <- NULL
   ret  
@@ -431,7 +417,7 @@ Harmonize<-function(dtalist){
   	return(dtalist)
   }
   else {
-	stop("Something went wrong with the harmonization")
+	stop(msg_rci_22())
   }
 
 }
@@ -451,7 +437,7 @@ prdebug<-function(lab,x){
 checkWhereVarInData <- function(var, colNames) {
 
   if (!(var %in% colNames)) {
-    msg <- paste0("ERROR: column ", var, " not found in data\n")
+    msg <- msg_rci_17(var)
     cat(msg)
     stop(msg)
   }
@@ -462,25 +448,35 @@ checkWhereVarInData <- function(var, colNames) {
 
 #' Function that subsets input data based on "where variable"
 #'
-#' @param readData list from readComets
+#' @param readData list from readComets or readData$subjdata
 #' @param where users can specify which subjects to perform the analysis by specifying this parameter. 'where' expects a vector with a variable name, a comparison operator ("<", ">", "=","<=",">="), and a value.  For example, "where = c("Gender=Female")".
 #' @return filtered list
 #'
 filterCOMETSinput <- function(readData,where=NULL) {
 
+  # 2023-03-03 Change readData to also be readData$subjdata
+
   if (!length(where)) {
-    warning("No filtering was performed because 'where' parameter is NULL")
+    warning(msg_rci_18())
     return(readData)
+  }
+
+  if ("subjdata" %in% names(readData)) {
+    subflag  <- 0
+    subjdata <- readData$subjdata
+  } else {
+    subflag  <- 1
+    subjdata <- readData 
   }
 
   samplesToKeep <- c()
   myfilts       <- trimws(unlist(strsplit(where,",")))
   myfilts       <- myfilts[nchar(myfilts) > 0]  
   if (!length(myfilts)) {
-    warning("No filtering was performed because 'where' parameter contains no filters")
-    return(readData)
+    warning(msg_rci_19())
+    return(subjdata)
   }
-  cx <- colnames(readData$subjdata)
+  cx <- colnames(subjdata)
 
   # create rules for each filter
   for (i in 1:length(myfilts)) {
@@ -490,39 +486,45 @@ filterCOMETSinput <- function(readData,where=NULL) {
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)  
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) <= as.numeric(mysplit[2])) )
+                         which(as.numeric(as.character(subjdata[,myvar])) <= as.numeric(mysplit[2])) )
     } else if(length(grep(">=",myrule))>0) {
       mysplit <- strsplit(myrule,">=")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) >= as.numeric(mysplit[2])) )
+                         which(as.numeric(as.character(subjdata[,myvar])) >= as.numeric(mysplit[2])) )
     } else if(length(grep("<",myrule))>0) {
       mysplit <- strsplit(myrule,"<")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) < as.numeric(mysplit[2])) )
+                         which(as.numeric(as.character(subjdata[,myvar])) < as.numeric(mysplit[2])) )
     } else if(length(grep(">",myrule))>0) {
       mysplit <- strsplit(myrule,">")[[1]]
       myvar = gsub(" ","",mysplit[1])
       checkWhereVarInData(myvar, cx)
       samplesToKeep <- c(samplesToKeep,
-                         which(as.numeric(as.character(readData$subjdata[,myvar])) > as.numeric(mysplit[2])) )
+                         which(as.numeric(as.character(subjdata[,myvar])) > as.numeric(mysplit[2])) )
     } else if (length(grep("!=",myrule))>0) {
-      tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=1)   
+      tmp <- getSubsFromEqWhere(subjdata, myrule, notEqual=1)   
       samplesToKeep <- c(samplesToKeep, tmp)  
     } else if (length(grep("=",myrule))>0) {
-      tmp <- getSubsFromEqWhere(readData$subjdata, myrule, notEqual=0)   
+      tmp <- getSubsFromEqWhere(subjdata, myrule, notEqual=0)   
       samplesToKeep <- c(samplesToKeep, tmp)  
-    } else stop("Make sure your 'where' filters contain logicals (>, >=, <, <=, =, !=)")
+    } else stop(msg_rci_20())
   }
-  mycounts          <- as.numeric(lapply(unique(samplesToKeep),function(x)
-                                            length(which(samplesToKeep==x))))
-  fincounts         <- which(mycounts == length(myfilts))
-  readData$subjdata <- readData$subjdata[unique(samplesToKeep)[fincounts],]
+  mycounts  <- as.numeric(lapply(unique(samplesToKeep),function(x)
+                                 length(which(samplesToKeep==x))))
+  fincounts <- which(mycounts == length(myfilts))
+  subjdata  <- subjdata[unique(samplesToKeep)[fincounts],]
   
-  return(readData)
+  if (subflag) {
+    return(subjdata)
+  } else {
+    readData$subjdata <- subjdata
+    return(readData)
+  }
+
 }
 
 # Function to identify subjects from a != or == where condition

@@ -1,7 +1,7 @@
 
 #' @name meta_options
 #' @title Meta-analysis options
-#' @description A list of options for the runMeta function
+#' @description A list of options for the \code{\link{runMeta}} function
 #' @details
 #' \itemize{
 #' \item{\code{min.n.cohort}}{ Minimum number of cohorts to include when meta-analyzing
@@ -26,6 +26,19 @@
 #'      variables, and vec1, vec2, ... are vectors of stratification levels to be removed
 #'      from the test.
 #'                      The default is NULL.}
+#' \item{\code{dups.allow}}{ TRUE or FALSE to allow for duplicated metabolite results in a file.
+#'                      If TRUE, the result with the largest \code{nobs} will be used.
+#'                      The default is FALSE.}
+#' \item{\code{stopOnFileError}}{ TRUE or FALSE to stop processing when a problem with any
+#'                                   one of the input files is encountered. If FALSE, then
+#'                           the files containing errors will be removed from the analysis.
+#'                      The default is TRUE.}
+#' \item{\code{oneModelCheck}}{ TRUE or FALSE to check for consistent files when each file
+#'                              consists of results from a single model. If TRUE, then each
+#'                              file must have the same model name, model function, exposure
+#'                              (or outcome) and for a categorical exposure variable, the same
+#'                              reference value.
+#'                      The default is TRUE.}
 #' }
 #'
 NULL
@@ -33,18 +46,21 @@ NULL
 
 getValidGlobalMetaOps <- function() {
 
-  ops.char    <- c(getOutTypeOpName())
+  ops.char    <- c(getOutTypeOpName(), "MODEL")
   ops.charVec <- c(metaOp_cohorts.include(), metaOp_cohorts.exclude())
   ops.num     <- c(metaOp_minNcohortName(), metaOp_cohortMinSubs(), metaOp_totalMinSubs(),
-                   "DEBUG", "DONOTRUN")
-  ops.log     <- NULL
+                   "DEBUG")
+  ops.log     <- c(metaOp_oneModelCheck(), metaOp_dups.allow(), metaOp_stopOnFileError())
   ops.list    <- metaOp_strataToExcludeFromHetTest()
-  default     <- list(cohorts.include=NULL, cohorts.exclude=NULL, DEBUG=0, DONOTRUN=0)
+  default     <- list(cohorts.include=NULL, cohorts.exclude=NULL, DEBUG=0, MODEL="")
   default[[metaOp_minNcohortName()]] <- metaOp_minNcohortDefault()
   default[[metaOp_cohortMinSubs()]]  <- metaOp_cohortMinSubsDefault()
   default[[metaOp_totalMinSubs()]]   <- metaOp_totalMinSubsDefault()
   default[[getOutTypeOpName()]]      <- getOutTypeOpDefault()
   default[metaOp_strataToExcludeFromHetTest()] <- list(NULL)
+  default[[metaOp_oneModelCheck()]]            <- metaOp_oneModelCheckDefault()
+  default[[metaOp_dups.allow()]]               <- metaOp_dups.allowDefault()
+  default[[metaOp_stopOnFileError()]]          <- metaOp_stopOnFileErrorDefault()
 
   valid <- names(default)
 
@@ -53,7 +69,7 @@ getValidGlobalMetaOps <- function() {
 
 } 
 
-meta_check_op <- function(op) {
+meta_check_op <- function(op, name="op") {
 
   if (!length(op)) op <- list()
   tmp        <- getValidGlobalMetaOps()
@@ -62,8 +78,11 @@ meta_check_op <- function(op) {
   def        <- c(tmp$def, list(NULL))
   names(def) <- valid
 
-  check.list(op, "op", valid)
-  op <- default.list(op, valid, def)
+  check.list(op, name, valid)
+
+  op <- checkGlobalOpList(op, name=name, meta=1)
+
+  #op <- default.list(op, valid, def)
   op
 }
 

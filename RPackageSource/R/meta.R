@@ -1,31 +1,52 @@
 #' This function allows users to run a single meta-analysis 
-#' @param filevec Character vector of files that contain
-#'        the output files from \code{\link{runModel}} or \code{\link{runAllModels}}. 
-#'        Valid file extensions are ".xlsx", and ".rda". 
+#' @param file.obj Character vector of file names or a list,
+#'        where each element of the list is a file name or a
+#'        list of type \code{\link{file.list}}.
+#'        The files can be output files from
+#'        \code{\link{runModel}} or \code{\link{runAllModels}}. 
+#'        If all the files are from \code{\link{runModel}} or \code{\link{runAllModels}},
+#'        \code{file.obj} can be a vector. A list is required if any of the
+#'        files are not from \code{\link{runModel}} and \code{\link{runAllModels}},
+#'        or if any of the files requires changes.
 #' @param op A list containing the options to use.
 #'           See \code{\link{meta_options}}.
 #'           The default is NULL.
 #' @return List of data frames containing the results and information
 #'
 #' @export
-runMeta <- function(filevec, op=NULL) {
+runMeta <- function(file.obj, op=NULL) {
 
-  filevec     <- checkMetaFiles(filevec, valid.ext=c(getOutTypeOpRda(), getOutTypeOpExcel()))
+  dfToComets.check_fobj(file.obj) 
   op          <- meta_check_op(op) 
   op$temp.dir <- meta_createTempDir(getwd(), nrand=6)
-  ret         <- try(meta_main(filevec, NULL, op), silent=TRUE)
-  meta_removeTempDir(op$temp.dir)
+  ret         <- try(meta_main(file.obj, NULL, op), silent=FALSE)
+  meta_rmDir(op)
   ret
 }
 
-meta_main <- function(filevec, modelName, op) {
+meta_main <- function(file.obj, modelName, op) {
 
-  DEBUG                <- op$DEBUG
+  # file.obj can now be a list of sublists or a vector of file names
+
+  DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_main\n")
-  if (length(filevec) < op[[metaOp_minNcohortName()]]) {
-    msg <- paste0("ERROR: number of input files less than ", metaOp_minNcohortName())
+  len <- length(file.obj)
+  if (len < op[[metaOp_minNcohortName()]]) {
+    msg <- msg_meta_1(len)
     stop(msg)
   }
+
+  op$temp.dir <- checkForSep(op$temp.dir)
+
+  # Transform all files to COMETS and save in rda files
+  tmp     <- meta_transformAndSave(file.obj, op) 
+  filevec <- tmp[["files", exact=TRUE]]
+  op      <- tmp[["op", exact=TRUE]]
+  if (length(filevec) < op[[metaOp_minNcohortName()]]) {
+    msg <- paste0(msg_meta_2())
+    stop(msg)
+  }
+
   op$modelName         <- modelName
   op$modelNumber       <- meta_getModelNumber(modelName)
   tmp                  <- meta_initFileCheck(filevec, op)
@@ -42,7 +63,7 @@ meta_main <- function(filevec, modelName, op) {
   rm(tmp)
   gc()
 
-  # Check for model consistency across the cohorts
+  # Check for model consistency for one model across the cohorts (if option specified?)
   meta_consistency(file.info.list, op)
 
   # Determine if this is a correlation model
@@ -57,7 +78,6 @@ meta_main <- function(filevec, modelName, op) {
   op$strat.model <- nchar(ret) > 0
 
   ret <- meta_getFinalDataAndRun(ids, nsubs, data.list, op) 
-
   ret <- meta_setReturnObj(ret, op)
   if (DEBUG) cat("End: meta_main\n")  
 
@@ -73,10 +93,11 @@ meta_setReturnObj <- function(df, op) {
   if (op$strat.model) df <- meta_strat_het_test(df, op)
   if (op$corr.model) df <- meta_FisherZtoCorr(df, alpha=0.95)
 
-  # Check min nbumber of cohorts and sample size
-  df <- meta_setRetDf(df, op) 
+  # Check min number of cohorts and sample size
+  df     <- meta_setRetDf(df, op) 
+  modcol <- getModelSummaryModelCol()
 
-  ord <- c(
+  ord <- c(modcol,
            runModel.getStrataColName(), runModel.getStrataNumColName(),
            getModelSummaryOutUidCol(), getModelSummaryExpUidCol(),
            getEffectsTermName(), 
@@ -88,8 +109,20 @@ meta_setReturnObj <- function(df, op) {
            getMetaHetPvalueCol(), getMetaDirectionCol(), 
            paste0(getEffectsPvalueName(), ".", op$cohorts),
            getMetaMessageCol())
+  df <- orderVars(df, ord)
  
-  ret[[metaRetListResultsTable()]] <- orderVars(df, ord)
+  # Check for constant model summary column
+  cx <- colnames(df)
+  if (modcol %in% cx) {
+    vec <- df[, modcol, drop=TRUE]
+    if (length(unique(vec)) < 2) {
+      tmp <- !(cx %in% modcol)
+      cx  <- cx[tmp]
+      df  <- df[, cx, drop=FALSE]
+    }
+  }
+
+  ret[[metaRetListResultsTable()]] <- df
   ret[[wnm]]                       <- wobj
 
   # Info table
@@ -127,10 +160,15 @@ meta_setRetDf <- function(x, op) {
 
 meta_consistency <- function(file.info.list, op) {
 
+  if (!op[[metaOp_oneModelCheck()]]) return(NULL)
+
+  if (op$DEBUG) cat("Begin: meta_consistency\n")
+
   # Check model, outcomes, exposures
   meta_model_check(file.info.list, op)
   meta_outExp_check(file.info.list, op) 
 
+  if (op$DEBUG) cat("End: meta_consistency\n")
   NULL
 }
 
@@ -139,29 +177,39 @@ meta_model_check <- function(file.info.list, op) {
   n          <- length(file.info.list)
   modnm      <- getInfoTableModelFuncName()
   cohortnm   <- getInfoTableCohortName()
+  modelnm    <- getInfoTableModelNmName()
   modelFuncs <- rep("", n)
+  cohorts    <- rep("", n)
+  models     <- rep("", n)
   miss       <- c("", NA, "NA")
   glmnm      <- getGlmModelName()
   famnm      <- getInfoTableFamilyName() 
   lmnm       <- getLmModelName()
 
   for (i in 1:n) {
-    flist  <- file.info.list[[i]]
-    info   <- flist$info
-    cohort <- getInfoTableValue(info, cohortnm, ifNotFound="", check.len=1) 
-    model  <- getInfoTableValue(info, modnm, ifNotFound="", check.len=1) 
-    if (model %in% miss) {
-      msg <- paste0("ERROR: missing model function for cohort ", cohort)
-      stop(msg)
-    }
+    flist      <- file.info.list[[i]]
+    info       <- flist$info
+    cohorts[i] <- getInfoTableValue(info, cohortnm, ifNotFound="", check.len=1) 
+    models[i]  <- getInfoTableValue(info, modelnm, ifNotFound="", check.len=1)
+    model      <- getInfoTableValue(info, modnm, ifNotFound="", check.len=1) 
     if (model == glmnm) {
       fam <- getInfoTableValue(info, famnm, ifNotFound="", check.len=1)
       if (fam == "gaussian") model <- lmnm  # Same as linear model
     }
     modelFuncs[i] <- model
   }
+  umodels <- tolower(trimws(unique(models)))
+  if (length(umodels) != 1) stop(msg_meta_3())
   umods <- unique(modelFuncs)
-  if (length(umods) != 1) stop("ERROR: different model functions were run among the cohorts")
+  if (length(umods) != 1) stop(msg_meta_4())
+  
+  tmp <- duplicated(cohorts)
+  if (any(tmp)){
+   dups <- paste0(cohorts[tmp], collapse=", ")
+   msg  <- msg_meta_5(dups)
+   stop(msg)
+  }
+
   NULL
 
 }
@@ -169,6 +217,7 @@ meta_model_check <- function(file.info.list, op) {
 meta_outExp_check <- function(file.info.list, op) {
 
   DEBUG      <- op$DEBUG
+
   if (DEBUG) cat("Begin: meta_outExp_check\n")
 
   n          <- length(file.info.list)
@@ -178,8 +227,10 @@ meta_outExp_check <- function(file.info.list, op) {
   evec       <- ovec
   ovecn      <- rep(0, n)
   evecn      <- ovecn
+  erefvec    <- ovec
   outnm      <- getInfoTableOutcomeName()
   expnm      <- getInfoTableExposureName() 
+  exprefnm   <- getInfoTableExpRefName()
   sep        <- runModel.getVarSep()
   symbol     <- getInfoTable2plusVars()
   for (i in 1:n) {
@@ -189,22 +240,33 @@ meta_outExp_check <- function(file.info.list, op) {
     cohort   <- getInfoTableValue(info, cohortnm, ifNotFound="", check.len=1) 
     outcome  <- getInfoTableValue(info, outnm,    ifNotFound="", check.len=1) 
     exposure <- getInfoTableValue(info, expnm,    ifNotFound="", check.len=1) 
-    olen     <- length(unlist(strsplit(outcome, sep)))
-    elen     <- length(unlist(strsplit(exposure, sep)))
+    #olen     <- length(unlist(strsplit(outcome, sep)))
+    #elen     <- length(unlist(strsplit(exposure, sep)))
     # Check for multiple outcomes and multiple exposures
-    if ((outcome == symbol) && (exposure == symbol)) {
-      stop(paste0("ERROR: cohort ", cohort, " contains multiple outcomes and multiple exposures"))
-    } 
-    ovec[i] <- outcome
-    evec[i] <- exposure
+    #if ((outcome == symbol) && (exposure == symbol)) {
+    #  stop(paste0("ERROR: cohort ", cohort, " contains multiple outcomes and multiple exposures"))
+    #} 
+    ovec[i]    <- outcome
+    evec[i]    <- exposure
+    erefvec[i] <- getInfoTableValue(info, exprefnm, ifNotFound="", check.len=1) 
   }
   # Check for different exposure variables
-  vec <- unique(evec)
-  if (length(vec) > 1) stop("ERROR: all cohorts must have the same exposure variable") 
+  evec[is.na(evec)] <- ""
+  vec <- unique(tolower(trimws(evec)))
+  if (DEBUG) print(vec)
+  if (length(vec) > 1) stop(msg_meta_6()) 
 
   # Check for different outcome variables
-  vec <- unique(ovec)
-  if (length(vec) > 1) stop("ERROR: all cohorts must have the same outcome variable") 
+  ovec[is.na(ovec)] <- ""
+  vec <- unique(tolower(trimws(ovec)))
+  if (DEBUG) print(vec)
+  if (length(vec) > 1) stop(msg_meta_7()) 
+
+  # Check for different exposure references
+  erefvec[is.na(erefvec)] <- ""
+  vec <- unique(tolower(trimws(erefvec)))
+  if (DEBUG) print(vec)
+  if (length(vec) > 1) stop(msg_meta_8()) 
 
   if (DEBUG) cat("End: meta_outExp_check\n")
 
@@ -316,9 +378,8 @@ meta_corrToFisherZ <- function(x, f) {
     yids <- paste0(yids, ":", y[, sv, drop=TRUE])
   }
   rows <- match(xids, yids)
-  if (any(is.na(rows))) stop("ERROR with Effects/ModelSummary")
-  nobs <- as.numeric(y[rows, getModelSummaryNobsName(), drop=TRUE])
-  
+  if (any(is.na(rows))) stop(msg_meta_9())
+  nobs <- as.numeric(y[rows, getModelSummaryNobsName(), drop=TRUE]) 
   corr <- as.numeric(x[, betav, drop=TRUE])
  
   # Change if corr = -1, 1
@@ -350,9 +411,9 @@ meta_loadEffects <- function(f, cols, numvars, modnum, infoTable) {
 
   # For correlation models, transform and add standard error
   modfunc <- getInfoTableValue(infoTable, getInfoTableModelFuncName(), ifNotFound=NULL, check.len=1) 
+
   if (is.null(modfunc)) stop("INTERNAL CODING ERROR op$model")
   if (modfunc == getCorrModelName()) x <- meta_corrToFisherZ(x, f) 
-
   cx <- colnames(x)
   if (length(numvars)) {
     if (!all(numvars %in% cx)) stop("INTERNAL CODING ERROR numvars")
@@ -368,7 +429,7 @@ meta_loadEffects <- function(f, cols, numvars, modnum, infoTable) {
   x
 }
 
-meta_getIdNames <- function(x, strata.cols=TRUE, term.col=TRUE) {
+meta_getIdNames <- function(x, term.col=TRUE, strataCol=TRUE) {
 
   # Currently, x must be combined model summary and effects sheets
   sep <- getMetaIdNamesSep()
@@ -382,17 +443,70 @@ meta_getIdNames <- function(x, strata.cols=TRUE, term.col=TRUE) {
   nvv1 <- length(vv1)
   if (!nvv1) stop("INTERNAL CODING ERROR 0 in meta_getIdNames")
 
-  vv2 <- getMetaIdNamesStratCols()
   if (!all(vv1 %in% cx)) stop("INTERNAL CODING ERROR 1 in meta_getIdNames")
   ret <- x[, vv1[1], drop=TRUE]
   if (nvv1 > 1) {
     for (i in 2:nvv1) ret <- paste(ret, x[, vv1[i], drop=TRUE], sep=sep)
   }
-  if (strata.cols && all(vv2 %in% cx)) {
-    ret <- paste(ret, x[, vv2[1], drop=TRUE], x[, vv2[2], drop=TRUE], sep=sep)
+
+  vv2 <- getMetaIdNamesStratCols()
+  if (!strataCol) vv2 <- vv2[!(vv2 %in% runModel.getStrataNumColName())]
+  nvv2 <- length(vv2)
+  if (nvv2 && all(vv2 %in% cx)) {
+    for (i in 1:nvv2) {  
+      ret <- paste(ret, x[, vv2[i], drop=TRUE], sep=sep)
+    }
   }
 
   ret
+}
+
+meta_checkForUnqIds <- function(df, op) {
+
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_checkForUnqIds\n")
+
+  idv <- getMetaIdCol()
+  ids <- df[, idv, drop=TRUE]
+  tmp <- duplicated(ids)
+
+  if (any(tmp)) {
+    dups <- ids[tmp]
+
+    # Check if option specified
+    allow <- op[[metaOp_dups.allow(), exact=TRUE]]
+    if (!allow) {
+      # ERROR, print some info
+      tmp  <- ids %in% dups[1]
+      tmp0 <- tmp
+      tmp  <- ids[tmp]
+      tmp  <- tmp[1:min(5, length(tmp))]   
+      print(tmp) 
+      print(df[tmp0, ])
+      stop(msg_meta_34())
+    } else {
+      if (op$DEBUG) cat("Removing duplicated ids\n")
+      # Use another option to determine how to remove duplicates
+      # For now, use max nobs
+      nobs <- df[, getModelSummaryNobsName(), drop=TRUE]
+      tmp  <- !is.finite(nobs)
+      if (any(tmp)) nobs[tmp] <- -Inf
+      dups <- unique(dups)
+      vec  <- 1:nrow(df)
+      keep <- rep(TRUE, nrow(df)) 
+      for (dup in dups) {
+        tmp        <- ids == dup
+        rows       <- vec[tmp]
+        ii         <- which.max(nobs[tmp]) 
+        row        <- rows[ii]
+        keep[rows] <- FALSE
+        keep[row]  <- TRUE
+      } 
+      df <- df[keep, , drop=FALSE] 
+    }
+  }
+  if (DEBUG) cat("End: meta_checkForUnqIds\n")
+  df
 }
 
 meta_loadCohortData <- function(flist, op) {
@@ -400,13 +514,14 @@ meta_loadCohortData <- function(flist, op) {
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_loadCohortData\n")
   idv      <- getEffectsRunName()
+  modv     <- getModelSummaryModelCol()
   cols     <- c(idv,
                runModel.getStrataColName(), runModel.getStrataNumColName(),
                getEffectsTermName(), 
                getEffectsEstName(), 
                getEffectsEstSeName(), 
                getEffectsPvalueName())
-  numvars  <- c(getEffectsEstName(), getEffectsEstSeName(), getEffectsPvalueName())
+  numvars  <- c(getEffectsEstName(), getEffectsEstSeName())
 
   # Load Effects data frame
   x   <- meta_loadEffects(flist$file, cols, numvars, NULL, flist$info)
@@ -416,17 +531,29 @@ meta_loadCohortData <- function(flist, op) {
   ssv <- getModelSummaryNobsName()
   yv  <- getModelSummaryOutUidCol()
   ev  <- getModelSummaryExpUidCol()
-  tmp <- c(idv, ssv, yv, ev)
-  if (!nonEmptyDfHasCols(y, tmp, allcols=1, ignoreCase=0)) {
-    stop("ERROR with ModelSummary")
+  vv  <- c(idv, ssv, yv, ev)
+  if (!nonEmptyDfHasCols(y, vv, allcols=1, ignoreCase=0)) {
+    stop(msg_meta_36())
   }
-  y    <- y[, tmp, drop=FALSE]
+  # Add model
+  vv   <- c(vv, modv)
+  vv   <- vv[vv %in% colnames(y)]
+  y    <- y[, vv, drop=FALSE]
   rows <- match(x[, idv, drop=TRUE], y[, idv, drop=TRUE]) 
-  if (any(is.na(rows))) stop("ERROR matching rows between Effects and ModelSummary data frames")
+  if (any(is.na(rows))) stop(msg_meta_35())
   x[, ssv] <- y[rows, ssv]
   x[, yv]  <- y[rows, yv]
   x[, ev]  <- y[rows, ev]
 
+  # Add in (normalized) model name if the col exists
+  if ((modv %in% colnames(y)) && (!(modv %in% colnames(x)))) {
+    x[, modv] <- y[rows, modv, drop=TRUE]
+  } else {
+    mod <- op[["modelName", exact=TRUE]]
+    if (is.null(mod)) mod <- metaModelNameDefault()
+    mod <- meta_normModelStr(mod)
+    x[, modv] <- mod
+  }
   rm(y, rows)
   gc()
 
@@ -434,8 +561,12 @@ meta_loadCohortData <- function(flist, op) {
   x <- meta_filterCohortData(x, op)
 
   # Add id column
-  x[, getMetaIdCol()] <- meta_getIdNames(x) 
+  ids                 <- meta_getIdNames(x) 
+  x[, getMetaIdCol()] <- ids
 
+  # Check for unique ids
+  x <- meta_checkForUnqIds(x, op)
+  
   if (DEBUG) cat("End: meta_loadCohortData\n")
 
   x
@@ -475,12 +606,15 @@ meta_updateIdCnts <- function(retlist, ids, nsub) {
   if (!length(retlist)) {
     retlist <- list(ids=ids, ncohort=rep(1, len), nsub=nsub)
   } else {
-    tmp <- ids %in% retlist$ids
-    if (any(tmp)) {
+    rows <- match(retlist$ids, ids)
+    tmp  <- !is.na(rows)
+    rows <- rows[tmp]
+    if (length(rows)) {
       retlist$ncohort[tmp] <- retlist$ncohort[tmp] + 1
-      retlist$nsub[tmp]    <- retlist$nsub[tmp] + nsub[tmp]
+      retlist$nsub[tmp]    <- retlist$nsub[tmp] + nsub[rows]
     }
-    tmp <- !tmp
+    if (length(retlist$ids) != length(retlist$nsub)) stop("INTERNAL CODING ERROR 1")
+    tmp <- !(ids %in% retlist$ids)
     m   <- sum(tmp)
     if (m) {
       retlist$ids     <- c(retlist$ids, ids[tmp])
@@ -488,26 +622,35 @@ meta_updateIdCnts <- function(retlist, ids, nsub) {
       retlist$nsub    <- c(retlist$nsub, nsub[tmp])
     }
   }
+  if (length(retlist$ids) != length(retlist$nsub)) stop("INTERNAL CODING ERROR 2")
   retlist
 }
 
 meta_getFinalSet <- function(idlist, op) {
 
-  len <- length(idlist$ids)
-  if (!len) stop("ERROR: all metabolites have been filtered out")
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_getFinalSet\n")
+  len   <- length(idlist$ids)
+  if (!len) stop(msg_meta_10())
   ok    <- rep(TRUE, len)
   minN  <- op[[metaOp_totalMinSubs(), exact=TRUE]]
   if (minN) {
     ok <- ok & (idlist$nsub >= minN)
     ok[is.na(ok)] <- FALSE
   }
+  if (DEBUG) cat(paste0(sum(!ok), " ids removed after min nsub option\n"))
   minN  <- op[[metaOp_minNcohortName(), exact=TRUE]]
   if (minN) {
     ok <- ok & (idlist$ncohort >= minN)
     ok[is.na(ok)] <- FALSE
   }
+  if (DEBUG) cat(paste0(sum(ok), " ids left after min ncohort option\n"))
+
   ret.ids  <- idlist$ids[ok]
   ret.nsub <- idlist$nsub[ok] 
+  if (!length(ret.ids)) stop(msg_meta_11())
+
+  if (DEBUG) cat("End: meta_getFinalSet\n")
   list(ids=ret.ids, nsub=ret.nsub)
 }
 
@@ -526,17 +669,24 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
   msnv     <- getModelSummaryNobsName()
   temp.dir <- op$temp.dir
   cohorts  <- NULL
+  stopOnError <- op[[metaOp_stopOnFileError(), exact=TRUE]]
 
   for (i in 1:nfiles) {
     x      <- NULL
     flist  <- file.info.list[[i]]
     cohort <- flist$cohort
     info   <- flist$info
-    if (DEBUG) cat(paste0("Processing cohort ", cohort, "\n"))
+    if (DEBUG) cat(paste0("*** Processing cohort ", cohort, "\n"))
     x    <- meta_loadCohortData(flist, op)
     wobj <- runmodel.checkForError(x, warnStr="ERROR", objStr=flist$file, rem.obj=wobj)
     if ("try-error" %in% class(x)) {
-      if (DEBUG) print(x)
+      msg <- msg_meta_37(flist$file)
+      if (stopOnError) {
+        print(x)
+        stop(msg)
+      }
+      cat(msg) 
+      if (DEBUG) print(x) 
       next
     }
 
@@ -555,7 +705,7 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
     ret[[ind]]      <- temp.file
     cohorts         <- c(cohorts, cohort)  
   }
-  if (!length(ret)) stop("ERROR loading all files")  
+  if (!length(ret)) stop(msg_meta_38())  
 
   # Get final set of metabs to analyze
   tmp <- meta_getFinalSet(idlist, op) 
@@ -576,18 +726,20 @@ meta_unpasteIds <- function(ids) {
   vv1 <- getMetaIdNamesUidCols()
   vv2 <- getMetaIdNamesStratCols()
   cx  <- c(vv1, vv2)
-  ret <- as.data.frame(ret, stringsASFactors=FALSE)
+  ret <- as.data.frame(ret, stringsAsFactors=FALSE)
   colnames(ret) <- cx[1:ncol(ret)]
   ret
 }
 
 meta_getFinalDataAndRun <- function(ids, nsubs, data.list, op) {
 
+  DEBUG   <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_getFinalDataAndRun\n")
   ndata   <- length(data.list)
   N       <- length(ids)
   beta    <- matrix(data=NA, nrow=N, ncol=ndata)
   se      <- beta
-  p       <- beta
+  #p       <- beta
   betav   <- getEffectsEstName()
   sev     <- getEffectsEstSeName()
   pv      <- getEffectsPvalueName()
@@ -607,7 +759,7 @@ meta_getFinalDataAndRun <- function(ids, nsubs, data.list, op) {
     ind            <- ind + 1
     beta[tmp, ind] <- x[rows, betav, drop=TRUE]
     se[tmp, ind]   <- x[rows, sev, drop=TRUE]
-    p[tmp, ind]    <- x[rows, pv, drop=TRUE]
+    #p[tmp, ind]    <- x[rows, pv, drop=TRUE]
     cohorts        <- c(cohorts, nms[i])
   }
   rm(x, tmp, rows, nms)
@@ -615,23 +767,28 @@ meta_getFinalDataAndRun <- function(ids, nsubs, data.list, op) {
   if (ind < ndata) {
     beta <- beta[, 1:ind, drop=FALSE]
     se   <- se[, 1:ind, drop=FALSE]
-    p    <- p[, 1:ind, drop=FALSE]
+    #p    <- p[, 1:ind, drop=FALSE]
     gc()
   }
 
   # Call main function
+  if (DEBUG) cat("Begin: meta_core\n")
   ret <- meta_core(beta, se)
+  if (DEBUG) cat("End: meta_core\n")
   rm(beta, se)
   gc()
 
   # Set return data frame
-  p             <- as.data.frame(p)
-  colnames(p)   <- paste0(pv, ".", cohorts)
+  #p             <- as.data.frame(p)
+  #colnames(p)   <- paste0(pv, ".", cohorts)
   ret           <- as.data.frame(ret, stringsAsFactors=FALSE)
   nsubv         <- getMetaNsubCol()
   ret[, nsubv]  <- nsubs
-  ret           <- cbind(meta_unpasteIds(ids), ret, p)
-  
+  #ret           <- cbind(meta_unpasteIds(ids), ret, p)
+  ret           <- cbind(meta_unpasteIds(ids), ret)
+
+  if (DEBUG) cat("End: meta_getFinalDataAndRun\n")
+
   ret
 }
 
@@ -656,27 +813,29 @@ meta_getModelNumber <- function(x, sep=NULL) {
 }
 
 meta_getFileInfo <- function(f, normModelNames=1) {
- 
+
   nm <- getEffectsName()
   x  <- loadDataFrame(f, nm)
-  if (!nonEmptyDf(x)) stop(paste0("ERROR: ", nm, " table not found"))
+  if (!nonEmptyDf(x)) {
+    stop(msg_meta_12(nm))
+  }
   
   nm <- getInfoTableDfName()
   x  <- loadDataFrame(f, nm)
-  if (!nonEmptyDf(x)) stop(paste0("ERROR: ", nm, " table not found"))
+  if (!nonEmptyDf(x)) stop(msg_meta_12(nm))
 
   if (normModelNames) x <- infoTable_normNames(x)
 
   cnm    <- getInfoTableCohortName()
   cohort <- getInfoTableValue(x, cnm, ifNotFound=NULL, check.len=1) 
-  if (!length(cohort)) stop("ERROR: name of cohort not found")
+  if (!length(cohort)) stop(msg_meta_13())
 
   mnm <- getInfoTableModelNmName()
   modname <- getInfoTableValue(x, mnm, ifNotFound=NULL, check.len=0) 
-  if (!length(modname)) stop("ERROR: name of model not found")
+  if (!length(modname)) stop(msg_meta_14())
   modnumbers <- meta_getModelNumber(modname)
   nmodels    <- length(modnumbers)
-  if (nmodels != length(unique(modnumbers))) stop("ERROR: model names are not unique")
+  if (nmodels != length(unique(modnumbers))) stop(msg_meta_15())
 
   list(cohort=cohort, model.names=modname, model.numbers=modnumbers, info=x)
 
@@ -694,15 +853,16 @@ meta_initFileCheck <- function(filevec, op) {
   ok       <- rep(TRUE, n)
   modnum   <- op[["modelNumber", exact=TRUE]]
   cohorts  <- NULL
+  cvec     <- rep("", n)
   for (i in 1:n) {
     f   <- filevec[i]
-    obj <- try(meta_getFileInfo(f), silent=TRUE)
+    obj <- try(meta_getFileInfo(f), silent=FALSE)
     if ("try-error" %in% class(obj)) {
       print(obj)
       wobj  <- runmodel.checkForError(obj, warnStr="ERROR", objStr=f, rem.obj=wobj)
       ok[i] <- FALSE
     } else {
-      # See if file contains correct model
+      # See if file contains correct model. Not being done currently.
       if (!is.null(modnum)) {
         tmp <- modnum %in% tolower(obj$model.numbers)
       } else {
@@ -718,12 +878,40 @@ meta_initFileCheck <- function(filevec, op) {
         len               <- length(infolist)
         infolist[[len+1]] <- obj
         cohorts           <- c(cohorts, obj$cohort)
+        cvec[i]           <- obj$cohort
       }
     }
   }
   m <- sum(ok)
-  if (m < op[[metaOp_minNcohortName()]]) stop("ERROR: too few cohorts left after exclusions")
-  if (any(duplicated(cohorts))) stop("ERROR: cohort names are not unique")
+  if (m < op[[metaOp_minNcohortName()]]) stop(msg_meta_16()) 
+  tmp <- duplicated(cohorts)
+  if (any(tmp)) {
+    # Perhaps add an option later to automatically rename duplicated cohort names
+    if (DEBUG) {
+      dups <- cohorts[tmp]
+      for (dup in dups) {
+        tmp <- cvec %in% dup
+        cat(paste0("Files corresponding to duplicated cohort '", dup, "':\n"))
+        print(filevec[tmp])
+      }
+    } 
+    stop(msg_meta_17())
+
+    # Rename duplicated cohorts. This must be done before meta_loadFilesAndSetupData is called
+    dups <- unique(cohorts[tmp])
+    cnt  <- rep(2, length(dups))
+    ids  <- (1:length(infolist))[tmp]
+    for (id in ids) {
+      obj    <- infolist[[id]]
+      cohort <- obj$cohort
+      tmp    <- dups %in% cohort
+      if (sum(tmp) != 1) stop("INTERNAL CODING ERROR")
+      obj$cohort     <- paste0(cohort, ".", cnt[tmp])
+      cnt[tmp]       <- cnt[tmp] + 1
+      obj$info       <- setInfoTableValue(obj$info, getInfoTableCohortName(), obj$cohort)
+      infolist[[id]] <- obj
+    }
+  }
   op[[wrnm]] <- wobj
 
   if (DEBUG) cat("End: meta_initFileCheck\n")
@@ -739,7 +927,7 @@ meta_createTempDir <- function(out.dir, nrand=6) {
   out.dir <- checkForSep(out.dir)
   ret     <- paste0(out.dir, dir)
   dir.create(ret)
-  if (!dir.exists(ret)) stop(paste0("ERROR: directory ", ret, " not created"))
+  if (!dir.exists(ret)) stop(msg_meta_18(ret))
   ret
 }
 
@@ -747,10 +935,23 @@ meta_removeTempDir <- function(dir) {
 
   if (!length(dir) || !nchar(dir)) return(NULL)
   if (dir.exists(dir)) {
-    unlink(dir, recursive=TRUE, force=TRUE, expand=TRUE)
+    tmp <- try(unlink(dir, recursive=TRUE, force=TRUE), silent=TRUE)
+    if (("try-error" %in% class(tmp)) && dir.exists(dir)) {
+      tmp <- list.files(dir, full.names=TRUE)
+      file.remove(tmp)
+      unlink(dir, recursive=TRUE, force=TRUE)
+    }
   }
   NULL
 
+}
+
+meta_rmDir <- function(op) {
+
+  DEBUG <- op[["DEBUG", exact=TRUE]]
+  if (!length(DEBUG)) DEBUG <- FALSE
+  if (!DEBUG) meta_removeTempDir(op$temp.dir)
+  NULL
 }
 
 #' Main function that performs the meta-analysis calculations.
@@ -859,6 +1060,15 @@ meta_core <- function(beta, se, only.ret.Q=FALSE) {
     pvaluer[tmp] <- NA
     phet[tmp]    <- NA
   }
+
+  # For ncohort = 1, set random effects to the fixed effects
+  tmp <- ncohort %in% 1
+  if (any(tmp)) {
+    betar[tmp]   <- betaf[tmp]
+    ser[tmp]     <- sef[tmp]
+    pvaluer[tmp] <- pvaluef[tmp]
+  }
+
   ret <- list()
   ret[[getMetaFixedBetaCol()]]    <- betaf
   ret[[getMetaFixedBetaSeCol()]]  <- sef
@@ -882,17 +1092,20 @@ meta_strat_het_test <- function(df, op) {
   ret     <- df # Return data frame with added columns
 
   # Remove any strata if needed
-  svar <- unique(unlist(df[, svarCol, drop=TRUE]))
-  if (length(svar) != 1) stop("INTERNAL CODING ERROR with strata")
   rem.list <- op[[metaOp_strataToExcludeFromHetTest(), exact=TRUE]]
-  if (length(rem.list)) rem.list <- rem.list[[svar, exact=TRUE]]
-  if (length(rem.list)) {
-    tmp <- !(df[, svalCol, drop=TRUE] %in% rem.list)
+  nrem     <- length(rem.list) 
+  if (nrem) {
+    sids <- paste0(df[, svarCol, drop=TRUE], ":", df[, svalCol, drop=TRUE])
+    vars <- names(rem.list)
+    rem  <- NULL
+    for (i in 1:nrem) rem <- c(rem,  paste0(vars[i], ":", rem.list[[vars[i], exact=TRUE]]))
+    tmp <- !(sids %in% rem)
     if (!all(tmp)) df <- df[tmp, , drop=FALSE]
+    rm(sids, tmp, vars, rem); gc()
   }
 
   # Get the ids for all rows
-  ids     <- meta_getIdNames(df, strata.cols=FALSE)
+  ids     <- meta_getIdNames(df, strataCol=FALSE)
   strata  <- unlist(df[, svalCol, drop=TRUE]) 
   ustrata <- unique(strata)
   uids    <- unique(ids)
@@ -937,7 +1150,7 @@ meta_strat_het_test_main <- function(beta, se, ids, uids, strata, ustrata) {
 
 meta_strat_het_test_add <- function(ret, uids, fixed, random) {
 
-  ids  <- meta_getIdNames(ret, strata.cols=FALSE)
+  ids  <- meta_getIdNames(ret, strataCol=FALSE)
   rows <- match(ids, uids)
   tmp  <- !is.na(rows)
   rows <- rows[tmp]
@@ -975,7 +1188,7 @@ meta_relevel_terms_main <- function(df, var, from, to) {
   for (i in 1:length(varfrom)) {
     tmp <- vec %in% varfrom[i]
     if (!any(tmp)) {
-      msg <- paste0(tv, "='", varfrom[i], "' not found in ", eff, " data frame")
+      msg <- msg_meta_19(c(tv, varfrom[i], eff))
       warning(msg)
     } else {
       ret[tmp] <- varto[i]
@@ -1004,7 +1217,7 @@ meta_relevel_strata_main <- function(df, var, from, to) {
   for (i in 1:length(varfrom)) {
     tmp <- tmp0 & (vecval %in% varfrom[i])
     if (!any(tmp)) {
-      msg <- paste0(var, "='", varfrom[i], "' not found in ", eff, " data frame")
+      msg <- msg_meta_19(c(var, varfrom[i], eff))
       warning(msg)
     } else {
       ret[tmp] <- varto[i]

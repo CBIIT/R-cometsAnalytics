@@ -55,8 +55,7 @@ runModel.addRemVars <- function(obj, vars, type, reason, printWarning=1, varMap=
 
   if (printWarning) {
     str <- paste(vars, collapse=", ", sep="") 
-    msg <- paste("The variable(s) ", str, " have been removed from ", 
-                 type, " because of: ", reason, sep="")
+    msg <- msg_mod_16(c(str, type, reason))
     warning(msg)
   }
 

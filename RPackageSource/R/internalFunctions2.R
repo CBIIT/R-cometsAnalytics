@@ -3,9 +3,9 @@ checkVariableNames <- function(varnames, name, convertMissTo="", default=NULL, o
 
   if (!length(varnames)) return(default)
   varnames <- try(as.vector(varnames), silent=TRUE)
-  if ("try-error" %in% class(varnames)) stop(paste(name, " must be a character vector", sep=""))
-  if (!is.vector(varnames)) stop(paste(name, " must be a character vector", sep=""))
-  if (max.n && (length(varnames) > max.n)) stop(paste(name, " must have length ", max.n, sep=""))
+  if ("try-error" %in% class(varnames)) stop(msg_arg_notCharVec(name))
+  if (!is.vector(varnames)) stop(msg_arg_notCharVec(name))
+  if (max.n && (length(varnames) > max.n)) stop(msg_arg_maxlen(c(name, max.n)))
 
   # varnames could be all missing
   if (!is.na(convertMissTo)) {
@@ -16,12 +16,12 @@ checkVariableNames <- function(varnames, name, convertMissTo="", default=NULL, o
     return(varnames)
   }
 
-  if (!is.character(varnames)) stop(paste(name, " must be a character vector", sep=""))
+  if (!is.character(varnames)) stop(msg_arg_notCharVec(name))
   
   varnames <- tolower(trimws(varnames))
   if (only.unique) varnames <- unique(varnames)
   tmp <- nchar(varnames)
-  if (stopOnMissError && any(tmp < 1)) stop(paste("some variable names in ", name, " are not valid", sep=""))  
+  if (stopOnMissError && any(tmp < 1)) stop(msg_arg_colsNotValid(name))  
   tmp <- varnames == "all metabolites"  
   tmp[is.na(tmp)] <- FALSE
   if (any(tmp)) varnames[tmp] <- "All metabolites"
@@ -223,16 +223,16 @@ default.list <- function(inList, names, default, error=NULL,
 
   n1 <- length(names)
   n2 <- length(default)
-  if (n1 != n2) stop("ERROR: in calling default.list")
+  if (n1 != n2) stop("INTERNAL CODING ERROR 1")
 
   if (is.null(error)) {
     error <- rep(0, times=n1)
   } else if (n1 != length(error)) {
-    stop("ERROR: in calling default.list")
+    stop("INTERNAL CODING ERROR 2")
   }
 
   if (!is.null(checkList)) {
-    if (n1 != length(checkList)) stop("ERROR: in calling default.list")
+    if (n1 != length(checkList)) stop("INTERNAL CODING ERROR 3")
     checkFlag <- 1
   } else {
     checkFlag <- 0
@@ -247,7 +247,7 @@ default.list <- function(inList, names, default, error=NULL,
         inList[[names[i]]] <- default[[i]]
       } else {
         temp <- paste("ERROR: the name ", names[i], " was not found", sep="")
-        stop(temp)
+        stop("INTERNAL CODING ERROR 4")
       }
     } else if (checkFlag) {
       temp <- checkList[[i]]
@@ -255,7 +255,7 @@ default.list <- function(inList, names, default, error=NULL,
         if (!all(inList[[names[i]]] %in% checkList[[i]])) {
           temp <- paste("ERROR: the name '", names[i], 
                       "' has an invalid value", sep="")
-          stop(temp)
+          stop("INTERNAL CODING ERROR 5")
         }
       }
     }
@@ -346,7 +346,7 @@ getLogicalValueFromStr <- function(str) {
 
 defFunctionString <- function(str) {
 
-  if (!isString(str)) stop("ERROR: str must be a string")
+  if (!isString(str)) stop(msg_arg_notString("str"))
   str <- trimws(str)
   len <- nchar(str)
   if (len < 1) stop(paste("ERROR: the function string ", str, " is not valid", sep=""))
@@ -495,9 +495,10 @@ newVersionOutToOldOut <- function(x) {
 
 } # END: newVersionOutToOldOut
 
-parseDelimVec <- function(vec, sep, ncol) {
+parseDelimVec <- function(vec, sep, ncol, numeric=FALSE) {
 
   mat <- unlist(strsplit(vec, sep, fixed=TRUE))
+  if (numeric) mat <- as.numeric(mat)
   if (length(mat) != length(vec)*ncol) return(NULL)
   mat <- matrix(mat, byrow=TRUE, ncol=ncol)
 
@@ -557,4 +558,22 @@ expParms_deltaMethod <- function(beta, beta.se) {
 
 getVecFromStr <- function(str, delimiter=",") {
   unlist(strsplit(str, delimiter, fixed=TRUE))
+}
+
+getQuotedVecStr <- function(vec, sep=", ") {
+
+  if (!length(vec)) return("")
+  ret <- paste0(vec, collapse=sep)
+  ret <- paste0("'", ret, "'")
+  ret
+
+}
+
+getQuotedVarStr <- function(vec, sep=", ") {
+
+  if (!length(vec)) return("")
+  ret <- paste0("'", vec, "'")
+  ret <- paste0(ret, collapse=sep)
+  ret
+
 }

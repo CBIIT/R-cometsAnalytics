@@ -336,7 +336,7 @@ mrf_load_data <- function(filevec, op) {
     ms <- try(mrf_subset_ms(ms, eff)) 
     if ("try-error" %in% class(ms)) next
 
-    # Get the ids, we only need the uids and strata, not term
+    # Get the ids, we only need the uids, model and strata, not term
     ids <- meta_getIdNames(ms, term.col=FALSE) 
 
     # Change run numbers to other ids to prevent colliding with other files
@@ -434,7 +434,10 @@ isCometsOutFile <- function(f) {
 
   ret  <- FALSE
   lowf <- tolower(f)
-  if (isExcelFile(lowf)) {
+  if (is.list(f)) {
+    nms <- names(f)
+    if (all(cometsReqOutSheetNames() %in% nms)) ret <- TRUE 
+  } else if (isExcelFile(lowf)) {
     sheets <- try(readxl::excel_sheets(lowf), silent=TRUE)
     if ("try-error" %in% class(sheets)) return(ret)
     sheets <- tolower(sheets)
@@ -458,3 +461,5 @@ areCometsOutFiles <- function(fvec) {
   for (i in 1:n) ret[i] <- isCometsOutFile(fvec[i])
   ret
 }
+
+

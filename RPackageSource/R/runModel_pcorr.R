@@ -26,7 +26,7 @@ runModel.getDefaultPcorrOptions <- function() {
 runModel.checkPcorrOpList <- function(op, name="model.options") {
 
   n       <- length(op)
-  if (n && !is.list(op)) stop(paste("ERROR: ", name, " must be a list", sep=""))
+  if (n && !is.list(op)) stop(msg_arg_notList(name))
 
   tmp   <- runModel.getDefaultPcorrOptions()
   def   <- tmp$default
@@ -85,7 +85,8 @@ runModel.tidyPcorr <- function(nsubs, fit, expVars, defObj, designMatCols, dmatC
     names(wp) <- ""
 
     ret  <- list(converged=TRUE, coef.stats=obj1, fit.stats=nsubs, 
-                 msg=msg, adj=adj, adj.rem=adj.rem, wald.pvalue=wp)  
+                 msg=msg, adj=adj, adj.rem=adj.rem, wald.pvalue=wp,
+                 cov.str="")  
   } 
 
   ret

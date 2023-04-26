@@ -17,6 +17,25 @@ getInfoTableValue <- function(infoTable, name, ifNotFound=NULL, check.len=1) {
 
 }
 
+setInfoTableValue <- function(infoTable, name, value) {
+
+  ret <- infoTable
+  if (nonEmptyDf(infoTable)) {
+    cx   <- colnames(infoTable)
+    nmv  <- getInfoTableNameCol()
+    valv <- getInfoTableValueCol()
+    if (!all(c(nmv, valv) %in% cx)) stop("INTERNAL CODING ERROR 1")
+
+    tmp  <- infoTable[, nmv, drop=TRUE] %in% name 
+    n    <- sum(tmp)
+    if (!n) return(ret)
+    ret[tmp, valv] <- value  
+  }
+  ret
+
+}
+
+
 infoTable_normNames <- function(infoTable) {
 
   if (nonEmptyDf(infoTable)) {
@@ -76,6 +95,7 @@ getInfoTableDF <- function(modeldata, metabdata, op) {
   valuevec  <- c(mydate, cohort, 
                  cversion, rversion, os,
                  inputf, modelName, modelspec) 
+  if (length(namevec) != length(valuevec)) stop("INTERNAL CODING ERROR 1")
 
   global    <- getValidGlobalOps()$valid
   exc       <- c("DEBUG", "DONOTRUN", getModelOpsName(), getOutCommonColsOpName())
@@ -84,6 +104,7 @@ getInfoTableDF <- function(modeldata, metabdata, op) {
   tmp       <- updateInfoTableVecs(global, op, namevec, valuevec, "op$")
   namevec   <- tmp$namevec
   valuevec  <- tmp$valuevec
+  if (length(namevec) != length(valuevec)) stop("INTERNAL CODING ERROR 2")
 
   mop      <- op[[getModelOpsName(), exact=TRUE]]
   inc      <- c("method", "family", "link", "weights", "offset", 
@@ -94,6 +115,7 @@ getInfoTableDF <- function(modeldata, metabdata, op) {
   tmp       <- updateInfoTableVecs(nms, mop, namevec, valuevec, "model.options$")
   namevec   <- tmp$namevec
   valuevec  <- tmp$valuevec
+  if (length(namevec) != length(valuevec)) stop("INTERNAL CODING ERROR 3")
 
   # Add info for meta-analyses
   yv        <- modeldata[["rcovs", exact=TRUE]]
@@ -107,6 +129,19 @@ getInfoTableDF <- function(modeldata, metabdata, op) {
   vals      <- c(yv, ev, sv)
   namevec   <- c(namevec, nms)
   valuevec  <- c(valuevec, vals)
+  if (length(namevec) != length(valuevec)) stop("INTERNAL CODING ERROR 4")
+
+  # Add exposure reference level
+  exprefs <- modeldata[["exposurerefs", exact=TRUE]]
+  n       <- length(exprefs)
+  if (!n) {
+    exprefs <- ""
+  } else if (n > 1) {
+    exprefs <- getInfoTable2plusVars()
+  }
+  namevec  <- c(namevec, getInfoTableExpRefName())
+  valuevec <- c(valuevec, exprefs)
+  if (length(namevec) != length(valuevec)) stop("INTERNAL CODING ERROR 5")
 
   ret <- data.frame(name=namevec, value=valuevec, stringsAsFactors=FALSE)
   ret
@@ -126,7 +161,7 @@ getInfoTableDF.meta <- function(op) {
   ncohorts <- length(cohorts)
   if (!ncohorts) cohorts <- ""
   cohorts <- paste0(cohorts, collapse=", ")
-  modelName <- op[["models", exact=TRUE]]
+  modelName <- op[["MODEL", exact=TRUE]]
   if (length(modelName) > 1) modelName <- modelName[1]
   if (!length(modelName)) modelName <- ""
 
@@ -140,7 +175,7 @@ getInfoTableDF.meta <- function(op) {
   # Get meta options
   tmp       <- meta_check_op(NULL)
   global    <- names(tmp)
-  exc       <- c("DEBUG", "DONOTRUN")
+  exc       <- c("DEBUG", "MODEL")
   tmp       <- !(global %in% exc)
   global    <- global[tmp]
   tmp       <- updateInfoTableVecs(global, op, namevec, valuevec, "op$")

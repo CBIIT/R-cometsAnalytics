@@ -15,6 +15,19 @@ getFileExt <- function(f, tolower=1, tarflag=1) {
   ret
 }
 
+getFileNameFromObj <- function(obj) {
+
+  if (isString(obj)) {
+    ret <- obj
+  } else if (is.list(obj)) {
+    ret <- obj[[dfToC_file(), exact=TRUE]]
+  } else {
+    ret <- ""
+  }
+  if (is.null(ret)) ret <- ""
+  ret
+}
+
 loadFile <- function(fobj, sheets=NULL) {
  
   if (is.list(fobj)) {
@@ -26,7 +39,7 @@ loadFile <- function(fobj, sheets=NULL) {
   f   <- trimws(f)
   ext <- getFileExt(f, tolower=1) 
   if (!length(ext)) {
-    msg <- paste0("ERROR: file extension could not be determined for ", f)
+    msg <- msg_arg_fileExtUnknown(f)
     stop(msg)
   }
   if (ext == "rda") {
@@ -34,11 +47,19 @@ loadFile <- function(fobj, sheets=NULL) {
   } else if (ext == "xlsx") {
     ret <- myread_xlsx(f, sheets=sheets)
   } else {
-    #stop(paste0("ERROR: cannot read file with extension ", ext))
     sep <- NULL 
     if (is.list(fobj)) sep <- fobj[["sep", exact=TRUE]]
     if (is.null(sep)) sep <- getFileDelim(f, default="")
-    ret <- read.table(f, header=1, sep=sep, as.is=TRUE, check.names=FALSE)
+    ret <- try(read.table(f, header=1, sep=sep, as.is=TRUE, check.names=FALSE, 
+                      comment.char=""), silent=TRUE)
+    if ("try-error" %in% class(ret)) {
+      ret <- read.table(f, header=1, sep=sep, as.is=TRUE, check.names=FALSE, 
+                      comment.char="", quote='"')
+    }
+    if ("try-error" %in% class(ret)) {
+      ret <- read.table(f, header=1, sep=sep, as.is=TRUE, check.names=FALSE, 
+                      comment.char="", quote="'")
+    }
   }
 
   ret
@@ -61,7 +82,7 @@ myread_rda <- function(f) {
 
   nm <- load(f)
   if (length(nm) != 1) {
-    msg <- paste0("ERROR: ", f, " contains more than one object")
+    msg <- msg_arg_rdaMultObj(f)
     stop(msg)
   }
   ret <- eval(parse(text=nm))
@@ -73,7 +94,7 @@ myread_xlsx <- function(f, sheets=NULL) {
   if (is.null(sheets)) sheets <- readxl::excel_sheets(f)
   nsheets <- length(sheets)
   if (!length(sheets)) {
-    msg <- paste0("ERROR: ", f, " contains no sheets")
+    msg <- msg_arg_xlsxNoSheets(f)
     stop(msg)
   }
   ret <- list()
@@ -143,7 +164,7 @@ getFileDelim <- function(f, default="") {
   ret    <- default
   x      <- scan(f, nlines=2, what="character", sep="\n", quiet=TRUE)
   nx     <- length(x)
-  if (!nx) stop("ERROR: file has no rows")
+  if (!nx) stop(msg_arg_fileNoRows(f))
   n2Flag <- nx > 1
   seps   <- c("\t", " ", ",")  
   nseps  <- length(seps)

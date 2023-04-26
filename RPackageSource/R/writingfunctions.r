@@ -78,9 +78,9 @@ OutputListToExcel <- function(filename, obj) {
 
   filename <- trimws(filename)
   len      <- nchar(filename)
-  if (len < 5) stop("ERROR: filename is not valid")
+  if (len < 5) stop(msg_arg_fileExtNotxlsx("filename"))
   str <- tolower(substr(filename, len-4, len))
-  if (str != ".xlsx") stop("ERROR: filename must have a .xlsx extension")
+  if (str != ".xlsx") stop(msg_arg_fileExtNotxlsx("filename"))
   if (file.exists(filename)) file.remove(filename)
 
   # For backwards compatibility
@@ -101,10 +101,10 @@ OutputListToExcel <- function(filename, obj) {
     }
   }
   if (file.exists(filename)) {
-    msg <- paste0("Output saved to file: ", filename, "\n")
+    msg <- msg_arg_outSavedToFile(filename)
     cat(msg)
   } else {
-    warning("No output written, check the input object.")
+    warning(msg_arg_noOutWrt())
   }  
 
   filename
@@ -118,7 +118,7 @@ saveObjectByFileExt <- function(obj, out.file) {
   } else if (isExcelFile(f)) {
     OutputListToExcel(out.file, obj)
   } else {
-    stop("ERROR: incorrect file extension")
+    stop(msg_arg_fileExtNotValid(c(out.file, ".xlsx, .rda")))
   }
   NULL
 

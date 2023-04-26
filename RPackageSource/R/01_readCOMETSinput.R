@@ -4,6 +4,11 @@
 #' @param file path of Excel file to be read in. This file must contain sheets
 #' with names \bold{Metabolites}, \bold{SubjectMetabolites}, \bold{SubjectData}, \bold{VarMap}, 
 #' and optionally \bold{Models}, \bold{Model_Types} (see details).
+#' @param mode How is this function being called (Interactive or Batch). 
+#'        When running in Batch mode, all models in the \bold{Models} sheet must be valid;
+#'        otherwise an error will be thrown. When running in Interactive mode, a warning
+#'        will be given if the \bold{Models} sheet contains errors.
+#'        The default is Batch.
 #' @return a list comprising of data and information needed for \code{\link{getModelData}}.
 #'
 #' @details Additional information regarding each sheet in the input Excel file is given below. 
@@ -82,22 +87,22 @@
 #'
 #' @export
 
-readCOMETSinput <- function(file) {
+readCOMETSinput <- function(file, mode="Batch") {
 
-  if (!isString(file)) stop("ERROR: file must be a character string giving the complete path to the Excel file.")
-  if (!file.exists(file)) stop(paste0("ERROR: input Excel file ", file, " does not exist."))
+  if (!isString(file)) stop(msg_rci_1())
+  if (!file.exists(file)) stop(msg_rci_2(file))
+  mode <- check.string(mode, c(getMode_interactive(), getMode_batch()), "mode")
 
   # Get the sheet names in the file
   sheets <- try(readxl::excel_sheets(file))
-  if ("try-error" %in% class(sheets)) stop("ERROR: check that the input file is an Excel file")
+  if ("try-error" %in% class(sheets)) stop(msg_rci_3())
 
   # Check for the required sheet names
   nms    <- getReqSheetNames()
   tmp    <- toupper(nms) %in% toupper(sheets)
   if (!any(tmp)) {
     msg <- infile.collapseVec(nms)
-    msg <- paste0("The input Excel file is missing all required sheets: ", msg)  
-    stop(msg)
+    stop(msg_rci_4(msg))
   }
 
   # Read varMap sheet first
@@ -136,14 +141,11 @@ readCOMETSinput <- function(file) {
       dta.options <- readExcelSheet(file, getOptionsSheetName(), sheets, optional=1) 
       if (length(dta.options)) dta.options <- checkOptionsSheet0(dta.options)
     } else {
-      msg <- paste0("NOTE: the column ", toupper(modnm), " was not found in the ", modelsSheet, " sheet. ",
-                    "Assuming older version of Excel file.\n")
-      cat(msg)
+      msg <- c(toupper(modnm), modelsSheet)
+      cat(msg_rci_5(msg))
     }
   } else {
-    msg <- paste0("NOTE: the ", modelsSheet, " sheet was not found in input excel file.",
-                  " Assuming RcometsAnalytics will be run in interactive mode.\n")
-    cat(msg)
+    cat(msg_rci_6(modelsSheet))
   } 
 
   # Go through the varmap VARTYPE column and convert categorical entries into factors
@@ -286,10 +288,13 @@ readCOMETSinput <- function(file) {
   err <- infile.checkAllModels(dtalist)
   if (err) {
     # Display warning, user could be running in interactive mode 
-    msg <- paste0("ERRORS were produced for some models in the ", getModelsSheetName(),
-                  " sheet. See messages above. \n")
+    msg <- msg_rci_21()
     cat(msg)
-    warning(msg)
+    if (mode == getMode_batch()) {
+      stop(msg)
+    } else {
+      warning(msg)
+    }
   } 
   return(dtalist)
 

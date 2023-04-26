@@ -1,6 +1,13 @@
 ##########################################################################
 # Lists
 ##########################################################################
+
+isList <- function(x) {
+
+  ret <- is.list(x) && ("list" %in% class(x))
+  ret
+}
+
 checkOptionListNames <- function(op, valid, name) {
     if (!length(op)) return(NULL)
 
@@ -9,15 +16,17 @@ checkOptionListNames <- function(op, valid, name) {
     tmp <- nchar(nms) < 1
     if (any(tmp)) {
       print(op)
-      stop(paste("ERROR: the above ", name, " list is not valid", sep="")) 
+      stop(msg_arg_listNotValid(name)) 
     }
-    tmp <- !(nms %in% valid)
-    if (any(tmp)) {
-      err <- paste(nms[tmp], collapse=",", sep="")
-      if (length(err) > 1) {
-        stop(paste("ERROR: ", err, " are not valid option names for ", name, sep=""))
-      } else {
-        stop(paste("ERROR: ", err, " is not a valid option name for ", name, sep=""))
+    if (length(valid)) {
+      tmp <- !(nms %in% valid)
+      if (any(tmp)) {
+        err <- paste(nms[tmp], collapse=",", sep="")
+        if (length(err) > 1) {
+          stop(msg_arg_opsNotValidFor(c(err, name)))
+        } else {
+          stop(msg_arg_opNotValidFor(c(err, name)))
+        }
       }
     }  
 
@@ -27,14 +36,14 @@ checkOptionListNames <- function(op, valid, name) {
 
 checkRequiredListNames <- function(x, req, name) {
 
-  if (!length(x)) stop(paste0(name, " has length 0"))
-  if (!is.list(x)) stop(paste0(name, " must be a list"))
+  if (!length(x)) stop(msg_arg_len0(name))
+  if (!is.list(x)) stop(msg_arg_notList(name))
 
   tmp  <- !(req %in% names(x))
   miss <- req[tmp]
   if (length(miss)) {
     tmp <- paste0(miss, collapse=", ")
-    msg <- paste0("ERROR: the objects ", tmp, " are not in ", name)
+    msg <- msg_arg_objNotIn(c(tmp, name))
     stop(msg)  
   }
   
@@ -44,11 +53,24 @@ checkRequiredListNames <- function(x, req, name) {
 
 check.list <- function(x, name, valid) {
 
-  if (!is.list(x)) stop(paste("ERROR: ", name, " must be a list", sep=""))
+  if (!isList(x)) stop(msg_arg_notList(name))
   checkOptionListNames(x, valid, name) 
   NULL 
 
 } # END: check.list
+
+##########################################################################
+# vector
+##########################################################################
+
+check.vector <- function(x, name, min.len=0, len=0) {
+
+  lenx <- length(x)
+  if (!lenx && min.len) stop(msg_arg_len0(name))
+  if (len && (lenx != len)) stop(msg_arg_lenN(c(name, len)))
+  if (!is.vector(x)) stop(msg_arg_notVec(name))
+  NULL
+}
 
 ##########################################################################
 # char, string
@@ -82,7 +104,7 @@ check.string <- function(obj, valid, parm) {
 
   if (errFlag) {
     msg <- paste(valid, collapse=", ")
-    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
+    msg <- msg_arg_objNotValid(c(parm, msg))
     stop(msg)
   }
 
@@ -109,7 +131,7 @@ check.number <- function(obj, valid, parm) {
 
   if (errFlag) {
     msg <- paste(valid, collapse=", ")
-    msg <- paste("ERROR: ", parm, " must be one of ", msg, sep="")
+    msg <- msg_arg_objNotValid(c(parm, msg))
     stop(msg)
   }
 
@@ -127,7 +149,7 @@ check.logical <- function(x, name) {
     if ((x != 0) && (x != 1)) err <- 1
   }
   if (err) {
-    msg <- paste("ERROR: ", name, " must be TRUE or FALSE", sep="")
+    msg <- msg_arg_notTF(name)
     stop(msg)
   }
 
@@ -152,10 +174,9 @@ check.range <- function(x, name, lower, upper, upper.inc=TRUE) {
   }
   if (err) {
     if (is.finite(upper)) {
-      msg <- paste("ERROR: ", name, " must be ", op1,  
-                   lower, " and ", op2, upper, sep="")
+      msg <- msg_arg_objNotInRange(c(name, op1, lower, op2, upper))
     } else {
-      msg <- paste("ERROR: ", name, " must be >= ", lower, sep="")
+      msg <- msg_arg_objNotGEQ(c(name, lower))
     }
     stop(msg)
   }
@@ -167,26 +188,26 @@ check.range <- function(x, name, lower, upper, upper.inc=TRUE) {
 check_numVec <- function(x, nm, len=NA) {
 
   n <- length(x)
-  if (!n) stop(paste0("ERROR: ", nm, " has length 0"))
-  if (!is.numeric(x)) stop(paste0("ERROR: ", nm, " must be a numeric vector"))
-  if (!is.vector(x)) stop(paste0("ERROR: ", nm, " must be a numeric vector"))
+  if (!n) stop(msg_arg_len0(nm))
+  if (!is.numeric(x)) stop(msg_arg_notNumVec(nm))
+  if (!is.vector(x)) stop(paste0(msg_arg_notNumVec(nm)))
   if (is.finite(len) && (n != len)) {
-    stop(paste0("ERROR: ", nm, " must have length ", len))
+    stop(msg_arg_lenN(c(nm, len)))
   }
   NULL
 }
 
 check_numMat <- function(x, nm, dim=NA) {
 
-  if (!is.matrix(x)) stop(paste0("ERROR: ", nm, " must be a numeric matrix"))
-  if (!is.numeric(x)) stop(paste0("ERROR: ", nm, " must be a numeric matrix"))
+  if (!is.matrix(x)) stop(msg_arg_notNumMat(nm))
+  if (!is.numeric(x)) stop(msg_arg_notNumMat(nm))
   nr <- nrow(x)
   nc <- ncol(x)
-  if (!nr) stop(paste0("ERROR: ", nm, " has 0 rows"))
-  if (!nc) stop(paste0("ERROR: ", nm, " has 0 columns"))
+  if (!nr) stop(msg_arg_0rows(nm))
+  if (!nc) stop(msg_arg_0cols(nm))
   if (length(dim) == 2) {
-    if (nr != dim[1]) stop(paste0("ERROR: ", nm, " must have ", dim[1], " rows"))
-    if (nc != dim[2]) stop(paste0("ERROR: ", nm, " must have ", dim[2], " columns"))
+    if (nr != dim[1]) stop(msg_arg_Nrows(c(nm, dim[1])))
+    if (nc != dim[2]) stop(msg_arg_Ncols(c(nm, dim[2])))
   }
   NULL
 }
@@ -198,7 +219,7 @@ check_numVecMat <- function(x, nm, len=NA, dim=NA) {
   } else if (is.vector(x)) {
     check_numVec(x, nm, len=len) 
   } else {
-    stop(paste0("ERROR: ", nm, " must be a numeric matrix or vector"))
+    stop(msg_arg_notNumMatVec(nm))
   }
   NULL
 }
@@ -209,13 +230,13 @@ check_numVecMat <- function(x, nm, len=NA, dim=NA) {
 
 checkFiles <- function(filevec, name="filevec") {
 
-  if (!length(filevec)) stop("ERROR: No files specified")
-  if (!is.character(filevec)) stop(paste0("ERROR: ", name, " must be a character vector"))
+  if (!length(filevec)) stop(msg_arg_noFiles())
+  if (!is.character(filevec)) stop(msg_arg_notCharVec(name))
   filevec <- trimws(filevec)
   tmp     <- !file.exists(filevec)
   if (any(tmp)) {
     print(filevec[tmp])
-    stop("ERROR: the above file(s) do not exist")
+    stop(msg_arg_filesDNE())
   }
   filevec
 }
@@ -241,14 +262,13 @@ checkFileExtensions <- function(filevec, checkForExt=c(".xlsx", ".rda"), case=0)
 
 check_out.file <- function(x, nm="out.file", valid.ext=NULL, delIfExists=1) {
 
-  if (!isString(x)) stop(paste0("ERROR: ", nm, " must be an output file name"))
+  if (!isString(x)) stop(msg_arg_outfile(nm))
   x <- trimws(x)
   if (length(valid.ext)) {
     tmp <- checkFileExtensions(tolower(x), checkForExt=valid.ext)
     if (!tmp) {
       ext <- paste0(getOutTypeOpVals(), collapse=", ")
-      msg <- paste0("ERROR: ", nm," must have a valid file extension (",
-                    ext, ")")
+      msg <- msg_arg_fileExtNotValid(c(nm, ext))
       stop(msg) 
     } 
   }
@@ -278,19 +298,19 @@ checkForSep <- function(x) {
 
 check.dir <- function(x, name) {
 
-  if (!isString(x)) stop(paste0("ERROR: ", name, " must be a folder name"))
+  if (!isString(x)) stop(msg_arg_dir(name))
   x <- trimws(x)
-  if (!dir.exists(x)) stop(paste0("ERROR: ", name, " must be a folder name"))
+  if (!dir.exists(x)) stop(msg_arg_dir(name))
   x <- checkForSep(x)
   x
 }
 
 check_out.dir <- function(x, name="out.dir") {
 
-  if (!isString(x)) stop(paste0("ERROR: ", name, " must be a character string"))
+  if (!isString(x)) stop(msg_arg_notString(name))
   x <- trimws(x)
-  if (!dir.exists(x)) stop(paste0("ERROR: ", x, " does not exist"))
-  if (file.access(x, mode=2)) stop(paste0("ERROR: ", x, " does not have write permission"))
+  if (!dir.exists(x)) stop(msg_arg_dirDNE(x))
+  if (file.access(x, mode=2)) stop(msg_arg_dirNoWrtPerm(x))
 
   x <- gsub("\\", "/", x, fixed=TRUE)
   x <- checkForSep(x)

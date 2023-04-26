@@ -9,7 +9,7 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
 
   if (!m) {
     if (optional) return(NULL)
-    msg <- paste0("ERROR: the input Excel file is missing the ", sheet, " sheet.\n")
+    msg <- msg_res_1(sheet)
     if (stopOnError) stop(msg)
     cat(msg)
     return(NULL)
@@ -17,7 +17,7 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
 
   # This should not be possible
   if (m > 1) {
-    msg <- paste0("ERROR: multiple sheets in the input Excel file map to the ", sheet, " sheet.\n")
+    msg <- msg_res_2(sheet)
     if (stopOnError) stop(msg)
     cat(msg)
     return(NULL)
@@ -25,12 +25,12 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
 
   ret <- try(readxl::read_excel(f, sh2), silent=TRUE)
   if ("try-error" %in% class(ret)) {
-    msg <- paste0("ERROR attempting to read the ", sheet, " sheet.\n")
+    msg <- msg_res_3(sheet)
     if (stopOnError) stop(msg)
     cat(msg)
     return(NULL)
   } else {
-    cat(paste0(sheet, " sheet is read in.\n"))
+    cat(msg_res_7(sheet))
   }
   
   compbl <- FALSE
@@ -41,13 +41,13 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
       ret <- suppressWarnings(fixData(ret, compbl=compbl))
     } else {
       if (optional) return(NULL)
-      msg <- paste0("ERROR the ", sheet, " sheet has no rows.\n")
+      msg <- msg_res_4(sheet)
       if (stopOnError) stop(msg)
       cat(msg)
     }
   } else {
     if (optional) return(NULL)
-    msg <- paste0("ERROR the ", sheet, " sheet is empty.\n")
+    msg <- msg_res_5(sheet)
     if (stopOnError) stop(msg)
     cat(msg)
   }
@@ -66,7 +66,7 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
         for (i in 1:n) vars[i] <- unlist(strsplit(cx[i], "...", fixed=TRUE))[1]
         vars <- toupper(unique(vars))
         vars <- infile.collapseVec(vars) 
-        msg  <- paste0("POSSIBLE ERROR: the ", sheet, " sheet may contain duplicated column(s) ", vars, ".\n")
+        msg  <- msg_res_6(c(sheet, vars))
         cat(msg)
       }
     }
@@ -119,7 +119,7 @@ infile.catVarsToFactors <- function(dta.sdata, dta.vmap) {
   myfactors <- dta.vmap[, v3, drop=TRUE][which(tmp)]
   myfactors <- myfactors[myfactors %in% colnames(dta.sdata)]
   m         <- length(myfactors)
-  cat(paste0("There are ", m, " categorical variables.\n"))
+  cat(msg_res_8(m))
   if (m) {
     for (v in myfactors) dta.sdata[,v] <- factor(dta.sdata[,v, drop=TRUE])
   }  
@@ -349,7 +349,7 @@ infile.basicSheetCheck <- function(data, reqCols, sheetName, min.ncol=2, reqCols
   if (n && (n != length(reqCols))) {
     if (n == 1) {
       # Missing id variable
-      cat(paste0("ERROR in the ", sheetName, " sheet. The column(s) (", toupper(reqCols.orig), ") are missing.\n"))
+      cat(msg_ibsc_1(c(sheetName, toupper(reqCols.orig))))
       err <- 1
     } else {
       stop("INTERNAL CODING ERROR in infile.basicSheetCheck")
@@ -367,13 +367,13 @@ infile.basicSheetCheck <- function(data, reqCols, sheetName, min.ncol=2, reqCols
     tmp     <- !(reqCols %in% cols)
     if (any(tmp)) {
       msg <- infile.collapseVec(reqCols.orig[tmp])
-      msg <- paste0("ERROR in the ", sheetName, " sheet. The column(s) ", toupper(msg), " are missing.\n")
+      msg <- msg_ibsc_1(c(sheetName, toupper(msg)))
       cat(msg)
       err <- 1
     }
   } 
   if (length(cols) < min.ncol) {
-    cat(paste0("ERROR in the ", sheetName, " sheet. There must be at least ", min.ncol, " columns.\n"))
+    cat(msg_ibsc_2(c(sheetName, min.ncol)))
     err <- 1
   }
   
@@ -427,8 +427,7 @@ infile.checkForValInCol <- function(col, val, sheetName, colName) {
   err <- 0
   if (!(val %in% col)) {
     err <- 1
-    msg <- paste0("ERROR in the ", sheetName, " sheet. A row with ", 
-            toupper(colName), "=", val, " was not found.\n")
+    msg <- msg_ibsc_3(c(sheetName, toupper(colName), val))
     cat(msg)
   }
 
@@ -453,8 +452,7 @@ infile.checkColForMiss <- function(colvec, sheetName, colName, error=1) {
     }
     rows <- (1:n)[tmp] + 1   
     rows <- infile.collapseVec(rows)
-    msg  <- paste0(str, " on row(s) ", rows, " of the ", sheetName, " sheet. ",
-                   toupper(colName), " contains missing values.\n")
+    msg  <- msg_ibsc_4(c(str, rows, sheetName, toupper(colName)))
     cat(msg)  
     if (!error) warning(msg)
   }
@@ -475,9 +473,7 @@ infile.checkColForReqVals <- function(colvec, reqVals, sheetName, colName) {
     rows <- (1:n)[tmp] + 1
     rows <- infile.collapseVec(rows)   
     vals <- infile.collapseVec(reqVals) 
-    msg  <- paste0("ERROR on row(s) ", rows, " of the ", 
-                   sheetName, " sheet. ", toupper(colName),
-                   " must be one of ", vals, ".\n")
+    msg  <- msg_ibsc_5(c(rows, sheetName, toupper(colName), vals))
     cat(msg)  
   }
 
@@ -501,8 +497,7 @@ infile.checkColForDups <- function(colvec, sheetName, colName, error=1) {
       str <- "WARNING" 
     }
     dups <- infile.collapseVec(colvec[tmp])   
-    msg  <- paste0(str, " in the ", sheetName, " sheet. ", 
-                   toupper(colName), "=", dups, " are duplicated.\n")
+    msg  <- msg_ibsc_6(c(str, sheetName, toupper(colName), dups))
     cat(msg)
     if (!error) warning(msg)  
   }
@@ -661,8 +656,7 @@ infile.checkNumericVars <- function(x, vars, sheetName, maxN.error=5, vars.orig=
     if (length(invalid) > N) str2 <- ",..."
     cvars  <- infile.collapseVec(c(vars, str1)) 
     c2     <- infile.collapseVec(c(invalid, str2))
-    msg    <- paste0("ERROR in the ", sheetName, " sheet. The ", cstr,  " column(s) ", 
-                     cvars, " contain invalid values ", c2, ".\n")
+    msg    <- msg_ibsc_7(c(sheetName, cstr, cvars, c2))
     cat(msg) 
   }
 
@@ -675,8 +669,7 @@ infile.checkNumericVars <- function(x, vars, sheetName, maxN.error=5, vars.orig=
     cstr <- getVarMapVarTypeCont()
     if (nerr2 > N) str1 <- ",..."
     cvars  <- infile.collapseVec(c(vars, str1)) 
-    msg    <- paste0("ERROR in the ", sheetName, " sheet. The ", cstr,  " column(s) ", 
-                     cvars, " are not numeric.\n")
+    msg    <- msg_ibsc_8(c(sheetName, cstr, cvars))
     cat(msg) 
   }
 
@@ -751,8 +744,7 @@ infile.checkWhere0 <- function(wstr, wvars, row, sheetName, colName) {
     wvars <- wvars[tmp]  
     if (lenw && !length(wvars)) {
       err <- 1
-      msg <- paste0("ERROR on row ", row, " of the ", sheetName, " sheet. ", toupper(colName), 
-                    "=(", wstr, ") is not valid.\n")
+      msg <- msg_ibsc_9(c(row, sheetName, toupper(colName), wstr))
       cat(msg)
     }
   }
@@ -928,8 +920,7 @@ infile.checkModelsSheet <- function(x, allcols, VarMap, metabs, ModelOptions) {
     # Check that MODEL_TYPE column has a corresponding row in the model options sheet
     if (iflag && modOpFlag && !is.na(ival) && !(ival %in% modOpsIds)) {
       err <- err + 1
-      msg <- paste0("ERROR on row ", row, " of the ", nm, " sheet. ", IV, "=", ival, 
-                    " not found in the ", modOpSheet, " sheet.\n")
+      msg <- msg_ibsc_10(c(row, nm, IV, ival, modOpSheet))
       cat(msg)
     } 
   }
@@ -958,16 +949,14 @@ infile.checkSubIds <- function(subMetab, mIdVar, subData) {
   if (!any(tmp)) {
     # No overlapping ids
     err <- 1
-    msg <- paste0("ERROR: the ", msheet, " and ", dsheet, 
-                  " sheets have no subject ids in common.\n")
+    msg <- msg_ibsc_11(c(msheet, dsheet))
     cat(msg)
     return(err)
   }
 
   m <- sum(!tmp)
   if (m) {
-    msg <- paste0("WARNING: there were ", m, " subject ids from the ", msheet, " sheet",
-                  " that were not found in the ", dsheet, " sheet.\n")
+    msg <- msg_ibsc_12(c(m, msheet, dsheet))
     cat(msg)
     warning(msg)
   }
@@ -975,8 +964,7 @@ infile.checkSubIds <- function(subMetab, mIdVar, subData) {
   tmp <- !(subDataIds %in% subMetabIds)
   m   <- sum(tmp)
   if (m) {
-    msg <- paste0("WARNING: there were ", m, " subject ids from the ", dsheet, " sheet",
-                  " that were not found in the ", msheet, " sheet.\n")
+    msg <- msg_ibsc_12(c(m, dsheet, msheet))
     cat(msg)
     warning(msg)
   }
@@ -1006,7 +994,7 @@ infile.checkAllModels <- function(readData) {
       err <- err + 1
       # Get and print error message
       msg <- getErrorMsgFromTryError(modeldata)
-      msg <- paste0("ERROR for model on row ", row, " of the ", sheet, " sheet: \n", msg, "\n")
+      msg <- msg_ibsc_13(c(row, sheet, msg))
       cat(msg)
       next
     }
@@ -1019,7 +1007,7 @@ infile.checkAllModels <- function(readData) {
       err <- err + 1
       # Get and print error message
       msg <- getErrorMsgFromTryError(op)
-      msg <- paste0("ERROR for model on row ", row, " of the ", sheet, " sheet: \n", msg, "\n")
+      msg <- msg_ibsc_13(c(row, sheet, msg))
       cat(msg)
       next
     }
@@ -1029,7 +1017,7 @@ infile.checkAllModels <- function(readData) {
       err <- err + 1
       # Get and print error message
       msg <- getErrorMsgFromTryError(tmp)
-      msg <- paste0("ERROR for model on row ", row, " of the ", sheet, " sheet: \n", msg, "\n")
+      msg <- msg_ibsc_13(c(row, sheet, msg))
       cat(msg)
       next
     }
@@ -1090,8 +1078,7 @@ infile.checkForReservedWords <- function(row, colName, word, reserved, sheet="Mo
   err  <- 0
   if (word %in% reserved) {
     err <- 1
-    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet. ",
-                  toupper(colName), "=", word, " is a reserved word.\n")  
+    msg <- msg_ibsc_14(c(row, sheet, toupper(colName), word))  
     cat(msg)
   }
 
@@ -1107,8 +1094,7 @@ infile.checkForInvalidVars <- function(row, colName, vec, invalid, sheet="Models
     err  <- 1
     vec  <- vec[tmp]
     cvec <- infile.collapseVec(vec)  
-    msg  <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
-                  toupper(colName), "=", cvec, " is invalid.\n")  
+    msg  <- msg_ibsc_15(c(row, sheet, toupper(colName), cvec))  
     cat(msg)
   }
 
@@ -1121,13 +1107,7 @@ infile.checkForMaxNvars <- function(row, colName, vec, maxlen=1, sheet="Models")
   err  <- 0
   if (length(vec) > maxlen) {
     err  <- 1
-    msg  <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
-                   " The column ", toupper(colName), " should only contain ")
-    if (maxlen == 1) {
-      msg <- paste0(msg, "a single variable.\n")
-    } else {
-      msg <- paste0(msg, "at most ", maxlen, " variables.\n")
-    }   
+    msg  <- msg_ibsc_16(c(row, sheet, toupper(colName), maxlen))
     cat(msg)
   }
 
@@ -1148,9 +1128,7 @@ infile.checkVarsInVarRef <- function(row, colName, vars, varRefVec, metabs, shee
   if (any(tmp)) {
     vv  <- infile.collapseVec(vars[tmp]) 
     err <- 1
-    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet. ",
-                  toupper(colName), "=", vv, " are not listed in the ",
-                  toupper(getVarMapVarRefCol()), " column of the ", getVarMapSheetName(), " sheet.\n")  
+    msg <- msg_ibsc_17(c(row, sheet, toupper(colName), vv))  
     cat(msg)
   }
 
@@ -1170,9 +1148,7 @@ infile.checkForVarsInData <- function(row, colName, vars, allcols, sheet="Models
   if (any(tmp)) {
     err <- 1
     msg <- infile.collapseVec(vars[tmp]) 
-    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet. ",
-                  toupper(colName), "=", msg,
-                  " do not exist in the data! Check the naming!\n")  
+    msg <- msg_ibsc_18(c(row, sheet, toupper(colName), msg))  
     cat(msg)
   }
 
@@ -1186,8 +1162,7 @@ infile.checkForMissingVarNames <- function(row, colName, vars, sheet="Models") {
   vars <- infile.modifySetOfVars(vars)
   if (!length(vars)) {
     err <- 1
-    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
-                  " The ", toupper(colName), " column must contain variable names.\n")  
+    msg <- msg_ibsc_19(c(row, sheet, toupper(colName)))  
     cat(msg)
   }
 
@@ -1200,8 +1175,7 @@ infile.checkForMissingValues <- function(row, colName, values, sheet="Models") {
   err  <- 0
   if (any(is.na(values))) {
     err <- 1
-    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
-                  " The ", toupper(colName), " column cannot have missing values.\n")  
+    msg <- msg_ibsc_20(c(row, sheet, toupper(colName)))  
     cat(msg)
   }
 
@@ -1221,10 +1195,7 @@ infile.checkForOverlappingVars <- function(row, colName1, colName2, vars1, vars2
   if (length(vv)) {
     err <- 1
     msg <- infile.collapseVec(vv) 
-    msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
-                  " The variable(s) ", msg, " appear on both the ",
-                  toupper(colName1), " and ", toupper(colName2), 
-                  " columns. This is not allowed.\n")  
+    msg <- msg_ibsc_21(c(row, sheet, msg, toupper(colName1), toupper(colName2)))  
     cat(msg)
   }
   
@@ -1240,9 +1211,7 @@ infile.searchForWhereOp <- function(str, row, colName="WHERE", sheet="Models") {
   if (grepl("<", str, fixed=TRUE)) return(ret)
   if (grepl(">", str, fixed=TRUE)) return(ret)
 
-  msg <- paste0("ERROR on row ", row, " of the ", sheet, " sheet.",
-                  " The ", toupper(colName), " column does not contain", 
-                  " an operator (<, >, =, >=, <=, !=)\n")  
+  msg <- msg_ibsc_22(c(row, sheet, toupper(colName)))  
   cat(msg)
 
   1

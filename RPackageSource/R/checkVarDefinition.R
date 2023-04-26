@@ -20,7 +20,7 @@ vardef_catvars <- function(vmap, subjdata) {
     var <- refvec[i]
     def <- defvec[i]
     if (!(var %in% cx)) {
-      msg <- paste0("The categorical variable '", var, "' was not found in the data")
+      msg <- msg_rci_23(var)
       warning(msg)
       next
     }
@@ -36,9 +36,7 @@ vardef_catvars <- function(vmap, subjdata) {
     if (m && (m < 10)) {
       datacats <- datacats[tmp]
       str      <- vardef_getMissCatStr(datacats)
-      msg      <- paste0("ERROR: categorical variable '", var, "' has value(s) '",
-                         str, "' not defined in the ", toupper(vdef), 
-                         " column of the ", sheet, " sheet.")
+      msg      <- msg_rci_24(c(var, str, toupper(vdef), sheet))
       stop(msg)
     }
   }

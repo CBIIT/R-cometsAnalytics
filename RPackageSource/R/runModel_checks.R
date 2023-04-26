@@ -189,7 +189,7 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
   # Check that there is at least a minimum number of subjects
   if (nrow(dmat) < minN){
-    stop(paste(modeldata$modlabel," has less than ", minN, " observations and will not be run.", sep=""))
+    stop(msg_mod_5(c(modeldata$modlabel, minN)))
   }
 
   # Remove linearly dependent cols
@@ -222,9 +222,14 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
   # If subjects were removed, then update gdta.
   # Possibly change this to keep a logical vector of subs to keep.
-  if (nrow(dmat) < nrow(gdta)) {
+  nrg <- nrow(gdta)
+  nrd <- nrow(dmat)
+  if (nrd < nrg) {
     tmp  <- rownames(gdta) %in%  rownames(dmat)
     gdta <- gdta[tmp, , drop=FALSE]
+
+    # print a warning
+    warning(msg_mod_24(nrg - nrd))
   }  
 
   # Drop unused levels from factors
@@ -236,7 +241,7 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
   ccovs   <- tmp$vars
   rem.obj <- tmp$rem.obj
   if (!length(ccovs)) {
-    stop(paste(modeldata$modlabel," has all exposure variables removed.", sep=""))
+    stop(msg_mod_6(modeldata$modlabel))
   }
 
   # Remove outcomes that have too few non-missing unique value
@@ -245,7 +250,7 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
   rcovs   <- tmp$vars
   rem.obj <- tmp$rem.obj
   if (!length(rcovs)) {
-    stop(paste(modeldata$modlabel," has all outcome variables removed.", sep=""))
+    stop(msg_mod_7(modeldata$modlabel))
   }
 
   # check if any of the exposures are factors
@@ -296,10 +301,10 @@ runModel.checkModeldata <- function(x, name="modeldata") {
   req  <- c("gdta", "rcovs", "ccovs", "modelspec", "modlabel", 
             "dict_metabnames")
   checkRequiredListNames(x, req, name)
-  if (!is.data.frame(x$gdta)) stop(paste0(name, "$gdta must be a data frame"))
+  if (!is.data.frame(x$gdta)) stop(msg_mod_8(name))
   tmp <- c(getMode_batch(), getMode_interactive())
   if (!(x$modelspec %in% tmp)) {
-    stop(paste0("ERROR: ", name, "$modelspec must be ", tmp[1], " or ", tmp[2])) 
+    stop(msg_mod_9(c(name, tmp[1], tmp[2]))) 
   }
 
   NULL
@@ -325,13 +330,10 @@ check2VariableSets <- function(rem.obj, baseSet, set2, baseName, set2Name, rem.s
   if (length(varToRemove)) {
     set2 <- set2[!tmp]
     if (!length(set2)) {
-      msg <- paste0("ERROR: all of the ", set2Name, " are also ", baseName, "!! ",
-                    "Please make sure ", set2Name, " are not ", baseName, ".")
+      msg <- msg_mod_10(c(set2Name, baseName))
       stop(msg)
     } else {
-      msg <- paste0("Some of the ", baseName, " are also exposure variables!!\n",
-                    "The variable(s) ", paste0(varToRemove, collapse=", "),
-                    " will be dropped from the list of ", set2Name, ".")
+      msg <- msg_mod_11(c(set2Name, baseName, paste0(varToRemove, collapse=", ")))
       warning(msg)
     }
     rem.obj <- runModel.addRemVars(rem.obj, varToRemove, rem.str1, 
@@ -350,8 +352,7 @@ check2VariableSets_error <- function(baseSet, set2, baseName, set2Name) {
   tmp  <- set2 %in% baseSet
   if (any(tmp)) {
     varstr <- paste0(set2[tmp], collapse=", ")
-    msg    <- paste0("ERROR: the variable(s) ", varstr, " are both ", baseName,
-                     " and ", set2Name, " variables!  This is not allowed.")
+    msg    <- msg_mod_12(c(varstr, baseName, set2Name))
     stop(msg)  
   }
 
@@ -364,13 +365,13 @@ checkAllVariables <- function(rem.obj, outcomes, exposures, adjvars=NULL,
 
   ny <- length(outcomes)
   ne <- length(exposures)
-  if (!ny) stop("ERROR: outcome variables must be specified")
-  if (!ne) stop("ERROR: exposure variables must be specified")
+  if (!ny) stop(msg_mod_13())
+  if (!ne) stop(msg_mod_14())
 
   # Special case when outcome=exposure. Be careful if you try to generalize
   #  this to more than one variable (allVsAll analysis).
   if ((ny == 1) && (ne == 1) && (outcomes == exposures)) {
-    stop("ERROR: only one outcome variable and it is also the exposure variable")
+    stop(msg_mod_15())
   }
 
   if (length(adjvars)) {

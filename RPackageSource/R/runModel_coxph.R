@@ -45,7 +45,7 @@ runModel.parseAndCheckCoxphOps <- function(str, modeldata) {
   valid <- names(def)
 
   if (!length(str)) return(def)
-  if (!isString(str)) stop("str must be a string")
+  if (!isString(str)) stop(msg_arg_notString("str"))
 
   str    <- setupOpStr(str)
   if (!nchar(str)) return(def)
@@ -61,8 +61,8 @@ runModel.parseAndCheckCoxphOps <- function(str, modeldata) {
     tmp   <- getOptionNameAndValue(strVec[i], sep=eq)
     name  <- tmp$name
     value <- tmp$value
-    if (!(name %in% valid)) stop(paste("ERROR: ", strVec[i], " is not valid", sep=""))
-    if (!length(value)) stop(paste("ERROR: ", strVec[i], " is not valid", sep=""))
+    if (!(name %in% valid)) stop(msg_arg_opNotValid(strVec[i]))
+    if (!length(value)) stop(msg_arg_opNotValid(strVec[i]))
     
     # value must be converted to the correct type
     value <- runModel.convertCoxphOp(name, value)
@@ -74,8 +74,7 @@ runModel.parseAndCheckCoxphOps <- function(str, modeldata) {
   ret <- try(runModel.checkCoxphOpList(ret, modeldata, name=getModelOpsName()), silent=TRUE)
   if ("try-error" %in% class(ret)) {
     print(ret)
-    msg <- paste("ERROR with options, make sure options are separated by a ", 
-                 getOpStrSep(), sep="")
+    msg <- msg_arg_opsError()
     stop(msg)
   }
 
@@ -86,7 +85,7 @@ runModel.parseAndCheckCoxphOps <- function(str, modeldata) {
 runModel.checkCoxphOpList <- function(op, modeldata, name="coxph.options") {
 
   n   <- length(op)
-  if (n && !is.list(op)) stop(paste("ERROR: ", name, " must be a list", sep=""))
+  if (n && !is.list(op)) stop(msg_arg_notList(name))
   tmp <- runModel.getDefaultCoxphOptions()
   
   def   <- tmp$default
@@ -124,7 +123,7 @@ runModel.checkCoxphOpList <- function(op, modeldata, name="coxph.options") {
       }
       if ("try-error" %in% class(tmp)) {
         print(tmp)
-        stop(paste("ERROR: the option ", nm, getOpStrEq(), val, " is not valid", sep=""))
+        stop(msg_arg_opEqValNotValid(c(nm, val)))
       }
     }
   }
@@ -153,7 +152,7 @@ checkCoxphOp_Surv.type <- function(x) {
 }
 checkCoxphOp_weights <- function(x, data, varMap) {
 
-  if (!isString(x)) stop("ERROR: weights must be a variable name")
+  if (!isString(x)) stop(msg_arg_colNotValid("weights"))
   if (length(data)) {
     check.variableInData(x, "weights", data, varMap, numeric=1, positive=1)
   }
@@ -178,7 +177,7 @@ runModel.defRetObj.coxph <- function(dmatCols0, op) {
   names(wp)            <- ""
 
   list(converged=FALSE, coef.stats=coef.stats, fit.stats=fit.stats, 
-       msg="", adj=adj, adj.rem="", wald.pvalue=wp)
+       msg="", adj=adj, adj.rem="", wald.pvalue=wp, cov.str="")
 
 } # END: runModel.defRetObj.coxph
 
@@ -211,7 +210,7 @@ runModel.callCoxph <- function(x, y, op) {
 
 } # END: runModel.callCoxph
 
-runModel.tidyCoxph <- function(nsubs, fit, exposure, expVars, defObj, modeldata, op) {
+runModel.tidyCoxph <- function(nsubs, fit, exposure, expVars, defObj, modeldata, op, expRef) {
 
   nv        <- getModelSummaryNobsName()
   n         <- length(fit)
@@ -254,11 +253,16 @@ runModel.tidyCoxph <- function(nsubs, fit, exposure, expVars, defObj, modeldata,
     adj.rem <- runModel.getAdjVarStr(nms0[rem], dmatCols0)
 
     # Wald p-value
-    wald.p <- runModel.getWaldPvalues(exposure, expVars, modeldata[["acovs.new.list", exact=TRUE]], 
-                                      fit, sfit=sfit)
+    parmslist <- NULL
+    if (!op$out.eff.exp) parmslist <- modeldata[["acovs.new.list", exact=TRUE]]
+    wald.p <- runModel.getWaldPvalues(exposure, expVars, parmslist, fit, sfit=sfit)
+
+    # Get covariance string
+    cov.str <- runModel.getUpperTriCovStr(fit, sfit, expVars, expRef)
+
     ret  <- list(converged=1, coef.stats=obj1, fit.stats=obj2, 
                  msg=msg, adj=adj, adj.rem=adj.rem, 
-                 wald.pvalue=wald.p)  
+                 wald.pvalue=wald.p, cov.str=cov.str)  
   } 
 
   ret

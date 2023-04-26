@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.4"}
+getVersionNumber     <- function() {"2.9.0.6"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -89,7 +89,7 @@ getOutMergeOpVals         <- function() {c(getOutMergeOpAll(), getOutMergeOpNone
 getOutMergeOpDefault      <- function() {getOutMergeOpNone()} 
 getOutMergeAllStr         <- function() {"all_models"}
 getMaxNpairwiseOpName     <- function() {"max.npairwise"}
-getMaxNpairwiseOpDefault  <- function() {100}
+getMaxNpairwiseOpDefault  <- function() {1000}
 
 getOutfileSpCharSep       <- function() {"_"}
 getOutfileCohortSep       <- function() {"__"}
@@ -108,8 +108,9 @@ getEffectsPvalueName       <- function() {"pvalue"}
 getEffectsRunName          <- function() {"run"}
 getEffectsEstName          <- function() {"estimate"}
 getEffectsEstSeName        <- function() {"std.error"}
+getEffectsStatName         <- function() {"statistic"}
 getEffectsGlmCoefNames     <- function() {c(getEffectsTermName(), getEffectsEstName(), getEffectsEstSeName(), 
-                                          "statistic", getEffectsPvalueName())}
+                                            getEffectsStatName() , getEffectsPvalueName())}
 getEffectsPcorCoefNames    <- function() {c(getEffectsTermName(), getEffectsCorrEstName(), 
                                             getEffectsPvalueName())}
 # Added later to Effects data frame
@@ -140,6 +141,10 @@ getModelSummaryCoxphFitNames  <- function() {c("n", "nevent", "statistic.log", "
 getModelSummaryClogitFitNames <- function() {getModelSummaryCoxphFitNames()}
 getModelSummaryOutUidCol  <- function() {"outcome_uid"}
 getModelSummaryExpUidCol  <- function() {"exposure_uid"}
+getModelSummaryCovStrSep1 <- function() {","}
+getModelSummaryCovStrSep2 <- function() {"|"}
+getModelSummaryCovStrCol  <- function() {"exposure.covariances"}
+
 
 # For input excel file
 getModelOptionsIdCol     <- function() {"model_type"}
@@ -212,7 +217,8 @@ getInfoTableModelFuncName      <- function() {"op$model"}
 getInfoTableFamilyName         <- function() {"model.options$family"}
 getInfoTableCohortName         <- function() {"cohort"}
 getInfoTableModelNmName        <- function() {"model name"}
-
+getInfoTableFileNmName         <- function() {"input file"}
+getInfoTableExpRefName         <- function() {"exposurerefs"}
 getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffectsName(),
                                                 runModel.getWarningsListName(),
                                                 getRampChemEnrichDfName(), getTable1DfName(),
@@ -220,32 +226,42 @@ getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffect
                                              }
 
 # Meta analysis
-getMetaModelsSheetName         <- function() {"Meta_Models"}
-getMetaModelTypeSheetName      <- function() {"Meta_Types"}
-getMetaOpFileModelsCol         <- function() {"MODEL"}
-getMetaOpFileModelTypeCol      <- function() {"META_TYPE"}
-getMetaGlobalOptionName        <- function() {"GLOBAL"}
-metaOp_methodName              <- function() {"method"}
-metaOp_methodDefault           <- function() {"fixed"}
-metaOp_methodVals              <- function() {c(metaOp_methodDefault(), "random")}
-metaOp_minNcohortName          <- function() {"min.n.cohort"}
-metaOp_minNcohortDefault       <- function() {2}
-metaOp_cohortMinSubs           <- function() {"min.nsub.cohort"}
-metaOp_cohortMinSubsDefault    <- function() {25}
-metaOp_totalMinSubs            <- function() {"min.nsub.total"}
-metaOp_totalMinSubsDefault     <- function() {50}
-metaOp_save.mem                <- function() {"save.mem"}
-metaOp_save.memDefault         <- function() {1}
-metaOp_cohorts.include         <- function() {"cohorts.include"}
-metaOp_cohorts.exclude         <- function() {"cohorts.exclude"}
+getMetaModelsSheetName            <- function() {"Meta_Models"}
+getMetaModelTypeSheetName         <- function() {"Meta_Types"}
+getMetaOpFileModelsCol            <- function() {"MODEL"}
+getMetaOpFileModelTypeCol         <- function() {"META_TYPE"}
+getMetaGlobalOptionName           <- function() {"GLOBAL"}
+metaOp_methodName                 <- function() {"method"}
+metaOp_methodDefault              <- function() {"fixed"}
+metaOp_methodVals                 <- function() {c(metaOp_methodDefault(), "random")}
+metaOp_minNcohortName             <- function() {"min.n.cohort"}
+metaOp_minNcohortDefault          <- function() {2}
+metaOp_cohortMinSubs              <- function() {"min.nsub.cohort"}
+metaOp_cohortMinSubsDefault       <- function() {25}
+metaOp_totalMinSubs               <- function() {"min.nsub.total"}
+metaOp_totalMinSubsDefault        <- function() {50}
+metaOp_save.mem                   <- function() {"save.mem"}
+metaOp_save.memDefault            <- function() {1}
+metaOp_cohorts.include            <- function() {"cohorts.include"}
+metaOp_cohorts.exclude            <- function() {"cohorts.exclude"}
 metaOp_strataToExcludeFromHetTest <- function() {"strata.exclude.het.test"}
-metaOp_models                  <- function() {"models"}
-metaDataOp_renameLevels        <- function() {"rename.levels"}
-metaDataOp_renameLevels.var    <- function() {"var"}
-metaDataOp_renameLevels.old    <- function() {"old"}
-metaDataOp_renameLevels.new    <- function() {"new"}
+metaOp_check.consistency          <- function() {"check.consistency"}
+metaOp_check.consistencyDefault   <- function() {TRUE}
+metaOp_oneModelCheck              <- function() {"oneModelCheck"}
+metaOp_oneModelCheckDefault       <- function() {TRUE}
+metaOp_dups.allow                 <- function() {"dups.allow"}
+metaOp_dups.allowDefault          <- function() {FALSE}
+metaOp_stopOnFileError            <- function() {"stopOnFileError"}
+metaOp_stopOnFileErrorDefault     <- function() {TRUE}
+metaOp_models                     <- function() {"models"}
+metaDataOp_renameLevels           <- function() {"rename.levels"}
+metaDataOp_renameLevels.var       <- function() {"var"}
+metaDataOp_renameLevels.old       <- function() {"old"}
+metaDataOp_renameLevels.new       <- function() {"new"}
+
 
 metaModelNameNumberSep         <- function() {" "}
+metaModelNameDefault           <- function() {"NA"}
 metaRetListResultsTable        <- function() {"Results"}
 getHarmMetabIdCol              <- function() {"metabolite_name"}
 getMetaBetaCol                 <- function() {"meta.estimate"}
@@ -275,14 +291,13 @@ getMetaEpsForCorr              <- function() {1e-6}
 getMetaLabelForOutFiles        <- function() {"meta"}
 getMetaValidExt                <- function() {c("xlsx", "rda", "zip", "tar", "tar.gz")}
 getMetaIdNamesSep              <- function() {":::"}
-getMetaIdNamesUidCols          <- function() {c(getModelSummaryOutUidCol(), getModelSummaryExpUidCol(), getEffectsTermName())}
+getMetaIdNamesUidCols          <- function() {c(getModelSummaryModelCol(), getModelSummaryOutUidCol(), 
+                                                getModelSummaryExpUidCol(), getEffectsTermName())}
 getMetaIdNamesStratCols        <- function() {c(runModel.getStrataColName(), runModel.getStrataNumColName())}
 getMetaStratSep                <- function() {"."}
 
-# For non-COMETS output
-cometsReqOutSheetNames         <- function() {c(getEffectsName(), getModelSummaryName(), getInfoTableDfName())}
-filelistSheetOp                <- function() {"sheet"}
 
+# For merging multiple files from same cohort
 mrf_precedenceOpName           <- function() {"precedence"}
 mrf_precedenceNobs             <- function() {"nobs"}
 mrf_precedenceData             <- function() {"data"}
@@ -290,9 +305,34 @@ mrf_precedenceDefault          <- function() {mrf_precedenceNobs()}
 mrf_precedenceValid            <- function() {c(mrf_precedenceNobs(), mrf_precedenceData())}
 mrf_consistencyOpName          <- function() {"check.consistency"}
 mrf_consistencyDefault         <- function() {TRUE}
-
-
 mrf_InfoMrgSep                 <- function() {"||"}
 mrf_FileCol                    <- function() {"file"}
 mrf_runSep                     <- function() {"_"}
 
+# For non-COMETS output
+dfToC_se.col                   <- function() {"se.col"}
+dfToC_est.col                  <- function() {"estimate.col"}
+dfToC_nobs.col                 <- function() {"nobs.col"}
+dfToC_nobs                     <- function() {"nobs"}
+dfToC_outcome.col              <- function() {"outcome.col"}
+dfToC_outcome.name             <- function() {"outcome.name"}
+dfToC_exposure.col             <- function() {"exposure.col"}
+dfToC_exposure.name            <- function() {"exposure.name"}
+dfToC_stratavar.col            <- function() {"stratavar.col"}
+dfToC_strata.col               <- function() {"strata.col"}
+dfToC_strata.name              <- function() {"strata.name"}
+dfToC_strata.value             <- function() {"strata.value"}
+dfToC_model.col                <- function() {"model.col"}
+dfToC_model.name               <- function() {"model.name"}
+dfToC_change.col.values        <- function() {"change.col.values"}
+dfToC_change.col               <- function() {"col"}
+dfToC_change.old               <- function() {"old"}
+dfToC_change.new               <- function() {"new"}
+dfToC_cohort                   <- function() {"cohort"}
+dfToC_file                     <- function() {"file"}
+dfToC_fileSep                  <- function() {"sep"}
+dfToC_where                    <- function() {"where"}
+dfToC_newRef                   <- function() {"new.ref.value"}
+
+cometsReqOutSheetNames         <- function() {c(getEffectsName(), getModelSummaryName(), getInfoTableDfName())}
+filelistSheetOp                <- function() {"sheet"}

@@ -15,7 +15,7 @@
 #' \item{\code{check.nsubjects}}{ Minimum number of subjects. The default is 25.}
 #' \item{\code{max.npairwise}}{ The maximum number of metabolites to process the 
 #'                             "all pairwise correlations" model.
-#'                    The default is 100.}
+#'                    The default is 1000.}
 #' \item{\code{max.nstrata}}{ The maximum number of strata for a stratified analysis.
 #'                    The default is 10.}
 #' \item{\code{model}}{ String for the model function. Currently, it must be one of
@@ -51,15 +51,6 @@
 #' \item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
 #'                            See \code{output.common.cols} and \code{output.merge}. \cr
 #'                            The default is "xlsx".}
-#' \item{\code{output.merge}}{ One of the following strings: "all", "by_function", "by_model_type" or "none".
-#'                             This option is used to merge model results together in order to reduce
-#'                             the number of output files. Setting to "all" will merge all model results together
-#'                             and output them to a single file. Setting to "by_function" will merge results from the
-#'                             same model function together and output to a file with the model function contained
-#'                             in the output file name. Similarly for "by_model_type", where the MODEL_TYPE column in the 
-#'                             MODELS sheet of the input Excel file is used to identify the models that will be 
-#'                             merged together. Setting to "none" will not merge results.
-#'                             The default is "none".}
 #' \item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
 #'                            The default is 0.}
 #' \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
@@ -100,7 +91,7 @@ NULL
 runModel.checkOptions <- function(op, modeldata) {
 
   if (!length(op)) op <- list()
-  if (!is.list(op)) stop("op must be a list") 
+  if (!is.list(op)) stop(msg_arg_notList("op")) 
   valid <- getAllOptionNames()
 
   # Check for valid names in the list
@@ -127,7 +118,7 @@ runModel.checkOptions <- function(op, modeldata) {
   op$colNamePrefix       <- "...x"
   op$rowNamePrefix       <- "r"
   op$check.n.unique.vals <- 2
-
+  
   # Output options are ignored for correlation analysis
   if (op$pcorrFlag) {
     op[[getOutEffectsOpName()]] <- getOutEffectsOpDefault()
@@ -143,6 +134,9 @@ runModel.checkOptions <- function(op, modeldata) {
     if (op$coxphFlag || op$clogitFlag) val <- TRUE
     op[[nm]] <- val
   } 
+
+  # Flag set for efficiency in the model tidy functions
+  op$out.eff.exp <- op[[getOutEffectsOpName()]] == getOutEffectsOpDefault()
 
   op
 
@@ -249,8 +243,8 @@ checkModelOptions <- function(op, modeldata) {
     # Add info for time vars
     timecov <- modeldata[["timecov", exact=TRUE]]
     len     <- length(timecov)
-    if (!len) stop(paste0("ERROR: no time variables specified for ", model, " model."))
-    if (len > 2) stop(paste0("ERROR: only one or two time variables can be specified for ", model, " model."))
+    if (!len) stop(msg_mod_19(model))
+    if (len > 2) stop(msg_mod_20(model))
     mop$n.time.vars <- len
     mop$time1.var   <- timecov[1]
     if (len > 1) mop$time2.var <- timecov[2]
@@ -260,8 +254,8 @@ checkModelOptions <- function(op, modeldata) {
     # Add info for group
     groupcov <- modeldata[["groupcov", exact=TRUE]]
     len      <- length(groupcov)
-    if (!len) stop(paste0("ERROR: no group variable specified for ", model, " model."))
-    if (len > 1) stop(paste0("ERROR: only one group variable can be specified for ", model, " model."))
+    if (!len) stop(msg_mod_21(model))
+    if (len > 1) stop(msg_mod_22(model))
     mop$group.var <- groupcov
     mop$groupFlag <- 1
   }
@@ -373,10 +367,9 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
     name  <- opnames[i]
     value <- opvalues[i]
 
-    if (!(name %in% valid)) stop(paste("ERROR: ", name, " is not a valid option", sep=""))
+    if (!(name %in% valid)) stop(msg_mod_23(name))
     if (!nchar(value)) {
       # An error was originally thrown, but perhaps set to NULL so it will be assigned the default value
-      #stop(paste("ERROR: ", name, "=", value, " is not valid", sep=""))
       value <- NULL
     } else {  
       # value must be converted to the correct type
@@ -410,7 +403,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
 checkGlobalOpList <- function(op, name="options", meta=0) {
 
   n       <- length(op)
-  if (n && !is.list(op)) stop(paste("ERROR: ", name, " must be a list", sep=""))
+  if (n && !is.list(op)) stop(msg_arg_notList(name))
   tmp     <- getValidGlobalOps(meta=meta)
   default <- tmp$default
   valid   <- names(default)
@@ -447,7 +440,7 @@ checkGlobalOpList <- function(op, name="options", meta=0) {
       if ("try-error" %in% class(tmp)) {
         print(tmp)
         if (length(val) > 1) val <- paste0(val, collapse=",")
-        stop(paste("ERROR: the option ", nm, getOpStrEq(), val, " is not valid", sep=""))
+        stop(msg_arg_opEqValNotValid(c(nm, val)))
       }
     }
   }
@@ -510,21 +503,21 @@ checkOp_output.ModelSummary <- function(str, name=NULL) {
 
 check.variableInData <- function(x, name, data, varMap, numeric=1, positive=0) {
 
-  if (!isString(x)) stop(paste("ERROR: ", name, " must be a variable in the data", sep=""))
+  if (!isString(x)) stop(msg_arg_colNotValid(name))
   vec <- NULL
   if (x %in% colnames(data)) vec <- data[, x, drop=TRUE]
   if (!length(vec)) {
     new <- (names(varMap))[varMap %in% x]  
     if (new %in% colnames(data)) vec <- data[, new, drop=TRUE]
   }
-  if (!length(vec)) stop(paste("ERROR: ", name, " must be a variable in the data", sep=""))
+  if (!length(vec)) stop(msg_arg_colNotValid(name))
   if (numeric) {
-    if (!is.numeric(vec)) stop(paste("ERROR: ", name, " must be a numeric variable in the data", sep=""))
+    if (!is.numeric(vec)) stop(msg_arg_colNumNotValid(name))
   }
   if (positive) {
     tmp <- vec < 0
     tmp[is.na(tmp)] <- FALSE
-    if (any(tmp)) stop(paste("ERROR: ", name, " cannot have negative values", sep=""))
+    if (any(tmp)) stop(msg_arg_colNegNotValid(name))
   }
   x
 
@@ -534,11 +527,11 @@ check.varnameVec <- function(x, name, min.len=0, tolower=1, returnOnMiss=NULL) {
 
   len <- length(x)
   if (!len) {
-    if (min.len) stop(paste0("ERROR: length(", name, ") = 0"))
+    if (min.len) stop(msg_arg_len0(name))
     return(NULL) 
   }
-  if (!is.character(x)) stop(paste0("ERROR: ", name, " must be a character vector"))
-  if (!is.vector(x)) stop(paste0("ERROR: ", name, " must be a character vector"))
+  if (!is.character(x)) stop(msg_arg_notCharVec(name))
+  if (!is.vector(x)) stop(msg_arg_notCharVec(name))
   x <- trimws(x)
   if (tolower) x <- tolower(x)
   tmp <- nchar(x) > 0
@@ -646,7 +639,7 @@ checkMetaFiles <- function(filevec, name="filevec", valid.ext=NULL) {
   ok     <- checkFileExtensions(filevec, checkForExt=dotExt)
   if (!all(ok)) {
     print(filevec[!ok])
-    stop("ERROR: the above file(s) do not have the correct file extension")
+    stop(msg_meta_33())
   }
   filevec
 }
@@ -663,7 +656,7 @@ checkMetaFilesFolders <- function(x, name="filesFolders") {
     ok     <- checkFileExtensions(files, checkForExt=dotExt)
     if (!all(ok)) {
       print(files[!ok])
-      stop("ERROR: the above file(s) do not have the correct file extension or are not valid directories")
+      stop(msg_meta_32())
     }
   }
   x
@@ -673,7 +666,7 @@ getOptionNameAndValue <- function(str, sep="=") {
 
   tmp <- parseStr(str, sep=sep)
   if (length(tmp) < 2) {
-    msg <- paste("ERROR: the option ", str, " is not valid", sep="")
+    msg <- msg_arg_opNotValid(str)
     stop(msg)
   }
   name  <- tmp[1]

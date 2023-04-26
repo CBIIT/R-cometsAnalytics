@@ -1,20 +1,27 @@
-# To do:
-#   2. Allow for multiple strata variables, re-map strata if necessary
-#   3. Allow for more than one model per input file
-#   5. Add additional options
-
 
 #' This function allows users to run meta-analyses on all models or a subset of models
 #' @param filesFolders Character vector of files and/or folders that contain
-#'        the output files from \code{\link{runAllModels}}. Valid file
-#'        extensions are ".xlsx", ".rda", ".zip", ".tar", and ".tar.gz". 
+#'        the output files from \code{\link{runAllModels}}. 
+#'        Valid file extensions are ".xlsx", ".rda", ".zip", ".tar", and ".tar.gz". 
 #'        Zip and tar files must contain files with extensions
-#'        ".xlsx" or ".rda".
+#'        ".xlsx" or ".rda". See details.
 #' @param out.dir Output directory to save the results for each model.
 #' @param opfile Excel file containing the models and options.
 #'           See \code{\link{meta_opfile}}.
 #'           The default is NULL.
 #' @return NULL
+#' @details The names of the files output from \code{\link{runAllModels}} will be
+#'        of the form \cr
+#'        <model name>__<cohort name>__<date>.xlsx or \cr
+#'        <model name>__<cohort name>__<date>.rda. \cr
+#'        These output files from
+#'        \code{\link{runAllModels}} can be bundled together into zip or tar files.
+#'        There is no file name requirement for the zip and tar files.
+#'
+#'        The steps used to obtain the initial set of files to include in the meta-analyses are:\cr
+#'        1. Recursively list all files found in any folder of \code{filesFolders}. \cr
+#'        2. Unzip or untar any zip or tar file. \cr
+#'        3. Remove files that do not have a file name of the forms above. \cr 
 #'
 #' @export
 runAllMeta <- function(filesFolders, out.dir, opfile=NULL) {
@@ -44,8 +51,9 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
   tmp       <- try(meta_extractAllFiles(filevec, tmpdir), silent=FALSE)
   if ("try-error" %in% class(tmp)) {
     meta_removeTempDir(tmpdir)
-    stop("ERROR in meta_extractAllFiles")
+    stop(msg_meta_20())
   }
+
   if (DEBUG) print(tmp)
   files.ok  <- tmp$files
   files.rem <- tmp[["removed", exact=TRUE]]
@@ -54,7 +62,7 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
   tmp            <- try(meta_parseFileNames(files.ok, op), silent=FALSE)
   if ("try-error" %in% class(tmp)) {
     meta_removeTempDir(tmpdir)
-    stop("ERROR in meta_parseFileNames")
+    stop(msg_meta_39())
   }
   finfo          <- tmp$info
   file.rem.fname <- tmp[["removed", exact=TRUE]]
@@ -70,7 +78,7 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
     err    <- "try-error" %in% class(tmp)
     if (err) {
       msg <- getErrorMsgFromTryError(tmp, addToEnd=NULL)
-      msg <- paste0("ERROR: model '", model, "' failed with message ", msg, "\n")
+      msg <- msg_meta_40(c(model, msg))
       cat(msg)
       tmp <- getResListFromError(tmp, model)
     }
@@ -125,11 +133,11 @@ meta_extractAllFiles <- function(fvec, dir) {
     rem     <- filevec[tmp]
     filevec <- filevec[!tmp]
   }
-  if (!length(filevec)) stop("ERROR: all files do not a correct file extension")
+  if (!length(filevec)) stop(msg_meta_21())
 
   # Intialize return vector of files to all non zip, tar files
   tmp <- !(zip01 | tar01)
-  if (all(tmp)) return(filevec)
+  if (all(tmp)) return(list(files=filevec, removed=rem))
   if (any(tmp)) ret <- filevec[tmp]
 
   # For the zip and  tar files, extract all files to dir
@@ -180,7 +188,7 @@ meta_listFiles <- function(fvec) {
     files <- c(files, tmp)
   }
   n <- length(files)
-  if (!n) stop("ERROR: no files found in the directories")
+  if (!n) stop(msg_meta_22())
   files <- unique(files)
   files
 
@@ -206,7 +214,7 @@ meta_parseFileNames <- function(fvec, op) {
     cohort[i] <- vec[cohort.i]
     model[i]  <- vec[mod.i]
   } 
-  if (!any(ok)) stop("ERROR: all files do not have valid names")
+  if (!any(ok)) stop(msg_meta_23())
   cohort.norm <- meta_normCohortStr(cohort)
   model.norm  <- meta_normModelStr(model)
   
@@ -222,7 +230,7 @@ meta_parseFileNames <- function(fvec, op) {
     if (length(models)) {
       tmp <- ret[, "model.norm"] %in% meta_normModelStr(models)
       ret <- ret[tmp, , drop=FALSE]
-      if (!nrow(ret)) stop("ERROR: no matching model names found")
+      if (!nrow(ret)) stop(msg_meta_24())
     }
   }
 

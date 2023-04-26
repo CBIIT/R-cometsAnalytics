@@ -1,6 +1,6 @@
 #' @name meta_opfile
 #' @title Options file for meta-analyses
-#' @description An Excel file containing models and options for the runAllMeta function
+#' @description An Excel file containing models and options for the \code{\link{runAllMeta}} function
 #' @details
 #' The file should contain sheets \bold{META_MODELS} and \bold{META_TYPES}. 
 #' Each sheet is optional. The \bold{META_MODELS} sheet should have a column
@@ -26,7 +26,7 @@ meta_setOptions <- function(op, model) {
     for (nm in nms) ret[[nm]] <- gop[[nm]]
   }
 
-  ret[[metaOp_models()]] <- model
+  ret[["MODEL"]] <- model
   ret
 }
 
@@ -65,7 +65,7 @@ getModelTypeOptionsFromSheet <- function(op, model) {
  
   # Check for missing names
   if (any(nchar(opnames) < 1)) {
-    stop(paste0("ERROR: missing option names in ", getMetaModelTypeSheetName(), " sheet"))
+    stop(msg_metaop_1())
   }
 
   # Check for duplicate names. metaOp_strataToExcludeFromHetTest is a special case
@@ -73,8 +73,7 @@ getModelTypeOptionsFromSheet <- function(op, model) {
   tmp  <- (duplicated(opnames)) & !tmp0
   if (any(tmp)) {
     str <- paste(opnames[tmp], collapse=", ", sep="")
-    msg <- paste0("ERROR: the options ", str, " appear more than once in the ",
-                  getMetaModelTypeSheetName(), " sheet")
+    msg <- msg_metaop_2(str)
     stop(msg)
   }
 
@@ -186,12 +185,12 @@ meta_readOpFile <- function(opFile) {
 meta_check_opFile <- function(x, nm="opfile") {
 
   if (is.null(x)) return(NULL)
-  if (!isString(x)) stop(paste0("ERROR: ", nm, " must be an Excel file"))
-  if (!isExcelFile(x)) stop(paste0("ERROR: ", nm, " must be an Excel file"))
+  if (!isString(x)) stop(msg_metaop_3(nm))
+  if (!isExcelFile(x)) stop(msg_metaop_3(nm))
   x <- checkFiles(x, name=nm)
   sheets <- try(readxl::excel_sheets(x))
   if ("try-error" %in% class(sheets)) {
-    stop(paste0("ERROR: check that ", nm, " is an Excel file"))
+    stop(msg_metaop_4(nm))
   }
 
   x
@@ -203,7 +202,7 @@ meta_excStratOpStr2List <- function(str, name) {
   vec <- trimws(vec)
   tmp <- nchar(vec) > 0
   vec <- vec[tmp]
-  if (length(vec) != 2) stop(paste0(name, " = ", str, " is not correctly specified"))
+  if (length(vec) != 2) stop(msg_metaop_5(c(name, str)))
   var        <- tolower(trimws(vec[1]))
   values     <- strsplit(vec[2], ",", fixed=TRUE)
   ret        <- list()
@@ -240,7 +239,29 @@ checkMetaOp_min.n.cohort <- function(x) {
   if (!length(x)) {
     ret <- metaOp_minNcohortDefault()
   } else {
-    check.range(x, metaOp_minNcohortName(), 2, Inf)
+    check.range(x, metaOp_minNcohortName(), 1, Inf)
+    ret <- x
+  }
+  ret
+}
+
+checkMetaOp_min.nsub.cohort <- function(x) {
+
+  if (!length(x)) {
+    ret <- metaOp_cohortMinSubsDefault()
+  } else {
+    check.range(x, metaOp_cohortMinSubs(), 1, Inf)
+    ret <- x
+  }
+  ret
+}
+
+checkMetaOp_min.nsub.total <- function(x) {
+
+  if (!length(x)) {
+    ret <- metaOp_totalMinSubsDefault()
+  } else {
+    check.range(x, metaOp_totalMinSubs(), 1, Inf)
     ret <- x
   }
   ret
@@ -270,7 +291,39 @@ checkMetaOp_output.type <- function(x) {
   checkOp_output.type(x)
 }
 
+checkMetaOp_strata.exclude.het.test <- function(x) {
+
+  nm <- metaOp_strataToExcludeFromHetTest()
+  if (length(x)) {
+    check.list(x, nm, NULL)
+  } else {
+    x <- NULL
+  }
+  x
+}
+
+checkMetaOp_dups.allow <- function(x) {
+
+ x <- check.logical(x, metaOp_dups.allow())
+ x  
+}
+
+checkMetaOp_stopOnFileError <- function(x) {
+
+ x <- check.logical(x, metaOp_stopOnFileError())
+ x  
+}
+
+checkMetaOp_oneModelCheck <- function(x) {
+
+ x <- check.logical(x, metaOp_oneModelCheck())
+ x  
+}
+
+
 checkMetaOp_DEBUG <- function(x) {
   checkOp_DEBUG(x)
 }
-
+checkMetaOp_MODEL <- function(x) {
+  x
+}

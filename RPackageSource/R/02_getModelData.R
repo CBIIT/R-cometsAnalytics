@@ -90,7 +90,7 @@ getModelData <-  function(readData,
 
   # figure out the model specification based on type (Interactive or Batch)
   if (modelspec == getMode_interactive()) {
-    if(any(colvars=="")) {stop("Please make sure that you have identified one or more exposure variables")}
+    if(any(colvars=="")) {stop(msg_gmd_1())}
 
     # Normalize variables so that it is consistent with readCOMETSinput
     rowvars  <- checkVariableNames(rowvars,  "outcomes",  default=allmetabStr, only.unique=1)
@@ -111,8 +111,7 @@ getModelData <-  function(readData,
     tmp <- is.na(match(allvars,subjmetab))
     if(any(tmp)) {
       msg <- infile.collapseVec(allvars[tmp], sep=", ", begin="<", end=">", removeMiss=1)
-      msg <- paste0("Check that user-input variable(s) ", msg, 
-                    " exist (should match VARREFERENCE column in VarMap Sheet)")
+      msg <- msg_gmd_2(msg)
       stop(msg)
     }
 
@@ -168,7 +167,7 @@ getModelData <-  function(readData,
 
     # Check exposurerefs
     m <- length(exposurerefs)
-    if (m && (m != length(exposures))) stop("ERROR: length(exposurerefs) != length(exposures)")
+    if (m && (m != length(exposures))) stop(msg_gmd_3())
 
     # end if modelspec is "Interactive"
 
@@ -177,8 +176,7 @@ getModelData <-  function(readData,
     # step 1. get the chosen model first
 
     if (modlabel == "") {
-      msg <- paste0("modelspec is set to '", getMode_batch(), 
-               "' yet model label (modlabel) is empty.  Please set modlabel.")
+      msg <- msg_gmd_4()
       stop(msg)
     }
 
@@ -188,10 +186,10 @@ getModelData <-  function(readData,
     # integrity check for unmatch modlabel -------------------------------------
     mods <- dplyr::filter(as.data.frame(readData[["mods"]]), model == modlabel)
     if (nrow(mods) == 0) {
-      tmp <- paste0("The model name '", modlabel, "' does not exist in the input Excel file. Please check your Models sheet.")
+      tmp <- msg_gmd_5(modlabel)
       stop(tmp)
     } else if (nrow(mods) > 1) {
-      tmp <- paste0("The model name '", modlabel, "' corresponds to more than one row in the input Excel file. Please check your Models sheet.")
+      tmp <- msg_gmd_6(modlabel)
       stop(tmp)
     }
 
@@ -269,8 +267,7 @@ getModelData <-  function(readData,
   tmp     <- is.na(match(allvars,colnames(readData$subjdata)))
   if (any(tmp)) {
     str <- paste(allvars[tmp], collapse=", ", sep="")
-    msg <- paste("Check that user-input variable(s) ", str,  
-               " exist (should match VARREFERENCE column in VarMap Sheet)", sep="")
+    msg <- msg_gmd_7(str)
     stop(msg)
   }
 
@@ -299,33 +296,42 @@ getModelData <-  function(readData,
     # Update the where rule (variables names have changed)
     where2      <- updateWhereStr(where, readData$dict_metabnames)
     numallsamps <- nrow(readData$subjdata)
-    readData    <- try(filterCOMETSinput(readData,where=where2), silent=TRUE)
-    if ("try-error" %in% class(readData)) {
-      print(readData)
-      stop(paste("ERROR applying WHERE: ", paste(where, collapse=" AND ", sep=""), sep=""))
+    tmp         <- try(filterCOMETSinput(readData$subjdata,where=where2), silent=TRUE)
+    if ("try-error" %in% class(tmp)) {
+      print(tmp)
+      stop(msg_gmd_8(paste0(where, collapse=" AND ")))
     }
-    msg         <- paste0("Filtering subjects according to the rule(s) ", 
-                        paste(where, collapse=" AND ", sep=""), ". ", 
-                        nrow(readData$subjdata)," of ", numallsamps," are retained. \n")
+    readData$subjdata <- tmp
+    rm(tmp); gc();
+    msg <- msg_gmd_9(c(paste0(where, collapse=" AND "),  nrow(readData$subjdata), numallsamps))
     cat(msg)
     if (!nrow(readData$subjdata)) {
-      cat("Check the WHERE condition.\n") 
+      cat(msg_gmd_19()) 
       if (modelspec == getMode_batch()) {
-        cat("Remember that in batch mode, multiple WHERE conditions should be separated by a comma.\n")
-        cat("For example: x = 1, y > 3 \n")
+        cat(msg_gmd_10())
+        cat(msg_gmd_11())
       }
-      stop("ERROR: no rows left in data after applying the WHERE condition")  
+      stop(msg_gmd_12())  
     }
   }
 
   gdta <- dplyr::select(readData$subjdata, dplyr::one_of(covlist))
 
   if(nrow(gdta) < 2) {
-    stop("Too few samples for this model, so the model will not be run.")
+    stop(msg_gmd_13())
   }
 
   # Outcomes and time vars must be numeric
   gdta <- convertVarsToNumeric(gdta, c(rcovs, timecov))
+
+  # If there is one categorical exposure and exposurerefs is NULL, then get the default ref
+  if ((length(ccovs) == 1) && !length(exposurerefs)) {
+    tmp <- gdta[, ccovs, drop=TRUE]
+    if (!is.numeric(tmp)) {
+      tmp <- levels(as.factor(tmp))
+      if (length(tmp)) exposurerefs <- tmp[1] 
+    }
+  }
 
 
   # Create list for analyses  -------------------------------
@@ -417,8 +423,8 @@ getModelFunFromSheet <- function(opTable) {
   tmp <- nchar(vec) > 0
   vec <- vec[tmp]
   n   <- length(vec)
-  if (!n) stop("ERROR: no model function specified")
-  if (n > 1) stop("ERROR: more than one model function specified")
+  if (!n) stop(msg_gmd_14())
+  if (n > 1) stop(msg_gmd_15())
   
   valid <- c(getValidModelNames(), getOldCorrModelName())
   ret   <- check.string(vec, valid, col)
@@ -448,15 +454,14 @@ getModelOptionsFromSheet <- function(op, opTable, modelFunc) {
  
   # Check for missing names
   if (any(nchar(opnames) < 1)) {
-    stop(paste0("ERROR: missing option names in ", getOptionsSheetName(), " sheet"))
+    stop(msg_gmd_16())
   }
 
   # Check for duplicate names
   tmp <- duplicated(opnames)
   if (any(tmp)) {
     str <- paste(opnames[tmp], collapse=", ", sep="")
-    msg <- paste0("ERROR: the options ", str, " appear more than once in the ",
-                  getOptionsSheetName(), " sheet")
+    msg <- msg_gmd_17(str)
     stop(msg)
   }
 
@@ -503,8 +508,7 @@ getAllOptionsForModel <- function(mods, readData, only.modelFunction=0) {
   # Make sure modelID is in the table
   tmp <- opTable[, modnm] %in% modelID
   if (!any(tmp)) {
-    msg <- paste0("ERROR: ", modnm, " = ", modelID, " not found in ", 
-                  getOptionsSheetName(), " sheet")
+    msg <- msg_gmd_18(c(modnm, modelID))
     stop(msg)
   }
   opTable2 <- opTable[tmp, , drop=FALSE]
