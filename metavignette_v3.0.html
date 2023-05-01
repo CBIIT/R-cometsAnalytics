@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ewy Mathé, Ella Temprosa, Bill Wheeler" />
 
-<meta name="date" content="2022-12-01" />
+<meta name="date" content="2023-05-01" />
 
 <title>Running meta-analyses with RcometsAnalytics locally</title>
 
@@ -1512,7 +1512,7 @@ div.tocify {
 <h1 class="title toc-ignore">Running meta-analyses with RcometsAnalytics
 locally</h1>
 <h4 class="author">Ewy Mathé, Ella Temprosa, Bill Wheeler</h4>
-<h4 class="date">2022-12-01</h4>
+<h4 class="date">2023-05-01</h4>
 
 </div>
 
@@ -1520,12 +1520,13 @@ locally</h1>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>RcometsAnalytics supports all cohort-specific analyses and
-meta-analyses of the COMETS consortium. This collaborative work is done
-via the COMETS harmonization group activities. For more information, see
-the COMETS <a href="http://epi.grants.cancer.gov/comets/"><strong>website</strong></a>.
+meta-analyses of the R COMETS Analytics consortium. This collaborative
+work is done via the COMETS Data Infrastructure interest group
+activities. For more information, see the COMETS <a href="http://epi.grants.cancer.gov/comets/"><strong>website</strong></a>.
 This vignette demonstrates using the RcometsAnalytics R package to run a
-meta-analysis from the command line. Documentation of the
-RcometsAnalytics R package can be found here <a href="https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual.pdf"><strong>manual</strong></a>.</p>
+meta-analysis from the command line assuming that the user does not
+already have model output files. The first three steps are similar to
+steps found in the vignette for running models locally: <a href="https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v2.1.html"><strong>Comets_vignette</strong></a>.</p>
 </div>
 <div id="meta-analysis-background-information" class="section level2">
 <h2>Meta-analysis Background Information</h2>
@@ -1536,6 +1537,15 @@ cohort should be independent from all other cohorts, that is, no
 overlapping subjects between any two cohorts. This package will conduct
 both fixed-effects and random-effects meta-analyses based on the
 DerSimonian-Laird method.</p>
+</div>
+<div id="rcometsanalytics-r-package" class="section level2">
+<h2>RcometsAnalytics R package</h2>
+<p>The main functions for performing meta-analyses in the
+RcometsAnalytics R package are <em>runMeta()</em> and
+<em>runAllMeta()</em>. Both functions require that the model output from
+each cohort has been saved to a file. The function <em>meta_calc()</em>
+is the core function that performs the calculations. Documentation of
+the RcometsAnalytics R package can be found here <a href="https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf"><strong>manual</strong></a>.</p>
 </div>
 <div id="data-input-format" class="section level2">
 <h2>Data Input Format</h2>
@@ -1570,15 +1580,15 @@ data1 &lt;- RcometsAnalytics::readCOMETSinput(file1)</code></pre>
 ## Model_Types sheet is read in.
 ## There are 16 categorical variables.
 ## Running Integrity Check...</code></pre>
-<pre><code>## Joining, by = &quot;hmdb_id&quot;</code></pre>
+<pre><code>## Joining with `by = join_by(hmdb_id)`</code></pre>
 <pre><code>## Begin testing models in Models sheet... 
 ## Filtering subjects according to the rule(s) age&lt; 70. 361 of 432 are retained.</code></pre>
-<pre><code>## Warning in runModel.addRemVars(rem.obj, vars[oneVal], vars.type, &quot;too few unique
-## non-missing values&quot;, : The variable(s) female, fasted have been removed from
-## adjvars because of: too few unique non-missing values</code></pre>
-<pre><code>## Warning in runModel.addRemVars(rem.obj, tmp[rem], varSet, &quot;linearly
-## dependent&quot;, : The variable(s) multivitamin.2 have been removed from adjvars
-## because of: linearly dependent</code></pre>
+<pre><code>## Warning in runModel.addRemVars(rem.obj, vars[oneVal], vars.type, &quot;too few
+## unique non-missing values&quot;, : The variable(s) female, fasted have been removed
+## from adjvars because of: too few unique non-missing values</code></pre>
+<pre><code>## Warning in runModel.addRemVars(rem.obj, tmp[rem], varSet, &quot;linearly dependent&quot;,
+## : The variable(s) multivitamin.2 have been removed from adjvars because of:
+## linearly dependent</code></pre>
 <pre><code>## Finished testing models in Models sheet.</code></pre>
 <pre class="r"><code>data2 &lt;- RcometsAnalytics::readCOMETSinput(file2)</code></pre>
 <pre><code>## VarMap sheet is read in.
@@ -1589,12 +1599,12 @@ data1 &lt;- RcometsAnalytics::readCOMETSinput(file1)</code></pre>
 ## Model_Types sheet is read in.
 ## There are 16 categorical variables.
 ## Running Integrity Check...</code></pre>
-<pre><code>## Joining, by = &quot;hmdb_id&quot;</code></pre>
+<pre><code>## Joining with `by = join_by(hmdb_id)`</code></pre>
 <pre><code>## Begin testing models in Models sheet... 
 ## Filtering subjects according to the rule(s) age&lt; 70. 475 of 568 are retained.</code></pre>
-<pre><code>## Warning in runModel.addRemVars(rem.obj, vars[oneVal], vars.type, &quot;too few unique
-## non-missing values&quot;, : The variable(s) female, fasted have been removed from
-## adjvars because of: too few unique non-missing values</code></pre>
+<pre><code>## Warning in runModel.addRemVars(rem.obj, vars[oneVal], vars.type, &quot;too few
+## unique non-missing values&quot;, : The variable(s) female, fasted have been removed
+## from adjvars because of: too few unique non-missing values</code></pre>
 <pre><code>## Warning in runModel.addRemVars(rem.obj, tmp[rem], varSet, &quot;correlated with
 ## another predictor&quot;, : The variable(s) multivitamin.2 have been removed from
 ## adjvars because of: correlated with another predictor</code></pre>
@@ -1611,115 +1621,148 @@ categorical adjustment variable.</p>
 modeldata2 &lt;- RcometsAnalytics::getModelData(data2, modelspec=&quot;Interactive&quot;, 
                           adjvars=&quot;bmi_grp&quot;, outcomes=NULL, exposures=&quot;age&quot;)</code></pre>
 </div>
-<div id="correlation-analysis" class="section level3">
-<h3>3. Correlation Analysis</h3>
+<div id="linear-regression" class="section level3">
+<h3>3. Linear Regression</h3>
 <p>The <em>runModel()</em> function will first be called to obtain the
-results from each cohort for a correlation analysis. The results will be
-saved, and then the meta-analysis can be performed.</p>
-<pre class="r"><code>results1  &lt;- RcometsAnalytics::runModel(modeldata1, data1, &quot;cohort_1&quot;)
-results2  &lt;- RcometsAnalytics::runModel(modeldata2, data2, &quot;cohort_2&quot;)</code></pre>
-<p>Save the output to files, since the <em>runMeta()</em> function
-requires files for its input. We will save the results from “cohort_1”
-as an Excel file, and the results from “cohort_2” as an R object
-file.</p>
-<pre class="r"><code>outfile1 &lt;- paste0(getwd(), &quot;/&quot;, &quot;corr_results1.xlsx&quot;)
-RcometsAnalytics::OutputListToExcel(outfile1, results1)</code></pre>
-<pre><code>## Output saved to file: /gpfs/gsfs10/users/wheelerwi/COMETS/current_3.0/vignettes/corr_results1.xlsx</code></pre>
-<pre><code>## [1] &quot;/gpfs/gsfs10/users/wheelerwi/COMETS/current_3.0/vignettes/corr_results1.xlsx&quot;</code></pre>
-<pre class="r"><code>outfile2 &lt;- paste0(getwd(), &quot;/&quot;, &quot;corr_results2.rda&quot;)
-save(results2, file=outfile2)</code></pre>
+results from each cohort for a linear regression analysis. Since the
+meta-analysis function <em>runMeta()</em> requires files for input, the
+results from <em>runModel()</em> will be saved to files. The output file
+names defined below have the specific format
+<model name><strong><cohort name></strong><date>.ext which is important
+when using the <em>runAllMeta()</em> function shown in section 6. The
+files <em>runMeta()</em> accepts have the extension “.xlsx” or
+“.rda”.<br />
+The model name is specified as “AgeAdjustedForBMI”.</p>
+<pre class="r"><code>outfile1  &lt;- paste0(getwd(), &quot;/&quot;, &quot;AgeAdjustedForBMI__cohort_1__2023-04-28.xlsx&quot;)
+outfile2  &lt;- paste0(getwd(), &quot;/&quot;, &quot;AgeAdjustedForBMI__cohort_2__2023-04-28.rda&quot;)
+results1  &lt;- RcometsAnalytics::runModel(modeldata1, data1, &quot;cohort_1&quot;, out.file=outfile1, op=list(model=&quot;lm&quot;))</code></pre>
+<pre><code>## Output saved to file: /gpfs/gsfs10/users/wheelerwi/COMETS/current_3.0/vignettes/AgeAdjustedForBMI__cohort_1__2023-04-28.xlsx</code></pre>
+<pre class="r"><code>results2  &lt;- RcometsAnalytics::runModel(modeldata2, data2, &quot;cohort_2&quot;, out.file=outfile2, op=list(model=&quot;lm&quot;))</code></pre>
 </div>
-<div id="meta-analysis-of-correlation-results" class="section level3">
-<h3>4. Meta Analysis of Correlation Results</h3>
+<div id="meta-analysis-of-results" class="section level3">
+<h3>4. Meta Analysis of Results</h3>
 <p>Run the meta-analysis with the <em>runMeta()</em> function, and then
-display the first five rows of the results.</p>
+display the first two rows of the results. In this example, a vector of
+file names is passed into the <em>runMeta()</em> function; however a
+list of file information can be passed in as we will see in a later
+example below. See the <em>runMeta()</em> function in the user <a href="https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf"><strong>manual</strong></a>
+for complete documentation.</p>
 <pre class="r"><code>ret &lt;- RcometsAnalytics::runMeta(c(outfile1, outfile2))
-ret$Results[1:5,]</code></pre>
+ret$Results[1:2,]</code></pre>
 <pre><code>##                           outcome_uid exposure_uid term n.cohort n.sub
 ## 1 HMDB00158#HMDB00158_B1#HMDB00158_B2          age  age        2  1000
 ## 2                       CHEM100006282          age  age        2  1000
-## 3                           HMDB00888          age  age        2  1000
-## 4                           HMDB00300          age  age        2  1000
-## 5                           HMDB00289          age  age        2  1000
-##   fixed.pvalue fixed.estimate fixed.estimate.L fixed.estimate.U random.pvalue
-## 1   0.86201561    0.005512829    -0.0565928635      0.067576023    0.98384208
-## 2   0.04889263    0.062388461     0.0003033131      0.123994495    0.04889263
-## 3   0.63147495    0.015212460    -0.0469181763      0.077225844    0.63147495
-## 4   0.09561001   -0.052809609    -0.1145204477      0.009307229    0.09561001
-## 5   0.02322186    0.071868444     0.0098259653      0.133359709    0.06699622
-##   random.estimate random.estimate.L random.estimate.U het.pvalue
-## 1     0.001055992     -0.1007965119       0.102886591  0.1029719
-## 2     0.062388461      0.0003033131       0.123994495  0.6560262
-## 3     0.015212460     -0.0469181763       0.077225844  0.6582414
-## 4    -0.052809609     -0.1145204477       0.009307229  0.5130708
-## 5     0.073956575     -0.0051882289       0.152180609  0.2048340
-##   pvalue.cohort_1 pvalue.cohort_2
-## 1      0.26628354      0.23038760
-## 2      0.10435373      0.23428859
-## 3      0.98537394      0.51521582
-## 4      0.54856497      0.09262885
-## 5      0.01480671      0.38089591</code></pre>
-<pre class="r"><code># Delete the results files from each cohort
-file.remove(c(outfile1, outfile2))</code></pre>
-<pre><code>## [1] TRUE TRUE</code></pre>
-<pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>## R version 4.2.2 (2022-10-31)
-## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: CentOS Linux 7 (Core)
-## 
-## Matrix products: default
-## BLAS/LAPACK: /usr/local/intel/compilers_and_libraries_2020.2.254/linux/mkl/lib/intel64_lin/libmkl_rt.so
-## 
-## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
-##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
-##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
-## 
-## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
-## 
-## loaded via a namespace (and not attached):
-##   [1] nlme_3.1-160             lubridate_1.9.0          webshot_0.5.4           
-##   [4] RColorBrewer_1.1-3       httr_1.4.4               backports_1.4.1         
-##   [7] tools_4.2.2              bslib_0.4.1              ISwR_2.0-8              
-##  [10] utf8_1.2.2               R6_2.5.1                 rpart_4.1.19            
-##  [13] DBI_1.1.3                lazyeval_0.2.2           colorspace_2.0-3        
-##  [16] nnet_7.3-18              withr_2.5.0              mnormt_2.1.1            
-##  [19] tidyselect_1.2.0         gridExtra_2.3            curl_4.3.3              
-##  [22] compiler_4.2.2           cli_3.4.1                TSP_1.2-1               
-##  [25] plotly_4.10.1            sass_0.4.2               scales_1.2.1            
-##  [28] psych_2.2.9              stringr_1.4.1            digest_0.6.30           
-##  [31] foreign_0.8-83           rmarkdown_2.18           rio_0.5.29              
-##  [34] ca_0.71.1                pkgconfig_2.0.3          htmltools_0.5.3         
-##  [37] parallelly_1.32.1        fastmap_1.1.0            readxl_1.4.1            
-##  [40] htmlwidgets_1.5.4        rlang_1.0.6              rstudioapi_0.14         
-##  [43] jquerylib_0.1.4          generics_0.1.3           jsonlite_1.8.3          
-##  [46] zip_2.2.2                dendextend_1.16.0        dplyr_1.0.10            
-##  [49] ModelMetrics_1.2.2.2     magrittr_2.0.3           Matrix_1.5-3            
-##  [52] Rcpp_1.0.9               munsell_0.5.0            fansi_1.0.3             
-##  [55] viridis_0.6.2            lifecycle_1.0.3          stringi_1.7.8           
-##  [58] pROC_1.18.0              yaml_2.3.6               MASS_7.3-58.1           
-##  [61] plyr_1.8.7               recipes_1.0.3            grid_4.2.2              
-##  [64] parallel_4.2.2           listenv_0.8.0            forcats_0.5.2           
-##  [67] ppcor_1.1                lattice_0.20-45          haven_2.5.1             
-##  [70] splines_4.2.2            hms_1.1.2                knitr_1.40              
-##  [73] pillar_1.8.1             corpcor_1.6.10           future.apply_1.10.0     
-##  [76] reshape2_1.4.4           codetools_0.2-18         stats4_4.2.2            
-##  [79] glue_1.6.2               evaluate_0.18            data.table_1.14.4       
-##  [82] vctrs_0.5.0              foreach_1.5.2            cellranger_1.1.0        
-##  [85] gtable_0.3.1             purrr_0.3.5              tidyr_1.2.1             
-##  [88] future_1.29.0            heatmaply_1.4.0          assertthat_0.2.1        
-##  [91] cachem_1.0.6             ggplot2_3.4.0            openxlsx_4.2.5.1        
-##  [94] xfun_0.34                gower_1.0.0              prodlim_2019.11.13      
-##  [97] RcometsAnalytics_2.9.0.3 broom_1.0.1              class_7.3-20            
-## [100] survival_3.4-0           viridisLite_0.4.1        timeDate_4021.106       
-## [103] seriation_1.4.0          tibble_3.1.8             iterators_1.0.14        
-## [106] registry_0.5-1           hardhat_1.2.0            lava_1.7.0              
-## [109] timechange_0.1.1         globals_0.16.1           ellipsis_0.3.2          
-## [112] caret_6.0-93             subselect_0.15.3         ipred_0.9-13</code></pre>
+##   fixed.pvalue fixed.estimate fixed.std.error random.pvalue random.estimate
+## 1  0.454284995    0.001013585     0.001354534   0.693471527    0.0008976198
+## 2  0.008639827    0.033004821     0.012568542   0.008639827    0.0330048214
+##   random.std.error het.pvalue
+## 1      0.002277365 0.09360158
+## 2      0.012568542 0.50016623</code></pre>
+</div>
+<div id="meta-analysis-from-transforming-results-files-for-consistency" class="section level3">
+<h3>5. Meta Analysis from transforming results files for
+consistency</h3>
+<p>When performing a meta-analysis, the results files must be consistent
+across all of the cohorts. In the case of a model having a categorical
+exposure variable, the exposure variable should be coded the same way
+across the cohorts and the same reference level should be used. If the
+coding or reference level was not consistent, then it is possible to
+transform results files to make them consistent. The following example
+demonstrates this. In this example, each cohort has a set of results
+from running a linear regression on the same model where the exposure
+variable is “smoke”, which denotes smoking status with levels “never”,
+“current”, and “former”. Cohort 1 did not recode the levels of smoke and
+used “former” as the reference level. Cohort 2 recoded the smoke
+variable as 0=never, 1=current, 2=former with 0 as the reference level.
+Below are the Effects tables from each set of results.</p>
+<pre class="r"><code>file1 &lt;- file.path(dir, &quot;modelLM__cohort_1__2023-04-01.xlsx&quot;)
+file2 &lt;- file.path(dir, &quot;modelLM__cohort_2__2023-04-01.xlsx&quot;)
+readxl::read_excel(file1, &quot;Effects&quot;)</code></pre>
+<pre><code>## # A tibble: 4 × 11
+##     run outcomespec exposurespec term        estimate std.error statistic pvalue
+##   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;
+## 1     1 tyrosine    smoke        smoke.curr…  -0.0245    0.0285    -0.861  0.390
+## 2     1 tyrosine    smoke        smoke.never  -0.0188    0.0289    -0.649  0.517
+## 3     2 valine      smoke        smoke.curr…  -0.0124    0.0216    -0.574  0.566
+## 4     2 valine      smoke        smoke.never  -0.0105    0.0220    -0.478  0.633
+## # ℹ 3 more variables: estimate.lower &lt;dbl&gt;, estimate.upper &lt;dbl&gt;,
+## #   metabolite_name &lt;chr&gt;</code></pre>
+<pre class="r"><code>readxl::read_excel(file2, &quot;Effects&quot;)</code></pre>
+<pre><code>## # A tibble: 4 × 11
+##     run outcomespec exposurespec term    estimate std.error statistic   pvalue
+##   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1     1 tyrosine    smoke        smoke.1   0.0226    0.0215      1.05 0.294   
+## 2     1 tyrosine    smoke        smoke.2  -0.128     0.0372     -3.43 0.000657
+## 3     2 valine      smoke        smoke.1   0.0281    0.0173      1.63 0.104   
+## 4     2 valine      smoke        smoke.2  -0.0810    0.0299     -2.71 0.00693 
+## # ℹ 3 more variables: estimate.lower &lt;dbl&gt;, estimate.upper &lt;dbl&gt;,
+## #   metabolite_name &lt;chr&gt;</code></pre>
+<p>Notice that the “term” column in the Effects tables above contain the
+names of the exposure parameters. These parameter names are not the same
+in the two tables. In order for a meta-analysis to be performed, the
+exposure variable must have the same coding and same reference level in
+each cohort. We will show how to set specific options to change the
+reference level and to recode the exposure variable to make the cohort 1
+results consistent with cohort 2. The reference level for cohort 1 must
+be “never” smokers, so the “new.ref.value” option is set to “never”. To
+obtain the same exposure parameter names, the option “change.col.values”
+is specified as a list containing the column name to change (“term”) and
+vectors (“old” and “new”) which map the original parameter names to the
+new parameter names. The list “list1” below contains the information
+needed to make the cohort 1 results consistent with cohort 2.</p>
+<pre class="r"><code>old    &lt;- c(&quot;smoke.never&quot;, &quot;smoke.current&quot;, &quot;smoke.former&quot;)
+new    &lt;- c(&quot;smoke.0&quot;,     &quot;smoke.1&quot;,       &quot;smoke.2&quot;)
+change &lt;- list(col=&quot;term&quot;, old=old, new=new)
+list1  &lt;- list(file=file1, new.ref.value=&quot;never&quot;, change.col.values=change)</code></pre>
+<p>Now the <em>runMeta()</em> function can be called by inputting a list
+of file information.</p>
+<pre class="r"><code>obj &lt;- RcometsAnalytics::runMeta(list(list1, file2))
+obj$Results</code></pre>
+<pre><code>##                           outcome_uid exposure_uid    term n.cohort n.sub
+## 1 HMDB00158#HMDB00158_B1#HMDB00158_B2        smoke smoke.1        2  1000
+## 2 HMDB00158#HMDB00158_B1#HMDB00158_B2        smoke smoke.2        2  1000
+## 3                           HMDB00883        smoke smoke.1        2  1000
+## 4                           HMDB00883        smoke smoke.2        2  1000
+##   fixed.pvalue fixed.estimate fixed.std.error random.pvalue random.estimate
+## 1    0.5290778     0.01012982      0.01609404     0.5290778      0.01012982
+## 2    0.1117004    -0.03634318      0.02284878     0.4727444     -0.05251415
+## 3    0.2627619     0.01410193      0.01259228     0.3569044      0.01381624
+## 4    0.2229208    -0.02156331      0.01769227     0.4701418     -0.03300597
+##   random.std.error  het.pvalue
+## 1       0.01609404 0.383031002
+## 2       0.07313736 0.001915321
+## 3       0.01499679 0.234166856
+## 4       0.04569892 0.013601543</code></pre>
+<p>To see the complete list of options for transforming a file of
+results see the <em>file.list</em> object in the user <a href="https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf"><strong>manual</strong></a>.</p>
+</div>
+<div id="example-using-runallmeta" class="section level3">
+<h3>6. Example using runAllMeta</h3>
+<p>The <em>runAllMeta()</em> function is for running meta-analyses in
+super-batch mode. The function takes three arguments, with the first
+argument being a character vector of file names and/or folder names. The
+second argument is the output folder to write the results to, and the
+third argument is an optional file for meta-analysis options. The result
+files “outfile1” and “outfile2” created in section 3 above will be used
+for this meta-analysis. Instead of passing in the file names, the folder
+name where these files reside (the working directory) will be passed in.
+The output from <em>runAllMeta()</em> will also be written to the
+working directory.</p>
+<pre class="r"><code>tmp &lt;- RcometsAnalytics::runAllMeta(getwd(), getwd())</code></pre>
+<pre><code>## Output saved to file: /gpfs/gsfs10/users/wheelerwi/COMETS/current_3.0/vignettes/AgeAdjustedForBMI__meta__2023-05-01.xlsx</code></pre>
+<p>The output files names created by <em>runAllMeta()</em> will be of
+the form &lt;model name&gt;__meta__&lt;date&gt;.ext.</p>
+<pre class="r"><code>res.file &lt;- paste0(getwd(), &quot;/AgeAdjustedForBMI__meta__&quot;, Sys.Date(), &quot;.xlsx&quot;)</code></pre>
+<p>Read in the table of results and compare to the previous
+meta-analysis performed in section 4. The results should be the
+same.</p>
+<pre class="r"><code>res &lt;- as.data.frame(readxl::read_excel(res.file, &quot;Results&quot;))
+all.equal(ret$Results, res)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>Delete the files created</p>
+<pre class="r"><code>file.remove(c(outfile1, outfile2, res.file))</code></pre>
+<pre><code>## [1] TRUE TRUE TRUE</code></pre>
+<pre class="r"><code>#sessionInfo()</code></pre>
 </div>
 </div>
 
