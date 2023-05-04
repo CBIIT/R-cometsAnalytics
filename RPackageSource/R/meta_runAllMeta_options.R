@@ -2,35 +2,56 @@
 #' @title Options file for meta-analyses
 #' @description An Excel file containing models and options for the \code{\link{runAllMeta}} function
 #' @details
-#' The file should contain sheets \bold{META_MODELS} and \bold{META_TYPES}. 
+#' The file can contain sheets \bold{META_MODELS}, \bold{META_TYPES}, and \bold{META_TRANSFORM}. 
 #' Each sheet is optional. The \bold{META_MODELS} sheet should have a column
-#' called \code{MODEL} containing the models for meta-analysis. 
-#' This list of models can be a subset of models defined by the input files.
-#' This sheet can also have a optional column called \code{MODEL_TYPE} that
-#' links to the \bold{META_TYPES} sheet defining the options for each model.
+#' called \code{MODEL} containing the models that the user wants to run 
+#' meta-analyses for. 
+#' If the \bold{MODELS} sheet is not given then meta-analyses for all models
+#'  will be run.
+#' This sheet can also have a optional column called \code{META_TYPE} that
+#' links to the \code{META_TYPE} column in the \bold{META_TYPES} sheet to define
+#' the options for each meta-analysis model.
+#' The \bold{META_TYPES} sheet should contain columns \code{META_TYPE},  \code{OPTION},
+#' and \code{VALUE}. 
 #' See the example file in /inst/extdata/cometsMetaInput.xlsx.
-#'
+#' If the \bold{META_TYPES} sheet is not specified, then the default values for all
+#'  meta-analysis options will be used.
+#' The \bold{META_TRANSFORM} sheet allows users to transform files of results so that
+#' a meta-analysis can be run. For example a file can be transformed to change the
+#' reference category of a categorical exposure variable, or to change the the
+#' category levels of a stratification or exposure variable so that the levels are 
+#' consistent with other files of results. This sheet should have columns \code{FILE},
+#' \code{OPTION}, and \code{VALUE}. The \code{FILE} column has the full name or base name
+#' of the file to be transformed. For the complete list of transformation options,
+#' see \code{\link{file.list}}.
+#' 
 NULL
 
 meta_setOptions <- function(op, model) {
 
-  ret   <- list()
   tmp   <- getValidGlobalMetaOps()
   valid <- tmp$valid
+  ret   <- tmp$default
   tmp   <- valid %in% names(op)
-  if (any(tmp)) ret <- op[valid[tmp]]
-
+  vv    <- valid[tmp]
+  if (length(vv)) {
+    for (v in vv) ret[[v]] <- op[[v, exact=TRUE]]
+  }
   gop <- getModelTypeOptionsFromSheet(op, model)
   if (length(gop)) {
     nms <- names(gop)
-    for (nm in nms) ret[[nm]] <- gop[[nm]]
+    for (nm in nms) ret[[nm]] <- gop[[nm, exact=TRUE]]
   }
 
   ret[["MODEL"]] <- model
+
   ret
 }
 
 getModelTypeOptionsFromSheet <- function(op, model) {
+
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: getModelTypeOptionsFromSheet\n")
 
   modelTypes <- op[["modelTypes", exact=TRUE]]
   if (!length(modelTypes)) return(NULL)
@@ -78,23 +99,37 @@ getModelTypeOptionsFromSheet <- function(op, model) {
   }
 
   # Special case: metaOp_strataToExcludeFromHetTest
-  m <- sum(tmp0) 
+  opnames0 <- opnames
+  m        <- sum(tmp0) 
   if (m > 1) {
     # Temporarily rename option to prevent overwriting the option later
     opnames[tmp0] <- paste0(opnames[tmp0], ".", 1:m)
   }
 
   # Get the global options
-  ret <- NULL
-  tmp <- opnames %in% getValidGlobalMetaOps()$valid
+  ret   <- NULL
+  valid <- getValidGlobalMetaOps()$valid
+  tmp   <- (opnames %in% valid) | tmp0
   if (any(tmp)) {
     g.opnames  <- opnames[tmp]
     g.opvalues <- opvalues[tmp]
-    tmp        <- checkGlobalOpsFromCharVecs(g.opnames, g.opvalues, meta=1)
-    if ("try-error" %in% class(tmp)) stop(tmp)
-    ret <- tmp[g.opnames]
+    lst        <- checkGlobalOpsFromCharVecs(g.opnames, g.opvalues, meta=1)
+    if ("try-error" %in% class(lst)) stop(lst)
+    # Get the options we need
+    tmp <- opnames0 %in% valid
+    nms <- unique(opnames0[tmp])
+    if (length(nms)) {
+      ret <- lst[nms]
+    } else {
+      if (DEBUG) {
+        print("POSSIBLE ERROR:")
+        print(cbind(g.opnames, g.opvalues))
+      } 
+      ret <- list()
+    }
   }
-  
+
+  if (DEBUG) cat("End: getModelTypeOptionsFromSheet\n")
   ret
 } 
 
@@ -114,6 +149,7 @@ meta_readAndSetGlobalOps <- function(opFile) {
       for (nm in nms) op[[nm]] <- gop[[nm]]
     }
   }
+  if (!length(op[["DEBUG", exact=TRUE]])) op$DEBUG <- 0
 
   op
 }
@@ -121,6 +157,11 @@ meta_readAndSetGlobalOps <- function(opFile) {
 meta_readOpFile <- function(opFile) {
 
   ret         <- list()
+
+  # If there is a transform sheet, read in and convert to a named list.
+  # The names in the list will be the file base names.
+  ret$transform <- meta_readTransformSheet(opFile) 
+
   sheets      <- try(readxl::excel_sheets(opFile))
   modelsSheet <- getMetaModelsSheetName()
   nm          <- tolower(getMetaOpFileModelsCol())
@@ -198,15 +239,19 @@ meta_check_opFile <- function(x, nm="opfile") {
 
 meta_excStratOpStr2List <- function(str, name) {
 
-  vec <- strsplit(str, ":", fixed=TRUE)
+  vec <- unlist(strsplit(str, metaOp_stratHet.argEq(), fixed=TRUE))
   vec <- trimws(vec)
   tmp <- nchar(vec) > 0
   vec <- vec[tmp]
+
   if (length(vec) != 2) stop(msg_metaop_5(c(name, str)))
+
   var        <- tolower(trimws(vec[1]))
-  values     <- strsplit(vec[2], ",", fixed=TRUE)
+  values     <- parseStr(vec[2], sep=metaOp_stratHet.vecSep())
+  if (!length(values)) stop(msg_metaop_5(c(name, str)))
   ret        <- list()
   ret[[var]] <- values
+
   ret
 }
 
@@ -221,6 +266,7 @@ meta_excStratOp_setList <- function(oplist) {
   m   <- length(sp1)
   if (!m) return(oplist)
   lst <- list()
+
   for (nm2 in sp1) {
     obj <- oplist[[nm2, exact=TRUE]]
     if (is.null(obj)) next
@@ -232,6 +278,142 @@ meta_excStratOp_setList <- function(oplist) {
   if (!length(oplist)) oplist <- list()
   oplist[[nm]] <- lst
   oplist
+}
+
+##########################################################
+# Function to read the "transform file" sheet into a list
+##########################################################
+
+meta_readTransformSheet <- function(f) {
+
+  # Sheet with cols file, option, value  
+  # A blank file field will assume it is for the previous non-blank file field
+
+
+  if (!length(f)) return(NULL)  
+  
+  sheet <- getMetaTransSheetName()
+  x     <- readExcelSheet(f, sheet, NULL, stopOnError=1, optional=1)
+  if (!length(x)) return(NULL)
+
+  # x should have correct columns
+  fcol   <- tolower(getMetaTransFileCol())
+  opcol  <- tolower(getMetaTransOptionCol())
+  valcol <- tolower(getMetaTransValueCol())
+  cols   <- c(fcol, opcol, valcol)
+  if (!nonEmptyDfHasCols(x, cols, allcols=1, ignoreCase=1)) {
+    warning(paste0("Sheet ", sheet, " is ignored"))
+    return(NULL)
+  }
+  colnames(x) <- tolower(colnames(x))
+
+  for (col in cols) {
+    vec <- trimws(x[, col])
+    tmp <- is.na(vec)
+    if (any(tmp)) vec[tmp] <- ""
+    tmp <- nchar(vec) < 1
+    if (any(tmp)) vec[tmp] <- ""
+    vec      <- gsub("'", "", vec, fixed=TRUE)
+    vec      <- gsub('"', "", vec, fixed=TRUE)
+    x[, col] <- vec
+  }
+
+  # Walk through file names and set missing to previous non-missing
+  x[, fcol] <- setMissValToPrev(x[, fcol, drop=TRUE], miss="")
+
+  # Remove rows with no file, option or value
+  tmp <- (x[, fcol, drop=TRUE] %in% "")  | 
+         (x[, opcol, drop=TRUE] %in% "") | 
+         (x[, valcol, drop=TRUE] %in% "")
+  x   <- x[!tmp, , drop=FALSE]
+  if (!nrow(x)) stop(paste0("ERROR: all rows from sheet ", sheet, " have beed removed")) 
+
+  filevec <- x[, fcol, drop=TRUE]
+  opvec   <- x[, opcol, drop=TRUE]
+  valvec  <- x[, valcol, drop=TRUE]
+  rm(x); gc()
+  
+  # Get options for each unique file
+  filevec <- basename(filevec)
+  ufiles  <- unique(filevec)
+  nfiles  <- length(ufiles)
+  ret     <- list()
+
+  for (i in 1:nfiles) {
+    file <- ufiles[i]
+    tmp  <- filevec %in% file
+    lst  <- meta_readTransParseFileOps(opvec[tmp], valvec[tmp])
+    if (length(lst)) ret[[file]] <- lst
+  }
+  if (!length(ret)) ret <- NULL
+
+  ret
+}
+
+meta_readTransParseFileOps <- function(opvec, valvec) {
+
+  # opvec, valvec  character vector of the option names and values
+  n <- length(opvec)
+  if (n != length(valvec)) stop("INTERNAL CODING ERROR 1")
+  if (!n) return(NULL)
+
+  # Numeric options
+  ops.numeric <- c(dfToC_nobs())
+
+  # special cases
+  sp1 <- dfToC_change.col.values()
+  sp2 <- dfToC_where()
+  sep <- getWhereSep() 
+
+  ret        <- list()
+  changeList <- list()
+  for (i in 1:n) {
+    nm <- opvec[i]
+    if (nm == sp1) {
+      tmp <- meta_readTransParseChangeCol(valvec[i])
+      if (length(tmp)) changeList[[length(changeList) + 1]] <- tmp
+    } else if (nm == sp2) {
+      ret[[nm]] <- parseStr(valvec[i], sep=sep)
+    } else if (nm %in% ops.numeric) {
+      ret[[nm]] <- as.numeric(valvec[i])
+    } else {
+      ret[[nm]] <- trimws(valvec[i])
+    }
+  }
+  if (length(changeList)) ret[[sp1]] <- changeList
+  ret
+}
+
+meta_readTransParseChangeCol <- function(str) {
+
+  col  <- dfToC_change.col()
+  old  <- dfToC_change.old()
+  new  <- dfToC_change.new()
+  sep  <- dfToC_change.sep()              
+  vsep <- dfToC_change.vec.sep()
+  eq   <- dfToC_change.argEq()
+  nm   <- dfToC_change.col.values()
+  str2 <- getQuotedVarStr(str)
+  
+  vec  <- parseStr(str, sep=sep)
+  n    <- length(vec)
+  if (n != 3) stop(paste0("ERROR: ", nm, " = ", str2, " is not valid"))
+  valid <- c(col, old, new)
+  ret   <- list()
+  for (i in 1:n) {
+    v2 <- parseStr(vec[i], sep=eq)
+    if (length(v2) != 2) stop(paste0("ERROR: ", nm, " = ", str2, " is not valid"))
+    arg  <- v2[1]
+    vals <- v2[2]
+    if (!(arg %in% valid)) stop(paste0("ERROR: ", nm, " = ", str2, " is not valid"))
+    if (!(arg %in% col)) vals <- parseStr(vals, sep=vsep)
+    ret[[arg]] <- vals   
+  }
+  tmp <- try(dfToComets.check_changeValues(ret, name=nm))
+  if ("try-error" %in% class(tmp)) {
+    stop(paste0("ERROR: ", nm, " = ", str2, " is not valid"))
+  }
+  ret
 }
 
 checkMetaOp_min.n.cohort <- function(x) {

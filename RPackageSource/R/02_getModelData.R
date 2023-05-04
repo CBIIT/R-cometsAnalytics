@@ -404,8 +404,8 @@ getGlobalOptionsFromSheet <- function(opTable, meta=0) {
   opNameCol <- getOptionNameCol()
   opValCol  <- getOptionValueCol()
 
-  # Remove rows with empty names and values
-  tmp       <- !nchar(opTable[, opNameCol]) & !nchar(opTable[, opValCol])
+  # Remove rows with empty names or values
+  tmp       <- !nchar(opTable[, opNameCol]) | !nchar(opTable[, opValCol])
   opTable   <- opTable[!tmp, , drop=FALSE]
   if (!nrow(opTable)) return(NULL)
 

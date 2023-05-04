@@ -228,9 +228,14 @@ getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffect
 # Meta analysis
 getMetaModelsSheetName            <- function() {"Meta_Models"}
 getMetaModelTypeSheetName         <- function() {"Meta_Types"}
+getMetaTransSheetName             <- function() {"Meta_Transform"}
 getMetaOpFileModelsCol            <- function() {"MODEL"}
 getMetaOpFileModelTypeCol         <- function() {"META_TYPE"}
 getMetaGlobalOptionName           <- function() {"GLOBAL"}
+getMetaTransFileCol               <- function() {"FILE"}
+getMetaTransOptionCol             <- function() {"OPTION"}
+getMetaTransValueCol              <- function() {"VALUE"}
+
 metaOp_methodName                 <- function() {"method"}
 metaOp_methodDefault              <- function() {"fixed"}
 metaOp_methodVals                 <- function() {c(metaOp_methodDefault(), "random")}
@@ -254,10 +259,8 @@ metaOp_dups.allowDefault          <- function() {FALSE}
 metaOp_stopOnFileError            <- function() {"stopOnFileError"}
 metaOp_stopOnFileErrorDefault     <- function() {TRUE}
 metaOp_models                     <- function() {"models"}
-metaDataOp_renameLevels           <- function() {"rename.levels"}
-metaDataOp_renameLevels.var       <- function() {"var"}
-metaDataOp_renameLevels.old       <- function() {"old"}
-metaDataOp_renameLevels.new       <- function() {"new"}
+metaOp_stratHet.argEq             <- function() {"="}
+metaOp_stratHet.vecSep            <- function() {","}
 
 
 metaModelNameNumberSep         <- function() {" "}
@@ -328,6 +331,9 @@ dfToC_change.col.values        <- function() {"change.col.values"}
 dfToC_change.col               <- function() {"col"}
 dfToC_change.old               <- function() {"old"}
 dfToC_change.new               <- function() {"new"}
+dfToC_change.vec.sep           <- function() {" "}
+dfToC_change.sep               <- function() {","}
+dfToC_change.argEq             <- function() {"="}
 dfToC_cohort                   <- function() {"cohort"}
 dfToC_file                     <- function() {"file"}
 dfToC_fileSep                  <- function() {"sep"}

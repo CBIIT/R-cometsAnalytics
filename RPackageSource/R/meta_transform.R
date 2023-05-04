@@ -443,12 +443,28 @@ dfToComets.changeLevels.var <- function(x, var, from, to, stopOnError=1) {
   for (i in 1:length(from)) {
     tmp <- vec %in% from[i]
     if (!any(tmp)) {
-      msg <- msg_meta_30(c(var, from[i]))
-      warning(msg)
+      #msg <- msg_meta_30(c(var, from[i]))
+      #warning(msg)
     } else {
       ret[tmp] <- to[i]
     }
   }
+
+  # Warning if variable contains values that were not changed
+  vec[is.na(vec)] <- ""
+  vec  <- trimws(vec)
+  uvec <- unique(vec)
+  tmp  <- (nchar(uvec) > 0) & !(uvec %in% from)
+  uvec <- uvec[tmp]
+  if (length(uvec)) {
+    str1 <- getQuotedVarStr(uvec, sep=", ")
+    str2 <- getQuotedVarStr(var, sep=", ")
+    str3 <- dfToC_change.col.values()
+    msg  <- msg_meta_42(c(str1, str2, str3))
+    warning(msg)
+  }
+
+
   x[, var] <- ret
   x
 }
@@ -528,6 +544,22 @@ dfToComets.loadAndCheck <- function(flist) {
   list(data=obj, info.list=flist)
 }
 
+remColFromChangeColList <- function(lst, rem.col) {
+
+  # lst is the list dfToC_change.col.values()
+  n   <- length(lst)
+  if (!n) return(lst)
+  col <- dfToC_change.col()
+  rem <- NULL
+  for (i in 1:n) {
+    tmp <- lst[[i]]
+    var <- tmp[[col,  exact=TRUE]]
+    if (length(var) && (var == rem.col)) rem <- c(rem, i)
+  }
+  if (length(rem)) lst <- lst[-rem]
+  lst
+}
+
 CometsToComets <- function(obj, infolist) {
 
   # For a comets file, the only things that should change are the levels,
@@ -556,13 +588,20 @@ CometsToComets <- function(obj, infolist) {
   # Change levels 
   lst <- infolist[[dfToC_change.col.values(), exact=TRUE]]
   if (!is.null(lst)) {
-    df.ms <- dfToComets.changeLevels(df.ms, infolist, stopOnError=0)
     df.es <- dfToComets.changeLevels(df.es, infolist, stopOnError=0)
-    #df.ts <- dfToComets.changeLevels(df.ts, infolist)
-
+    
     # Check if the values for column "term" changed. If so, then the exposureref
     #   value needs to be updated. 
     df.is <- CometsToComets.infoExpRef(df.is, lst, ref)
+
+    # For the ModelSummary df, term col does not need to be updated. This is done 
+    #   to prevent warnings.
+    lst2 <- remColFromChangeColList(lst, getEffectsTermName())
+    if (length(lst2)) {
+      tmp <- infolist
+      tmp[[dfToC_change.col.values()]] <- lst2
+      df.ms <- dfToComets.changeLevels(df.ms, infolist, stopOnError=0)
+    }
   }
 
   # For strata columns

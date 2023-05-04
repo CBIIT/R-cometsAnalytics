@@ -48,7 +48,7 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
   if (DEBUG) cat(paste0("Temporary folder ", tmpdir, " created\n"))
 
   # Get all files from folders and by extracting from zip/tar files
-  tmp       <- try(meta_extractAllFiles(filevec, tmpdir), silent=FALSE)
+  tmp <- try(meta_extractAllFiles(filevec, tmpdir), silent=FALSE)
   if ("try-error" %in% class(tmp)) {
     meta_removeTempDir(tmpdir)
     stop(msg_meta_20())
@@ -59,22 +59,26 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
   files.rem <- tmp[["removed", exact=TRUE]]
 
   # Parse file names
-  tmp            <- try(meta_parseFileNames(files.ok, op), silent=FALSE)
+  tmp <- try(meta_parseFileNames(files.ok, op), silent=FALSE)
   if ("try-error" %in% class(tmp)) {
     meta_removeTempDir(tmpdir)
     stop(msg_meta_39())
   }
   finfo          <- tmp$info
+  if (DEBUG) print(finfo)
   file.rem.fname <- tmp[["removed", exact=TRUE]]
-  
+
   umodels <- unique(finfo[, "model"])
   nmodels <- length(umodels)
   for (i in 1:nmodels) {
     model  <- umodels[i]
+    cat(msg_meta_46(getQuotedVarStr(model)))
     tmp    <- meta_getUseInfo(finfo, model, op)
-    finfo2 <- tmp$file.info
-    op2    <- tmp$op
-    tmp    <- try(runMeta(finfo2[, "file", drop=TRUE], op2), silent=TRUE)
+    finfo2 <- tmp[["file.info", exact=TRUE]]
+    op2    <- tmp[["op", exact=TRUE]]
+    fobj   <- tmp[["file.obj", exact=TRUE]]
+    #tmp    <- runMeta(fobj, op2)
+    tmp    <- try(runMeta(fobj, op2), silent=TRUE)
     err    <- "try-error" %in% class(tmp)
     if (err) {
       msg <- getErrorMsgFromTryError(tmp, addToEnd=NULL)
@@ -93,27 +97,75 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
 
 meta_getUseInfo <- function(finfo, model, op) {
  
-  ret   <- NULL
-  tmp   <- finfo[, "model.norm"] %in% meta_normModelStr(model)
-  if (!any(tmp)) return(ret)
+  op0 <- op # op is overwritten below
 
   # Get correct options for runMeta function
-  op      <- meta_setOptions(op, model)
+  op    <- meta_setOptions(op, model)
+  ret   <- list(file.info=NULL, op=op, file.obj=NULL)
+
+  tmp   <- finfo[, "model.norm"] %in% meta_normModelStr(model)
+  if (!any(tmp)) {
+    msg_meta_44(getQuotedVarStr(model))
+    return(ret)
+  }
+
   finfo   <- finfo[tmp, , drop=FALSE]
   cohorts <- op[[metaOp_cohorts.include(), exact=TRUE]]
   if (!is.null(cohorts)) {
     tmp   <- finfo[, "cohort.norm"] %in% meta_normCohortStr(cohorts)
-    if (!any(tmp)) return(ret)
     finfo <- finfo[tmp, , drop=FALSE]
+    cat(msg_meta_43(c(nrow(finfo), metaOp_cohorts.include())))
+    if (!any(tmp)) return(ret)
   }
   cohorts <- op[[metaOp_cohorts.exclude(), exact=TRUE]]
   if (!is.null(cohorts)) {
     tmp   <- !(finfo[, "cohort.norm"] %in% meta_normCohortStr(cohorts))
-    if (!any(tmp)) return(ret)
     finfo <- finfo[tmp, , drop=FALSE]
+    cat(msg_meta_43(c(nrow(finfo), metaOp_cohorts.exclude())))
+    if (!any(tmp)) return(ret)
   }
-  list(file.info=finfo, op=op)
+
+  # Get file object if some files need to be transformed
+  file.obj <- meta_getFileObj(finfo[, "file", drop=TRUE], op0)
+
+  list(file.info=finfo, op=op, file.obj=file.obj)
  
+}
+
+meta_getFileObj <- function(files, op) {
+
+  DEBUG     <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_getFileObj\n")
+
+  if (!length(files)) return(files)
+  transform <- op[["transform", exact=TRUE]]
+  if (!length(transform)) return(files)
+  bfiles <- basename(files)
+  nms    <- names(transform) 
+  tmp    <- bfiles %in% nms
+  if (!any(tmp)) return(files)
+
+  # Some files need to be transformed
+  nf  <- length(files)
+  ret <- as.list(files)
+  ids <- (1:nf)[tmp]
+  for (id in ids) {
+    bfile <- bfiles[id]
+    lst   <- transform[[bfile, exact=TRUE]]
+    if (!length(lst) || !is.list(lst)) {
+      if (DEBUG) {
+        print(paste0("Empty transform list or error for file ", bfile))
+        print(files[id])
+        print(lst)
+      }
+      next 
+    }
+    lst$file  <- files[id]
+    ret[[id]] <- lst
+  }
+
+  if (DEBUG) cat("End: meta_getFileObj\n")
+  ret
 }
 
 meta_extractAllFiles <- function(fvec, dir) {

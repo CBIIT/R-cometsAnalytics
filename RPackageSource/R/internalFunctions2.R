@@ -577,3 +577,33 @@ getQuotedVarStr <- function(vec, sep=", ") {
   ret
 
 }
+
+setMissValToPrev <- function(vec, miss=NA) {
+
+  n <- length(vec)
+  if (n < 2) return(vec)
+  tmp    <- vec %in% miss
+  tmp[1] <- FALSE
+  if (!any(tmp)) return(vec)
+ 
+  rows <- (1:n)[tmp] 
+  for (i in 1:length(rows)) {
+    row      <- rows[i]  
+    vec[row] <- vec[row-1]
+  }
+
+  vec
+}
+
+addNamedValueToList <- function(lst, name, value) {
+
+  if (!length(lst)) lst <- list()
+  if (length(name) != 1) return(lst)
+  if (!is.list(lst)) stop("ERROR 1")
+  if (!is.null(value)) {
+    lst[[name]] <- value
+  } else {
+    lst[name]   <- list(value)
+  }
+  lst
+}

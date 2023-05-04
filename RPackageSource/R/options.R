@@ -330,10 +330,11 @@ getValidGlobalOps <- function(meta=0) {
 
 } # END: getValidGlobalOps 
 
-getCharVecFromStr <- function(str, sep) {
+getCharVecFromStr <- function(str, sep, remWhiteSpace=1) {
 
   ret <- strsplit(str, sep, fixed=TRUE)
   ret <- unlist(ret)
+  if (remWhiteSpace) ret <- trimws(ret)
   ret
 
 } # END: getCharVecFromStr
@@ -359,6 +360,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
   nm    <- metaOp_strataToExcludeFromHetTest()
   sp1   <- c(nm, paste0(nm, ".", 1:999))
   flag1 <- 0
+  if (meta) valid <- c(valid, sp1)
 
   ret <- list()
   # Loop over each element
@@ -387,7 +389,8 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
       }
     }
 
-    ret[[name]] <- value
+    #ret[[name]] <- value
+    ret <- addNamedValueToList(ret, name, value)
   }
 
   # Special case
@@ -395,7 +398,7 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
 
   # Check the values
   ret <- try(checkGlobalOpList(ret, name="options", meta=meta), silent=TRUE)
-  
+
   ret
 
 } # END: checkGlobalOpsFromCharVecs
@@ -407,8 +410,9 @@ checkGlobalOpList <- function(op, name="options", meta=0) {
   tmp     <- getValidGlobalOps(meta=meta)
   default <- tmp$default
   valid   <- names(default)
-  ops.n   <- c(tmp$ops.numeric, tmp$ops.logical)
-  ops.cv  <- tmp$ops.charVec
+  ops.n   <- c(tmp[["ops.numeric", exact=TRUE]], tmp[["ops.logical", exact=TRUE]])
+  ops.cv  <- tmp[["ops.charVec", exact=TRUE]]
+  ops.lst <- tmp[["ops.list", exact=TRUE]]
   if (meta) {
     FSTR <- "checkMetaOp_"
   } else {
@@ -417,6 +421,9 @@ checkGlobalOpList <- function(op, name="options", meta=0) {
 
   # Special cases
   spec1 <- getAddMetabColsOpName() 
+  spec2 <- metaOp_cohorts.include()
+  spec3 <- metaOp_cohorts.exclude()
+  spec4 <- metaOp_strataToExcludeFromHetTest()
 
   # Check the names and values
   if (n) {
@@ -427,11 +434,22 @@ checkGlobalOpList <- function(op, name="options", meta=0) {
       nm  <- nms[i]
       val <- op[[i]]
 
+      if (!length(val)) next
+
       if (nm %in% ops.n) {
         tmp <- try(eval(parse(text=paste(FSTR, nm, "(", val, ")", sep=""))),
                    silent=TRUE)
       } else if (nm == spec1) {
         tmp     <- try(checkOp_output.metab.cols(val), silent=TRUE)
+        op[[i]] <- tmp
+      } else if (nm == spec2) {
+        tmp     <- try(checkMetaOp_cohorts.include(val), silent=TRUE)
+        op[[i]] <- tmp
+      } else if (nm == spec3) {
+        tmp     <- try(checkMetaOp_cohorts.exclude(val), silent=TRUE)
+        op[[i]] <- tmp
+      } else if (nm == spec4) {
+        tmp     <- try(checkMetaOp_strata.exclude.het.test(val), silent=TRUE)
         op[[i]] <- tmp
       } else {
         tmp <- try(eval(parse(text=paste(FSTR, nm, "('", val, "')", sep=""))),

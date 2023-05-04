@@ -198,6 +198,10 @@ meta_model_check <- function(file.info.list, op) {
     }
     modelFuncs[i] <- model
   }
+  cohorts[cohorts %in% miss[-3]]   <- ""
+  models[models %in% miss]         <- ""
+  modelFuncs[modelFuncs %in% miss] <- ""
+
   umodels <- tolower(trimws(unique(models)))
   if (length(umodels) != 1) stop(msg_meta_3())
   umods <- unique(modelFuncs)
@@ -1089,7 +1093,7 @@ meta_strat_het_test <- function(df, op) {
   tmp     <- c(svarCol, svalCol)
   if (!nonEmptyDfHasCols(df, tmp, allcols=1, ignoreCase=0)) return(df)
   
-  ret     <- df # Return data frame with added columns
+  ret <- df # Return data frame with added columns
 
   # Remove any strata if needed
   rem.list <- op[[metaOp_strataToExcludeFromHetTest(), exact=TRUE]]
@@ -1102,6 +1106,11 @@ meta_strat_het_test <- function(df, op) {
     tmp <- !(sids %in% rem)
     if (!all(tmp)) df <- df[tmp, , drop=FALSE]
     rm(sids, tmp, vars, rem); gc()
+
+    if (!nrow(df)) {
+      cat(msg_meta_45(metaOp_strataToExcludeFromHetTest()))
+      return(ret)
+    }
   }
 
   # Get the ids for all rows
@@ -1173,89 +1182,4 @@ meta_strat_het_test_add <- function(ret, uids, fixed, random) {
 
   ret
 } 
-
-meta_relevel_terms_main <- function(df, var, from, to) {
-
-  tv      <- tolower(getEffectsTermName())
-  var     <- tolower(var)
-  varfrom <- paste0(var, ".", from)
-  varto   <- paste0(var, ".", to)
-  vec     <- tolower(df[, tv, drop=TRUE])
-  if (!any(varfrom %in% vec)) return(df)
-  len     <- length(vec)
-  ret     <- vec
-  eff     <- getEffectsName()
-  for (i in 1:length(varfrom)) {
-    tmp <- vec %in% varfrom[i]
-    if (!any(tmp)) {
-      msg <- msg_meta_19(c(tv, varfrom[i], eff))
-      warning(msg)
-    } else {
-      ret[tmp] <- varto[i]
-    }
-  }
-  df[, tv] <- ret
-
-  df
-}
-
-meta_relevel_strata_main <- function(df, var, from, to) {
-
-  svar    <- tolower(runModel.getStrataColName())
-  sval    <- tolower(runModel.getStrataNumColName())
-  var     <- tolower(var)
-  vecvar  <- tolower(df[, svar, drop=TRUE])
-  if (!(var %in% vecvar)) return(df)
-
-  varfrom <- tolower(from)
-  varto   <- tolower(to)
-  vecval  <- tolower(df[, sval, drop=TRUE])
-  len     <- length(vecvar)
-  ret     <- vecval
-  tmp0    <- vecvar %in% var
-  eff     <- getEffectsName()
-  for (i in 1:length(varfrom)) {
-    tmp <- tmp0 & (vecval %in% varfrom[i])
-    if (!any(tmp)) {
-      msg <- msg_meta_19(c(var, varfrom[i], eff))
-      warning(msg)
-    } else {
-      ret[tmp] <- varto[i]
-    }
-  }
-  df[, sval] <- ret
-
-  df
-}
-
-meta_relevel_data <- function(df, df.list) {
-
-  nm  <- metaDataOp_renameLevels()
-  lst <- df.list[[nm, exact=TRUE]]
-  len <- length(lst)
-  if (!len) return(df)
-
-  tv    <- tolower(getEffectsTermName())
-  if (!nonEmptyDfHasCols(df, tv, allcols=1, ignoreCase=1)) return(df)
-
-  cx    <- tolower(colnames(df))
-  svar  <- tolower(runModel.getStrataColName())
-  sval  <- tolower(runModel.getStrataNumColName())
-  sFlag <- (svar %in% cx) && (sval %in% cx) 
-  varnm <- metaDataOp_renameLevels.var()
-  oldnm <- metaDataOp_renameLevels.old()
-  newnm <- metaDataOp_renameLevels.new()
-  
-  for (i in 1:len) {
-    tmp <- lst[[i]]
-    var <- tmp[[varnm, exact=TRUE]]
-    old <- tmp[[oldnm, exact=TRUE]]
-    new <- tmp[[newnm, exact=TRUE]]
-
-    # Try both term and strata
-    df <- meta_relevel_terms_main(df, var, old, new)
-    if (sFlag) df <- meta_relevel_strata_main(df, var, old, new)
-  }
-  df
-}
 

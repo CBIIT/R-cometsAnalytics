@@ -212,6 +212,13 @@ msg_meta_38             <- function() "ERROR loading all files"
 msg_meta_39             <- function() "ERROR in meta_parseFileNames"
 msg_meta_40             <- function(x) paste0("ERROR: model '", x[1], "' failed with message ", x[2], "\n")
 msg_meta_41             <- function(x) paste0("No levels to change for variable ", x[1])
+msg_meta_42             <- function(x) paste0("The values ", x[1], " for column ", x[2], " were not changed. Check option ", x[3])
+msg_meta_43             <- function(x) paste0(x[1], " file(s) are left after applying option ", x[2], "\n")
+msg_meta_44             <- function(x) paste0("No files found for model ", x[1], "\n")
+msg_meta_45             <- function(x) paste0("The option ", x[1], " removed all strata.",
+                                              " Stratification het test will not be performed.\n")
+msg_meta_46             <- function(x) paste0("Begin meta-analysis for model ", x[1], "\n")
+
 
 msg_metaop_1            <- function() paste0("ERROR: missing option names in ", getMetaModelTypeSheetName(), " sheet")
 msg_metaop_2            <- function(x) paste0("ERROR: the options ", x[1], " appear more than once in the ",

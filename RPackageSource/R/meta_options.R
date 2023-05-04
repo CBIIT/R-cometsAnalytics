@@ -79,7 +79,6 @@ meta_check_op <- function(op, name="op") {
   names(def) <- valid
 
   check.list(op, name, valid)
-
   op <- checkGlobalOpList(op, name=name, meta=1)
 
   #op <- default.list(op, valid, def)
