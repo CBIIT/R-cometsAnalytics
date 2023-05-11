@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ewy Mathé, Ella Temprosa, Bill Wheeler" />
 
-<meta name="date" content="2023-05-01" />
+<meta name="date" content="2023-05-11" />
 
 <title>Running meta-analyses with RcometsAnalytics locally</title>
 
@@ -1512,7 +1512,7 @@ div.tocify {
 <h1 class="title toc-ignore">Running meta-analyses with RcometsAnalytics
 locally</h1>
 <h4 class="author">Ewy Mathé, Ella Temprosa, Bill Wheeler</h4>
-<h4 class="date">2023-05-01</h4>
+<h4 class="date">2023-05-11</h4>
 
 </div>
 
@@ -1659,85 +1659,8 @@ ret$Results[1:2,]</code></pre>
 ## 1      0.002277365 0.09360158
 ## 2      0.012568542 0.50016623</code></pre>
 </div>
-<div id="meta-analysis-from-transforming-results-files-for-consistency" class="section level3">
-<h3>5. Meta Analysis from transforming results files for
-consistency</h3>
-<p>When performing a meta-analysis, the results files must be consistent
-across all of the cohorts. In the case of a model having a categorical
-exposure variable, the exposure variable should be coded the same way
-across the cohorts and the same reference level should be used. If the
-coding or reference level was not consistent, then it is possible to
-transform results files to make them consistent. The following example
-demonstrates this. In this example, each cohort has a set of results
-from running a linear regression on the same model where the exposure
-variable is “smoke”, which denotes smoking status with levels “never”,
-“current”, and “former”. Cohort 1 did not recode the levels of smoke and
-used “former” as the reference level. Cohort 2 recoded the smoke
-variable as 0=never, 1=current, 2=former with 0 as the reference level.
-Below are the Effects tables from each set of results.</p>
-<pre class="r"><code>file1 &lt;- file.path(dir, &quot;modelLM__cohort_1__2023-04-01.xlsx&quot;)
-file2 &lt;- file.path(dir, &quot;modelLM__cohort_2__2023-04-01.xlsx&quot;)
-readxl::read_excel(file1, &quot;Effects&quot;)</code></pre>
-<pre><code>## # A tibble: 4 × 11
-##     run outcomespec exposurespec term        estimate std.error statistic pvalue
-##   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;
-## 1     1 tyrosine    smoke        smoke.curr…  -0.0245    0.0285    -0.861  0.390
-## 2     1 tyrosine    smoke        smoke.never  -0.0188    0.0289    -0.649  0.517
-## 3     2 valine      smoke        smoke.curr…  -0.0124    0.0216    -0.574  0.566
-## 4     2 valine      smoke        smoke.never  -0.0105    0.0220    -0.478  0.633
-## # ℹ 3 more variables: estimate.lower &lt;dbl&gt;, estimate.upper &lt;dbl&gt;,
-## #   metabolite_name &lt;chr&gt;</code></pre>
-<pre class="r"><code>readxl::read_excel(file2, &quot;Effects&quot;)</code></pre>
-<pre><code>## # A tibble: 4 × 11
-##     run outcomespec exposurespec term    estimate std.error statistic   pvalue
-##   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1     1 tyrosine    smoke        smoke.1   0.0226    0.0215      1.05 0.294   
-## 2     1 tyrosine    smoke        smoke.2  -0.128     0.0372     -3.43 0.000657
-## 3     2 valine      smoke        smoke.1   0.0281    0.0173      1.63 0.104   
-## 4     2 valine      smoke        smoke.2  -0.0810    0.0299     -2.71 0.00693 
-## # ℹ 3 more variables: estimate.lower &lt;dbl&gt;, estimate.upper &lt;dbl&gt;,
-## #   metabolite_name &lt;chr&gt;</code></pre>
-<p>Notice that the “term” column in the Effects tables above contain the
-names of the exposure parameters. These parameter names are not the same
-in the two tables. In order for a meta-analysis to be performed, the
-exposure variable must have the same coding and same reference level in
-each cohort. We will show how to set specific options to change the
-reference level and to recode the exposure variable to make the cohort 1
-results consistent with cohort 2. The reference level for cohort 1 must
-be “never” smokers, so the “new.ref.value” option is set to “never”. To
-obtain the same exposure parameter names, the option “change.col.values”
-is specified as a list containing the column name to change (“term”) and
-vectors (“old” and “new”) which map the original parameter names to the
-new parameter names. The list “list1” below contains the information
-needed to make the cohort 1 results consistent with cohort 2.</p>
-<pre class="r"><code>old    &lt;- c(&quot;smoke.never&quot;, &quot;smoke.current&quot;, &quot;smoke.former&quot;)
-new    &lt;- c(&quot;smoke.0&quot;,     &quot;smoke.1&quot;,       &quot;smoke.2&quot;)
-change &lt;- list(col=&quot;term&quot;, old=old, new=new)
-list1  &lt;- list(file=file1, new.ref.value=&quot;never&quot;, change.col.values=change)</code></pre>
-<p>Now the <em>runMeta()</em> function can be called by inputting a list
-of file information.</p>
-<pre class="r"><code>obj &lt;- RcometsAnalytics::runMeta(list(list1, file2))
-obj$Results</code></pre>
-<pre><code>##                           outcome_uid exposure_uid    term n.cohort n.sub
-## 1 HMDB00158#HMDB00158_B1#HMDB00158_B2        smoke smoke.1        2  1000
-## 2 HMDB00158#HMDB00158_B1#HMDB00158_B2        smoke smoke.2        2  1000
-## 3                           HMDB00883        smoke smoke.1        2  1000
-## 4                           HMDB00883        smoke smoke.2        2  1000
-##   fixed.pvalue fixed.estimate fixed.std.error random.pvalue random.estimate
-## 1    0.5290778     0.01012982      0.01609404     0.5290778      0.01012982
-## 2    0.1117004    -0.03634318      0.02284878     0.4727444     -0.05251415
-## 3    0.2627619     0.01410193      0.01259228     0.3569044      0.01381624
-## 4    0.2229208    -0.02156331      0.01769227     0.4701418     -0.03300597
-##   random.std.error  het.pvalue
-## 1       0.01609404 0.383031002
-## 2       0.07313736 0.001915321
-## 3       0.01499679 0.234166856
-## 4       0.04569892 0.013601543</code></pre>
-<p>To see the complete list of options for transforming a file of
-results see the <em>file.list</em> object in the user <a href="https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf"><strong>manual</strong></a>.</p>
-</div>
 <div id="example-using-runallmeta" class="section level3">
-<h3>6. Example using runAllMeta</h3>
+<h3>5. Example using runAllMeta</h3>
 <p>The <em>runAllMeta()</em> function is for running meta-analyses in
 super-batch mode. The function takes three arguments, with the first
 argument being a character vector of file names and/or folder names. The
@@ -1749,7 +1672,8 @@ name where these files reside (the working directory) will be passed in.
 The output from <em>runAllMeta()</em> will also be written to the
 working directory.</p>
 <pre class="r"><code>tmp &lt;- RcometsAnalytics::runAllMeta(getwd(), getwd())</code></pre>
-<pre><code>## Output saved to file: /gpfs/gsfs10/users/wheelerwi/COMETS/current_3.0/vignettes/AgeAdjustedForBMI__meta__2023-05-01.xlsx</code></pre>
+<pre><code>## Begin meta-analysis for model &#39;AgeAdjustedForBMI&#39;
+## Output saved to file: /gpfs/gsfs10/users/wheelerwi/COMETS/current_3.0/vignettes/AgeAdjustedForBMI__meta__2023-05-11.xlsx</code></pre>
 <p>The output files names created by <em>runAllMeta()</em> will be of
 the form &lt;model name&gt;__meta__&lt;date&gt;.ext.</p>
 <pre class="r"><code>res.file &lt;- paste0(getwd(), &quot;/AgeAdjustedForBMI__meta__&quot;, Sys.Date(), &quot;.xlsx&quot;)</code></pre>
