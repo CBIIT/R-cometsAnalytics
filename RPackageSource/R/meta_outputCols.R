@@ -33,12 +33,14 @@
 #' \item{\code{strata.random.het.df}}{ Degrees of freedom for the above test. }
 #' }
 #'
-#' @name MetaOutputColumns
+#' @name metaOutputColumns
 #' @title Meta Analysis Output Columns
 #' @details 
 #'  Correlation models will not contain columns for \code{fixed.std.error} and
 #'           \code{random.std.error}. Instead, there will be columns for 
 #'           lower and upper confidence limits of \code{fixed.estimate} and
 #'           \code{random.estimate}.
+#' The meta-analysis options \code{add.cohort.names} and \code{add.cohort.cols} 
+#' will also add cohort specific columns to the output (see \code{\link{meta_options}}).
 #'  
 NULL

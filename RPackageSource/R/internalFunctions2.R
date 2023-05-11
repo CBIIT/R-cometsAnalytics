@@ -607,3 +607,15 @@ addNamedValueToList <- function(lst, name, value) {
   }
   lst
 }
+
+formIdsFromCols <- function(x, cols, sep=":") {
+
+  ncols <- length(cols)
+  if (!ncols) stop("ERROR 1")
+  if (!all(cols %in% colnames(x))) stop("ERROR 2")
+  ret <- x[, cols[1], drop=TRUE]
+  if (ncols > 1) {
+    for (i in 2:ncols) ret <- paste0(ret, sep, x[, cols[i], drop=TRUE])
+  }
+  ret
+}

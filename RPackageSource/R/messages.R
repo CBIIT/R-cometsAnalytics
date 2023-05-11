@@ -190,10 +190,10 @@ msg_meta_17             <- function() "ERROR: cohort names are not unique"
 msg_meta_18             <- function(x) paste0("ERROR: directory ", x[1], " not created")
 msg_meta_19             <- function(x) paste0(x[1], "='", x[2], "' not found in ", x[3], " data frame")
 msg_meta_20             <- function() "ERROR in meta_extractAllFiles"
-msg_meta_21             <- function() "ERROR: all files do not have a correct file extension (.xlsx, .rda, .zip, .tar, .tar.gz)"
+msg_meta_21             <- function() "ERROR: all files are required to have a correct file extension, such as .xlsx, .rda, .zip, .tar, .tar.gz"
 msg_meta_22             <- function() "ERROR: no files found in the directories"
-msg_meta_23             <- function() "ERROR: all files do not have valid names of the form, e.g. 'modelName__cohortName__date.xlsx'"
-msg_meta_24             <- function() "ERROR: no matching model names found"
+msg_meta_23             <- function() "ERROR: all files must follow a valid naming convention, e.g. 'modelName__cohortName__date.xlsx'"
+msg_meta_24             <- function() "ERROR: specified model name(s) do not match do not match any of the results file names."
 msg_meta_25             <- function() "ERROR: data contains no rows or no columns"
 msg_meta_26             <- function() paste("ERROR: set option ", dfToC_cohort(), " to specify the cohort name")
 msg_meta_27             <- function(x) paste0("ERROR: column ", x[1], " is missing. Set option ", 
@@ -220,7 +220,8 @@ msg_meta_45             <- function(x) paste0("The option ", x[1], " removed all
 msg_meta_46             <- function(x) paste0("Begin meta-analysis for model ", x[1], "\n")
 
 
-msg_metaop_1            <- function() paste0("ERROR: missing option names in ", getMetaModelTypeSheetName(), " sheet")
+msg_metaop_1            <- function() paste0("ERROR: missing value(s) in the ", getOptionNameCol(), 
+                                             " of the ", getMetaModelTypeSheetName(), " sheet")
 msg_metaop_2            <- function(x) paste0("ERROR: the options ", x[1], " appear more than once in the ",
                                               getMetaModelTypeSheetName(), " sheet")
 msg_metaop_3            <- function(x) paste0("ERROR: ", x[1], " must be an Excel file")

@@ -39,6 +39,19 @@
 #'                              (or outcome) and for a categorical exposure variable, the same
 #'                              reference value.
 #'                      The default is TRUE.}
+#' \item{\code{add.cohort.names}}{ TRUE or FALSE to add binary columns (one for each cohort) to
+#'       the data frame of results to show which cohorts contributed to the meta-analysis
+#        results for each metabolite. The names of the binary columns will be the cohort names.
+#'       The value will be 1 if the cohort contributed to the result or 0 if the cohort did not.
+#'                      The default is TRUE.}
+#' \item{\code{add.cohort.cols}}{ Vector of column names to add to the output for each cohort.
+#'       These must be column names from the ModelSummary or Effects
+#'       tables in the meta-analysis input files.
+#'       For example, if \code{add.cohort.cols = "pvalue"}, then the p-values from each 
+#'       cohort will be added to the output, and the columns will be of the form
+#'       <cohort name>.pvalue. A missing value will appear if the cohort did not
+#'       contribute to the result.
+#'                      The default is NULL.}
 #' }
 #'
 NULL
@@ -47,20 +60,24 @@ NULL
 getValidGlobalMetaOps <- function() {
 
   ops.char    <- c(getOutTypeOpName(), "MODEL")
-  ops.charVec <- c(metaOp_cohorts.include(), metaOp_cohorts.exclude())
+  ops.charVec <- c(metaOp_cohorts.include(), metaOp_cohorts.exclude(),
+                   metaOp_addCohortCols())
   ops.num     <- c(metaOp_minNcohortName(), metaOp_cohortMinSubs(), metaOp_totalMinSubs(),
                    "DEBUG")
-  ops.log     <- c(metaOp_oneModelCheck(), metaOp_dups.allow(), metaOp_stopOnFileError())
+  ops.log     <- c(metaOp_oneModelCheck(), metaOp_dups.allow(), metaOp_stopOnFileError(),
+                   metaOp_addCohortNames())
   ops.list    <- metaOp_strataToExcludeFromHetTest()
   default     <- list(cohorts.include=NULL, cohorts.exclude=NULL, DEBUG=0, MODEL="")
-  default[[metaOp_minNcohortName()]] <- metaOp_minNcohortDefault()
-  default[[metaOp_cohortMinSubs()]]  <- metaOp_cohortMinSubsDefault()
-  default[[metaOp_totalMinSubs()]]   <- metaOp_totalMinSubsDefault()
-  default[[getOutTypeOpName()]]      <- getOutTypeOpDefault()
+  default[[metaOp_minNcohortName()]]           <- metaOp_minNcohortDefault()
+  default[[metaOp_cohortMinSubs()]]            <- metaOp_cohortMinSubsDefault()
+  default[[metaOp_totalMinSubs()]]             <- metaOp_totalMinSubsDefault()
+  default[[getOutTypeOpName()]]                <- getOutTypeOpDefault()
   default[metaOp_strataToExcludeFromHetTest()] <- list(NULL)
   default[[metaOp_oneModelCheck()]]            <- metaOp_oneModelCheckDefault()
   default[[metaOp_dups.allow()]]               <- metaOp_dups.allowDefault()
   default[[metaOp_stopOnFileError()]]          <- metaOp_stopOnFileErrorDefault()
+  default <- addNamedValueToList(default, metaOp_addCohortCols(), metaOp_addCohortColsDefault())
+  default <- addNamedValueToList(default, metaOp_addCohortNames(), metaOp_addCohortNamesDefault())
 
   valid <- names(default)
 

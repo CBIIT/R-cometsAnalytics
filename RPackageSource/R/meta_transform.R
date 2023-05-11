@@ -50,7 +50,7 @@
 #'                             new=c(0, 1, 2))) will change the values
 #'         "never" to 0, "current" to 1, and "former" to 2 in the "smoke" column.
 #'                 The default is NULL.}
-#' \item{\code{where}}{Vector of strings with a variable name, 
+#' \item{\code{where}}{ Vector of strings with a variable name, 
 #'        a comparison operator (e.g. "<", ">", "<=", ">=", "!=", "="), and a value.  
 #'        The strings are combined by the logical AND (&) operator.
 #'        For example, \code{where = c("study = A", "age > 50")} uses all subjects

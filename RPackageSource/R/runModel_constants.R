@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.6"}
+getVersionNumber     <- function() {"2.9.0.7"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -261,7 +261,10 @@ metaOp_stopOnFileErrorDefault     <- function() {TRUE}
 metaOp_models                     <- function() {"models"}
 metaOp_stratHet.argEq             <- function() {"="}
 metaOp_stratHet.vecSep            <- function() {","}
-
+metaOp_addCohortCols              <- function() {"add.cohort.cols"}
+metaOp_addCohortColsDefault       <- function() {NULL}
+metaOp_addCohortNames             <- function() {"add.cohort.names"}
+metaOp_addCohortNamesDefault      <- function() {TRUE}
 
 metaModelNameNumberSep         <- function() {" "}
 metaModelNameDefault           <- function() {"NA"}

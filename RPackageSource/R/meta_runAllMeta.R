@@ -48,7 +48,7 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
   if (DEBUG) cat(paste0("Temporary folder ", tmpdir, " created\n"))
 
   # Get all files from folders and by extracting from zip/tar files
-  tmp <- try(meta_extractAllFiles(filevec, tmpdir), silent=FALSE)
+  tmp <- try(meta_extractAllFiles(filevec, tmpdir, DEBUG), silent=FALSE)
   if ("try-error" %in% class(tmp)) {
     meta_removeTempDir(tmpdir)
     stop(msg_meta_20())
@@ -168,13 +168,16 @@ meta_getFileObj <- function(files, op) {
   ret
 }
 
-meta_extractAllFiles <- function(fvec, dir) {
+meta_extractAllFiles <- function(fvec, dir, DEBUG) {
+
+  if (DEBUG) cat("Begin: meta_extractAllFiles\n")
 
   ret   <- NULL  # returned vector of files containing results
   rem   <- NULL  # files removed or error
 
   # First, get all files in fvec and in the directories
   filevec <- meta_listFiles(fvec)
+  if (DEBUG) cat(paste0("There are ", length(filevec), " files before filtering correct extensions.\n"))
 
   # Remove files without correct extensions
   zip01 <- isZipFile(filevec)
@@ -185,7 +188,13 @@ meta_extractAllFiles <- function(fvec, dir) {
     rem     <- filevec[tmp]
     filevec <- filevec[!tmp]
   }
+  if (DEBUG) cat(paste0("There are ", length(filevec), " files after filtering correct extensions.\n"))
   if (!length(filevec)) stop(msg_meta_21())
+  if (DEBUG) {
+    cat(paste0("There are ", sum(zip01), " zip files.\n"))
+    cat(paste0("There are ", sum(tar01), " tar files.\n"))
+    cat(paste0("There are ", sum(res01), " result files.\n"))
+  }
 
   # Intialize return vector of files to all non zip, tar files
   tmp <- !(zip01 | tar01)
@@ -196,10 +205,12 @@ meta_extractAllFiles <- function(fvec, dir) {
   if (any(zip01)) {
     for (f in filevec[zip01]) meta_extractFiles(f, dir, ext="zip")
   }  
+  
   if (any(tar01)) {
     for (f in filevec[tar01]) meta_extractFiles(f, dir, ext="tar")
   }  
   f2 <- list.files(dir, full.names=TRUE)
+  if (DEBUG) cat(paste0(length(f2), " files have been unzipped.\n"))
 
   # Check extracted files
   if (length(f2)) {
@@ -209,7 +220,9 @@ meta_extractAllFiles <- function(fvec, dir) {
     f2  <- f2[ok]
   }
   if (length(f2))  ret <- c(ret, f2)
+  if (DEBUG) cat(paste0(length(ret), " files kept, ", length(rem), " files removed.\n"))
   
+  if (DEBUG) cat("End: meta_extractAllFiles\n")
   list(files=ret, removed=rem)
 }
 

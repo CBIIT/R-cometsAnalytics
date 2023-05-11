@@ -11,7 +11,9 @@
 #' @param op A list containing the options to use.
 #'           See \code{\link{meta_options}}.
 #'           The default is NULL.
-#' @return List of data frames containing the results and information
+#' @return List of data frames containing the results and information.
+#'         See \code{\link{metaOutputColumns}} for of a description of
+#'         columns in the results table.
 #'
 #' @export
 runMeta <- function(file.obj, op=NULL) {
@@ -131,6 +133,71 @@ meta_setReturnObj <- function(df, op) {
   
   ret
 
+}
+
+meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
+
+  ncohorts <- length(cohorts)
+  nids     <- length(ids)
+  if (ncohorts != length(data.list)) stop("INTERNAL CODING ERROR 1")
+  if (ncohorts != ncol(missMat)) stop("INTERNAL CODING ERROR 2")
+  if (nids != nrow(missMat)) stop("INTERNAL CODING ERROR 3")
+
+  ret  <- NULL
+  flag <- op[[metaOp_addCohortNames(), exact=TRUE]]
+  if (flag) {
+    # missMat is TRUE if missing
+    ret <- matrix(1-as.numeric(missMat), nrow=nids, ncol=ncohorts, byrow=FALSE)
+    colnames(ret) <- cohorts
+    ret <- as.data.frame(ret, check.names=FALSE)
+  }
+
+  colsToAdd <- op[[metaOp_addCohortCols(), exact=TRUE]]
+  if (!length(colsToAdd)) return(ret)
+
+  colsToAdd     <- trimws(tolower(colsToAdd))
+  idv           <- getMetaIdCol()
+  if (is.null(ret)) {
+    ret           <- data.frame(1:length(ids))
+    colnames(ret) <- idv
+  }
+  for (i in 1:ncohorts) {
+    cohort <- cohorts[i]
+    x      <- myread_rda(data.list[[i]])
+    tmp    <- colsToAdd %in% colnames(x)
+    cols   <- colsToAdd[tmp]
+    ncols  <- length(cols)
+    if (!ncols) {
+      msg <- paste0("No columns will be added for cohort ", cohort)
+      warning(msg)
+      next 
+    }
+
+    rows   <- match(ids, x[, idv, drop=TRUE])
+    tmp    <- !is.na(rows)
+    rows   <- rows[tmp]
+    if (!length(rows)) {
+      msg <- paste0("INTERNAL CODING ERROR with cohort ", cohort, "\n")
+      cat(msg)
+      next
+    }
+    
+    # Use missMat to determine if this cohort was not included for some metabs
+    tmp      <- missMat[, i, drop=TRUE] %in% 1
+    missFlag <- any(tmp) 
+
+    # New column names
+    new <- paste0(cohort, ".", cols)
+    for (j in 1:ncols) {
+      v            <- new[j]
+      ret[, v]     <- NA
+      ret[rows, v] <- x[rows, cols[j], drop=TRUE] 
+      if (missFlag) ret[tmp, v] <- NA
+    } 
+    rm(x, rows, tmp); gc()
+  }
+  ret[[idv]] <- NULL
+  ret
 }
 
 meta_setRetDf <- function(x, op) {
@@ -513,6 +580,30 @@ meta_checkForUnqIds <- function(df, op) {
   df
 }
 
+meta_matchModSumToEffects <- function(eff, ms) {
+
+  # First see if the run number is unique
+  rv      <- getEffectsRunName()
+  tmp     <- duplicated(ms[, rv, drop=TRUE])
+  if (!any(tmp)) {
+    rows <- match(eff[, rv, drop=TRUE], ms[, rv, drop=TRUE])
+    return(rows)
+  }
+
+  # Could be from older version of COMETS or from certain output options selected
+  # Use more columns to match. 
+  modv    <- getModelSummaryModelCol()
+  strcolv <- runModel.getStrataColName()
+  strvalv <- runModel.getStrataNumColName()
+  vv      <- c(rv, modv, strcolv, strvalv)
+  tmp     <- (vv %in% colnames(eff)) & (vv %in% colnames(ms))
+  vv      <- vv[tmp]
+  eff.ids <- formIdsFromCols(eff, vv, sep=":") 
+  ms.ids  <- formIdsFromCols(ms, vv, sep=":") 
+  rows    <- match(eff.ids, ms.ids)
+  rows
+}
+
 meta_loadCohortData <- function(flist, op) {
 
   DEBUG <- op$DEBUG
@@ -523,12 +614,25 @@ meta_loadCohortData <- function(flist, op) {
                runModel.getStrataColName(), runModel.getStrataNumColName(),
                getEffectsTermName(), 
                getEffectsEstName(), 
-               getEffectsEstSeName(), 
-               getEffectsPvalueName())
+               getEffectsEstSeName())
   numvars  <- c(getEffectsEstName(), getEffectsEstSeName())
+  addcols  <- op[[metaOp_addCohortCols(), exact=TRUE]]
+  addflag  <- length(addcols)
+  if (addflag) {
+    addcols <- tolower(trimws(addcols))
+    cols    <- unique(c(cols, addcols))
+  }
 
   # Load Effects data frame
   x   <- meta_loadEffects(flist$file, cols, numvars, NULL, flist$info)
+  
+  # Determine if there are any of the addcols to add from modelSummary
+  if (addflag) {
+    tmp     <- !(addcols %in% colnames(x))
+    addcols <- addcols[tmp]
+    addflag <- length(addcols)
+    if (!addflag) addcols <- NULL
+  }
 
   # Add in sample size, uid columns from modelSummary data frame
   y   <- loadDataFrame(flist$file, getModelSummaryName())
@@ -542,12 +646,20 @@ meta_loadCohortData <- function(flist, op) {
   # Add model
   vv   <- c(vv, modv)
   vv   <- vv[vv %in% colnames(y)]
-  y    <- y[, vv, drop=FALSE]
-  rows <- match(x[, idv, drop=TRUE], y[, idv, drop=TRUE]) 
+  #y    <- y[, vv, drop=FALSE]
+  #rows <- match(x[, idv, drop=TRUE], y[, idv, drop=TRUE]) 
+  rows <- meta_matchModSumToEffects(x, y) 
   if (any(is.na(rows))) stop(msg_meta_35())
   x[, ssv] <- y[rows, ssv]
   x[, yv]  <- y[rows, yv]
   x[, ev]  <- y[rows, ev]
+  if (addflag) {
+    tmp     <- addcols %in% colnames(y)
+    addcols <- addcols[tmp]
+    if (length(addcols)) {
+      for (v in addcols) x[, v] <- y[rows, v]
+    }
+  }
 
   # Add in (normalized) model name if the col exists
   if ((modv %in% colnames(y)) && (!(modv %in% colnames(x)))) {
@@ -751,11 +863,11 @@ meta_getFinalDataAndRun <- function(ids, nsubs, data.list, op) {
   ind     <- 0
   cohorts <- NULL
   nms     <- names(data.list)
+  use     <- rep(FALSE, ndata)
   for (i in 1:ndata) {
     x     <- NULL
     gc()
     x     <- myread_rda(data.list[[i]])
-    file.remove(data.list[[i]])
     rows  <- match(ids, x[, idv, drop=TRUE])
     tmp   <- !is.na(rows)
     rows  <- rows[tmp]
@@ -763,33 +875,49 @@ meta_getFinalDataAndRun <- function(ids, nsubs, data.list, op) {
     ind            <- ind + 1
     beta[tmp, ind] <- x[rows, betav, drop=TRUE]
     se[tmp, ind]   <- x[rows, sev, drop=TRUE]
-    #p[tmp, ind]    <- x[rows, pv, drop=TRUE]
     cohorts        <- c(cohorts, nms[i])
+    use[i]         <- TRUE
   }
   rm(x, tmp, rows, nms)
   gc()
   if (ind < ndata) {
     beta <- beta[, 1:ind, drop=FALSE]
     se   <- se[, 1:ind, drop=FALSE]
-    #p    <- p[, 1:ind, drop=FALSE]
     gc()
   }
 
+  # Determine if we need the matrix of missing for each id and cohort
+  mflag <- length(op[[metaOp_addCohortCols(), exact=TRUE]]) |
+           op[[metaOp_addCohortNames(), exact=TRUE]] 
+
   # Call main function
   if (DEBUG) cat("Begin: meta_core\n")
-  ret <- meta_core(beta, se)
+  ret <- meta_core(beta, se, ret.miss.matrix=mflag)
   if (DEBUG) cat("End: meta_core\n")
   rm(beta, se)
   gc()
 
+  # Save miss matrix if needed
+  if (mflag) {
+    miss.matrix          <- ret[["miss.matrix", exact=TRUE]]
+    ret[["miss.matrix"]] <- NULL
+    gc()
+  }
+
   # Set return data frame
-  #p             <- as.data.frame(p)
-  #colnames(p)   <- paste0(pv, ".", cohorts)
-  ret           <- as.data.frame(ret, stringsAsFactors=FALSE)
-  nsubv         <- getMetaNsubCol()
-  ret[, nsubv]  <- nsubs
-  #ret           <- cbind(meta_unpasteIds(ids), ret, p)
-  ret           <- cbind(meta_unpasteIds(ids), ret)
+  ret          <- as.data.frame(ret, stringsAsFactors=FALSE)
+  nsubv        <- getMetaNsubCol()
+  ret[, nsubv] <- nsubs
+  ret          <- cbind(meta_unpasteIds(ids), ret)
+
+  # Add cohort specific columns
+  if (mflag) {
+    ret2 <- meta_addCohortCols(ids, data.list[use], cohorts, miss.matrix, op) 
+    if (length(ret2)) ret <- cbind(ret, ret2) 
+  }
+
+  # Remove files
+  #for (i in 1:ndata) file.remove(data.list[[i]])
 
   if (DEBUG) cat("End: meta_getFinalDataAndRun\n")
 
@@ -992,7 +1120,7 @@ meta_check_beta_se <- function(beta, se) {
   NULL
 }
 
-meta_core <- function(beta, se, only.ret.Q=FALSE) {
+meta_core <- function(beta, se, only.ret.Q=FALSE, ret.miss.matrix=FALSE) {
 
   if (is.vector(beta)) dim(beta) <- c(1, length(beta))
   if (is.vector(se)) dim(se) <- c(1, length(se))
@@ -1039,7 +1167,7 @@ meta_core <- function(beta, se, only.ret.Q=FALSE) {
   wgt       <- 1/(var + tmp)
   tmp       <- NULL
   if (missFlag) wgt[miss] <- 0
-  miss      <- NULL
+  if (!ret.miss.matrix) miss <- NULL
   rm(tmp, q)
   gc()
   rsumWrand <- rowSums(wgt)
@@ -1082,6 +1210,7 @@ meta_core <- function(beta, se, only.ret.Q=FALSE) {
   ret[[getMetaRandomPvalueCol()]] <- pvaluer
   ret[[getMetaHetPvalueCol()]]    <- phet
   ret[[getMetaNcohortCol()]]      <- ncohort
+  if (ret.miss.matrix) ret[["miss.matrix"]] <- miss
 
   ret  
 }
