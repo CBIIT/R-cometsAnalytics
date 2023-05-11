@@ -105,58 +105,7 @@ ret <- RcometsAnalytics::runMeta(c(outfile1, outfile2))
 ret$Results[1:2,]
 ```
 
-### 5. Meta Analysis from transforming results files for consistency
-When performing a meta-analysis, the results files must be consistent
-across all of the cohorts. In the case of a model having a categorical 
-exposure variable, the exposure variable should be coded the same way
-across the cohorts and the same reference level should be used. If the
-coding or reference level was not consistent, then it is possible to
-transform results files to make them consistent. The following example 
-demonstrates this. In this example, each cohort has a set of results from
-running a linear regression on the same model where the exposure variable
-is "smoke", which denotes smoking status with levels "never", "current", 
-and "former". Cohort 1 did not recode the levels of smoke and used "former"
-as the reference level. Cohort 2 recoded the smoke variable as 0=never, 
-1=current, 2=former with 0 as the reference level. Below are the Effects
-tables from each set of results.
-```{r}
-file1 <- file.path(dir, "modelLM__cohort_1__2023-04-01.xlsx")
-file2 <- file.path(dir, "modelLM__cohort_2__2023-04-01.xlsx")
-readxl::read_excel(file1, "Effects")
-readxl::read_excel(file2, "Effects")
-```
-Notice that the "term" column in the Effects tables above contain the names
-of the exposure parameters. These parameter names are not the same in the two
-tables.
-In order for a meta-analysis to be performed, the exposure variable must 
-have the same coding and same reference level in each cohort. We will show
-how to set specific options to change the reference level and to recode
-the exposure variable to make the cohort 1 results consistent with cohort 2.
-The reference level for cohort 1 must be "never" smokers, so 
-the "new.ref.value" option is set to "never". To obtain the same exposure 
-parameter names, the option "change.col.values" is specified as a list
-containing the column name to change ("term") and vectors ("old" and "new")
-which map the original parameter names to the new parameter names.
-The list "list1" below contains the information needed to make the cohort 1
-results consistent with cohort 2.
-```{r}
-old    <- c("smoke.never", "smoke.current", "smoke.former")
-new    <- c("smoke.0",     "smoke.1",       "smoke.2")
-change <- list(col="term", old=old, new=new)
-list1  <- list(file=file1, new.ref.value="never", change.col.values=change)
-```
-Now the *runMeta()* function can be called by inputting a list of file information.
-```{r}
-obj <- RcometsAnalytics::runMeta(list(list1, file2))
-obj$Results
-```
-
-To see the complete list of options for transforming a file of results see 
-the *file.list* object in the user 
-[**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf).
-
-
-### 6. Example using runAllMeta
+### 5. Example using runAllMeta
 The *runAllMeta()* function is for running meta-analyses in super-batch mode.
 The function takes three arguments, with the first argument being a character
 vector of file names and/or folder names. The second argument is the output
