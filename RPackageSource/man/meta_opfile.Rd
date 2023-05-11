@@ -7,13 +7,13 @@
 An Excel file containing models and options for the \code{\link{runAllMeta}} function
 }
 \details{
-The file can contain sheets \bold{META_MODELS}, \bold{META_TYPES}, and \bold{META_TRANSFORM}. 
+The file can contain sheets \bold{META_MODELS} and \bold{META_TYPES}. 
 Each sheet is optional. The \bold{META_MODELS} sheet should have a column
 called \code{MODEL} containing the models that the user wants to run 
 meta-analyses for. 
 If the \bold{MODELS} sheet is not given then meta-analyses for all models
  will be run.
-This sheet can also have a optional column called \code{META_TYPE} that
+This sheet can also have an optional column called \code{META_TYPE} that
 links to the \code{META_TYPE} column in the \bold{META_TYPES} sheet to define
 the options for each meta-analysis model.
 The \bold{META_TYPES} sheet should contain columns \code{META_TYPE},  \code{OPTION},
@@ -21,12 +21,4 @@ and \code{VALUE}.
 See the example file in /inst/extdata/cometsMetaInput.xlsx.
 If the \bold{META_TYPES} sheet is not specified, then the default values for all
  meta-analysis options will be used.
-The \bold{META_TRANSFORM} sheet allows users to transform files of results so that
-a meta-analysis can be run. For example a file can be transformed to change the
-reference category of a categorical exposure variable, or to change the the
-category levels of a stratification or exposure variable so that the levels are 
-consistent with other files of results. This sheet should have columns \code{FILE},
-\code{OPTION}, and \code{VALUE}. The \code{FILE} column has the full name or base name
-of the file to be transformed. For the complete list of transformation options,
-see \code{\link{file.list}}.
 }

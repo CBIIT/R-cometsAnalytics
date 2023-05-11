@@ -22,7 +22,9 @@ See \code{\link{meta_options}}.
 The default is NULL.}
 }
 \value{
-List of data frames containing the results and information
+List of data frames containing the results and information.
+        See \code{\link{metaOutputColumns}} for of a description of
+        columns in the results table.
 }
 \description{
 This function allows users to run a single meta-analysis

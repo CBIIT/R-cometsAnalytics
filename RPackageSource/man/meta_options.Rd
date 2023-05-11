@@ -43,5 +43,17 @@ A list of options for the \code{\link{runMeta}} function
                              (or outcome) and for a categorical exposure variable, the same
                              reference value.
                      The default is TRUE.}
+\item{\code{add.cohort.names}}{ TRUE or FALSE to add binary columns (one for each cohort) to
+      the data frame of results to show which cohorts contributed to the meta-analysis
+      The value will be 1 if the cohort contributed to the result or 0 if the cohort did not.
+                     The default is TRUE.}
+\item{\code{add.cohort.cols}}{ Vector of column names to add to the output for each cohort.
+      These must be column names from the ModelSummary or Effects
+      tables in the meta-analysis input files.
+      For example, if \code{add.cohort.cols = "pvalue"}, then the p-values from each 
+      cohort will be added to the output, and the columns will be of the form
+      <cohort name>.pvalue. A missing value will appear if the cohort did not
+      contribute to the result.
+                     The default is NULL.}
 }
 }
