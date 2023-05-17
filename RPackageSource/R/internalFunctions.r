@@ -129,13 +129,17 @@ checkExposureRef <- function(dta.vmap, dta.models) {
     msg <- c(str, toupper(refv))
     stop(msg_rci_10(msg))
   }
-  vec <- dta.vmap[, tolower(getVarMapAccValsCol()), drop=TRUE]
-  for (i in 1:length(allvars)) {
-    v             <- allvars[i]
-    row           <- rows[i]
-    accvals       <- parseAccValues(vec[row], TRUE)
-    acc.list[[v]] <- accvals
+  accv <- tolower(getVarMapAccValsCol())
+  if (accv %in% colnames(dta.vmap)) {
+    vec <- dta.vmap[, accv, drop=TRUE]
+    for (i in 1:length(allvars)) {
+      v             <- allvars[i]
+      row           <- rows[i]
+      accvals       <- parseAccValues(vec[row], TRUE)
+      acc.list[[v]] <- accvals
+    }
   }
+  accFlag <- length(acc.list)
 
   # Loop over remaining rows
   expvec    <- dta.models[, expv, drop=TRUE]
@@ -168,9 +172,11 @@ checkExposureRef <- function(dta.vmap, dta.models) {
     for (j in 1:length(cvars)) {
       ref <- refs[j]
       v   <- cvars[j]
-      if (!(ref %in% acc.list[[v, exact=TRUE]])) {
-        msg <- c(toupper(exprefv), ref, v, dta.models[i, modelsv, drop=TRUE])
-        stop(msg_rci_13(msg)) 
+      if (accFlag) {
+        if (!(ref %in% acc.list[[v, exact=TRUE]])) {
+          msg <- c(toupper(exprefv), ref, v, dta.models[i, modelsv, drop=TRUE])
+          stop(msg_rci_13(msg)) 
+        }
       }
     }
   }
@@ -385,9 +391,8 @@ Harmonize<-function(dtalist){
     names(foundhmdb)<-gsub("hmdb_id",cohorthmdb,names(foundhmdb))
     names(finharmlistg)<-gsub("hmdb_id",cohorthmdb,names(finharmlistg))
 
-    finharmlistg <- finharmlistg %>% filter(!is.na(uid_01)) # take the ones with the previous match
-
     #################################################################
+    #finharmlistg <- finharmlistg %>% filter(!is.na(uid_01)) # take the ones with the previous match
     # The code below was giving an error because finharmlistg and 
     #   foundhmdb did not have the same columns. To fix, add column
     #   names to one or both:
@@ -399,11 +404,21 @@ Harmonize<-function(dtalist){
       c2   <- colnames(foundhmdb)
       add  <- c2[!(c2 %in% c1)]
       if (length(add)) finharmlistg[, add] <- NA
+
+      # Check the type of column in each to prevent an error
+      for (v in colnames(finharmlistg)) {
+        type1 <- is.numeric(finharmlistg[, v, drop=TRUE])
+        type2 <- is.numeric(foundhmdb[, v, drop=TRUE])
+        if (type1 && !type2) finharmlistg[, v] <- as.character(finharmlistg[, v, drop=TRUE])
+        if (type2 && !type1) foundhmdb[, v]    <- as.character(foundhmdb[, v, drop=TRUE])
+      }
     }
- 
-    #finharmlistg<-finharmlistg %>%
-    #  filter(!is.na(uid_01)) %>% # take the ones with the previous match
-    #  union_all(foundhmdb)       # union with the non-matches
+
+    if (nrow(foundhmdb)) {
+      finharmlistg<-finharmlistg %>%
+        filter(!is.na(uid_01)) %>% # take the ones with the previous match
+        union_all(foundhmdb)       # union with the non-matches
+    }
     #################################################################
 
     # fix found hmdb name
@@ -411,13 +426,12 @@ Harmonize<-function(dtalist){
 
   }
 
-
   if(all.equal(sort(finharmlistg[,dtalist$metabId]),sort(dtalist$metab[,dtalist$metabId]))) {
   	dtalist$metab <- finharmlistg
   	return(dtalist)
   }
   else {
-	stop(msg_rci_22())
+    stop(msg_rci_22())
   }
 
 }

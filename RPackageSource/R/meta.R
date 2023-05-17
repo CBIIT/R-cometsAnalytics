@@ -33,22 +33,16 @@ meta_main <- function(file.obj, modelName, op) {
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_main\n")
   len <- length(file.obj)
-  if (len < op[[metaOp_minNcohortName()]]) {
-    msg <- msg_meta_1(len)
-    stop(msg)
-  }
-
+  if (len < op[[metaOp_minNcohortName()]]) stop(msg_meta_1(len))
+  
   op$temp.dir <- checkForSep(op$temp.dir)
 
   # Transform all files to COMETS and save in rda files
   tmp     <- meta_transformAndSave(file.obj, op) 
   filevec <- tmp[["files", exact=TRUE]]
   op      <- tmp[["op", exact=TRUE]]
-  if (length(filevec) < op[[metaOp_minNcohortName()]]) {
-    msg <- paste0(msg_meta_2())
-    stop(msg)
-  }
-
+  if (length(filevec) < op[[metaOp_minNcohortName()]]) stop(msg_meta_2())
+  
   op$modelName         <- modelName
   op$modelNumber       <- meta_getModelNumber(modelName)
   tmp                  <- meta_initFileCheck(filevec, op)

@@ -49,6 +49,10 @@ msg_rci_23              <- function(x) paste0("The categorical variable '", x[1]
 msg_rci_24              <- function(x) paste0("ERROR: categorical variable '", x[1], "' has value(s) '",
                                               x[2], "' not defined in the ", x[3], 
                                               " column of the ", x[4], " sheet.")
+msg_rci_25              <- function(x) paste0("Possible problem with the ", getVarMapVarDefCol(),
+                                              " of the ", getVarMapSheetName(), 
+                                              " for variable ", x[1], "\n")
+
 
 msg_res_1               <- function(x) paste0("ERROR: the input Excel file is missing the ", x, " sheet.\n")
 msg_res_2               <- function(x) paste0("ERROR: multiple sheets in the input Excel file map to the ", x, " sheet.\n")

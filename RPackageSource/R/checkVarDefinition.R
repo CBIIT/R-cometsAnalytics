@@ -26,7 +26,7 @@ vardef_catvars <- function(vmap, subjdata) {
     }
 
     # Get the categories
-    defcats <- vardef_getCats(def) 
+    defcats <- vardef_getCats(def, var) 
 
     # Check against the data. A group variable for conditional logistic models
     #   is problematic.
@@ -57,7 +57,46 @@ vardef_getMissCatStr <- function(x) {
 
 }
 
-vardef_getCats <- function(str) {
+vardef_getCats <- function(str, var) {
+
+  ret <- NULL
+  vec <- trimws(unlist(strsplit(trimws(str), "(", fixed=TRUE)))
+  if (!length(vec)) return(ret)
+  vec <- vec[nchar(vec) > 0] 
+  if (length(vec) != 2) return(ret)
+  x   <- vec[2]
+
+  vec <- trimws(unlist(strsplit(x, "=", fixed=TRUE)))
+  vec <- vec[nchar(vec) > 0]
+  n   <- length(vec)
+  if (!n) return(ret)
+  ret <- vec[1]
+  if (n < 3) return(ret)
+
+  # Leave out first and last
+  vec <- vec[-c(1, n)]
+  n   <- length(vec)
+  for (i in 1:n) {
+    vec2 <- unlist(strsplit(vec[i], "", fixed=TRUE))
+    n2   <- length(vec2)
+    tmp  <- vec2 %in% c(" ", ",", ":", ";", ".")
+    if (any(tmp)) {
+      j <- max((1:n2)[tmp])
+      if (j < n2) {
+        val <- trimws(paste0(vec2[(j+1):n2], collapse=""))
+        ret <- c(ret, val)
+      } else {
+        warning(msg_rci_25(var))
+      }
+    } else {
+      warning(msg_rci_25(var))
+    }
+  }
+
+  ret
+}
+
+vardef_getCats.old <- function(str) {
 
   ret <- NULL
   vec <- trimws(unlist(strsplit(trimws(str), "(", fixed=TRUE)))
