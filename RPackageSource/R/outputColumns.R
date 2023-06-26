@@ -102,14 +102,6 @@ NULL
 #' 
 NULL
 
-#' Columns in the ChemEnrich table. 
-#'
-#' @name ChemEnrich
-#' @title Chemical Class Enrichment 
-#' @details See \code{\link[RaMP]{chemicalClassEnrichment}} for details.
-#' 
-NULL
-
 #' Columns in Table1. 
 #' Depending on the model run and options specified, 
 #' all the below names may not appear in the data frame.

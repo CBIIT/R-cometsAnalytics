@@ -222,9 +222,15 @@ runModel.checkModelDesign <- function (modeldata, metabdata, op) {
 
   # If subjects were removed, then update gdta.
   # Possibly change this to keep a logical vector of subs to keep.
-  if (nrow(dmat) < nrow(gdta)) {
+  nrg <- nrow(gdta)
+  nrd <- nrow(dmat)
+  if (nrd < nrg) {
     tmp  <- rownames(gdta) %in%  rownames(dmat)
     gdta <- gdta[tmp, , drop=FALSE]
+
+    # print a warning
+    msg <- paste0("WARNING: ", nrg - nrd, " subject(s) have been removed due to missing values")
+    warning(msg)
   }  
 
   # Drop unused levels from factors

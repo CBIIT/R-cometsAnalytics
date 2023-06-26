@@ -159,15 +159,39 @@ Harmonize<-function(dtalist){
     names(foundhmdb)<-gsub("hmdb_id",cohorthmdb,names(foundhmdb))
     names(finharmlistg)<-gsub("hmdb_id",cohorthmdb,names(finharmlistg))
 
-    finharmlistg<-finharmlistg %>%
-      filter(!is.na(uid_01)) %>% # take the ones with the previous match
-      union_all(foundhmdb)       # union with the non-matches
+    #################################################################
+    # The code below was giving an error because finharmlistg and 
+    #   foundhmdb did not have the same columns. To fix, add column
+    #   names to one or both:
+    if (nrow(foundhmdb) && nrow(finharmlistg)) {
+      c1   <- colnames(finharmlistg)
+      c2   <- colnames(foundhmdb)
+      add  <- c1[!(c1 %in% c2)]
+      if (length(add)) foundhmdb[, add] <- NA
+      c2   <- colnames(foundhmdb)
+      add  <- c2[!(c2 %in% c1)]
+      if (length(add)) finharmlistg[, add] <- NA
+
+      # Check the type of column in each to prevent an error
+      for (v in colnames(finharmlistg)) {
+        type1 <- is.numeric(finharmlistg[, v, drop=TRUE])
+        type2 <- is.numeric(foundhmdb[, v, drop=TRUE])
+        if (type1 && !type2) finharmlistg[, v] <- as.character(finharmlistg[, v, drop=TRUE])
+        if (type2 && !type1) foundhmdb[, v]    <- as.character(foundhmdb[, v, drop=TRUE])
+      }
+    }
+
+    if (nrow(foundhmdb)) {
+      finharmlistg<-finharmlistg %>%
+        filter(!is.na(uid_01)) %>% # take the ones with the previous match
+        union_all(foundhmdb)       # union with the non-matches
+    }
+    #################################################################
 
     # fix found hmdb name
     names(finharmlistg)<-gsub(".cohort.comets",".comets",names(finharmlistg))
 
   }
-
 
   if(all.equal(sort(finharmlistg[,dtalist$metabId]),sort(dtalist$metab[,dtalist$metabId]))) {
   	dtalist$metab <- finharmlistg

@@ -315,6 +315,17 @@ getModelData <-  function(readData,
   # Outcomes and time vars must be numeric
   gdta <- convertVarsToNumeric(gdta, c(rcovs, timecov))
 
+  # Check time variable for values <= 0
+  if (length(timecov)) {
+    for (v in timecov) {
+      tmp <- gdta[, v, drop=TRUE] <= 0
+      tmp[is.na(tmp)] <- FALSE
+      if (any(tmp)) {
+        msg <- paste0("ERROR: the time variable '", v, "' must be positive")
+        stop(msg)
+      }
+    }
+  }
 
   # Create list for analyses  -------------------------------
   # list for subset data
