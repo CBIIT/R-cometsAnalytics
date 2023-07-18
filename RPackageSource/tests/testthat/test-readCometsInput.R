@@ -15,6 +15,9 @@ data  <- RcometsAnalytics::readCOMETSinput(f)
 
 b_data$input.file <- NULL
 data$input.file   <- NULL
+x                 <- b_data[["metab"]]
+x$comp_id         <- NULL
+b_data[["metab"]] <- x
 
 # Compare result to the baseline. 
 test_that("RcometsAnalytics::readCOMETSinput",
