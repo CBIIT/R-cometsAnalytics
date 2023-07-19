@@ -24,7 +24,7 @@ if (!require("devtools")) {
 }
 
 library(devtools)
-devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource@master")
+devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource@v3.0-dev")
 
 library(RcometsAnalytics)
 ```
