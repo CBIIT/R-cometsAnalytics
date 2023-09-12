@@ -31,6 +31,9 @@ library(RcometsAnalytics)
 
 # Documentation and Example Data
 
+## News
+All changes are logged under our [NEWS](https://github.com/CBIIT/R-cometsAnalytics/blob/master/RPackageSource/NEWS)  section.  
+
 ## Vignette
 To view a detailed vignette that outlines the basic steps for running analyses using the RcometsAnalytics package [Click here](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v2.1.html).
 
