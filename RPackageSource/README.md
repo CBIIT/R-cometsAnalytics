@@ -18,13 +18,15 @@ Of note, this R package contains all the functions that are used by the Comets-A
 
 To install and load the RcometsAnalytics package, simply type the following:
 
+Note: If you have previously downloaded the @master version of the package, uninstall and restart R before downloading v3.0-dev version
+
 ```
 if (!require("devtools")) {
     install.packages("devtools")
 }
 
 library(devtools)
-devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource@master")
+devtools::install_github("CBIIT/R-cometsAnalytics/RPackageSource@v3.0-dev")
 
 library(RcometsAnalytics)
 ```
