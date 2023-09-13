@@ -32,8 +32,11 @@
 #' 	outcomes=c("lactose","lactate"))
 #' obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' @export
+###add adj.p.col and adj to input arguments
+#### adj.p.col: name of column to adjust p. Leave as empty if we do not need adjustment on p
+#### adj: adjustment method, default is BH
 
-runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NULL) {
+runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NULL, adj.p.col="", adj="BH") { # add adj.p.col="" and adj = "BH"
 
   ptm <- base::proc.time() # start processing time
 
@@ -56,7 +59,8 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NUL
   ret       <- runModel.addMetabCols(ret, metabdata, op)
   ret       <- runModel.getTable1(ret, modeldata, op) 
   ret       <- runModel.getInfoDF(ret, modeldata, metabdata, op) 
-
+  if (nchar(adj.p.col)>0) ret$Effects <- runModel.subsetDfByPvalue(ret$Effects, adj.p.col, adj)  # call to subsetDfByPvalue
+  
   # Stop the clock
   ptm <- base::proc.time() - ptm
   attr(ret, "ptime") <- paste("Processing time:", round(ptm[3], digits=3), "sec")
