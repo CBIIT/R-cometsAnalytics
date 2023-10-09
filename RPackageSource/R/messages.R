@@ -170,6 +170,8 @@ msg_mod_21              <- function(x) paste0("ERROR: no group variable specifie
 msg_mod_22              <- function(x) paste0("ERROR: only one group variable can be specified for ", x[1], " model.")
 msg_mod_23              <- function(x) paste0("ERROR: ", x[1], " is not a valid option")
 msg_mod_24              <- function(x) paste0("WARNING: ", x[1], " subject(s) have been removed due to missing values")
+msg_mod_25              <- function() paste0("Duplicated harmonized metabolite ids")
+msg_mod_26              <- function(x) paste0("Duplicated harmonized metabolite ids in cohort ", x[1])
 
 msg_meta_1              <- function(x) paste0("ERROR: number of files provided (", x[1], ")",
                                               " is less than required. In this analysis, then number of files ", 
@@ -205,7 +207,7 @@ msg_meta_27             <- function(x) paste0("ERROR: column ", x[1], " is missi
 msg_meta_28             <- function(x) paste0("ERROR: column ", x[1], " is missing. Set option ", x[2])
 msg_meta_29             <- function(x) paste0("ERROR: column ", x[1], " not found in data")
 msg_meta_30             <- function(x) paste0(x[1], "='", x[2], "' not found in the data")
-msg_meta_31             <- function() "ERROR: loaded file is not a data frame or list"
+msg_meta_31             <- function() "ERROR: file type is not expected. Please re-run model using COMETS version 3.0 or later."
 msg_meta_32             <- function() "ERROR: the above file(s) do not have the correct file extension or are not valid directories"
 msg_meta_33             <- function() "ERROR: the above file(s) do not have the correct file extension"
 msg_meta_34             <- function() "ERROR: Data does not contain unique results"
@@ -222,7 +224,9 @@ msg_meta_44             <- function(x) paste0("No files found for model ", x[1],
 msg_meta_45             <- function(x) paste0("The option ", x[1], " removed all strata.",
                                               " Stratification het test will not be performed.\n")
 msg_meta_46             <- function(x) paste0("Begin meta-analysis for model ", x[1], "\n")
-
+msg_meta_47             <- function() "ERROR: no metabolites remain after removing duplicates"
+msg_meta_48             <- function(x) paste0("The metabolites ", x[1], " are duplicates")
+msg_meta_49             <- function() "ERROR while processing duplicate metabolites\n" 
 
 msg_metaop_1            <- function() paste0("ERROR: missing value(s) in the ", getOptionNameCol(), 
                                              " of the ", getMetaModelTypeSheetName(), " sheet")

@@ -619,3 +619,27 @@ formIdsFromCols <- function(x, cols, sep=":") {
   }
   ret
 }
+
+getSeqsFromList <- function(inlist) {
+
+  ncomb <- 1
+  nc    <- length(inlist)
+  for (i in 1:nc) ncomb <- ncomb*length(inlist[[i]])
+  nn    <- names(inlist)
+
+  mat <- matrix(NA, nrow=ncomb, ncol=nc)
+  if (length(nn)) colnames(mat) <- nn
+  for (j in 1:nc) {
+     vec  <- inlist[[j]]
+     nvec <- length(vec)
+     if (j == 1) {
+       m <- ncomb/nvec
+     } else {
+       m <- m/nvec
+     }
+     mat[, j] <- rep(vec, each=m)
+  }
+
+  mat
+
+} # END: getSeqsFromList

@@ -27,9 +27,9 @@ runmodel.addWarning <- function(obj, newList) {
   if (!length(x2)) x2 <- ""
   if (!length(x3)) x3 <- ""
   new <- cbind(x1, x2, x3)
+  colnames(new) <- c(c1, c2, c3)
   if (is.null(obj)) {
-    obj           <- new
-    colnames(obj) <- c(c1, c2, c3)
+    obj <- new
   } else {
     obj <- rbind(obj, new)
   }

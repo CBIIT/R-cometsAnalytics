@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.7"}
+getVersionNumber     <- function() {"2.9.0.9"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -225,6 +225,9 @@ getAllRetSheetNames            <- function() {c(getModelSummaryName(), getEffect
                                                 getInfoTableDfName())
                                              }
 
+getMetabHarmIdColName          <- function() {"uid_01"}
+dupMetabHarmIds                <- function() {"dupMetabHarmIds"}
+
 # Meta analysis
 getMetaModelsSheetName            <- function() {"Meta_Models"}
 getMetaModelTypeSheetName         <- function() {"Meta_Types"}
@@ -254,8 +257,9 @@ metaOp_check.consistency          <- function() {"check.consistency"}
 metaOp_check.consistencyDefault   <- function() {TRUE}
 metaOp_oneModelCheck              <- function() {"oneModelCheck"}
 metaOp_oneModelCheckDefault       <- function() {TRUE}
-metaOp_dups.allow                 <- function() {"dups.allow"}
-metaOp_dups.allowDefault          <- function() {FALSE}
+metaOp_dups.method                <- function() {"dups.method"}
+metaOp_dups.methodDefault         <- function() {1}
+metaOp_dups.methodValues          <- function() {0:1} #0=error, 1=remove all
 metaOp_stopOnFileError            <- function() {"stopOnFileError"}
 metaOp_stopOnFileErrorDefault     <- function() {TRUE}
 metaOp_models                     <- function() {"models"}
@@ -269,6 +273,7 @@ metaOp_addCohortNamesDefault      <- function() {TRUE}
 metaModelNameNumberSep         <- function() {" "}
 metaModelNameDefault           <- function() {"NA"}
 metaRetListResultsTable        <- function() {"Results"}
+metaRetListDupsTable           <- function() {"Duplicates"}
 getHarmMetabIdCol              <- function() {"metabolite_name"}
 getMetaBetaCol                 <- function() {"meta.estimate"}
 getMetaBetaSeCol               <- function() {"meta.std.error"}

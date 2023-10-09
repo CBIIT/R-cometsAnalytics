@@ -202,13 +202,15 @@ checkAcceptedValues <- function(dta.sdata, dta.vmap) {
   types               <- trimws(types[tmp])
   accvals             <- trimws(accvals[tmp])
   vars                <- trimws(vars[tmp])
+  tmp                 <- is.na(accvals)
+  if (any(tmp)) accvals[tmp] <- ""
   n                   <- length(types)
   if (!n) return(NULL)
   catflag <- types == cat.str
   for (i in 1:n) {
 
     # Special case of group variable for conditional logistic regression
-    if (toupper(accvals[i]) == "NA") next
+    if (toupper(accvals[i]) %in% c("NA", "")) next
 
     obj <- parseAccValues(accvals[i], catflag[i])
     if (!length(obj)) {
@@ -233,7 +235,6 @@ checkAccValuesInData <- function(sdata, var, obj, catflag) {
       stop(msg_rci_15(msg)) 
     }
   } else {
-
     # Continuous
     #list(min=vec[1], max=vec[2], include.min=inc1, include.max=inc2)
     vec <- as.numeric(vec)
@@ -241,7 +242,7 @@ checkAccValuesInData <- function(sdata, var, obj, catflag) {
     if (obj$include.min) {
       tmp <- vec >= a
     } else {
-      tmp <- vec >= a
+      tmp <- vec > a
     }
     flag1 <- contAccValuesVecAllOk(tmp)
     b     <- obj$max
@@ -252,7 +253,7 @@ checkAccValuesInData <- function(sdata, var, obj, catflag) {
     }
     flag2 <- contAccValuesVecAllOk(tmp)
     if (!flag1 || !flag2) {
-      msg <- c(var, getQuotedVecStr(obj))
+      msg <- c(var, getQuotedVecStr(obj$obj))
       stop(msg_rci_16(msg)) 
     }
   }

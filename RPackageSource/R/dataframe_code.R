@@ -150,3 +150,16 @@ df.rbind.all <- function(base, new) {
 
 } # END: df.rbind.all
 
+df.checkRemConstantCol <- function(df, col) {
+
+  cx <- colnames(df)
+  if (col %in% cx) {
+    vec <- df[, col, drop=TRUE]
+    if (length(unique(vec)) < 2) {
+      tmp <- !(cx %in% col)
+      cx  <- cx[tmp]
+      df  <- df[, cx, drop=FALSE]
+    }
+  }
+  df
+}

@@ -33,6 +33,11 @@
 #' \item{\code{strata.random.het.df}}{ Degrees of freedom for the above test. }
 #' }
 #'
+#' The Duplicates data frame contains the meta-analysis results for duplicated
+#'  metabolites. It contains the same columns as the Results data frame plus
+#'  the columns \code{run}, \code{outcomespec}, and \code{exposurespec} which
+#'  are useful for differentiating the duplicated metabolites.
+#'
 #' @name metaOutputColumns
 #' @title Meta Analysis Output Columns
 #' @details 

@@ -56,6 +56,7 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NUL
   ret       <- runModel.addMetabCols(ret, metabdata, op)
   ret       <- runModel.getTable1(ret, modeldata, op) 
   ret       <- runModel.getInfoDF(ret, modeldata, metabdata, op) 
+  ret       <- runModel.dupMetabHarmIds(ret, metabdata, op)
 
   # Stop the clock
   ptm <- base::proc.time() - ptm
@@ -67,6 +68,26 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NUL
   ret
 
 } # END: runModel 
+
+runModel.dupMetabHarmIds <- function(ret, metabdata, op) {
+
+  ids <- metabdata[[dupMetabHarmIds(), exact=TRUE]]
+  if (!length(ids)) return(ret)
+  idstr     <- paste0(ids, collapse=", ")
+  nm        <- runModel.getWarningsListName()
+  obj       <- ret[[nm, exact=TRUE]]
+  c1        <- runModel.getWarningCol()
+  c2        <- runModel.getObjectCol()
+  c3        <- runModel.getMessageCol()
+  lst       <- list()
+  lst[[c1]] <- "WARNING"
+  lst[[c2]] <- idstr
+  lst[[c3]] <- msg_mod_25()
+  obj       <- runmodel.addWarning(obj, lst) 
+  ret[[nm]] <- obj
+
+  ret
+}
 
 # Function to check for passing in options with running in batch
 runModel.checkOpBatch <- function(modeldata, op) {

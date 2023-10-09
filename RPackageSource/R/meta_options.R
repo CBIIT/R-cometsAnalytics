@@ -26,9 +26,6 @@
 #'      variables, and vec1, vec2, ... are vectors of stratification levels to be removed
 #'      from the test.
 #'                      The default is NULL.}
-#' \item{\code{dups.allow}}{ TRUE or FALSE to allow for duplicated metabolite results in a file.
-#'                      If TRUE, the result with the largest \code{nobs} will be used.
-#'                      The default is FALSE.}
 #' \item{\code{stopOnFileError}}{ TRUE or FALSE to stop processing when a problem with any
 #'                                   one of the input files is encountered. If FALSE, then
 #'                           the files containing errors will be removed from the analysis.
@@ -63,8 +60,8 @@ getValidGlobalMetaOps <- function() {
   ops.charVec <- c(metaOp_cohorts.include(), metaOp_cohorts.exclude(),
                    metaOp_addCohortCols())
   ops.num     <- c(metaOp_minNcohortName(), metaOp_cohortMinSubs(), metaOp_totalMinSubs(),
-                   "DEBUG")
-  ops.log     <- c(metaOp_oneModelCheck(), metaOp_dups.allow(), metaOp_stopOnFileError(),
+                   metaOp_dups.method(), "DEBUG")
+  ops.log     <- c(metaOp_oneModelCheck(),  metaOp_stopOnFileError(),
                    metaOp_addCohortNames())
   ops.list    <- metaOp_strataToExcludeFromHetTest()
   default     <- list(cohorts.include=NULL, cohorts.exclude=NULL, DEBUG=0, MODEL="")
@@ -74,7 +71,7 @@ getValidGlobalMetaOps <- function() {
   default[[getOutTypeOpName()]]                <- getOutTypeOpDefault()
   default[metaOp_strataToExcludeFromHetTest()] <- list(NULL)
   default[[metaOp_oneModelCheck()]]            <- metaOp_oneModelCheckDefault()
-  default[[metaOp_dups.allow()]]               <- metaOp_dups.allowDefault()
+  default[[metaOp_dups.method()]]              <- metaOp_dups.methodDefault()
   default[[metaOp_stopOnFileError()]]          <- metaOp_stopOnFileErrorDefault()
   default <- addNamedValueToList(default, metaOp_addCohortCols(), metaOp_addCohortColsDefault())
   default <- addNamedValueToList(default, metaOp_addCohortNames(), metaOp_addCohortNamesDefault())

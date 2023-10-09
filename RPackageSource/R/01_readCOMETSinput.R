@@ -281,8 +281,11 @@ readCOMETSinput <- function(file, mode="Batch") {
   dtalist[[getMetabDataOpsName()]] <- dta.options
   dtalist[[getInputFileOpsName()]] <- file
 
-  # Check vardefinition for categorical variables
-  vardef_catvars(dtalist$vmap, dtalist$subjdata) 
+  # Check vardefinition for categorical variables. Turned off, now have ACCEPTED_VALUES col
+  #vardef_catvars(dtalist$vmap, dtalist$subjdata) 
+
+  # Check for duplicated harminized ids
+  dtalist[[dupMetabHarmIds()]] <- rci.checkForDupHarmIds(dtalist$metab)
 
   # Test the models in the Models sheet 
   err <- infile.checkAllModels(dtalist)
@@ -404,5 +407,17 @@ renameSubjDataVars <- function(x, vmap) {
 
 } # END: renameSubjDataVars
 
+# Check for duplicated harmonized ids
+rci.checkForDupHarmIds <- function(metabDF) {
 
+  ret <- NULL
+  v   <- getMetabHarmIdColName()
+  if (nonEmptyDfHasCols(metabDF, v, allcols=1, ignoreCase=0)) {
+    vec <- unlist(metabDF[, v, drop=TRUE])
+    tmp <- duplicated(vec)
+    if (any(tmp)) ret <- vec[tmp]
+  }
+
+  ret
+}
 

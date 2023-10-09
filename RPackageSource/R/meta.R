@@ -22,6 +22,7 @@ runMeta <- function(file.obj, op=NULL) {
   op          <- meta_check_op(op) 
   op$temp.dir <- meta_createTempDir(getwd(), nrand=6)
   ret         <- try(meta_main(file.obj, NULL, op), silent=FALSE)
+#ret <- meta_main(file.obj, NULL, op)
   meta_rmDir(op)
   ret
 }
@@ -55,9 +56,12 @@ meta_main <- function(file.obj, modelName, op) {
   op                   <- tmp$op
   ids                  <- tmp$ids
   nsubs                <- tmp$nsub
+  dup.ids              <- tmp[["dup.ids", exact=TRUE]]
   op$cohorts           <- names(data.list)
   rm(tmp)
   gc()
+  ret      <- NULL
+  ret.dups <- NULL
 
   # Check for model consistency for one model across the cohorts (if option specified?)
   meta_consistency(file.info.list, op)
@@ -73,14 +77,32 @@ meta_main <- function(file.obj, modelName, op) {
   if (is.na(ret)) ret <- ""
   op$strat.model <- nchar(ret) > 0
 
-  ret <- meta_getFinalDataAndRun(ids, nsubs, data.list, op) 
-  ret <- meta_setReturnObj(ret, op)
+  # Process duplicate metabs and then remove them from data
+  if (length(dup.ids)) {
+    tmp      <- match(dup.ids, ids)
+    if (any(is.na(tmp))) stop("INTERNAL CODING ERROR dup.ids")
+    ret.dups <- try(meta_process_dups(dup.ids, nsubs[tmp], data.list, op), silent=TRUE)
+    if ("try-error" %in% class(ret.dups)) {
+      wnm       <- runModel.getWarningsListName()
+      op[[wnm]] <- runmodel.checkForError(ret.dups, warnStr="ERROR", objStr="", 
+                                   rem.obj=op[[wnm, exact=TRUE]], msg=NULL) 
+      cat(msg_meta_49())
+      ret.dups <- NULL
+    }
+    tmp      <- !(ids %in% dup.ids)
+    ids      <- ids[tmp]
+    nsubs    <- nsubs[tmp]
+  }
+
+  if (length(ids)) ret <- meta_getFinalDataAndRun(ids, nsubs, data.list, op) 
+
+  ret <- meta_setReturnObj(ret, ret.dups, op)
   if (DEBUG) cat("End: meta_main\n")  
 
   ret     
 }
 
-meta_setReturnObj <- function(df, op) {
+meta_setReturnObj <- function(df, df.dups, op) {
 
   ret  <- list()
   wnm  <- runModel.getWarningsListName()
@@ -108,18 +130,31 @@ meta_setReturnObj <- function(df, op) {
   df <- orderVars(df, ord)
  
   # Check for constant model summary column
-  cx <- colnames(df)
-  if (modcol %in% cx) {
-    vec <- df[, modcol, drop=TRUE]
-    if (length(unique(vec)) < 2) {
-      tmp <- !(cx %in% modcol)
-      cx  <- cx[tmp]
-      df  <- df[, cx, drop=FALSE]
-    }
+  df <- df.checkRemConstantCol(df, modcol) 
+  ret[[metaRetListResultsTable()]] <- df
+
+  # Duplicates
+  dupnm <- metaRetListDupsTable()
+  if (length(df.dups)) {
+    ord <- c(modcol,
+           runModel.getStrataColName(), runModel.getStrataNumColName(),
+           getModelSummaryOutUidCol(), getModelSummaryExpUidCol(),
+           getEffectsTermName(), 
+           getMetaNcohortCol(), getMetaNsubCol(),
+           getMetaFixedPvalueCol(), getMetaFixedBetaCol(), getMetaFixedBetaSeCol(),
+           getMetaFixedBetaLCol(), getMetaFixedBetaUCol(),
+           getMetaRandomPvalueCol(), getMetaRandomBetaCol(), getMetaRandomBetaSeCol(),
+           getMetaRandomBetaLCol(), getMetaRandomBetaUCol(),
+           getMetaHetPvalueCol(), getMetaDirectionCol(), 
+           paste0(getEffectsPvalueName(), ".", op$cohorts),
+           getMetaMessageCol())
+    df.dups <- orderVars(df.dups, ord)
+    df.dups <- df.checkRemConstantCol(df.dups, modcol) 
+    ret[[dupnm]] <- df.dups
   }
 
-  ret[[metaRetListResultsTable()]] <- df
-  ret[[wnm]]                       <- wobj
+  # Errors/warnings table
+  ret[[wnm]] <- wobj
 
   # Info table
   nm        <- getInfoTableDfName()
@@ -155,6 +190,7 @@ meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
     ret           <- data.frame(1:length(ids))
     colnames(ret) <- idv
   }
+
   for (i in 1:ncohorts) {
     cohort <- cohorts[i]
     x      <- myread_rda(data.list[[i]])
@@ -167,9 +203,9 @@ meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
       next 
     }
 
-    rows   <- match(ids, x[, idv, drop=TRUE])
-    tmp    <- !is.na(rows)
-    rows   <- rows[tmp]
+    rows <- match(ids, x[, idv, drop=TRUE])
+    tmp0 <- !is.na(rows)
+    rows <- rows[tmp0]
     if (!length(rows)) {
       msg <- paste0("INTERNAL CODING ERROR with cohort ", cohort, "\n")
       cat(msg)
@@ -185,10 +221,63 @@ meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
     for (j in 1:ncols) {
       v            <- new[j]
       ret[, v]     <- NA
-      ret[rows, v] <- x[rows, cols[j], drop=TRUE] 
+      ret[tmp0, v] <- x[rows, cols[j], drop=TRUE] 
       if (missFlag) ret[tmp, v] <- NA
     } 
-    rm(x, rows, tmp); gc()
+    rm(x, rows, tmp, tmp0); gc()
+  }
+  ret[[idv]] <- NULL
+  ret
+}
+
+meta_addCohortCols_dups <- function(ids, data.list, cohorts, missMat, op, 
+                                    colsToAdd) {
+
+  ncohorts <- length(cohorts)
+  nids     <- length(ids)
+  if (ncohorts != length(data.list)) stop("INTERNAL CODING ERROR 1")
+  if (ncohorts != ncol(missMat)) stop("INTERNAL CODING ERROR 2")
+  if (nids != nrow(missMat)) stop("INTERNAL CODING ERROR 3")
+  ncols <- length(colsToAdd)
+
+  ret  <- NULL
+  flag <- op[[metaOp_addCohortNames(), exact=TRUE]]
+  if (flag) {
+    # missMat is TRUE if missing
+    ret <- matrix(1-as.numeric(missMat), nrow=nids, ncol=ncohorts, byrow=FALSE)
+    colnames(ret) <- cohorts
+    ret <- as.data.frame(ret, check.names=FALSE)
+  }
+
+  idv <- getMetaIdCol()
+  if (is.null(ret)) {
+    ret           <- data.frame(1:length(ids))
+    colnames(ret) <- idv
+  }
+
+  # Columns to add are part of data.list in the same order
+  for (i in 1:ncohorts) {
+    cohort <- cohorts[i]
+    x      <- data.list[[i]]
+    
+    # Use missMat to determine if this cohort was not included for some metabs
+    tmp      <- missMat[, i, drop=TRUE] %in% 1
+    missFlag <- any(tmp) 
+
+    # New column names
+    new <- paste0(cohort, ".", colsToAdd)
+    cx  <- colnames(x)
+    for (j in 1:ncols) {
+      v   <- new[j]
+      col <- colsToAdd[j]
+      if (col %in% cx) {
+        ret[, v] <- x[, col, drop=TRUE]
+      } else {
+        ret[, v] <- NA
+      }
+      if (missFlag) ret[tmp, v] <- NA
+    } 
+    rm(x, tmp); gc()
   }
   ret[[idv]] <- NULL
   ret
@@ -531,48 +620,73 @@ meta_checkForUnqIds <- function(df, op) {
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_checkForUnqIds\n")
 
-  idv <- getMetaIdCol()
-  ids <- df[, idv, drop=TRUE]
-  tmp <- duplicated(ids)
-
+  dups      <- NULL
+  dups.full <- NULL
+  idv       <- getMetaIdCol()
+  ids       <- df[, idv, drop=TRUE]
+  tmp       <- duplicated(ids)
   if (any(tmp)) {
-    dups <- ids[tmp]
+    dups      <- ids[tmp]
 
-    # Check if option specified
-    allow <- op[[metaOp_dups.allow(), exact=TRUE]]
-    if (!allow) {
-      # ERROR, print some info
+    # Remove the dups.method option and have a warning.
+    # All duplicate combinations will be processed.
+    dupmethod <- 1 # op[[metaOp_dups.method(), exact=TRUE]]
+    tmp <- ids %in% dups
+    rem <- df[tmp, , drop=FALSE]
+    #df  <- df[!tmp, , drop=FALSE] Do not remove from data
+    
+    # Get the metabolite names
+    yv   <- sort(unique(rem[, getModelSummaryOutUidCol(), drop=TRUE]))
+    ev   <- sort(unique(rem[, getModelSummaryExpUidCol(), drop=TRUE]))
+    mets <- yv
+    if (length(ev) > length(yv)) mets <- ev  
+    metstr <- getQuotedVarStr(mets)
+    msg    <- msg_meta_48(metstr)
+
+    if (DEBUG) {
       tmp  <- ids %in% dups[1]
       tmp0 <- tmp
       tmp  <- ids[tmp]
       tmp  <- tmp[1:min(5, length(tmp))]   
       print(tmp) 
       print(df[tmp0, ])
-      stop(msg_meta_34())
-    } else {
-      if (op$DEBUG) cat("Removing duplicated ids\n")
-      # Use another option to determine how to remove duplicates
-      # For now, use max nobs
-      nobs <- df[, getModelSummaryNobsName(), drop=TRUE]
-      tmp  <- !is.finite(nobs)
-      if (any(tmp)) nobs[tmp] <- -Inf
-      dups <- unique(dups)
-      vec  <- 1:nrow(df)
-      keep <- rep(TRUE, nrow(df)) 
-      for (dup in dups) {
-        tmp        <- ids == dup
-        rows       <- vec[tmp]
-        ii         <- which.max(nobs[tmp]) 
-        row        <- rows[ii]
-        keep[rows] <- FALSE
-        keep[row]  <- TRUE
-      } 
-      df <- df[keep, , drop=FALSE] 
     }
+
+    if (!dupmethod) {
+      # ERROR
+      stop(msg)
+    } else if (dupmethod == 1) {
+      # Removed all metabs with duplicates  
+      warning(msg)
+
+      # Add to errors/warnings list in calling function
+    }
+    if (!nrow(df)) stop(msg_meta_47())   
+    dups.full <- dups
+    
+    # Unpaste the dup strings to get the ids 
+    dups <- meta_getHarmIdsFromDupStr(dups) 
+
   }
   if (DEBUG) cat("End: meta_checkForUnqIds\n")
-  df
+
+  list(data=df, dups=dups, dups.full=dups.full)
 }
+
+meta_getHarmIdsFromDupStr <- function(dups) {
+
+  mat  <- meta_unpasteIds(dups)
+  ovec <- mat[, getModelSummaryOutUidCol(), drop=TRUE]
+  evec <- mat[, getModelSummaryExpUidCol(), drop=TRUE]
+  ovec <- unique(ovec)
+  evec <- unique(evec)
+  if (length(ovec) >= length(evec)) {
+    ret <- ovec
+  } else {
+    ret <- evec
+  }
+  ret
+} 
 
 meta_matchModSumToEffects <- function(eff, ms) {
 
@@ -611,7 +725,13 @@ meta_loadCohortData <- function(flist, op) {
                getEffectsEstSeName())
   numvars  <- c(getEffectsEstName(), getEffectsEstSeName())
   addcols  <- op[[metaOp_addCohortCols(), exact=TRUE]]
-  addflag  <- length(addcols)
+  # We need to add outcome and exposure in case there are duplicate
+  #   metabolites with the _uid columns
+  addcols <- c(addcols, getEffectsRunName(),
+               getEffectsOutcomespecName(), 
+               getEffectsExposurespecName())
+  addcols <- unique(addcols)
+  addflag <- length(addcols)
   if (addflag) {
     addcols <- tolower(trimws(addcols))
     cols    <- unique(c(cols, addcols))
@@ -619,7 +739,7 @@ meta_loadCohortData <- function(flist, op) {
 
   # Load Effects data frame
   x   <- meta_loadEffects(flist$file, cols, numvars, NULL, flist$info)
-  
+
   # Determine if there are any of the addcols to add from modelSummary
   if (addflag) {
     tmp     <- !(addcols %in% colnames(x))
@@ -674,12 +794,13 @@ meta_loadCohortData <- function(flist, op) {
   ids                 <- meta_getIdNames(x) 
   x[, getMetaIdCol()] <- ids
 
-  # Check for unique ids
-  x <- meta_checkForUnqIds(x, op)
-  
+  # Check for unique ids, returned is a list with names
+  #   "data" and "dups".
+  ret  <- meta_checkForUnqIds(x, op)
+
   if (DEBUG) cat("End: meta_loadCohortData\n")
 
-  x
+  ret
 }
 
 meta_filterCohortData <- function(x, op) {
@@ -781,28 +902,35 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
   cohorts  <- NULL
   stopOnError <- op[[metaOp_stopOnFileError(), exact=TRUE]]
 
+  # ids of duplicates
+  DUPIDS <- NULL
   for (i in 1:nfiles) {
     x      <- NULL
     flist  <- file.info.list[[i]]
     cohort <- flist$cohort
     info   <- flist$info
     if (DEBUG) cat(paste0("*** Processing cohort ", cohort, "\n"))
-    x    <- meta_loadCohortData(flist, op)
-    wobj <- runmodel.checkForError(x, warnStr="ERROR", objStr=flist$file, rem.obj=wobj)
-    if ("try-error" %in% class(x)) {
+    tmp  <- meta_loadCohortData(flist, op)
+    wobj <- runmodel.checkForError(tmp, warnStr="ERROR", objStr=flist$file, rem.obj=wobj)
+    if ("try-error" %in% class(tmp)) {
       msg <- msg_meta_37(flist$file)
       if (stopOnError) {
-        print(x)
+        print(tmp)
         stop(msg)
       }
       cat(msg) 
-      if (DEBUG) print(x) 
+      if (DEBUG) print(tmp) 
       next
     }
+    x         <- tmp$data
+    dups      <- tmp[["dups", exact=TRUE]]
+    dups.full <- tmp[["dups.full", exact=TRUE]]
+    if (length(dups.full)) DUPIDS <- unique(c(DUPIDS, dups.full))
+    rm(tmp); gc()
+    if (length(dups)) wobj <- meta_addDupsToWarnObj(cohort, dups, wobj)
 
     # Update counts
     idlist <- meta_updateIdCnts(idlist, meta_getIdNames(x), x[, msnv, drop=TRUE])
-
     temp.file <- paste0(temp.dir, "cohort_", i, ".rda")
     save(x, file=temp.file)
     x <- NULL
@@ -820,11 +948,165 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
   # Get final set of metabs to analyze
   tmp <- meta_getFinalSet(idlist, op) 
 
+  # Only keep the duplicated ids that are in the final set
+  DUPIDS <- DUPIDS[DUPIDS %in% tmp$ids]
   names(ret) <- cohorts
   op[[wnm]]  <- wobj
 
   if (DEBUG) cat("End: meta_loadFilesAndSetupData\n")
-  list(data=ret, file.info.list=ret.info, op=op, ids=tmp$ids, nsub=tmp$nsub)
+  list(data=ret, file.info.list=ret.info, op=op, ids=tmp$ids, 
+       nsub=tmp$nsub, dup.ids=DUPIDS)
+}
+
+meta_process_dups <- function(dup.ids, nsubs, data.list, op) {
+ 
+  if (length(dup.ids) != length(nsubs)) stop("ERROR")
+  N       <- length(data.list)
+  idv     <- getMetaIdCol()
+  betav   <- getEffectsEstName()
+  sev     <- getEffectsEstSeName()
+  nsubv   <- getMetaNsubCol()
+
+  # Determine if we need the matrix of missing for each id and cohort
+  colsToAdd <- op[[metaOp_addCohortCols(), exact=TRUE]]
+  colsToAdd <- c(getEffectsRunName(), 
+                 getEffectsOutcomespecName(),
+                 getEffectsExposurespecName())
+  colsToAdd <- unique(colsToAdd)
+  mflag     <- TRUE
+
+  # Get the duplicated ids from each cohort. 
+  dlist   <- list()
+  cohorts <- names(data.list)
+  use     <- rep(FALSE, N)
+  for (i in 1:N) {
+    x          <- myread_rda(data.list[[i]])
+    tmp        <- x[, idv, drop=TRUE] %in% dup.ids
+    m          <- sum(tmp)
+    dlist[[i]] <- x[tmp, , drop=FALSE]
+    if (m) use[i] <- TRUE
+  }
+  nuse <- sum(use)
+
+  # For each id, run a meta analysis for all combinations.
+  # First, combine everything into matrices
+  all.beta <- NULL
+  all.se   <- NULL
+  all.ids  <- NULL
+  nids     <- length(dup.ids)
+
+  # Initialize a list of data frames to save data from each cohort.
+  # In the end, the order must agree with the duplicates, and the 
+  # number of rows must match.
+  saveData    <- list()
+  saveData[N] <- list(NULL)
+  for (i in 1:nids) {
+    id       <- dup.ids[i]
+    cnt.list <- list()
+    d2list   <- list()
+    use2     <- use
+    for (j in 1:N) {
+      if (!use[j]) next
+      x           <- dlist[[j]]
+      tmp         <- x[, idv, drop=TRUE] == id
+      x           <- x[tmp, , drop=FALSE]
+      d2list[[j]] <- x
+      nr          <- nrow(x)
+      if (nr) {
+        cnt.list[[length(cnt.list)+1]] <- 1:nr
+      } else {
+        use2[j] <- FALSE
+      }
+    }
+    ncohorts <- length(cnt.list)
+    if (!ncohorts) {
+      msg <- paste0("INTERNAL CODING ERROR with duplicate id = ", id)
+      stop(msg)
+    } 
+    # Get all combinations 
+    mat <- getSeqsFromList(cnt.list)
+
+    # Set up beta and SE matrices
+    beta    <- matrix(data=NA, nrow=nrow(mat), ncol=nuse)
+    se      <- beta
+    ind     <- 0
+    for (j in 1:N) {
+      x   <- d2list[[j]]
+      tmp <- colsToAdd %in% colnames(x)
+      vv  <- colsToAdd[tmp]
+      if (!length(vv)) stop("INTERNAL CODING ERROR 2")
+      savedat <- saveData[[j]]
+
+      if (use2[j]) {
+        ind         <- ind + 1
+        rows        <- mat[, ind, drop=TRUE]
+        x           <- x[rows, , drop=FALSE]
+        beta[, ind] <- x[, betav, drop=TRUE] 
+        se[, ind]   <- x[, sev, drop=TRUE] 
+ 
+        # Save data
+        savex <- x[, vv, drop=FALSE]
+      } else {
+        # Save an object of NAs
+        savex <- matrix(data=NA, nrow=nrow(mat), ncol=length(vv))
+      }
+      # Append the data to save. 
+      if (!length(savedat)) {
+        saveData[[j]] <- savex
+      } else {
+        saveData[[j]] <- rbind(savedat, x[, vv, drop=FALSE])
+      }
+    }
+
+    all.ids  <- c(all.ids, rep(id, nrow(mat)))
+    all.beta <- rbind(all.beta, beta)
+    all.se   <- rbind(all.se, se)
+    rm(mat, beta, se, x, rows); gc()
+  }
+
+  ret <- meta_core(all.beta, all.se, ret.miss.matrix=mflag)
+
+  # Save miss matrix if needed
+  if (mflag) {
+    miss.matrix          <- ret[["miss.matrix", exact=TRUE]]
+    ret[["miss.matrix"]] <- NULL
+    gc()
+  }
+
+  # Set return data frame
+  ret          <- as.data.frame(ret, stringsAsFactors=FALSE)
+  ret[, nsubv] <- nsubs
+  ret          <- cbind(meta_unpasteIds(id), ret)
+
+  # Add cohort specific columns
+  ret2 <- meta_addCohortCols_dups(all.ids, saveData[use], cohorts[use],
+                                  miss.matrix, op, colsToAdd)
+  ret  <- cbind(ret, ret2) 
+
+  # Remove duplicates from data and save
+  for (i in 1:N) {
+    x   <- myread_rda(data.list[[i]])
+    tmp <- x[, idv, drop=TRUE] %in% dup.ids
+    x   <- x[!tmp, , drop=FALSE]
+    save(x, file=data.list[[i]])
+  }
+
+  ret
+}
+
+meta_addDupsToWarnObj <- function(cohort, dups, wobj) {
+
+  dupstr    <- paste0(dups, collapse=", ")
+  c1        <- runModel.getWarningCol()
+  c2        <- runModel.getObjectCol()
+  c3        <- runModel.getMessageCol()
+  lst       <- list()
+  lst[[c1]] <- "WARNING"
+  lst[[c2]] <- dupstr
+  lst[[c3]] <- msg_mod_26(cohort)
+  wobj      <- runmodel.addWarning(wobj, lst) 
+
+  wobj
 }
 
 meta_unpasteIds <- function(ids) {
