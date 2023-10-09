@@ -30,9 +30,6 @@ A list of options for the \code{\link{runMeta}} function
      variables, and vec1, vec2, ... are vectors of stratification levels to be removed
      from the test.
                      The default is NULL.}
-\item{\code{dups.allow}}{ TRUE or FALSE to allow for duplicated metabolite results in a file.
-                     If TRUE, the result with the largest \code{nobs} will be used.
-                     The default is FALSE.}
 \item{\code{stopOnFileError}}{ TRUE or FALSE to stop processing when a problem with any
                                   one of the input files is encountered. If FALSE, then
                           the files containing errors will be removed from the analysis.

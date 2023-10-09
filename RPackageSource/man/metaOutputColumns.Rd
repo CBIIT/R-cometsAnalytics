@@ -37,6 +37,11 @@ returned from \code{\link{runMeta}}.
 \item{\code{strata.random.het.pvalue}}{ P-value for Cochran's Q test of heterogeneity across the strata using the random-effects meta-analysis estimates. }
 \item{\code{strata.random.het.df}}{ Degrees of freedom for the above test. }
 }
+
+The Duplicates data frame contains the meta-analysis results for duplicated
+ metabolites. It contains the same columns as the Results data frame plus
+ the columns \code{run}, \code{outcomespec}, and \code{exposurespec} which
+ are useful for differentiating the duplicated metabolites.
 }
 \details{
 Correlation models will not contain columns for \code{fixed.std.error} and
