@@ -20,7 +20,9 @@
 #'          file in \code{filevec} that contains the metabolite will be chosen.
 #'          The option \code{check.consistency} will check for the same 
 #'          outcome, exposure, and stratification variable names across the files.
+#'
 #' @export
+
 mergeResultsFiles <- function(filevec, out.file, op=NULL) {
 
   # Check arguments

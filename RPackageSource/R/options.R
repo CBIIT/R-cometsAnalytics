@@ -433,7 +433,6 @@ checkGlobalOpList <- function(op, name="options", meta=0) {
     for (i in 1:n) {
       nm  <- nms[i]
       val <- op[[i]]
-
       if (!length(val)) next
 
       if (nm %in% ops.n) {

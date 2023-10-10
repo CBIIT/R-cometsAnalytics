@@ -93,7 +93,7 @@ plotMinvalues <- function(cometsdata,
 #' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Age")
 #' corrmatrix <- runCorr(modeldata,exmetabdata,"DPP")
 #' showCorr(corrmatrix)
 #' @export
@@ -124,7 +124,7 @@ showCorr <- function(corr, nlines=50) {
 #' dir         <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile     <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' modeldata   <- getModelData(exmetabdata,modlabel="1 Age")
 #' result      <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' showModel(result)
 #' @export
@@ -176,7 +176,7 @@ showModel <- function(obj, nlines=10) {
 #' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 #' csvfile <- file.path(dir, "cometsInputAge.xlsx")
 #' exmetabdata <- readCOMETSinput(csvfile)
-#' modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+#' modeldata <- getModelData(exmetabdata,modlabel="1 Age")
 #' corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
 #' showHeatmap(corrmatrix)
 #' }
@@ -198,7 +198,7 @@ showHeatmap <- function (ccorrList, strata=NULL,
 
   # order the rows according to sort by
   if (rowsortby == "metasc") {
-	exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modlabel="1 Gender adjusted")
+	exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modlabel="1 Age")
 
     ccorrmat$exposurespec <- suppressWarnings(
       factor(ccorrmat$exposurespec, levels =

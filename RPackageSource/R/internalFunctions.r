@@ -210,7 +210,7 @@ checkAcceptedValues <- function(dta.sdata, dta.vmap) {
   for (i in 1:n) {
 
     # Special case of group variable for conditional logistic regression
-    if (toupper(accvals[i]) %in% c("NA", "")) next
+    if (toupper(accvals[i]) %in% "NA") next
 
     obj <- parseAccValues(accvals[i], catflag[i])
     if (!length(obj)) {

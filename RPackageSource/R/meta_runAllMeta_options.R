@@ -484,9 +484,9 @@ checkMetaOp_strata.exclude.het.test <- function(x) {
   x
 }
 
-checkMetaOp_dups.allow <- function(x) {
+checkMetaOp_dups.method <- function(x) {
 
- x <- check.logical(x, metaOp_dups.allow())
+ x <- check.number(x, metaOp_dups.methodValues(), metaOp_dups.method())
  x  
 }
 

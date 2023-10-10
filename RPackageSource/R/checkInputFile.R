@@ -2,6 +2,14 @@ readExcelSheet <- function(f, sheet, f.sheets, stopOnError=0, optional=0) {
 
   ret <- NULL
 
+  if (!length(f.sheets)) {
+    f.sheets <- try(readxl::excel_sheets(f))
+    if ("try-error" %in% class(f.sheets)) {
+      if (stopOnError) stop(msg_rci_3())
+      return(NULL)
+    }
+  }
+
   # make sheet names not case-sensitive
   tmp <- toupper(f.sheets) %in% toupper(sheet)
   sh2 <- f.sheets[tmp]
