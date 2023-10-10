@@ -78,11 +78,11 @@ There are 2 ways to specify your model, batch or interactive.
 In Batch mode, models are specified in your input file Models sheet. 
 The model information needs to be read in with the function *getModelData()* and 
 processed so the software knows which models to run.
-The following call defines the "1 Gender adjusted" model from the Models
+The following call defines the "1 Age" model from the Models
 sheet in the input file to be run.
 
 ```{r}
-exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modlabel="1 Gender adjusted")
+exmodeldata <- RcometsAnalytics::getModelData(exmetabdata,modlabel="1 Age")
 ```
 In Interactive mode, models are specified as parameters. 
 The model information needs to be read in with the function *getModelData()* and 
