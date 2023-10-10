@@ -20,7 +20,7 @@ Function that displays the first N rows of each data frame
 dir         <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile     <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata   <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+modeldata   <- getModelData(exmetabdata,modlabel="1 Age")
 result      <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 showModel(result)
 }

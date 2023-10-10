@@ -21,7 +21,7 @@ Function that returns top N lines of the \code{\link{runCorr}} output
 dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
 csvfile <- file.path(dir, "cometsInputAge.xlsx")
 exmetabdata <- readCOMETSinput(csvfile)
-modeldata <- getModelData(exmetabdata,modlabel="1 Gender adjusted")
+modeldata <- getModelData(exmetabdata,modlabel="1 Age")
 corrmatrix <- runCorr(modeldata,exmetabdata,"DPP")
 showCorr(corrmatrix)
 }
