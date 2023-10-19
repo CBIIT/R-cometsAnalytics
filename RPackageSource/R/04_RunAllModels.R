@@ -78,6 +78,9 @@ run1Model <- function(mymod, readData, cohortLabel="") {
 
 writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
 
+  if (!length(cohortLabel)) cohortLabel <- "NA"
+  cohortLabel <- trimws(cohortLabel)
+  if (!nchar(cohortLabel)) cohortLabel <- "NA"
   out.type <- op[[getOutTypeOpName(), exact=TRUE]] 
   rdaFlag  <- out.type == getOutTypeOpRda()
   fname    <- getOutFileName(cohortLabel, model, out.type)

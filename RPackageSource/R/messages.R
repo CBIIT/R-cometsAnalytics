@@ -225,7 +225,7 @@ msg_meta_45             <- function(x) paste0("The option ", x[1], " removed all
                                               " Stratification het test will not be performed.\n")
 msg_meta_46             <- function(x) paste0("Begin meta-analysis for model ", x[1], "\n")
 msg_meta_47             <- function() "ERROR: no metabolites remain after removing duplicates"
-msg_meta_48             <- function(x) paste0("The metabolites ", x[1], " are duplicates")
+msg_meta_48             <- function(x) paste0("The metabolites ", x[1], " are duplicates in cohort ", x[2])
 msg_meta_49             <- function() "ERROR while processing duplicate metabolites\n" 
 
 msg_metaop_1            <- function() paste0("ERROR: missing value(s) in the ", getOptionNameCol(), 

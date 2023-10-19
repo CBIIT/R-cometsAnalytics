@@ -54,7 +54,7 @@ meta_main <- function(file.obj, modelName, op) {
   data.list            <- tmp$data
   file.info.list       <- tmp$file.info.list
   op                   <- tmp$op
-  ids                  <- tmp$ids
+  ids                  <- sort(tmp$ids)
   nsubs                <- tmp$nsub
   dup.ids              <- tmp[["dup.ids", exact=TRUE]]
   op$cohorts           <- names(data.list)
@@ -79,7 +79,8 @@ meta_main <- function(file.obj, modelName, op) {
 
   # Process duplicate metabs and then remove them from data
   if (length(dup.ids)) {
-    tmp      <- match(dup.ids, ids)
+    dup.ids <- sort(dup.ids)
+    tmp     <- match(dup.ids, ids)
     if (any(is.na(tmp))) stop("INTERNAL CODING ERROR dup.ids")
     ret.dups <- try(meta_process_dups(dup.ids, nsubs[tmp], data.list, op), silent=TRUE)
     if ("try-error" %in% class(ret.dups)) {
@@ -94,6 +95,7 @@ meta_main <- function(file.obj, modelName, op) {
     nsubs    <- nsubs[tmp]
   }
 
+  # Process non-duplicate metabolites
   if (length(ids)) ret <- meta_getFinalDataAndRun(ids, nsubs, data.list, op) 
 
   ret <- meta_setReturnObj(ret, ret.dups, op)
@@ -230,20 +232,23 @@ meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
   ret
 }
 
-meta_addCohortCols_dups <- function(ids, data.list, cohorts, missMat, op, 
+meta_addCohortCols_dups <- function(ids, use, data.list, cohorts, missMat, op, 
                                     colsToAdd) {
+
+  # missMat will have number of columns equal to the number of cohorts used for duplicates
 
   DEBUG    <- op$DEBUG
   if (DEBUG) cat("Begin: meta_addCohortCols_dups\n")
 
   ncohorts <- length(cohorts)
+  nuse     <- sum(use)
   nids     <- length(ids)
   # Error checks
   if (ncohorts != length(data.list)) stop("INTERNAL CODING ERROR 1")
-  if (ncohorts != ncol(missMat)) stop("INTERNAL CODING ERROR 2")
+  if (nuse != ncol(missMat)) stop("INTERNAL CODING ERROR 2")
   if (nids != nrow(missMat)) stop("INTERNAL CODING ERROR 3")
   for (i in 1:ncohorts) {
-    if (nids != nrow(data.list[[i]])) stop("INTERNAL CODING ERROR 4")
+    if (use[i] && (nids != nrow(data.list[[i]]))) stop("INTERNAL CODING ERROR 4")
   }
   
   ncols <- length(colsToAdd)
@@ -252,7 +257,14 @@ meta_addCohortCols_dups <- function(ids, data.list, cohorts, missMat, op,
   flag <- op[[metaOp_addCohortNames(), exact=TRUE]]
   if (flag) {
     # missMat is TRUE if missing
-    ret <- matrix(1-as.numeric(missMat), nrow=nids, ncol=ncohorts, byrow=FALSE)
+    ret <- matrix(data=0, nrow=nids, ncol=ncohorts, byrow=FALSE)
+    ind <- 0
+    for (i in 1:ncohorts) {
+      if (use[i]) {
+        ind      <- ind + 1
+        ret[, i] <- 1-as.numeric(missMat[, ind, drop=TRUE])
+      }
+    }
     colnames(ret) <- cohorts
     ret <- as.data.frame(ret, check.names=FALSE)
   }
@@ -264,13 +276,17 @@ meta_addCohortCols_dups <- function(ids, data.list, cohorts, missMat, op,
   }
 
   # Columns to add are part of data.list in the same order
+  ind <- 0
   for (i in 1:ncohorts) {
     if (DEBUG) print(c(i, ncohorts))
+    if (!use[i]) next
+  
     cohort <- cohorts[i]
     x      <- data.list[[i]]
 
     # Use missMat to determine if this cohort was not included for some metabs
-    tmp      <- missMat[, i, drop=TRUE] %in% 1
+    ind      <- ind + 1
+    tmp      <- missMat[, ind, drop=TRUE] %in% 1
     missFlag <- any(tmp) 
 
     # New column names
@@ -626,7 +642,7 @@ meta_getIdNames <- function(x, term.col=TRUE, strataCol=TRUE) {
   ret
 }
 
-meta_checkForUnqIds <- function(df, op) {
+meta_checkForUnqIds <- function(df, op, cohort) {
 
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_checkForUnqIds\n")
@@ -652,7 +668,7 @@ meta_checkForUnqIds <- function(df, op) {
     mets <- yv
     if (length(ev) > length(yv)) mets <- ev  
     metstr <- getQuotedVarStr(mets)
-    msg    <- msg_meta_48(metstr)
+    msg    <- msg_meta_48(c(metstr, getQuotedVarStr(cohort)))
 
     if (DEBUG) {
       tmp  <- ids %in% dups[1]
@@ -807,7 +823,7 @@ meta_loadCohortData <- function(flist, op) {
 
   # Check for unique ids, returned is a list with names
   #   "data" and "dups".
-  ret  <- meta_checkForUnqIds(x, op)
+  ret  <- meta_checkForUnqIds(x, op, flist$cohort)
 
   if (DEBUG) cat("End: meta_loadCohortData\n")
 
@@ -936,9 +952,10 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
     x         <- tmp$data
     dups      <- tmp[["dups", exact=TRUE]]
     dups.full <- tmp[["dups.full", exact=TRUE]]
+
     if (length(dups.full)) DUPIDS <- unique(c(DUPIDS, dups.full))
     rm(tmp); gc()
-    if (length(dups)) wobj <- meta_addDupsToWarnObj(cohort, dups, wobj)
+    if (length(dups)) wobj <- meta_addDupsToWarnObj(cohort, sort(dups), wobj)
 
     # Update counts
     idlist <- meta_updateIdCnts(idlist, meta_getIdNames(x), x[, msnv, drop=TRUE])
@@ -1040,13 +1057,14 @@ meta_process_dups <- function(dup.ids, nsubs, data.list, op) {
       msg <- paste0("INTERNAL CODING ERROR with duplicate id = ", id)
       stop(msg)
     } 
-    # Get all combinations 
+    # Get all combinations. mat will have sum(use2) columns 
     mat <- getSeqsFromList(cnt.list)
 
-    # Set up beta and SE matrices
-    beta    <- matrix(data=NA, nrow=nrow(mat), ncol=nuse)
-    se      <- beta
-    ind     <- 0
+    # Set up beta and SE matrices. They have nuse, not sum(use2) columns !!!
+    beta <- matrix(data=NA, nrow=nrow(mat), ncol=nuse)
+    se   <- beta
+    ind  <- 0
+    col  <- 0   
     for (j in 1:N) {
       if (DEBUG) print(c(i, nids, j, N))
       if (!use[j]) next
@@ -1056,12 +1074,13 @@ meta_process_dups <- function(dup.ids, nsubs, data.list, op) {
       vv  <- colsToAdd[tmp]
       if (!length(vv)) stop("INTERNAL CODING ERROR 2")
       
+      col <- col + 1
       if (use2[j]) {
         ind         <- ind + 1
         rows        <- mat[, ind, drop=TRUE]
         x           <- x[rows, , drop=FALSE]
-        beta[, ind] <- x[, betav, drop=TRUE] 
-        se[, ind]   <- x[, sev, drop=TRUE] 
+        beta[, col] <- x[, betav, drop=TRUE] 
+        se[, col]   <- x[, sev, drop=TRUE] 
  
         # Save data
         savex <- x[, vv, drop=FALSE]
@@ -1100,10 +1119,10 @@ meta_process_dups <- function(dup.ids, nsubs, data.list, op) {
   # Set return data frame
   ret          <- as.data.frame(ret, stringsAsFactors=FALSE)
   ret[, nsubv] <- all.nsubs
-  ret          <- cbind(meta_unpasteIds(id), ret)
+  ret          <- cbind(meta_unpasteIds(all.ids), ret)
 
   # Add cohort specific columns
-  ret2 <- meta_addCohortCols_dups(all.ids, saveData[use], cohorts[use],
+  ret2 <- meta_addCohortCols_dups(all.ids, use, saveData, cohorts,
                                   miss.matrix, op, colsToAdd)
   ret  <- cbind(ret, ret2) 
 
@@ -1129,7 +1148,7 @@ meta_addDupsToWarnObj <- function(cohort, dups, wobj) {
   lst       <- list()
   lst[[c1]] <- "WARNING"
   lst[[c2]] <- dupstr
-  lst[[c3]] <- msg_mod_26(cohort)
+  lst[[c3]] <- msg_mod_26(getQuotedVarStr(cohort))
   wobj      <- runmodel.addWarning(wobj, lst) 
 
   wobj
