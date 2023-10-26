@@ -12,7 +12,7 @@
 # Prerequesities 
 1. Latest version of R
 2. Latest version of R Studio
-3. Downloaded input "cohort_1.xlsx" and "cohort_2.xlsx" files at [this link](https://github.com/CBIIT/R-cometsAnalytics/tree/v3.0-dev/RPackageSource/inst/extdata) 
+3. Downloaded input "[cohort_1.xlsx](/cohort_1.xlsx)" and "[cohort_2.xlsx](/cohort_2.xlsx)" files at [this link](https://github.com/CBIIT/R-cometsAnalytics/tree/v3.0-dev/RPackageSource/inst/extdata) 
 
 # Agenda
 | Time | Topic |
