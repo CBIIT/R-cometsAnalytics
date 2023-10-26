@@ -12,7 +12,7 @@
 # Prerequesities 
 1. Latest version of R
 2. Latest version of R Studio
-3. Downloaded input "[cohort_1.xlsx](cohort_1.xlsx)" and "[cohort_2.xlsx](cohort_2.xlsx)" files from this directory
+3. Downloaded input [cohort_1.xlsx](cohort_1.xlsx) and [cohort_2.xlsx](cohort_2.xlsx) files from this directory
 
 # Agenda
 | Time | Topic |
@@ -31,7 +31,7 @@
 | 11:30-11:45 | Wrap up (Ella Temprosa) |
 
 # Getting Prepared
-### Installing COMETS Analytics
+## Installing COMETS Analytics
 For this workshop, we will be using our v3.0-dev version, which is in development.  To install, please use the following code:
 ```
 if (!require("devtools")) {
@@ -52,14 +52,17 @@ This version supports meta-analyses, in addition to the following single cohort 
 - Survival
 - Conditional logistic regression 
 
-### Access to Input Data
+## Access to Input Data
 The input data for this workshop is provided in the "cohort_1.xlsx" and "cohort_2.xlsx" sheets. These files can be downloaded from [this folder](https://github.com/CBIIT/R-cometsAnalytics/tree/v3.0-dev/RPackageSource/inst/extdata). 
 You are also welcome to work through exercises with your own data.
 
 
-### Single Cohort Analyses
+# Single Cohort Analyses
 
 We will be following along the COMETS Vignette to conduct the single cohort analysis.
 You can find the Vignette with the example input sheet [here](https://github.com/nicole-prince/R-cometsAnalytics/blob/master/RPackageSource/vignettes/COMETS_vignette_MANA.html)
+
+# Meta-Analysis Analyses
+
 
 
