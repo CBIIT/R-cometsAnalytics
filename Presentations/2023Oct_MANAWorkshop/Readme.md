@@ -17,11 +17,11 @@
 # Agenda
 | Time | Topic |
 | :---:   | :---: | 
-| 10:00-10:15 | Introduction to workshop, COMETS and COMETS Analytics 
-| 10:15-10:55 Single cohort analyses (Ewy Mathé and Nicole Prince)
-  * Input File (Ewy Mathé)
-  * R package analysis and output (Nicole Prince)
-  * Exercise (Nicole Prince)
+| 10:00-10:15 | Introduction to workshop, COMETS and COMETS Analytics  |
+| 10:15-10:55 | Single cohort analyses (Ewy Mathé and Nicole Prince) |
+| |  * Input File (Ewy Mathé) |
+| |   * R package analysis and output (Nicole Prince)  |
+| |   * Exercise (Nicole Prince)  |
 | 10:55-11:00 | BREAK |
 | 11:00-11:25 | Meta-Analysis (Ella Temprosa) |
 | | * Input File | 
