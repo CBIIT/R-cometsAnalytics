@@ -64,5 +64,11 @@ You can find the Vignette with the example input sheet [here](https://github.com
 # 3. Meta-Analysis Analyses
 (Coming soon)
 
+# Useful Links
+Useful links:
+-	COMETS portal: https://epi.grants.cancer.gov/cometsportal 
+-	COMETS Analytics: http://comets-analytics.org/ 
+-	COMETS public site: https://cssi.cancer.gov/comets 
+
 
 
