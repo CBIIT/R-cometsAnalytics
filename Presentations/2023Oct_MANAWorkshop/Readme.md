@@ -18,17 +18,17 @@
 | Time | Topic |
 | :---:   | --- | 
 | 10:00-10:15 | Introduction to workshop, COMETS and COMETS Analytics  |
-| 10:15-10:55 | Single cohort analyses (Ewy Mathé and Nicole Prince) |
-| |  * Input File (Ewy Mathé) |
-| |   * R package analysis and output (Nicole Prince)  |
-| |   * Exercise (Nicole Prince)  |
+| 10:15-10:55 | Single cohort analyses  |
+| |  * Input File |
+| |   * R package analysis and output |
+| |   * Exercise |
 | 10:55-11:00 | BREAK |
-| 11:00-11:25 | Meta-Analysis (Ella Temprosa) |
+| 11:00-11:25 | Meta-Analysis |
 | | * Input File | 
 | |   * Meta-analysis in R and Output |
 | |   * Exercise |
 | 11:25-11:40 | Questions and Discussion |
-| 11:30-11:45 | Wrap up (Ella Temprosa) |
+| 11:30-11:45 | Wrap up |
 
 # 1 Getting Prepared
 ## 1.1 Installing COMETS Analytics
@@ -59,7 +59,7 @@ You are also welcome to work through exercises with your own data.
 
 # 2. Single Cohort Analyses
 We will be following along the COMETS Vignette to conduct the single cohort analysis.
-You can find the Vignette with the example input sheet [here](https://github.com/nicole-prince/R-cometsAnalytics/blob/master/RPackageSource/vignettes/COMETS_vignette_MANA.html)
+You can find the Vignette with the example input sheet [here](https://cbiit.github.io/R-cometsAnalytics/2023MANA_COMETSAnalytics_vignette.html)
 
 # 3. Meta-Analysis Analyses
 (Coming soon)
