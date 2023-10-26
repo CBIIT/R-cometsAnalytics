@@ -58,11 +58,11 @@ You are also welcome to work through exercises with your own data.
 
 
 # Single Cohort Analyses
-
 We will be following along the COMETS Vignette to conduct the single cohort analysis.
 You can find the Vignette with the example input sheet [here](https://github.com/nicole-prince/R-cometsAnalytics/blob/master/RPackageSource/vignettes/COMETS_vignette_MANA.html)
 
 # Meta-Analysis Analyses
+(Coming soon)
 
 
 
