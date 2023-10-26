@@ -65,10 +65,12 @@ You can find the Vignette with the example input sheet [here](https://github.com
 (Coming soon)
 
 # Useful Links
-Useful links:
--	COMETS portal: https://epi.grants.cancer.gov/cometsportal 
 -	COMETS Analytics: http://comets-analytics.org/ 
 -	COMETS public site: https://cssi.cancer.gov/comets 
 
+# References
+Temprosa M, Moore SC, Zanetti KA, et al. COMETS Analytics: An Online Tool for Analyzing and Meta-Analyzing Metabolomics Data in Large Research Consortia. Am J Epidemiol. Jan 1 2022;191(1):147-158. doi:10.1093/aje/kwab120
+
+Yu B, Zanetti KA, Temprosa et al.  The Consortium of Metabolomics Studies (COMETS): Metabolomics in 47 Prospective Cohort Studies. Am J Epidem. 2019 Jun 1;188(6):991-1012.
 
 
