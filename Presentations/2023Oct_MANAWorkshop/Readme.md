@@ -16,7 +16,7 @@
 
 # Agenda
 | Time | Topic |
-| :---:   | :---: | 
+| :---:   | --- | 
 | 10:00-10:15 | Introduction to workshop, COMETS and COMETS Analytics  |
 | 10:15-10:55 | Single cohort analyses (Ewy Mathé and Nicole Prince) |
 | |  * Input File (Ewy Mathé) |
