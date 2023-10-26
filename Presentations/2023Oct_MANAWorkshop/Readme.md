@@ -15,18 +15,19 @@
 3. Downloaded input "cohort_1.xlsx" and "cohort_2.xlsx" files at [this link](https://github.com/CBIIT/R-cometsAnalytics/tree/v3.0-dev/RPackageSource/inst/extdata) 
 
 # Agenda
-10:00-10:15 Introduction to workshop, COMETS and COMETS Analytics 
-10:15-10:55 Single cohort analyses (Ewy Mathé and Nicole Prince)
-  Input File (Ewy Mathé)
-  R package analysis and output (Nicole Prince)
-  Exercise (Nicole Prince)
-10:55-11:00 BREAK
-11:00-11:25 Meta-Analysis (Ella Temprosa)
-  Input File 
-  Meta-analysis in R and Output
-  Exercise
-11:25-11:40 Questions and Discussion
-11:30-11:45 Wrap up (Ella Temprosa)
+| Time | Topic |
+| 10:00-10:15 | Introduction to workshop, COMETS and COMETS Analytics 
+| 10:15-10:55 Single cohort analyses (Ewy Mathé and Nicole Prince)
+  * Input File (Ewy Mathé)
+  * R package analysis and output (Nicole Prince)
+  * Exercise (Nicole Prince)
+| 10:55-11:00 | BREAK |
+| 11:00-11:25 | Meta-Analysis (Ella Temprosa) |
+| | * Input File | 
+| |   * Meta-analysis in R and Output |
+| |   * Exercise |
+| 11:25-11:40 | Questions and Discussion |
+| 11:30-11:45 | Wrap up (Ella Temprosa) |
 
 # Getting Prepared
 ### Installing COMETS Analytics
