@@ -53,7 +53,7 @@ This version supports meta-analyses, in addition to the following single cohort 
 - Conditional logistic regression 
 
 ### Access to Input Data
-The input data for this workshop is provided in the "cohort_1_MANA.xlsx" and "cohort_2_MANA.xlsx" sheets. These files can be downloaded from [this folder](https://github.com/CBIIT/R-cometsAnalytics/tree/v3.0-dev/RPackageSource/inst/extdata). 
+The input data for this workshop is provided in the "cohort_1.xlsx" and "cohort_2.xlsx" sheets. These files can be downloaded from [this folder](https://github.com/CBIIT/R-cometsAnalytics/tree/v3.0-dev/RPackageSource/inst/extdata). 
 You are also welcome to work through exercises with your own data.
 
 
