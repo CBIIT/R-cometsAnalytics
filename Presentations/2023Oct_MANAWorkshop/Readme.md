@@ -130,8 +130,35 @@ Run the meta-analysis with the *runMeta()* function, and then display the first 
 
 ```{r}
 ret <- RcometsAnalytics::runMeta(c(outfile1, outfile2))
-ret$Results[1:2,]
+results<-ret$Results
 ```
+Let's look at the results
+
+```{r}
+# need to compile metabolite metadata from different cohorts
+allmetabolites<-rbind(data1$metab,data2$metab) 
+
+library(tidyverse)
+
+# unique metabolites
+uniquemetab<-allmetabolites %>%
+  select(uid_01,metabolite_name,super_pathway,sub_pathway,pubchem) %>%
+  distinct()
+
+# patch in the names to results
+resultnames<-left_join(results,uniquemetab,by=c("outcome_uid"="uid_01")) %>%
+  mutate(log10p=log10(1/fixed.pvalue),
+         hetp=factor(if_else(het.pvalue<0.05,1,0),levels=c(0,1),labels=c("hetp<0.05","hetp ns")))
+
+library(plotly)
+
+fig <- plot_ly(data = resultnames, x = ~fixed.estimate, y = ~log10p,color=~hetp,
+               text = ~paste("Metabolite: ", metabolite_name, '<br>heterogeneity', format.pval(het.pvalue)))  
+
+fig
+
+```
+
 
 ### 5. Example using runAllMeta
 
