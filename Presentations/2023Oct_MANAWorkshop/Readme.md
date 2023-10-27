@@ -64,6 +64,13 @@ You can find the Vignette with the example input sheet [here](https://cbiit.gith
 # 3. Meta-Analysis Analyses
 (Coming soon)
 
+# How to get involved
+* Cohort membership https://cssi.cancer.gov/comets#membership
+* Individual Membership https://cssi.cancer.gov/sites/default/files/comets-consortium-membership-application-v3.pdf
+* Project Proposal https://cssi.cancer.gov/comets/projects
+* Interest Groups https://cssi.cancer.gov/comets/interest-groups 
+* Give Scientific Presentation at Monthly Meeting
+
 # Useful Links
 -	COMETS Analytics: http://comets-analytics.org/ 
 -	COMETS public site: https://cssi.cancer.gov/comets 
