@@ -34,12 +34,11 @@ A list of options for the \code{\link{runMeta}} function
                                   one of the input files is encountered. If FALSE, then
                           the files containing errors will be removed from the analysis.
                      The default is TRUE.}
-\item{\code{oneModelCheck}}{ TRUE or FALSE to check for consistent files when each file
-                             consists of results from a single model. If TRUE, then each
-                             file must have the same model name, model function, exposure
-                             (or outcome) and for a categorical exposure variable, the same
-                             reference value.
-                     The default is TRUE.}
+\item{\code{merge.cohort.files}}{ TRUE or FALSE to merge files with the same cohort name.
+                    This will take the union of all metabolites in the files. A metabolite
+                    that occurs in multiple files will be chosen from the file with the
+                    maximum sample size for that metabolite. 
+                     The default is FALSE.}
 \item{\code{add.cohort.names}}{ TRUE or FALSE to add binary columns (one for each cohort) to
       the data frame of results to show which cohorts contributed to the meta-analysis
       The value will be 1 if the cohort contributed to the result or 0 if the cohort did not.

@@ -62,6 +62,14 @@ A list of 19:
 \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
                             chemical class enrichment.
                            The default is 0.05.}
+\item{\code{miss.metab}}{ Vector of numeric values that define missing values, or the
+                       string "minimum" that will set samples with the minimum metabolite
+                       value to NA provided there is more than one sample with the
+                       minimum value.
+                           The default is NULL.}
+\item{\code{miss.data}}{ Vector of values that define missing values for the non-metabolite
+                         variables.
+                           The default is NULL.}
 }
 }
 \details{

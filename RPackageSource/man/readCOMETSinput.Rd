@@ -33,9 +33,13 @@ A table with the columns \code{METABID}, \code{METABOLITE_NAME}, and possibly ot
  of information about the metabolites. The \code{METABID} column is used
  for harmonizing the metabolite names across different cohorts when meta-analyses are performed. \cr
 \bold{SubjectMetabolites} \cr
-A table with the subject ids in the first column and metabolites as the other columns. \cr
+A table with the subject ids in the first column and metabolites as the other columns.
+Each cell must contain a numeric value or left empty (missing); otherwise an error
+will occur. \cr
 \bold{SubjectData} \cr
-A table with the subject ids in the first column and covariates as the other columns. \cr
+A table with the subject ids in the first column and covariates as the other columns. 
+For continuous variables, each cell must contain a numeric value or left empty (missing); 
+otherwise an error will occur.\cr
 \bold{VarMap} \cr
 A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
 \code{VARTYPE}, \code{VARDEFINITION}, and optionally \code{ACCEPTED_VALUES}. 
