@@ -10,7 +10,7 @@ NEW FEATURES
     o The readCOMETSinput function now has the argument mode ("Interactive" or "Batch") for the model in which it is called.
     o The ModelSummary table now has a column called "exposure.covariances" containing exposure covariances for non-correlation models.
     o The VARDEFINITION column of the VarMap sheet is now checked when readCOMETSinput is called.
-
+    o The function plotMissvalues has been added to plot the distribution of missing values in metabolites.
 
 
 CHANGES IN VERSION 2.1.0

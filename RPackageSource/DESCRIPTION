@@ -1,7 +1,7 @@
 Package: RcometsAnalytics
 Type: Package
 Title: Comets Analytics for consortium based metabolomic analyses
-Version: 2.9.0.12
+Version: 2.9.0.14
 Author: Ella Temprosa, Ewy Mathe
 Maintainer: Bill Wheeler <wheelerb@imsweb.com>
 Description: This R package support all cohort-specific analyses of the COMETS
@@ -22,4 +22,4 @@ RoxygenNote: 7.2.3
 NeedsCompilation: no
 URL: http://comets-analytics.org/
 BugReports: https://github.com/CBIIT/nci-webtools-comets-analytics/issues
-Packaged: 2023-10-10 19:47:41 UTC; wheelerwi
+Packaged: 2023-10-30 13:21:44 UTC; wheelerwi
