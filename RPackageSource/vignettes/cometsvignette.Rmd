@@ -67,9 +67,14 @@ To plot some the distribution of variances for each metabolite:
 RcometsAnalytics::plotVar(exmetabdata,titlesize=12)
 ```
 
-To plot the distribution of minimum/missing values:
+To plot the distribution of minimum values:
 ```{r, eval=T}
 RcometsAnalytics::plotMinvalues(exmetabdata,titlesize=12)
+```
+
+To plot the distribution of missing values:
+```{r, eval=T}
+RcometsAnalytics::plotMissvalues(exmetabdata,titlesize=12)
 ```
 
 ### 2. Get Model Data
