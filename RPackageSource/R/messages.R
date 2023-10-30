@@ -192,7 +192,9 @@ msg_meta_13             <- function() "ERROR: name of cohort not found"
 msg_meta_14             <- function() "ERROR: name of model not found"
 msg_meta_15             <- function() "ERROR: model names are not unique"
 msg_meta_16             <- function() "ERROR: too few cohorts left after exclusions"
-msg_meta_17             <- function() "ERROR: cohort names are not unique"
+msg_meta_17             <- function() paste0("ERROR: cohort names are not unique.",
+                                             " If this is intended, set option ", metaOp_mergeCohortFiles(),
+                                             " to TRUE.\n")
 msg_meta_18             <- function(x) paste0("ERROR: directory ", x[1], " not created")
 msg_meta_19             <- function(x) paste0(x[1], "='", x[2], "' not found in ", x[3], " data frame")
 msg_meta_20             <- function() "ERROR in meta_extractAllFiles"
@@ -227,6 +229,7 @@ msg_meta_46             <- function(x) paste0("Begin meta-analysis for model ", 
 msg_meta_47             <- function() "ERROR: no metabolites remain after removing duplicates"
 msg_meta_48             <- function(x) paste0("The metabolites ", x[1], " are duplicates in cohort ", x[2])
 msg_meta_49             <- function() "ERROR while processing duplicate metabolites\n" 
+msg_meta_50             <- function(x) paste0("NOTE: files for cohort ", x[1], " were merged into ", x[2], "\n")
 
 msg_metaop_1            <- function() paste0("ERROR: missing value(s) in the ", getOptionNameCol(), 
                                              " of the ", getMetaModelTypeSheetName(), " sheet")

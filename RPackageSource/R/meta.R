@@ -20,7 +20,7 @@ runMeta <- function(file.obj, op=NULL) {
 
   dfToComets.check_fobj(file.obj) 
   op          <- meta_check_op(op) 
-  op$temp.dir <- meta_createTempDir(getwd(), nrand=6)
+  op$temp.dir <- meta_createTempDir(getwd())
   ret         <- try(meta_main(file.obj, NULL, op), silent=FALSE)
 #ret <- meta_main(file.obj, NULL, op)
   meta_rmDir(op)
@@ -54,7 +54,7 @@ meta_main <- function(file.obj, modelName, op) {
   data.list            <- tmp$data
   file.info.list       <- tmp$file.info.list
   op                   <- tmp$op
-  ids                  <- sort(tmp$ids)
+  ids                  <- tmp$ids
   nsubs                <- tmp$nsub
   dup.ids              <- tmp[["dup.ids", exact=TRUE]]
   op$cohorts           <- names(data.list)
@@ -550,7 +550,7 @@ meta_corrToFisherZ <- function(x, f) {
 
   # Load model summary data frame
   y <- loadDataFrame(f, getModelSummaryName())
-  
+
   # Match rows to get the number of observations for each 
   xids <- x[, rv, drop=TRUE]
   yids <- y[, rv, drop=TRUE]
@@ -889,6 +889,7 @@ meta_getFinalSet <- function(idlist, op) {
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_getFinalSet\n")
   len   <- length(idlist$ids)
+
   if (!len) stop(msg_meta_10())
   ok    <- rep(TRUE, len)
   minN  <- op[[metaOp_totalMinSubs(), exact=TRUE]]
@@ -907,6 +908,11 @@ meta_getFinalSet <- function(idlist, op) {
   ret.ids  <- idlist$ids[ok]
   ret.nsub <- idlist$nsub[ok] 
   if (!length(ret.ids)) stop(msg_meta_11())
+
+  # Return in sorted order
+  tmp      <- sort(ret.ids, index.return=TRUE)
+  ret.ids  <- tmp$x
+  ret.nsub <- ret.nsub[tmp$ix] 
 
   if (DEBUG) cat("End: meta_getFinalSet\n")
   list(ids=ret.ids, nsub=ret.nsub)
@@ -1348,22 +1354,27 @@ meta_initFileCheck <- function(filevec, op) {
         print(filevec[tmp])
       }
     } 
-    stop(msg_meta_17())
+    # Check if option to merge cohort files is specified, if not throw an error
+    if (!op[[metaOp_mergeCohortFiles()]]) stop(msg_meta_17())
+
+    # If option was, set, merge cohort files
+    infolist <- meta_mergeCohortFiles(infolist, cohorts, op)
+    if (length(infolist) < op[[metaOp_minNcohortName()]]) stop(msg_meta_2())
 
     # Rename duplicated cohorts. This must be done before meta_loadFilesAndSetupData is called
-    dups <- unique(cohorts[tmp])
-    cnt  <- rep(2, length(dups))
-    ids  <- (1:length(infolist))[tmp]
-    for (id in ids) {
-      obj    <- infolist[[id]]
-      cohort <- obj$cohort
-      tmp    <- dups %in% cohort
-      if (sum(tmp) != 1) stop("INTERNAL CODING ERROR")
-      obj$cohort     <- paste0(cohort, ".", cnt[tmp])
-      cnt[tmp]       <- cnt[tmp] + 1
-      obj$info       <- setInfoTableValue(obj$info, getInfoTableCohortName(), obj$cohort)
-      infolist[[id]] <- obj
-    }
+    #dups <- unique(cohorts[tmp])
+    #cnt  <- rep(2, length(dups))
+    #ids  <- (1:length(infolist))[tmp]
+    #for (id in ids) {
+    #  obj    <- infolist[[id]]
+    #  cohort <- obj$cohort
+    #  tmp    <- dups %in% cohort
+    #  if (sum(tmp) != 1) stop("INTERNAL CODING ERROR")
+    #  obj$cohort     <- paste0(cohort, ".", cnt[tmp])
+    #  cnt[tmp]       <- cnt[tmp] + 1
+    #  obj$info       <- setInfoTableValue(obj$info, getInfoTableCohortName(), obj$cohort)
+    #  infolist[[id]] <- obj
+    #}
   }
   op[[wrnm]] <- wobj
 
@@ -1371,6 +1382,45 @@ meta_initFileCheck <- function(filevec, op) {
 
   list(file.info.list=infolist, op=op)
 
+}
+
+meta_mergeCohortFiles <- function(flist, cohorts, op) {
+
+  DEBUG    <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_mergeCohortFiles\n")
+
+  ret      <- list()
+  ucohorts <- unique(cohorts)
+  idvec    <- 1:length(cohorts) 
+  for (cohort in ucohorts) {
+    tmp <- cohorts %in% cohort
+    ids <- idvec[tmp]
+    m   <- length(ids)
+    if (m < 2) {
+      ret[[length(ret)+1]] <- flist[[ids]]
+    } else {
+      fvec <- rep("", m)
+      for (i in 1:m) fvec[i] <- flist[[ids[i]]]$file
+      # Use file name for first file as the output file
+      out.file <- paste0(op$temp.dir, "mrg_", basename(fvec[1]))
+
+      tmp <- mergeResultsFiles(fvec, out.file, op=list(DEBUG=DEBUG))
+      cat(msg_meta_50(c(getQuotedVarStr(cohort), out.file)))
+      if (DEBUG) {
+        cat("***files.error***:\n")
+        print(tmp[["files.error", exact=TRUE]])
+        cat("***files.included***:\n")
+        print(tmp[["files.included", exact=TRUE]])
+        cat("***files.excluded***:\n")
+        print(tmp[["files.excluded", exact=TRUE]])
+      }
+      tmp      <- meta_getFileInfo(out.file)
+      tmp$file <- out.file 
+      ret[[length(ret)+1]] <- tmp
+    }
+  }
+
+  ret
 }
 
 meta_createTempDir <- function(out.dir, nrand=6) {

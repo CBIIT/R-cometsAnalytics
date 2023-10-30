@@ -30,13 +30,14 @@ mergeResultsFiles <- function(filevec, out.file, op=NULL) {
   if (length(out.file)) out.file <- check_out.file(out.file, valid.ext=getOutTypeOpVals())
   op  <- mrf_check_op(op)
   ret <- mergeResultsFiles_main(filevec, out.file, op)
+
   ret
 }
 
 mrf_default_options <- function() {
 
-  valid <- c(mrf_precedenceOpName(), mrf_consistencyOpName())
-  def   <- list(mrf_precedenceDefault(), mrf_consistencyDefault())
+  valid <- c(mrf_precedenceOpName(), mrf_consistencyOpName(), "DEBUG")
+  def   <- list(mrf_precedenceDefault(), mrf_consistencyDefault(), 0)
 
   names(def) <- valid
   def
@@ -61,6 +62,9 @@ mrf_check_op <- function(x, name="op") {
 }
 
 mergeResultsFiles_main <- function(filevec, out.file, op) {
+
+  DEBUG     <- op$DEBUG
+  if (DEBUG) cat("Begin: mergeResultsFiles_main\n")
 
   tmp       <- mrf_load_data(filevec, op)
   data.list <- tmp$data.list
@@ -104,11 +108,15 @@ mergeResultsFiles_main <- function(filevec, out.file, op) {
   if (!length(inc)) inc <- NULL
   exc <- files[!used]
   if (!length(exc)) exc <- NULL   
-
+  
+  if (DEBUG) cat("End: mergeResultsFiles_main\n")
   list(result=ret, files.error=exc.error, files.included=inc, files.excluded=exc)
 } 
 
 mrf_consistency <- function(data.list, op) {
+
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: mrf_consistency\n")
 
   if (!op[[mrf_consistencyOpName(), exact=TRUE]]) return(NULL)
 
@@ -133,9 +141,14 @@ mrf_consistency <- function(data.list, op) {
   }
 
   if (length(unique(svec)) > 1) stop("ERROR: files have different stratification variables")
+
+  # Some files could contain one result for a single exposure/metabolite
+  ovec <- ovec[!(ovec %in% "*")]
+  evec <- evec[!(evec %in% "*")]
   if (length(unique(ovec)) > 1) stop("ERROR: files have different outcome variables")
   if (length(unique(evec)) > 1) stop("ERROR: files have different exposure variables")
 
+  if (DEBUG) cat("End: mrf_consistency\n")
   NULL
 }
 
@@ -147,15 +160,17 @@ mrf_check_col <- function(df, col, col.desc, f) {
   vec <- unique(df[, col, drop=TRUE])
   m   <- length(vec)
 
-  # Check for unique var, or possibly all metabs
+  # Check for unique var, or possibly all metabs. Code not working correctly,
+  #   so just return "*" for now.
   if (m > 1) {
-    if (m <= b) {
-      msg <- paste0("ERROR: more than one ", col.desc, " variable in file ", f)
-      stop(msg)
-    } else {
-      # Probably all metabolites
-      vec <- "*"
-    }
+    vec <- "*"
+    #if (m <= b) {
+    #  msg <- paste0("ERROR: more than one ", col.desc, " variable in file ", f)
+    #  stop(msg)
+    #} else {
+    #  # Probably all metabolites
+    #  vec <- "*"
+    #}
   }
   vec[1]
 }
@@ -324,6 +339,7 @@ mrf_load_data <- function(filevec, op) {
   eff.sheet <- getEffectsName()
   exc       <- NULL
   data.list <- list()
+  modv      <- getModelSummaryModelCol()
   ok        <- rep(FALSE, n)
   for (i in 1:n) {
     # Read in effects sheet
@@ -337,6 +353,9 @@ mrf_load_data <- function(filevec, op) {
     if ("try-error" %in% class(ms)) next
     ms <- try(mrf_subset_ms(ms, eff)) 
     if ("try-error" %in% class(ms)) next
+
+    # Add in model column if needed
+    if (!(modv %in% colnames(ms))) ms[, modv] <- meta_normModelStr(metaModelNameDefault())
 
     # Get the ids, we only need the uids, model and strata, not term
     ids <- meta_getIdNames(ms, term.col=FALSE) 

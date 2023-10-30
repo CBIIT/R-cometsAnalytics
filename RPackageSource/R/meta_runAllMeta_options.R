@@ -518,6 +518,11 @@ checkMetaOp_add.cohort.cols <- function(x) {
   ret
 }
 
+checkMetaOp_merge.cohort.files <- function(x) {
+
+  x <- check.logical(x, metaOp_mergeCohortFilesDefault())
+  x  
+}
 
 checkMetaOp_DEBUG <- function(x) {
   checkOp_DEBUG(x)

@@ -109,6 +109,38 @@ infile.normIdCol <- function(x, vmap, which="metab") {
 
 } # END: infile.normIdCol
 
+infile.getCatVars <- function(dta.vmap) {
+
+  v1  <- tolower(getVarMapVarTypeCol())
+  v2  <- tolower(getVarMapVarRefCol())
+  v3  <- tolower(getVarMapCohortVarCol())
+  mid <- tolower(getVarRef_metabId())
+  sid <- tolower(getVarRef_subjectId())
+  cx  <- colnames(dta.vmap)
+  if (!(v1 %in% cx)) return(NULL)
+  if (!(v2 %in% cx)) return(NULL)
+  if (!(v3 %in% cx)) return(NULL)
+  tmp <- (dta.vmap[, v1, drop=TRUE] %in% getVarMapVarTypeCat()) & 
+        !(dta.vmap[, v2, drop=TRUE] %in% c(sid, mid))
+  ret <- unlist(dta.vmap[tmp, v3, drop=TRUE])
+  ret
+}
+
+infile.getSampleIdCohortVar <- function(vmap) {
+
+  ret   <- NULL
+  sid   <- tolower(getVarRef_subjectId())
+  vref  <- tolower(getVarMapVarRefCol())
+  cvar  <- tolower(getVarMapCohortVarCol())
+  tmp   <- vmap[, vref, drop=TRUE] %in% sid
+  if (any(tmp)) {
+    ret <- vmap[tmp, cvar, drop=TRUE]
+    ret <- ret[1]
+  }
+
+  ret
+}
+
 infile.catVarsToFactors <- function(dta.sdata, dta.vmap) {
 
   if (!length(dta.sdata) || !nrow(dta.sdata)) return(dta.sdata)

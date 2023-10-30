@@ -51,6 +51,9 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NUL
   op        <- runModel.checkOptions(op, modeldata)
   op$cohort <- cohortLabel
 
+  # Take care of missing values 
+  modeldata <- runModel.applyMiss(modeldata, metabdata, op)
+
   ret       <- runModel.start(modeldata, metabdata, op)
   ret       <- runModel.checkRetlist(ret, op) 
   ret       <- runModel.addMetabCols(ret, metabdata, op)
@@ -395,7 +398,7 @@ runModel.getStratVec <- function(gdta, scovs) {
 } # END: runModel.getStratVec
 
 runModel.start <- function(modeldata, metabdata, op) {
-   
+
   if (op$DEBUG) print(op)  
 
   nm <- getMaxNpairwiseOpName()
@@ -1493,4 +1496,67 @@ runModel.getUpperTriCovStr <- function(fit, sfit, parms, expRef) {
     ret   <- paste0(expRef, sep2, s1, sep2, s2) 
   }
   ret
+}
+
+runModel.applyMiss <- function(modeldata, metabdata, op) {
+
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: runModel.applyMiss\n")
+
+  miss.metab <- op[[getMissMetabOpName(), exact=TRUE]]
+  miss.data  <- op[[getMissDataOpName(), exact=TRUE]]
+  if (!length(miss.metab) && !length(miss.data)) return(modeldata)
+
+  x       <- modeldata$gdta
+  cx      <- colnames(x)
+  idv     <- metabdata$subjId0
+  metabs  <- names(modeldata$dict_metabnames)
+  tmp     <- !(metabs %in% idv) & (metabs %in% cx)
+  metabs  <- metabs[tmp]
+  nmetabs <- length(metabs)
+  tmp     <- !(cx %in% c(idv, metabs))
+  vars    <- cx[tmp]
+  nvars   <- length(vars)
+
+  if (nvars && length(miss.data)) {
+    for (v in vars) {
+      tmp <- x[, v, drop=TRUE] %in% miss.data
+      if (any(tmp)) x[tmp, v] <- NA
+    }
+  }
+  if (nmetabs && length(miss.metab)) {
+    # Determine if minimum values will be missing
+    minFlag <- tolower(getMissMetabOpMin()) %in% tolower(miss.metab) 
+    if (minFlag) miss.metab <- miss.metab[!(miss.metab %in% getMissMetabOpMin())]
+
+    if (length(miss.metab)) {
+      mat <- as.matrix(x[, metabs, drop=FALSE])
+      if (!is.matrix(mat)) stop("INTERNAL CODING ERROR 1")
+      tmp <- mat %in% miss.metab
+      if (any(tmp)) {
+        mat[tmp]    <- NA
+        mat         <- as.data.frame(mat, stringsAsFactors=FALSE, check.names=FALSE)
+        if (!is.data.frame(mat)) stop("INTERNAL CODING ERROR 2")
+        x[, metabs] <- mat
+      }
+    }
+    if (minFlag) {
+      # Take repeated minimum value to be missing
+      for (col in metabs) {
+        vec  <- x[, col, drop=TRUE]
+        tmp  <- is.finite(vec)
+        vec2 <- vec[tmp]
+        if (!length(vec2)) next
+        m   <- min(vec2, na.rm=TRUE)
+        tmp <- vec == m
+        tmp[is.na(tmp)] <- FALSE
+        n   <- sum(tmp)
+        if (n > 2) x[tmp, col] <- NA
+      }
+    }
+  }
+  modeldata$gdta <- x
+
+  if (DEBUG) cat("Begin: runModel.applyMiss\n")
+  modeldata
 }

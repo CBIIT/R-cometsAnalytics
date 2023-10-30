@@ -61,7 +61,7 @@ updateInfoTableVecs <- function(nms, op, namevec, valuevec, namestr) {
       len <- length(tmp)
       if (!len) tmp <- "NULL"
       len <- length(tmp)
-      if ((len == 1) && (is.character(tmp) || is.numeric(tmp))) {
+      if ((len == 1) && (is.character(tmp) || is.numeric(tmp) || is.logical(tmp))) {
         namevec  <- c(namevec, paste0(namestr, nm))
         valuevec <- c(valuevec, as.character(tmp))
       }
@@ -175,7 +175,7 @@ getInfoTableDF.meta <- function(op) {
   # Get meta options
   tmp       <- meta_check_op(NULL)
   global    <- names(tmp)
-  exc       <- c("DEBUG", "MODEL")
+  exc       <- c("DEBUG", "MODEL", metaOp_dups.method(), metaOp_oneModelCheck())
   tmp       <- !(global %in% exc)
   global    <- global[tmp]
   tmp       <- updateInfoTableVecs(global, op, namevec, valuevec, "op$")
@@ -183,5 +183,6 @@ getInfoTableDF.meta <- function(op) {
   valuevec  <- tmp$valuevec
 
   ret <- data.frame(name=namevec, value=valuevec, stringsAsFactors=FALSE)
+
   ret
 }

@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.9"}
+getVersionNumber     <- function() {"2.9.0.13"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -90,6 +90,11 @@ getOutMergeOpDefault      <- function() {getOutMergeOpNone()}
 getOutMergeAllStr         <- function() {"all_models"}
 getMaxNpairwiseOpName     <- function() {"max.npairwise"}
 getMaxNpairwiseOpDefault  <- function() {1000}
+getMissMetabOpName        <- function() {"miss.metab"}
+getMissMetabOpDefault     <- function() {NULL}
+getMissMetabOpMin         <- function() {"minimum"}
+getMissDataOpName         <- function() {"miss.data"}
+getMissDataOpDefault      <- function() {NULL}
 
 getOutfileSpCharSep       <- function() {"_"}
 getOutfileCohortSep       <- function() {"__"}
@@ -156,7 +161,8 @@ getSubDataSheetName      <- function() {"SubjectData"}
 getVarMapSheetName       <- function() {"VarMap"}
 getModelsSheetName       <- function() {"Models"}
 getOptionsSheetName      <- function() {"Model_Types"}
-getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput")}
+getGlobalMissValName     <- function() {"MissingValues"}
+getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput", getGlobalMissValName())}
 getModelFunctionCol      <- function() {"function"}
 getReqSheetNames         <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
 getReqMetabSheetCols     <- function() {c("metabolite_name")}
@@ -269,6 +275,8 @@ metaOp_addCohortCols              <- function() {"add.cohort.cols"}
 metaOp_addCohortColsDefault       <- function() {NULL}
 metaOp_addCohortNames             <- function() {"add.cohort.names"}
 metaOp_addCohortNamesDefault      <- function() {TRUE}
+metaOp_mergeCohortFiles           <- function() {"merge.cohort.files"}
+metaOp_mergeCohortFilesDefault    <- function() {FALSE}
 
 metaModelNameNumberSep         <- function() {" "}
 metaModelNameDefault           <- function() {"NA"}

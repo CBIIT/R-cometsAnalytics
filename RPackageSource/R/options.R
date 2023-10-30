@@ -56,6 +56,14 @@
 #' \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
 #'                             chemical class enrichment.
 #'                            The default is 0.05.}
+#' \item{\code{miss.metab}}{ Vector of numeric values that define missing values, or the
+#'                        string "minimum" that will set samples with the minimum metabolite
+#'                        value to NA provided there is more than one sample with the
+#'                        minimum value.
+#'                            The default is NULL.}
+#' \item{\code{miss.data}}{ Vector of values that define missing values for the non-metabolite
+#'                          variables.
+#'                            The default is NULL.}
 #' }
 #'
 #' @name options
@@ -290,10 +298,12 @@ getValidGlobalOps <- function(meta=0) {
   chemEnrich <- getRampCallChemEnrichOpName()
   cE.pval    <- getRampPvalOpName()
   allpair    <- getMaxNpairwiseOpName()
+  miss.m     <- getMissMetabOpName()
+  miss.d     <- getMissDataOpName()
 
   ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
                    out.type, out.merge)
-  ops.charVec <- c(out.metabs)
+  ops.charVec <- c(out.metabs, miss.m, miss.d)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
                    add.ci, exp.parms, cE.pval, allpair, 
                    "DEBUG", "DONOTRUN")
@@ -313,17 +323,12 @@ getValidGlobalOps <- function(meta=0) {
   default[[chemEnrich]] <- getRampCallChemEnrichOpDefault()
   default[[cE.pval]]    <- getRampPvalOpDefault()
   default[[allpair]]    <- getMaxNpairwiseOpDefault()
-
-  # Be careful with exp.parms option, as it can be NULL
-  defval <- getExpParmsOpDefault() 
-  if (!length(defval)) {
-    nms            <- names(default)
-    default        <- c(default, list(NULL))
-    names(default) <- c(nms, exp.parms)  
-  } else {
-    default[[exp.parms]] <- defval 
-  }
-  valid <- names(default)
+  
+  # Be careful with options that have NULL as the default value
+  default <- addNamedValueToList(default, exp.parms, getExpParmsOpDefault())
+  default <- addNamedValueToList(default, miss.m,    getMissMetabOpDefault())
+  default <- addNamedValueToList(default, miss.d,    getMissDataOpDefault())
+  valid   <- names(default)
 
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
        valid=valid, default=default, ops.charVec=ops.charVec)
@@ -449,6 +454,9 @@ checkGlobalOpList <- function(op, name="options", meta=0) {
         op[[i]] <- tmp
       } else if (nm == spec4) {
         tmp     <- try(checkMetaOp_strata.exclude.het.test(val), silent=TRUE)
+        op[[i]] <- tmp
+      } else if (nm %in% ops.cv) {
+        tmp     <- try(checkOp_CHARVEC(val, nm), silent=TRUE)
         op[[i]] <- tmp
       } else {
         tmp <- try(eval(parse(text=paste(FSTR, nm, "('", val, "')", sep=""))),
@@ -645,6 +653,12 @@ checkOp_max.npairwise <- function(x) {
   check.range(x, "max.npairwise", 2, Inf)
 }
 
+checkOp_CHARVEC <- function(x, nm) {
+
+  if (!length(x)) return(NULL)
+  check.vector(x, nm, min.len=0, len=0)
+  x
+}
 
 checkMetaFiles <- function(filevec, name="filevec", valid.ext=NULL) {
 

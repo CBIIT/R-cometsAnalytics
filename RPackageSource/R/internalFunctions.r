@@ -225,9 +225,10 @@ checkAcceptedValues <- function(dta.sdata, dta.vmap) {
 checkAccValuesInData <- function(sdata, var, obj, catflag) {
 
   vec <- sdata[, var, drop=TRUE]
+
   if (catflag) {
     vec <- trimws(vec)
-    tmp <- !(vec %in% obj)
+    tmp <- !(vec %in% obj) & !is.na(vec)
     if (any(tmp)) {
       vec <- unique(vec[tmp])
       str <- paste0(vec, collapse=", ")
@@ -323,7 +324,7 @@ Harmonize<-function(dtalist){
   # Load processed UIDs file:
   dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
   masterfile <- file.path(dir, "compileduids.RData")
-  load(masterfile)
+  tmp <- load(masterfile)
 
   # rename metid to be the same as metabid
   colnames(mastermetid)[which(colnames(mastermetid)=="metid")]=dtalist$metabId

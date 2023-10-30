@@ -19,10 +19,14 @@
 #'  for harmonizing the metabolite names across different cohorts when meta-analyses are performed. \cr
 
 #' \bold{SubjectMetabolites} \cr
-#' A table with the subject ids in the first column and metabolites as the other columns. \cr
+#' A table with the subject ids in the first column and metabolites as the other columns.
+#' Each cell must contain a numeric value or left empty (missing); otherwise an error
+#' will occur. \cr
 
 #' \bold{SubjectData} \cr
-#' A table with the subject ids in the first column and covariates as the other columns. \cr
+#' A table with the subject ids in the first column and covariates as the other columns. 
+#' For continuous variables, each cell must contain a numeric value or left empty (missing); 
+#' otherwise an error will occur.\cr
 
 #' \bold{VarMap} \cr
 #' A table with at least the required columns \code{VARREFERENCE}, \code{COHORTVARIABLE}, 
@@ -264,9 +268,16 @@ readCOMETSinput <- function(file, mode="Batch") {
             dtalist$subjdata[[x]] == min(dtalist$subjdata[[x]], na.rm = TRUE)
           )))
       }))
-      dtalist$transformation = transformation
-      dtalist$metab$var[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] = log2metvar
-      dtalist$metab$num.min[dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]] = num.min
+
+      # Get number of missing for each metab
+      num.miss <- colSums(is.na(as.matrix(dtalist$subjdata[, mymets, drop=FALSE])))
+
+      dtalist$transformation       <- transformation  
+      temp                         <- dtalist$metab[, dtalist$metabId] %in% dict_metabnames[mymets]
+      dtalist$metab$var[temp]      <- log2metvar
+      dtalist$metab$num.min[temp]  <- num.min
+      dtalist$metab$num.miss[temp] <- num.miss
+ 
   } else {
     # if all subject metabolite data is missing
     dtalist$transformation = NA
@@ -372,6 +383,26 @@ checkOptionsSheet0 <- function(x) {
     if (i > 1) x[, col] <- setupOpStr(x[, col])
   }
 
+  # Set missing id column to previous if previous is not missing and not
+  #   a global option name
+  idv    <- getModelOptionsIdCol()
+  idvec  <- x[, idv, drop=TRUE]
+  lidvec <- tolower(idvec)
+  tmp    <- nchar(idvec) < 1
+  tmp[is.na(tmp)] <- TRUE
+  tmp[1]          <- FALSE
+  if (!any(tmp)) return(x)
+  rows  <- (1:length(idvec))[tmp]
+  nrows <- length(rows)
+  gops  <- tolower(getGlobalOptionName())
+  tmp0  <- !(lidvec %in% gops)
+  for (i in 1:nrows) {
+    row   <- rows[i]
+    rowm1 <- row - 1
+    if (tmp0[rowm1]) idvec[row] <- idvec[rowm1]  
+  }
+  x[, idv] <- idvec
+
   x
 
 } # END: checkOptionsSheet0
@@ -420,4 +451,3 @@ rci.checkForDupHarmIds <- function(metabDF) {
 
   ret
 }
-

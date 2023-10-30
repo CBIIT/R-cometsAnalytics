@@ -91,15 +91,20 @@ OutputListToExcel <- function(filename, obj) {
   if (!length(nms)) nms <- paste("output ", 1:N, sep="")
   tmp <- nchar(nms) < 1
   if (any(tmp)) nms[tmp] <- paste("output ", (1:N)[tmp], sep="")
-
   over <- TRUE
+  lst  <- list()
+  # Change in rio package, write all sheets at once
   for (i in 1:N) {
     tmp <- obj[[i]]
     if (length(tmp) && (is.data.frame(tmp) || is.matrix(tmp))) {
-      rio::export(tmp, filename, which=nms[i], overwrite=over)
-      over <- FALSE
+      #rio::export(tmp, filename, which=nms[i], overwrite=over)
+      #over <- FALSE
+      lst[[nms[i]]] <- tmp
     }
   }
+  if (!length(lst)) return(NULL)
+  rio::export(lst, file=filename)  
+
   if (file.exists(filename)) {
     msg <- msg_arg_outSavedToFile(filename)
     cat(msg)

@@ -28,7 +28,8 @@
 #' \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
 #' \bold{Functions for graphics:} \cr
 #' \code{\link{plotVar}} (metabolite variance distribution plot) \cr
-#' \code{\link{plotMinvalues}} (distribution of missing values) \cr
+#' \code{\link{plotMinvalues}} (distribution of minimum values) \cr
+#' \code{\link{plotMissvalues}} (distribution of missing values) \cr
 #' \code{\link{showHeatmap}} (heat map of metabolite correlations) \cr
 #' \code{\link{showHClust}} (interactive heat map with hierarchical clustering) \cr
 #' \bold{Functions for saving results to files:} \cr

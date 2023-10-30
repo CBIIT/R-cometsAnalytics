@@ -30,12 +30,17 @@
 #'                                   one of the input files is encountered. If FALSE, then
 #'                           the files containing errors will be removed from the analysis.
 #'                      The default is TRUE.}
-#' \item{\code{oneModelCheck}}{ TRUE or FALSE to check for consistent files when each file
-#'                              consists of results from a single model. If TRUE, then each
-#'                              file must have the same model name, model function, exposure
-#'                              (or outcome) and for a categorical exposure variable, the same
-#'                              reference value.
-#'                      The default is TRUE.}
+# \item{\code{oneModelCheck}}{ TRUE or FALSE to check for consistent files when each file
+#                              consists of results from a single model. If TRUE, then each
+#                              file must have the same model name, model function, exposure
+#                              (or outcome) and for a categorical exposure variable, the same
+#                              reference value.
+#                      The default is TRUE.}
+#' \item{\code{merge.cohort.files}}{ TRUE or FALSE to merge files with the same cohort name.
+#'                     This will take the union of all metabolites in the files. A metabolite
+#'                     that occurs in multiple files will be chosen from the file with the
+#'                     maximum sample size for that metabolite. 
+#'                      The default is FALSE.}
 #' \item{\code{add.cohort.names}}{ TRUE or FALSE to add binary columns (one for each cohort) to
 #'       the data frame of results to show which cohorts contributed to the meta-analysis
 #        results for each metabolite. The names of the binary columns will be the cohort names.
@@ -62,7 +67,7 @@ getValidGlobalMetaOps <- function() {
   ops.num     <- c(metaOp_minNcohortName(), metaOp_cohortMinSubs(), metaOp_totalMinSubs(),
                    metaOp_dups.method(), "DEBUG")
   ops.log     <- c(metaOp_oneModelCheck(),  metaOp_stopOnFileError(),
-                   metaOp_addCohortNames())
+                   metaOp_addCohortNames(), metaOp_mergeCohortFiles())
   ops.list    <- metaOp_strataToExcludeFromHetTest()
   default     <- list(cohorts.include=NULL, cohorts.exclude=NULL, DEBUG=0, MODEL="")
   default[[metaOp_minNcohortName()]]           <- metaOp_minNcohortDefault()
@@ -73,6 +78,7 @@ getValidGlobalMetaOps <- function() {
   default[[metaOp_oneModelCheck()]]            <- metaOp_oneModelCheckDefault()
   default[[metaOp_dups.method()]]              <- metaOp_dups.methodDefault()
   default[[metaOp_stopOnFileError()]]          <- metaOp_stopOnFileErrorDefault()
+  default[[metaOp_mergeCohortFiles()]]         <- metaOp_mergeCohortFilesDefault()
   default <- addNamedValueToList(default, metaOp_addCohortCols(), metaOp_addCohortColsDefault())
   default <- addNamedValueToList(default, metaOp_addCohortNames(), metaOp_addCohortNamesDefault())
 
