@@ -99,7 +99,7 @@ OutputListToExcel <- function(filename, obj) {
     if (length(tmp) && (is.data.frame(tmp) || is.matrix(tmp))) {
       #rio::export(tmp, filename, which=nms[i], overwrite=over)
       #over <- FALSE
-      lst[[nms[i]]] <- tmp
+      lst[[nms[i]]] <- as.data.frame(tmp, stringsAsFactors=FALSE, check.names=FALSE)
     }
   }
   if (!length(lst)) return(NULL)

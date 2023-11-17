@@ -99,11 +99,12 @@ check.string <- function(obj, valid, parm) {
  
   # Check for errors
   if (!isString(obj)) errFlag <- 1 
-  obj <- trimws(obj)
-  if (!(obj %in% valid)) errFlag <- 1
-
+  if (!errFlag) {
+    obj <- trimws(obj)
+    if (!(obj %in% valid)) errFlag <- 1
+  }
   if (errFlag) {
-    msg <- paste(valid, collapse=", ")
+    msg <- getQuotedVarStr(valid)
     msg <- msg_arg_objNotValid(c(parm, msg))
     stop(msg)
   }

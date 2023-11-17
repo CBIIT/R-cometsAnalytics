@@ -284,6 +284,9 @@ msg_arg_colNotValid     <- function(x) paste0("ERROR: ", x[1], " must be a varia
 msg_arg_colsNotValid    <- function(x) paste0("ERROR: some variable names in ", x[1], " are not valid")
 msg_arg_colNumNotValid  <- function(x) paste0("ERROR: ", x[1], " must be a numeric variable in the data")
 msg_arg_colNegNotValid  <- function(x) paste0("ERROR: ", x[1], " cannot have negative values")
+msg_arg_varNotFound     <- function(x) paste0("ERROR: variable ", x[1], " not found in ", x[2])
 
-
-
+msg_ramp_no_padj        <- function(x) paste0("ERROR: No metabolites with adjusted p-value <= ", x[1])
+msg_ramp_no_metab       <- function()  "No outcomes/exposures match with the metabolite ids"
+msg_ramp_no_metab2      <- function()  "No metabolite names found"
+msg_ramp_idtypes        <- function(x) paste0("ERROR: the metab data must contain one of the id types ", x[1])

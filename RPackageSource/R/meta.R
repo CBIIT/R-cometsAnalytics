@@ -110,14 +110,16 @@ meta_setReturnObj <- function(df, df.dups, op) {
   wnm  <- runModel.getWarningsListName()
   wobj <- op[[wnm, exact=TRUE]]
   if (is.null(wobj)) wobj <- runModel.getEmptyErrorWarn() 
-  if (op$strat.model) df <- meta_strat_het_test(df, op)
-  if (op$corr.model) df <- meta_FisherZtoCorr(df, alpha=0.95)
-
-  # Check min number of cohorts and sample size
-  df     <- meta_setRetDf(df, op) 
   modcol <- getModelSummaryModelCol()
 
-  ord <- c(modcol,
+  if (length(df)) {
+    if (op$strat.model) df <- meta_strat_het_test(df, op)
+    if (op$corr.model) df <- meta_FisherZtoCorr(df, alpha=0.95)
+
+    # Check min number of cohorts and sample size
+    df <- meta_setRetDf(df, op) 
+  
+    ord <- c(modcol,
            runModel.getStrataColName(), runModel.getStrataNumColName(),
            getModelSummaryOutUidCol(), getModelSummaryExpUidCol(),
            getEffectsTermName(), 
@@ -129,15 +131,22 @@ meta_setReturnObj <- function(df, df.dups, op) {
            getMetaHetPvalueCol(), getMetaDirectionCol(), 
            paste0(getEffectsPvalueName(), ".", op$cohorts),
            getMetaMessageCol())
-  df <- orderVars(df, ord)
+    df <- orderVars(df, ord)
  
-  # Check for constant model summary column
-  df <- df.checkRemConstantCol(df, modcol) 
-  ret[[metaRetListResultsTable()]] <- df
+    # Check for constant model summary column
+    df <- df.checkRemConstantCol(df, modcol) 
+    ret[[metaRetListResultsTable()]] <- df
+  }
 
   # Duplicates
   dupnm <- metaRetListDupsTable()
   if (length(df.dups)) {
+    if (op$strat.model) df.dups <- meta_strat_het_test(df.dups, op)
+    if (op$corr.model) df.dups <- meta_FisherZtoCorr(df.dups, alpha=0.95)
+
+    # Check min number of cohorts and sample size
+    df.dups <- meta_setRetDf(df.dups, op) 
+
     ord <- c(modcol,
            runModel.getStrataColName(), runModel.getStrataNumColName(),
            getModelSummaryOutUidCol(), getModelSummaryExpUidCol(),
@@ -155,6 +164,8 @@ meta_setReturnObj <- function(df, df.dups, op) {
     ret[[dupnm]] <- df.dups
   }
 
+  ret <- meta_addDupToResTable(ret)
+
   # Errors/warnings table
   ret[[wnm]] <- wobj
 
@@ -164,6 +175,27 @@ meta_setReturnObj <- function(df, df.dups, op) {
   
   ret
 
+}
+
+meta_addDupToResTable <- function(ret) {
+
+  resnm <- metaRetListResultsTable()
+  dupnm <- metaRetListDupsTable()
+  col   <- metaDupColName()
+  res   <- ret[[resnm, exact=TRUE]]
+  dup   <- ret[[dupnm, exact=TRUE]]
+  if (length(dup)) dup[, col] <- 1
+  if (length(res)) {
+    res[, col] <- 0
+    if (length(dup)) {
+      res <- df.rbind.all(res, dup)
+    }
+  } else {
+    res <- dup
+  }
+  ret[[metaRetListResultsTable()]] <- res
+  ret[[metaRetListDupsTable()]]    <- dup
+  ret
 }
 
 meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
@@ -183,7 +215,8 @@ meta_addCohortCols <- function(ids, data.list, cohorts, missMat, op) {
     ret <- as.data.frame(ret, check.names=FALSE)
   }
 
-  colsToAdd <- op[[metaOp_addCohortCols(), exact=TRUE]]
+  colsToAdd <- unique(c(metaOp_addCohortColsDefault(),
+                      op[[metaOp_addCohortCols(), exact=TRUE]]))
   if (!length(colsToAdd)) return(ret)
 
   colsToAdd     <- trimws(tolower(colsToAdd))
@@ -1008,7 +1041,7 @@ meta_process_dups <- function(dup.ids, nsubs, data.list, op) {
   colsToAdd <- op[[metaOp_addCohortCols(), exact=TRUE]]
   colsToAdd <- c(getEffectsRunName(), 
                  getEffectsOutcomespecName(),
-                 getEffectsExposurespecName())
+                 getEffectsExposurespecName(), colsToAdd)
   colsToAdd <- unique(colsToAdd)
   mflag     <- TRUE
 

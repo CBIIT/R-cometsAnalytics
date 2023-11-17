@@ -209,6 +209,7 @@ getRampCallChemEnrichOpDefault <- function() {0}
 getRampOpName                  <- function() {"ramp.options"} # Name of list in the main options list
 getRampChemEnrichDfName        <- function() {"ChemEnrich"} # Name of the data frame in return list from runModel
 
+
 getTable1DfName                <- function() {"Table1"} 
 
 # Info table
@@ -272,7 +273,9 @@ metaOp_models                     <- function() {"models"}
 metaOp_stratHet.argEq             <- function() {"="}
 metaOp_stratHet.vecSep            <- function() {","}
 metaOp_addCohortCols              <- function() {"add.cohort.cols"}
-metaOp_addCohortColsDefault       <- function() {NULL}
+metaOp_addCohortColsDefault       <- function() {c(getEffectsRunName(), 
+                                                   getEffectsOutcomespecName(),
+                                                   getEffectsExposurespecName())}
 metaOp_addCohortNames             <- function() {"add.cohort.names"}
 metaOp_addCohortNamesDefault      <- function() {TRUE}
 metaOp_mergeCohortFiles           <- function() {"merge.cohort.files"}
@@ -282,6 +285,7 @@ metaModelNameNumberSep         <- function() {" "}
 metaModelNameDefault           <- function() {"NA"}
 metaRetListResultsTable        <- function() {"Results"}
 metaRetListDupsTable           <- function() {"Duplicates"}
+metaDupColName                 <- function() {"Duplicate"}
 getHarmMetabIdCol              <- function() {"metabolite_name"}
 getMetaBetaCol                 <- function() {"meta.estimate"}
 getMetaBetaSeCol               <- function() {"meta.std.error"}
