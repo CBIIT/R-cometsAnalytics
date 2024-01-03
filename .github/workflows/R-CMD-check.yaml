@@ -50,7 +50,7 @@ jobs:
         
       - name: Install RaMP
         run: |
-          Rscript -e 'remotes::install_github("ncats/RAMP-DB/tree/sqlite")'
+          Rscript -e 'remotes::install_github("ncats/RAMP-DB/sqlite")'
 
       - name: Cache R packages
         if: runner.os != 'Windows'
