@@ -21,9 +21,9 @@
 #' @importFrom survival coxph Surv clogit strata
 #' @importFrom stringr str_locate
 #' @importFrom utils sessionInfo untar unzip read.table
+#' @importFrom RaMP RaMP chemicalClassEnrichment
 #' @details
 #' \bold{Functions for analysis:} \cr
-#' \code{\link{runCorr}} (correlation analysis) \cr
 #' \code{\link{runModel}} (correlation, glm, lm, coxph, or clogit) \cr
 #' \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
 #' \bold{Functions for graphics:} \cr

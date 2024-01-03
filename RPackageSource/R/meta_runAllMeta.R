@@ -226,7 +226,40 @@ meta_extractAllFiles <- function(fvec, dir, DEBUG) {
   list(files=ret, removed=rem)
 }
 
-meta_extractFiles <- function(f, out.dir, ext=NULL) {
+meta_extractFiles <- function(f, out.dir, ext=NULL, depth=100) {
+  
+  # f could be a zip file containing zip files
+  meta_extractFiles.main(f, out.dir, ext=ext)
+  if (depth < 2) return(NULL)
+
+  savef <- NULL
+  for (i in 2:depth) {
+    # Get the zip and tar files in out.dir
+    fvec <- list.files(out.dir, full.names=TRUE, recursive=TRUE)
+    if (!length(fvec)) return(NULL)
+    if (length(savef)) fvec <- fvec[!(fvec %in% savef)]
+    if (!length(fvec)) return(NULL)
+
+    zip  <- isZipFile(fvec)
+    tar  <- isTarFile(fvec)
+    fzip <- fvec[zip]
+    ftar <- fvec[tar]
+    nzip <- length(fzip)
+    ntar <- length(ftar)
+    if (!nzip && !ntar) return(NULL)
+    
+    savef <- unique(c(savef, fvec[(zip | tar)]))
+    if (nzip) {
+      for (f in fzip) meta_extractFiles.main(f, out.dir, ext="zip")
+    }
+    if (ntar) {
+     for (f in ftar) meta_extractFiles.main(f, out.dir, ext="tar")
+    }
+  }
+  NULL
+}
+
+meta_extractFiles.main <- function(f, out.dir, ext=NULL) {
 
   ret <- NULL
   if (is.null(ext)) ext <- getFileExt(f, tolower=1)

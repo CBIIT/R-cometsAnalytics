@@ -203,6 +203,8 @@ runModel.testModelString2 <- function() {"Finished testing models in Models shee
 # options for RaMP
 getRampPvalOpName              <- function() {"chemEnrich.adjPvalue"}
 getRampPvalOpDefault           <- function() {0.05}
+getRampDBversionOpName         <- function() {"chemEnrich.db.version"}
+getRampDBversionOpDefault      <- function() {NULL}
 getRampPvalAdjMethod           <- function() {"BH"}
 getRampCallChemEnrichOpName    <- function() {"chemEnrich"}
 getRampCallChemEnrichOpDefault <- function() {0}

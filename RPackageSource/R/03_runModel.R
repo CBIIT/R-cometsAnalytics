@@ -1447,13 +1447,17 @@ runModel.addMetabCols <- function(obj, metabdata, op) {
 
 runModel.chemClassEnrichment <- function(df, metabdata, op) {
 
+  nm.p  <- getRampPvalOpName()
+  nm.db <- getRampDBversionOpName() 
   if (is.list(op)) {
-    ramp_op <- op[[getRampOpName(), exact=TRUE]]
+    db   <- op[[nm.db, exact=TRUE]]
+    padj <- op[[nm.p, exact=TRUE]]
   } else {
-    ramp_op <- NULL
+    db   <- NULL
+    padj <- getRampPvalOpDefault() 
   }
-  #ret <- chemClassEnrichment(df, metabdata, op=ramp_op)
-  ret <- NULL
+  ret <- chemClassEnrichment(df, metabdata, db.version=db, pvalue.adj=padj)
+
   ret
 } 
 
