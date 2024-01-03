@@ -51,7 +51,6 @@ jobs:
       - name: Install RaMP
         run: |
           Rscript -e 'remotes::install_github("ncats/RAMP-DB")'
-          shell: Rscript {0}
 
       - name: Cache R packages
         if: runner.os != 'Windows'
