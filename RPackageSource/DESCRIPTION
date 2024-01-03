@@ -1,7 +1,7 @@
 Package: RcometsAnalytics
 Type: Package
 Title: Comets Analytics for consortium based metabolomic analyses
-Version: 2.9.0.15
+Version: 2.9.0.16
 Author: Ella Temprosa, Ewy Mathe
 Maintainer: Bill Wheeler <wheelerb@imsweb.com>
 Description: This R package support all cohort-specific analyses of the COMETS
@@ -14,7 +14,7 @@ Description: This R package support all cohort-specific analyses of the COMETS
 Depends: R (>= 3.5.0)
 Imports: readxl, rio, dplyr, plyr, plotly, tidyr, heatmaply, stringr,
         data.table, caret, subselect, broom, psych, MASS, ppcor,
-        survival
+        survival, RaMP
 Suggests: Hmisc, knitr, testthat, rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
@@ -22,4 +22,4 @@ RoxygenNote: 7.2.3
 NeedsCompilation: no
 URL: http://comets-analytics.org/
 BugReports: https://github.com/CBIIT/nci-webtools-comets-analytics/issues
-Packaged: 2023-11-17 19:15:57 UTC; wheelerwi
+Packaged: 2024-01-03 17:44:47 UTC; wheelerwi
