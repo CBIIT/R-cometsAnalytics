@@ -41,11 +41,19 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Set up R and install BiocManager
-        uses: grimbough/bioc-actions/setup-bioc@v1
-        if: matrix.config.image == null
-        with:
-          bioc-version: ${{ matrix.config.bioc }}
+      - name: Install BiocFileCache
+        if: matrix.config.r == 'release'
+        run: |
+          remotes::install_cran("BiocManager")
+          BiocManager::install("BiocFileCache", version = remotes::bioc_version())
+        shell: Rscript {0}
+
+      - name: Install BiocFileCache devel
+        if: matrix.config.r == 'devel'
+        run: |
+          remotes::install_dev("BiocManager")
+          BiocManager::install("BiocFileCache", version = "devel")
+        shell: Rscript {0}
 
       - name: Query dependencies
         run: |
