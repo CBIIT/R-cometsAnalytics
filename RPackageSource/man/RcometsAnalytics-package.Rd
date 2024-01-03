@@ -12,7 +12,6 @@ Data are not saved in the system but
 }
 \details{
 \bold{Functions for analysis:} \cr
-\code{\link{runCorr}} (correlation analysis) \cr
 \code{\link{runModel}} (correlation, glm, lm, coxph, or clogit) \cr
 \code{\link{runAllModels}} (run models in batch mode from models sheet) \cr
 \bold{Functions for graphics:} \cr
