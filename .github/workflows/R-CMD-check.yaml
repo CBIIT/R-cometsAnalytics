@@ -43,6 +43,7 @@ jobs:
       
       - name: Query dependencies
         run: |
+          install.packages('devtools')
           devtools::install_dev("remotes")
           #install.packages('remotes')
           #saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
