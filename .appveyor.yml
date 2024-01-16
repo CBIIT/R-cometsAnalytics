@@ -22,7 +22,7 @@ environment:
 
   global:
     WARNINGS_ARE_ERRORS: 1
-    https_proxy=http://proxy.etc:8080
+    https_proxy: http://proxy.etc:8080
 
   matrix:
 
