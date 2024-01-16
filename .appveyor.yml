@@ -27,13 +27,13 @@ environment:
 
   - R_VERSION: release
     R_ARCH: x64
-    BIOC_USE_DEVEL: false
-    _R_CHECK_FORCE_SUGGESTS_: false
+    BIOC_USE_DEVEL: FLASE
+    _R_CHECK_FORCE_SUGGESTS_: FALSE
 
   - R_VERSION: release
     R_ARCH: x64
-    BIOC_USE_DEVEL: true
-    _R_CHECK_FORCE_SUGGESTS_: false
+    BIOC_USE_DEVEL: TRUE
+    _R_CHECK_FORCE_SUGGESTS_: FALSE
 
 build_script:
   - travis-tool.sh install_bioc  BiocFileCache
