@@ -22,6 +22,7 @@ environment:
 
   global:
     WARNINGS_ARE_ERRORS: 1
+    https_proxy=http://proxy.etc:8080
 
   matrix:
 
@@ -34,6 +35,8 @@ environment:
     R_ARCH: x64
     BIOC_USE_DEVEL: TRUE
     _R_CHECK_FORCE_SUGGESTS_: FALSE
+
+    
 
 build_script:
   - travis-tool.sh install_bioc  BiocFileCache
