@@ -58,11 +58,12 @@ addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, init=1, DEBUG=0) {
 
 subsetDfByPvalue <- function(df, col, max.pval, adj="BH") {
 
-  ret <- NULL
+  ret <- df
   if (nonEmptyDfHasCols(df, col)) {
     pvec <- as.numeric(df[, col, drop=TRUE])
     if (length(adj)) pvec <- p.adjust(pvec, method=adj)
-    tmp  <- pvec <= max.pval
+    ret$adj.pvalue <- pvec # add one column to store adj.pvalue
+    tmp  <- pvec <= 1 # set <=1 to include all p value not less than pmax
     tmp[is.na(tmp)] <- FALSE
     ret <- df[tmp, , drop=FALSE]
     if (!nrow(ret)) ret <- NULL
