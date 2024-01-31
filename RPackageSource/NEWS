@@ -9,7 +9,6 @@ NEW FEATURES
     o The VarMap sheet of the input Excel file now has an "ACCEPTED_VALUES" column to specify the valid values for each variable.
     o The readCOMETSinput function now has the argument mode ("Interactive" or "Batch") for the model in which it is called.
     o The ModelSummary table now has a column called "exposure.covariances" containing exposure covariances for non-correlation models.
-    o The VARDEFINITION column of the VarMap sheet is now checked when readCOMETSinput is called.
     o The function plotMissvalues has been added to plot the distribution of missing values in metabolites.
     o The options "miss.metab" and "miss.data" have been added to specify missing values.
     o A chemical enrichment analysis can be performed using the option "chemEnrich" or calling the  chemClassEnrichment function.
