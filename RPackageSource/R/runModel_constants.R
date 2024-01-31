@@ -275,7 +275,9 @@ metaOp_models                     <- function() {"models"}
 metaOp_stratHet.argEq             <- function() {"="}
 metaOp_stratHet.vecSep            <- function() {","}
 metaOp_addCohortCols              <- function() {"add.cohort.cols"}
-metaOp_addCohortColsDefault       <- function() {c(getEffectsRunName(), 
+metaOp_addCohortColsDefault       <- function() {c(getEffectsEstName(),
+                                                   getEffectsEstSeName(),
+                                                   getEffectsRunName(), 
                                                    getEffectsOutcomespecName(),
                                                    getEffectsExposurespecName())}
 metaOp_addCohortNames             <- function() {"add.cohort.names"}
@@ -285,7 +287,7 @@ metaOp_mergeCohortFilesDefault    <- function() {FALSE}
 
 metaModelNameNumberSep         <- function() {" "}
 metaModelNameDefault           <- function() {"NA"}
-metaRetListResultsTable        <- function() {"Results"}
+metaRetListResultsTable        <- function() {"Metaresults"}
 metaRetListDupsTable           <- function() {"Duplicates"}
 metaDupColName                 <- function() {"Duplicate"}
 getHarmMetabIdCol              <- function() {"metabolite_name"}

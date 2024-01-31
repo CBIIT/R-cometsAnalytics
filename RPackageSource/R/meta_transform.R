@@ -730,9 +730,11 @@ meta_transformAndSave <- function(file.obj, op) {
   N           <- length(file.obj)
   ok          <- rep(FALSE, N)
   out         <- paste0(tdir, "transform", 1:N, ".rda")
+  files.orig  <- rep("", N)
   for (i in 1:N) {
     f    <- getFileNameFromObj(file.obj[[i]])
     if (DEBUG) cat(paste0("*** Loading file ", f, "\n"))  
+    files.orig[i] <- f
     ret  <- try(meta_transform(file.obj[[i]]), silent=FALSE)
     wobj <- runmodel.checkForError(ret, warnStr="ERROR", objStr=f, rem.obj=wobj, msg=NULL)
     if ("try-error" %in% class(ret)) {
@@ -749,7 +751,8 @@ meta_transformAndSave <- function(file.obj, op) {
     save(ret, file=out[i])
     ok[i] <- TRUE
   }
-  op[[wnm]] <- wobj
+  op[[wnm]]          <- wobj
+  op[["files.orig"]] <- files.orig[ok]
   if (DEBUG) cat("End: meta_transformAndSave\n")
 
   list(files=out[ok], op=op)

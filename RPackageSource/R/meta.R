@@ -955,21 +955,24 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
 
   DEBUG    <- op$DEBUG
   if (DEBUG) cat("Begin: meta_loadFilesAndSetupData\n")
-  wnm      <- runModel.getWarningsListName()
-  wobj     <- op[[wnm, exact=TRUE]]
-  save.mem <- op[[metaOp_save.mem(), exact=TRUE]]
-  nfiles   <- length(file.info.list)
-  all.ids  <- NULL
-  idlist   <- NULL
-  ret      <- list()
-  ret.info <- list()
-  msnv     <- getModelSummaryNobsName()
-  temp.dir <- op$temp.dir
-  cohorts  <- NULL
+  wnm         <- runModel.getWarningsListName()
+  wobj        <- op[[wnm, exact=TRUE]]
+  save.mem    <- op[[metaOp_save.mem(), exact=TRUE]]
+  nfiles      <- length(file.info.list)
+  all.ids     <- NULL
+  idlist      <- NULL
+  ret         <- list()
+  ret.info    <- list()
+  msnv        <- getModelSummaryNobsName()
+  temp.dir    <- op$temp.dir
+  cohorts     <- NULL
   stopOnError <- op[[metaOp_stopOnFileError(), exact=TRUE]]
+  files.orig  <- op[["files.orig", exact=TRUE]]
+  if (length(files.orig) != nfiles) stop("INTERNAL CODING ERROR with files.orig")
 
   # ids of duplicates
   DUPIDS <- NULL
+  ok     <- rep(FALSE, nfiles)
   for (i in 1:nfiles) {
     x      <- NULL
     flist  <- file.info.list[[i]]
@@ -1004,6 +1007,7 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
     gc()
 
     # File is OK
+    ok[i]           <- TRUE
     ind             <- length(ret.info) + 1 
     flist$info      <- info
     ret.info[[ind]] <- flist 
@@ -1016,9 +1020,10 @@ meta_loadFilesAndSetupData <- function(file.info.list, op) {
   tmp <- meta_getFinalSet(idlist, op) 
 
   # Only keep the duplicated ids that are in the final set
-  DUPIDS <- DUPIDS[DUPIDS %in% tmp$ids]
-  names(ret) <- cohorts
-  op[[wnm]]  <- wobj
+  DUPIDS             <- DUPIDS[DUPIDS %in% tmp$ids]
+  names(ret)         <- cohorts
+  op[[wnm]]          <- wobj
+  op[["files.orig"]] <- files.orig[ok]
 
   if (DEBUG) cat("End: meta_loadFilesAndSetupData\n")
   list(data=ret, file.info.list=ret.info, op=op, ids=tmp$ids, 
@@ -1338,14 +1343,16 @@ meta_initFileCheck <- function(filevec, op) {
   DEBUG    <- op$DEBUG
   if (DEBUG) cat("Begin: meta_initFileCheck\n")
 
-  wrnm     <- runModel.getWarningsListName()
-  wobj     <- op[[wrnm, exact=TRUE]]
-  infolist <- list()
-  n        <- length(filevec)
-  ok       <- rep(TRUE, n)
-  modnum   <- op[["modelNumber", exact=TRUE]]
-  cohorts  <- NULL
-  cvec     <- rep("", n)
+  wrnm       <- runModel.getWarningsListName()
+  wobj       <- op[[wrnm, exact=TRUE]]
+  infolist   <- list()
+  n          <- length(filevec)
+  ok         <- rep(TRUE, n)
+  modnum     <- op[["modelNumber", exact=TRUE]]
+  cohorts    <- NULL
+  cvec       <- rep("", n)
+  files.orig <- op[["files.orig", exact=TRUE]]
+  if (length(files.orig) != n) stop("INTERNAL CODING ERROR with files.orig")
   for (i in 1:n) {
     f   <- filevec[i]
     obj <- try(meta_getFileInfo(f), silent=FALSE)
@@ -1376,6 +1383,8 @@ meta_initFileCheck <- function(filevec, op) {
   }
   m <- sum(ok)
   if (m < op[[metaOp_minNcohortName()]]) stop(msg_meta_16()) 
+  files.orig <- files.orig[ok]
+  op[["files.orig"]] <- files.orig
   tmp <- duplicated(cohorts)
   if (any(tmp)) {
     # Perhaps add an option later to automatically rename duplicated cohort names
@@ -1391,7 +1400,9 @@ meta_initFileCheck <- function(filevec, op) {
     if (!op[[metaOp_mergeCohortFiles()]]) stop(msg_meta_17())
 
     # If option was, set, merge cohort files
-    infolist <- meta_mergeCohortFiles(infolist, cohorts, op)
+    tmp           <- meta_mergeCohortFiles(infolist, cohorts, op)
+    infolist      <- tmp$file.list
+    op$files.orig <- tmp$files.orig
     if (length(infolist) < op[[metaOp_minNcohortName()]]) stop(msg_meta_2())
 
     # Rename duplicated cohorts. This must be done before meta_loadFilesAndSetupData is called
@@ -1410,7 +1421,7 @@ meta_initFileCheck <- function(filevec, op) {
     #}
   }
   op[[wrnm]] <- wobj
-
+  
   if (DEBUG) cat("End: meta_initFileCheck\n")
 
   list(file.info.list=infolist, op=op)
@@ -1422,15 +1433,21 @@ meta_mergeCohortFiles <- function(flist, cohorts, op) {
   DEBUG    <- op$DEBUG
   if (DEBUG) cat("Begin: meta_mergeCohortFiles\n")
 
-  ret      <- list()
-  ucohorts <- unique(cohorts)
-  idvec    <- 1:length(cohorts) 
+  ncohorts   <- length(cohorts)
+  files.orig <- op$files.orig
+  if (ncohorts != length(files.orig)) stop("INTERNAL CODING ERROR with files.orig")
+  ret       <- list()
+  retfiles0 <- NULL
+  ucohorts  <- unique(cohorts)
+  idvec     <- 1:ncohorts
   for (cohort in ucohorts) {
-    tmp <- cohorts %in% cohort
-    ids <- idvec[tmp]
-    m   <- length(ids)
+    tmp    <- cohorts %in% cohort
+    ids    <- idvec[tmp]
+    files0 <- files.orig[tmp]
+    m      <- length(ids)
     if (m < 2) {
       ret[[length(ret)+1]] <- flist[[ids]]
+      retfiles0            <- c(retfiles0, files0)
     } else {
       fvec <- rep("", m)
       for (i in 1:m) fvec[i] <- flist[[ids[i]]]$file
@@ -1450,10 +1467,12 @@ meta_mergeCohortFiles <- function(flist, cohorts, op) {
       tmp      <- meta_getFileInfo(out.file)
       tmp$file <- out.file 
       ret[[length(ret)+1]] <- tmp
+      tmp       <- paste0(files0, collapse=", ")
+      retfiles0 <- c(retfiles0, tmp) 
     }
   }
 
-  ret
+  list(file.list=ret, files.orig=retfiles0)
 }
 
 meta_createTempDir <- function(out.dir, nrand=6) {

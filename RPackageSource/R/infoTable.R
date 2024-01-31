@@ -172,6 +172,14 @@ getInfoTableDF.meta <- function(op) {
                  cversion, rversion, os,
                  modelName, cohorts) 
 
+  # Add file names
+  files.orig <- op[["files.orig", exact=TRUE]]
+  nfiles     <- length(files.orig)
+  if (nfiles) {
+    namevec  <- c(namevec,  paste0("file", 1:nfiles))
+    valuevec <- c(valuevec, files.orig) 
+  }
+
   # Get meta options
   tmp       <- meta_check_op(NULL)
   global    <- names(tmp)
