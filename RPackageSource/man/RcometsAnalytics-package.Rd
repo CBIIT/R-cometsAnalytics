@@ -2,6 +2,7 @@
 % Please edit documentation in R/imports.R
 \docType{package}
 \name{RcometsAnalytics-package}
+\alias{RcometsAnalytics}
 \alias{RcometsAnalytics-package}
 \title{RcometsAnalytics R package}
 \description{
@@ -28,4 +29,12 @@ Data are not saved in the system but
 \code{\link{runMeta}} (run a single meta-analysis) \cr
 \code{\link{runAllMeta}} (run multiple meta-analyses) \cr
 \code{\link{meta_calc}} (main calculation function for meta-analysis) \cr
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://comets-analytics.org/}
+  \item Report bugs at \url{https://github.com/CBIIT/nci-webtools-comets-analytics/issues}
+}
+
 }
