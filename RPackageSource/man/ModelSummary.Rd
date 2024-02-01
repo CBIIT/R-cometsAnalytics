@@ -45,6 +45,8 @@ all the below names may not appear in the data frame.
 \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
                           exposure is categorical.}
+\item{\code{wald.pvalue.adj}}{ FDR adjusted p-values of \code{wald.pvalue} for
+                               exposure variables only}
 \item{\code{exposure.covariances}}{ String of exposure reference level, dummy variable
              names and covariances 
                                    for a categorical exposure
