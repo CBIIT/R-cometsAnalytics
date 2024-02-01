@@ -110,6 +110,7 @@ getEffectsExposurespecName <- function() {"exposurespec"}
 getEffectsCorrEstOldName   <- function() {"corr"}
 getEffectsCorrEstName      <- function() {"estimate"}
 getEffectsPvalueName       <- function() {"pvalue"}
+getEffectsPvalueAdjName    <- function() {"pvalue.adj"}
 getEffectsRunName          <- function() {"run"}
 getEffectsEstName          <- function() {"estimate"}
 getEffectsEstSeName        <- function() {"std.error"}
@@ -143,13 +144,14 @@ getModelSummaryCoxphFitNames  <- function() {c("n", "nevent", "statistic.log", "
                                                "p.value.sc", "statistic.wald", "p.value.wald", "statistic.robust",
                                                "p.value.robust", "r.squared", "r.squared.max", "concordance",
                                                "std.error.concordance", "logLik", "AIC", "BIC", getModelSummaryNobsName())}
-getModelSummaryClogitFitNames <- function() {getModelSummaryCoxphFitNames()}
-getModelSummaryOutUidCol  <- function() {"outcome_uid"}
-getModelSummaryExpUidCol  <- function() {"exposure_uid"}
-getModelSummaryCovStrSep1 <- function() {","}
-getModelSummaryCovStrSep2 <- function() {"|"}
-getModelSummaryCovStrCol  <- function() {"exposure.covariances"}
-
+getModelSummaryClogitFitNames     <- function() {getModelSummaryCoxphFitNames()}
+getModelSummaryOutUidCol          <- function() {"outcome_uid"}
+getModelSummaryExpUidCol          <- function() {"exposure_uid"}
+getModelSummaryCovStrSep1         <- function() {","}
+getModelSummaryCovStrSep2         <- function() {"|"}
+getModelSummaryCovStrCol          <- function() {"exposure.covariances"}
+getModelSummaryWaldPvalueName     <- function() {"wald.pvalue"}
+getModelSummaryWaldPvalueAdjName  <- function() {"wald.pvalue.adj"}
 
 # For input excel file
 getModelOptionsIdCol     <- function() {"model_type"}

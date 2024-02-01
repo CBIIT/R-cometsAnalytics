@@ -156,6 +156,9 @@ runModel.checkRetlist <- function(ret, op) {
   # For confidence intervals
   ret <- runModel.addCI(ret, op) 
 
+  # For adjusted p-values
+  ret <- runModel.getAdjPvals(ret, op)
+
   ret
 
 } # END: runModel.checkRetlist
@@ -995,7 +998,7 @@ runModel.returnSaveObj <- function(rname, cname, term, coefMat, runRows1, runRow
                          adjVec[runRows1], remVec[runRows1], cov.str[runRows1], 
                          stringsAsFactors=FALSE)
     colnames(ret1)  <- c(getEffectsRunName(), getEffectsOutcomespecName(), getEffectsExposurespecName(),
-                         "converged", getEffectsTermName(), "wald.pvalue",
+                         "converged", getEffectsTermName(), getModelSummaryWaldPvalueName(),
                          names(defObj$fit.stats), "message", 
                          "adjvars", "adjvars.removed", getModelSummaryCovStrCol())
 
@@ -1563,4 +1566,97 @@ runModel.applyMiss <- function(modeldata, metabdata, op) {
 
   if (DEBUG) cat("Begin: runModel.applyMiss\n")
   modeldata
+}
+
+runModeladjP.cont <- function(x, expv, termv, pv) {
+
+  adj  <- rep(NA, nrow(x))
+  vars <- NULL
+  evec <- x[, expv, drop=TRUE]
+  pvec <- x[, pv, drop=TRUE]
+  tmp0 <- evec == x[, termv, drop=TRUE]
+  tmp0[is.na(tmp0)] <- FALSE
+  if (any(tmp0)) vars <- unique(evec[tmp0])
+  nvars <- length(vars)
+  if (nvars) {
+    for (i in 1:nvars) {
+      tmp <- tmp0 & (evec == vars[i])
+      tmp[is.na(tmp)] <- FALSE
+      if (any(tmp)) adj[tmp] <- p.adjust(pvec[tmp], method="fdr")
+    }
+  }
+  adj
+}
+
+runModeladjP.cat <- function(x, expv, termv, pv) {
+
+  adj  <- rep(NA, nrow(x))
+  evec <- x[, expv, drop=TRUE]
+  tvec <- x[, termv, drop=TRUE]
+  pvec <- x[, pv, drop=TRUE]
+
+  # Do not consider cont exposures
+  tmp0 <- evec != tvec
+  tmp0[is.na(tmp0)] <- FALSE
+
+  # Get all exposure dummy variables
+  vars <- NULL
+  v1   <- paste0(evec, ".")
+  len  <- nchar(v1)
+  tmp1 <- tmp0 & (v1 == substr(tvec, 1, len)) 
+  tmp1[is.na(tmp1)] <- FALSE
+      
+  if (any(tmp1)) vars <- unique(tvec[tmp1])
+  nvars <- length(vars)
+  if (nvars) {
+    for (i in 1:nvars) {
+      tmp <- tmp1 & (tvec == vars[i])
+      tmp[is.na(tmp)] <- FALSE
+      if (any(tmp)) adj[tmp] <- p.adjust(pvec[tmp], method="fdr")
+    }
+  }
+  adj
+}
+
+runModel.getAdjPvals <- function(ret, op) {
+
+  ms.sheet  <- getModelSummaryName() # Sheet name
+  eff.sheet <- getEffectsName()
+  expv      <- getEffectsExposurespecName()
+  termv     <- getEffectsTermName()
+  p         <- getEffectsPvalueName()   
+  pa        <- getEffectsPvalueAdjName()    
+  wp        <- getModelSummaryWaldPvalueName() 
+  wpa       <- getModelSummaryWaldPvalueAdjName()  
+
+  # ModelSummary sheet
+  x    <- ret[[ms.sheet, exact=TRUE]]
+  cols <- c(expv, termv, wp) 
+  tmp  <- nonEmptyDfHasCols(x, cols, allcols=1, ignoreCase=0)
+  if (tmp) {
+    # Get adj p-values for exposure vars with exposurespec == term
+    # On ModelsSummary sheet there is no need to worry about categorical exposures
+    adj             <- runModeladjP.cont(x, expv, termv, wp)
+    ret[[ms.sheet]] <- df.add1ColAfterCol(x, adj, wpa, wp)
+  }
+
+  # Effects sheet
+  x    <- ret[[eff.sheet, exact=TRUE]]
+  cols <- c(expv, termv, p) 
+  tmp  <- nonEmptyDfHasCols(x, cols, allcols=1, ignoreCase=0)
+  if (tmp) {
+    # Get adj p-values for exposure vars with exposurespec == term, be careful
+    #   with categorical exposures. First get adj vec for cont exposures.
+    adj  <- runModeladjP.cont(x, expv, termv, p)
+    tmp0 <- is.na(adj)
+
+    if (any(tmp0)) {
+      # Now for categorical exposures
+      adj2 <- runModeladjP.cat(x, expv, termv, p)
+      if (length(adj) != length(adj2)) stop("ERROR 2")
+      adj[tmp0] <- adj2[tmp0]
+    }
+    ret[[eff.sheet]] <- df.add1ColAfterCol(x, adj, pa, p)
+  }
+  ret
 }

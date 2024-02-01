@@ -88,7 +88,30 @@ df.add.cols <- function(addToDf, x, x.cols, miss.num=NA, miss.char="") {
   }
   addToDf
 
-} # END: df.add.col
+} # END: df.add.cols
+
+df.add1ColAfterCol <- function(df, vecOrConst, new.nm, after.nm) {
+
+  # Assumes df is valid and has the columns
+  if (!isString(new.nm) || !isString(after.nm)) stop("ERROR new.nm/after.nm")
+  if (new.nm == after.nm) stop("ERROR new.nm==after.nm")
+  nr <- nrow(df)
+  n  <- length(vecOrConst)
+  if (n == 1) vecOrConst <- rep(vecOrConst, nr)
+  if (length(vecOrConst) != nr) stop("ERROR with vecOrConst")
+  cx  <- colnames(df)
+  tmp <- cx %in% new.nm
+  if (any(tmp)) cx <- cx[!tmp]
+  ii <- match(after.nm, cx)
+  if (!is.finite(ii)) stop("ERROR 1")
+  nc  <- length(cx)
+  ord <- c(cx[1:ii], new.nm)
+  if (ii < nc) ord <- c(ord, cx[(ii+1):nc]) 
+  df[, new.nm] <- vecOrConst
+  df           <- df[, ord, drop=FALSE]
+  df
+
+}
 
 df.rbind.common <- function(base, new, doNotRemoveCols=NULL) {
 

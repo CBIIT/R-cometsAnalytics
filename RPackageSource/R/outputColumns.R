@@ -39,6 +39,8 @@
 #' \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
 #'                           Note that this test may be a multi-df test if the
 #'                           exposure is categorical.}
+#' \item{\code{wald.pvalue.adj}}{ FDR adjusted p-values of \code{wald.pvalue} for
+#'                                exposure variables only}
 #' \item{\code{exposure.covariances}}{ String of exposure reference level, dummy variable
 #'              names and covariances 
 #'                                    for a categorical exposure
@@ -76,6 +78,7 @@ NULL
 #' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' \item{\code{outcomespec}}{ Outcome variable}
 #' \item{\code{pvalue}}{ The p-value of the test}
+#' \item{\code{pvalue.adj}}{ FDR adjusted p-values for exposure variables only}
 #' \item{\code{run}}{ Run number that can be used to link with the
 #'                    \code{\link{ModelSummary}} table}
 #' \item{\code{statistic}}{ The test statistic for \code{term}}
