@@ -12,6 +12,7 @@ NEW FEATURES
     o The function plotMissvalues has been added to plot the distribution of missing values in metabolites.
     o The options "miss.metab" and "miss.data" have been added to specify missing values.
     o A chemical enrichment analysis can be performed using the option "chemEnrich" or calling the  chemClassEnrichment function.
+    o FDR adjusted p-values have been added to the Effects and ModelSummary tables.
 
 
 
