@@ -4,7 +4,13 @@
 \alias{runModel}
 \title{Main function for running the models}
 \usage{
-runModel(modeldata, metabdata, cohortLabel = "", op = NULL, out.file = NULL)
+runModel(
+  modeldata,
+  metabdata,
+  cohortLabel = "",
+  op = NULL,
+  writeTofile = FALSE
+)
 }
 \arguments{
 \item{modeldata}{list from function \code{\link{getModelData}}}
@@ -15,8 +21,8 @@ runModel(modeldata, metabdata, cohortLabel = "", op = NULL, out.file = NULL)
 
 \item{op}{list of options when running in \code{Interactive} mode (see \code{\link{options}}).}
 
-\item{out.file}{NULL or the name of an output file to save the results.
-The file extension must be ".xlsx" or ".rda".}
+\item{writeTofile}{TRUE/FALSE (whether or not to write results to the 
+current directory). Default is FALSE.}
 }
 \value{
 A list of objects with names \code{\link{ModelSummary}},
