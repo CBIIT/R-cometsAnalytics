@@ -8,12 +8,12 @@ NEW FEATURES
     o The Models sheet of the input Excel file now has an "EXPOSURE_REFERENCE" column to specify the reference level of a categorical variable.
     o The VarMap sheet of the input Excel file now has an "ACCEPTED_VALUES" column to specify the valid values for each variable.
     o The readCOMETSinput function now has the argument mode ("Interactive" or "Batch") for the model in which it is called.
-    o The ModelSummary table now has a column called "exposure.covariances" containing exposure covariances for non-correlation models.
+    o The ModelSummary table now has a column called "exposure.covariances" containing exposure covariances for categorical exposures and non-correlation models.
     o The function plotMissvalues has been added to plot the distribution of missing values in metabolites.
     o The options "miss.metab" and "miss.data" have been added to specify missing values.
     o A chemical enrichment analysis can be performed using the option "chemEnrich" or calling the  chemClassEnrichment function.
     o FDR adjusted p-values have been added to the Effects and ModelSummary tables.
-
+    o The runModel() function now has a "writeTofile" argument instead of "out.file" argument.
 
 
 CHANGES IN VERSION 2.1.0
