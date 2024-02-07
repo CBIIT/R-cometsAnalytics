@@ -5,8 +5,8 @@
 #' @param metabdata metabolite data list from \code{\link{readCOMETSinput}}
 #' @param cohortLabel cohort label (e.g DPP, NCI, Shanghai)
 #' @param op list of options when running in \code{Interactive} mode (see \code{\link{options}}).
-#' @param out.file NULL or the name of an output file to save the results.
-#'          The file extension must be ".xlsx" or ".rda".
+#' @param writeTofile TRUE/FALSE (whether or not to write results to the 
+#'   current directory). Default is FALSE.
 #'
 #' @return A list of objects with names \code{\link{ModelSummary}},
 #'        \code{\link{Effects}}, \code{\link{Errors_Warnings}},
@@ -33,7 +33,7 @@
 #' obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' @export
 
-runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NULL) {
+runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE) {
 
   ptm <- base::proc.time() # start processing time
 
@@ -41,7 +41,6 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NUL
   runModel.checkModeldata(modeldata)
   runModel.checkMetabdata(metabdata)
   if (!isString(cohortLabel)) stop(msg_mod_1())
-  if (length(out.file)) out.file <- check_out.file(out.file, valid.ext=getOutTypeOpVals())
 
   # Check if options were obtained in getModelData
   if (modeldata$modelspec == getMode_batch()) {
@@ -66,7 +65,9 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, out.file=NUL
   attr(ret, "ptime") <- paste("Processing time:", round(ptm[3], digits=3), "sec")
   class(ret) <- class_runModel()
        
-  if (length(out.file)) try(saveObjectByFileExt(ret, out.file))
+  if (writeTofile) {
+    writeObjectToFile(ret, cohortLabel, modeldata[["modlabel", exact=TRUE]], op)
+  }
 
   ret
 

@@ -2,7 +2,7 @@
 #' the input Excel file.
 #' @param readData list from \code{\link{readCOMETSinput}}
 #' @param cohortLabel cohort label (e.g. DPP, NCI, Shanghai)
-#' @param writeTofile T/F (whether or not to write results for each model into
+#' @param writeTofile TRUE/FALSE (whether or not to write results for each model into
 #' separate xlsx files). Files are written to current directory. Default is TRUE.
 #' 
 #' @return A list of return objects from \code{\link{runModel}} or \code{\link{runCorr}}.
@@ -18,7 +18,7 @@
 #' }
 #' @export
 
-runAllModels <- function(readData, cohortLabel="", writeTofile=T) {
+runAllModels <- function(readData, cohortLabel="", writeTofile=TRUE) {
 
   mymodels  <- readData$mods$model
   mrgStrs   <- rep("", length(mymodels))
@@ -70,7 +70,8 @@ run1Model <- function(mymod, readData, cohortLabel="") {
   if (flag) {
     ret <- runCorr(mymod, readData, cohort=cohortLabel)
   } else {
-    ret <- runModel(mymod, readData, cohortLabel=cohortLabel, op=NULL)
+    ret <- runModel(mymod, readData, cohortLabel=cohortLabel, op=NULL,
+                    writeTofile=FALSE)
   }
   ret
 
@@ -81,6 +82,10 @@ writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
   if (!length(cohortLabel)) cohortLabel <- "NA"
   cohortLabel <- trimws(cohortLabel)
   if (!nchar(cohortLabel)) cohortLabel <- "NA"
+  if (!length(model)) model <- "NA"
+  model <- trimws(model)
+  if (!nchar(model)) model <- "NA"
+
   out.type <- op[[getOutTypeOpName(), exact=TRUE]] 
   rdaFlag  <- out.type == getOutTypeOpRda()
   fname    <- getOutFileName(cohortLabel, model, out.type)
