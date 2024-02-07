@@ -81,15 +81,19 @@ The *runModel()* function will first be called to obtain the results from each
 cohort for a linear regression analysis. Since the meta-analysis function *runMeta()*
 requires files for input, the results from *runModel()* will be saved to files.
 The output file names defined below have the specific format 
-<model name>__<cohort name>__<date>.ext which is important when using the *runAllMeta()*
+<model name>__<cohort name>__<date>.ext, where ext is "xlsx" or "rda". 
+This format of the file name is important when using the *runAllMeta()*
 function shown in section 6. 
-The files *runMeta()* accepts have the extension ".xlsx" or ".rda".  
 The model name is specified as "AgeAdjustedForBMI".
 ```{r}
-outfile1  <- paste0(getwd(), "/", "AgeAdjustedForBMI__cohort_1__2023-04-28.xlsx")
-outfile2  <- paste0(getwd(), "/", "AgeAdjustedForBMI__cohort_2__2023-04-28.rda")
-results1  <- RcometsAnalytics::runModel(modeldata1, data1, "cohort_1", out.file=outfile1, op=list(model="lm"))
-results2  <- RcometsAnalytics::runModel(modeldata2, data2, "cohort_2", out.file=outfile2, op=list(model="lm"))
+outfile1  <- paste0(getwd(), "/", "AgeAdjustedForBMI__cohort_1__", Sys.Date(), ".xlsx")
+outfile2  <- paste0(getwd(), "/", "AgeAdjustedForBMI__cohort_2__", Sys.Date(), ".xlsx")
+results1  <- RcometsAnalytics::runModel(modeldata1, data1, "cohort_1", 
+             op=list(model="lm"))
+results2  <- RcometsAnalytics::runModel(modeldata2, data2, "cohort_2", 
+             op=list(model="lm"))
+tmp       <- RcometsAnalytics::OutputListToExcel(outfile1, results1)
+tmp       <- RcometsAnalytics::OutputListToExcel(outfile2, results2)
 ```
 
 ### 4. Meta Analysis of Results
@@ -128,7 +132,7 @@ res.file <- paste0(getwd(), "/AgeAdjustedForBMI__meta__", Sys.Date(), ".xlsx")
 Read in the table of results and compare to the previous meta-analysis performed 
 in section 4. The results should be the same.
 ```{r}
-res <- as.data.frame(readxl::read_excel(res.file, "Results"))
+res <- as.data.frame(readxl::read_excel(res.file, "Metaresults"))
 all.equal(ret$Results, res)
 ```
 
