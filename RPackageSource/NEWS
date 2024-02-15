@@ -14,7 +14,7 @@ NEW FEATURES
     o A chemical enrichment analysis can be performed using the option "chemEnrich" or calling the  chemClassEnrichment function.
     o FDR adjusted p-values have been added to the Effects and ModelSummary tables.
     o The runModel() function now has a "writeTofile" argument instead of "out.file" argument.
-
+    o The options "cohorts.indep" and "cohorts.merge" were added for meta-analyses.
 
 CHANGES IN VERSION 2.1.0
 ------------------------
