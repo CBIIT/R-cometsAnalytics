@@ -34,11 +34,13 @@ A list of options for the \code{\link{runMeta}} function
                                   one of the input files is encountered. If FALSE, then
                           the files containing errors will be removed from the analysis.
                      The default is TRUE.}
-\item{\code{merge.cohort.files}}{ TRUE or FALSE to merge files with the same cohort name.
+\item{\code{cohorts.indep}}{ Vector of cohort names that correspond to multiple input
+         files, where each file will be treated as an independent cohort.}
+\item{\code{cohorts.merge}}{ Vector of cohort names where each of these cohorts have
+         multiple files that will be merged together.
                     This will take the union of all metabolites in the files. A metabolite
                     that occurs in multiple files will be chosen from the file with the
-                    maximum sample size for that metabolite. 
-                     The default is FALSE.}
+                    maximum sample size for that metabolite.}
 \item{\code{add.cohort.names}}{ TRUE or FALSE to add binary columns (one for each cohort) to
       the data frame of results to show which cohorts contributed to the meta-analysis
       The value will be 1 if the cohort contributed to the result or 0 if the cohort did not.
