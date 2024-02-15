@@ -1,4 +1,3 @@
-#' @docType package
 #' @name RcometsAnalytics-package
 #' @title RcometsAnalytics R package
 #' @description This R package supports all cohort-specific analyses of

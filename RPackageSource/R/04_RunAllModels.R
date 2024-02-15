@@ -79,13 +79,6 @@ run1Model <- function(mymod, readData, cohortLabel="") {
 
 writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
 
-  if (!length(cohortLabel)) cohortLabel <- "NA"
-  cohortLabel <- trimws(cohortLabel)
-  if (!nchar(cohortLabel)) cohortLabel <- "NA"
-  if (!length(model)) model <- "NA"
-  model <- trimws(model)
-  if (!nchar(model)) model <- "NA"
-
   out.type <- op[[getOutTypeOpName(), exact=TRUE]] 
   rdaFlag  <- out.type == getOutTypeOpRda()
   fname    <- getOutFileName(cohortLabel, model, out.type)
@@ -161,6 +154,13 @@ getOutExtension <- function(out.type) {
 
 # Function to create output file name
 getOutFileName <- function(cohortLabel, model, out.type) {
+
+  if (!length(cohortLabel)) cohortLabel <- "NA"
+  cohortLabel <- trimws(cohortLabel)
+  if (!nchar(cohortLabel)) cohortLabel <- "NA"
+  if (!length(model)) model <- "NA"
+  model <- trimws(model)
+  if (!nchar(model)) model <- "NA"
 
   # Have file names in the form model__cohort__date, so it can easily be parsed
   sep <- getOutfileCohortSep()

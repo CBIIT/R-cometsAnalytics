@@ -36,11 +36,13 @@
 #                              (or outcome) and for a categorical exposure variable, the same
 #                              reference value.
 #                      The default is TRUE.}
-#' \item{\code{merge.cohort.files}}{ TRUE or FALSE to merge files with the same cohort name.
+#' \item{\code{cohorts.indep}}{ Vector of cohort names that correspond to multiple input
+#'          files, where each file will be treated as an independent cohort.}
+#' \item{\code{cohorts.merge}}{ Vector of cohort names where each of these cohorts have
+#'          multiple files that will be merged together.
 #'                     This will take the union of all metabolites in the files. A metabolite
 #'                     that occurs in multiple files will be chosen from the file with the
-#'                     maximum sample size for that metabolite. 
-#'                      The default is FALSE.}
+#'                     maximum sample size for that metabolite.}
 #' \item{\code{add.cohort.names}}{ TRUE or FALSE to add binary columns (one for each cohort) to
 #'       the data frame of results to show which cohorts contributed to the meta-analysis
 #        results for each metabolite. The names of the binary columns will be the cohort names.
@@ -63,11 +65,11 @@ getValidGlobalMetaOps <- function() {
 
   ops.char    <- c(getOutTypeOpName(), "MODEL")
   ops.charVec <- c(metaOp_cohorts.include(), metaOp_cohorts.exclude(),
-                   metaOp_addCohortCols())
+                   metaOp_addCohortCols(), metaOp_cohorts.merge(), metaOp_cohorts.indep())
   ops.num     <- c(metaOp_minNcohortName(), metaOp_cohortMinSubs(), metaOp_totalMinSubs(),
                    metaOp_dups.method(), "DEBUG")
   ops.log     <- c(metaOp_oneModelCheck(),  metaOp_stopOnFileError(),
-                   metaOp_addCohortNames(), metaOp_mergeCohortFiles())
+                   metaOp_addCohortNames())
   ops.list    <- metaOp_strataToExcludeFromHetTest()
   default     <- list(cohorts.include=NULL, cohorts.exclude=NULL, DEBUG=0, MODEL="")
   default[[metaOp_minNcohortName()]]           <- metaOp_minNcohortDefault()
@@ -78,11 +80,14 @@ getValidGlobalMetaOps <- function() {
   default[[metaOp_oneModelCheck()]]            <- metaOp_oneModelCheckDefault()
   default[[metaOp_dups.method()]]              <- metaOp_dups.methodDefault()
   default[[metaOp_stopOnFileError()]]          <- metaOp_stopOnFileErrorDefault()
-  default[[metaOp_mergeCohortFiles()]]         <- metaOp_mergeCohortFilesDefault()
-  default <- addNamedValueToList(default, metaOp_addCohortCols(), metaOp_addCohortColsDefault())
-  default <- addNamedValueToList(default, metaOp_addCohortNames(), metaOp_addCohortNamesDefault())
 
-  valid <- names(default)
+  # Add possibly NULL default values to get correct names below
+  default <- addNamedValueToList(default, metaOp_addCohortCols(),  metaOp_addCohortColsDefault())
+  default <- addNamedValueToList(default, metaOp_addCohortNames(), metaOp_addCohortNamesDefault())
+  default <- addNamedValueToList(default, metaOp_cohorts.merge(),  metaOp_cohorts.mergeDefault())
+  default <- addNamedValueToList(default, metaOp_cohorts.indep(),  metaOp_cohorts.indepDefault())
+
+  valid   <- names(default)
 
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,
        valid=valid, default=default, ops.charVec=ops.charVec, ops.list=ops.list)
@@ -100,6 +105,18 @@ meta_check_op <- function(op, name="op") {
 
   check.list(op, name, valid)
   op <- checkGlobalOpList(op, name=name, meta=1)
+
+  # Check cohorts.merge and cohorts.indep options
+  merge <- op[[metaOp_cohorts.merge(), exact=TRUE]]
+  indep <- op[[metaOp_cohorts.indep(), exact=TRUE]]
+  if (length(merge)) merge <- meta_normCohortStr(merge)
+  if (length(indep)) indep <- meta_normCohortStr(indep)
+  if (length(merge) && length(indep)) {
+    vec <- intersect(merge, indep)
+    if (length(vec)) stop(msg_metaop_6())
+  }
+  op[[metaOp_cohorts.merge()]] <- merge
+  op[[metaOp_cohorts.indep()]] <- indep
 
   #op <- default.list(op, valid, def)
   op

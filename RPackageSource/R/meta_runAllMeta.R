@@ -67,7 +67,6 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
   finfo          <- tmp$info
   if (DEBUG) print(finfo)
   file.rem.fname <- tmp[["removed", exact=TRUE]]
-
   umodels <- unique(finfo[, "model"])
   nmodels <- length(umodels)
   for (i in 1:nmodels) {

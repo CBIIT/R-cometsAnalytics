@@ -168,25 +168,26 @@ meta_readOpFile <- function(opFile) {
   nmt         <- tolower(getMetaOpFileModelTypeCol())
   if (toupper(modelsSheet) %in% toupper(sheets)) {
     x <- readExcelSheet(opFile, modelsSheet, sheets, optional=1) 
-    if (!nonEmptyDf(x)) return(ret)
-    cx <- tolower(colnames(x))
-    colnames(x) <- cx 
-    models      <- NULL
-    modelTypes  <- NULL
-    if (tolower(nm) %in% cx) {
-      models <- trimws(unlist(x[, nm, drop=TRUE]))
-      if (tolower(nmt) %in% cx) modelTypes <- unlist(x[, nmt, drop=TRUE])
-      if (is.null(modelTypes)) modelTypes <- rep("", length(models))
-      tmp        <- nchar(models) > 0
-      models     <- models[tmp]
-      modelTypes <- modelTypes[tmp]
-    } 
-    if (!length(models)) {
-      models     <- NULL
-      modelTypes <- NULL
-    } 
-    ret$models     <- models
-    ret$modelTypes <- modelTypes
+    if (nonEmptyDf(x)) {
+      cx <- tolower(colnames(x))
+      colnames(x) <- cx 
+      models      <- NULL
+      modelTypes  <- NULL
+      if (tolower(nm) %in% cx) {
+        models <- trimws(unlist(x[, nm, drop=TRUE]))
+        if (tolower(nmt) %in% cx) modelTypes <- unlist(x[, nmt, drop=TRUE])
+        if (is.null(modelTypes)) modelTypes <- rep("", length(models))
+        tmp        <- nchar(models) > 0
+        models     <- models[tmp]
+        modelTypes <- modelTypes[tmp]
+      } 
+      if (!length(models)) {
+        models     <- NULL
+        modelTypes <- NULL
+      } 
+      ret$models     <- models
+      ret$modelTypes <- modelTypes
+    }
   }
 
   # Read in the options sheet 
@@ -519,9 +520,28 @@ checkMetaOp_add.cohort.cols <- function(x) {
 }
 
 checkMetaOp_merge.cohort.files <- function(x) {
-
-  x <- check.logical(x, metaOp_mergeCohortFilesDefault())
+  #x <- check.logical(x, metaOp_mergeCohortFilesDefault())
   x  
+}
+
+checkMetaOp_cohorts.merge <- function(x) {
+
+  if (!length(x)) {
+    ret <- NULL
+  } else {
+    ret <- x
+  }
+  ret
+}
+
+checkMetaOp_cohorts.indep <- function(x) {
+
+  if (!length(x)) {
+    ret <- NULL
+  } else {
+    ret <- x
+  }
+  ret
 }
 
 checkMetaOp_DEBUG <- function(x) {

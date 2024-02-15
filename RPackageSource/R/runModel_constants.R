@@ -284,8 +284,13 @@ metaOp_addCohortColsDefault       <- function() {c(getEffectsEstName(),
                                                    getEffectsExposurespecName())}
 metaOp_addCohortNames             <- function() {"add.cohort.names"}
 metaOp_addCohortNamesDefault      <- function() {TRUE}
-metaOp_mergeCohortFiles           <- function() {"merge.cohort.files"}
-metaOp_mergeCohortFilesDefault    <- function() {FALSE}
+#metaOp_mergeCohortFiles           <- function() {"merge.cohort.files"}
+#metaOp_mergeCohortFilesDefault    <- function() {FALSE}
+metaOp_cohorts.merge              <- function() {"cohorts.merge"}
+metaOp_cohorts.mergeDefault       <- function() {NULL}
+metaOp_cohorts.indep              <- function() {"cohorts.indep"}
+metaOp_cohorts.indepDefault       <- function() {NULL}
+
 
 metaModelNameNumberSep         <- function() {" "}
 metaModelNameDefault           <- function() {"NA"}

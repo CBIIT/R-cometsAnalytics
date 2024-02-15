@@ -21,8 +21,11 @@ runMeta <- function(file.obj, op=NULL) {
   dfToComets.check_fobj(file.obj) 
   op          <- meta_check_op(op) 
   op$temp.dir <- meta_createTempDir(getwd())
-  ret         <- try(meta_main(file.obj, NULL, op), silent=FALSE)
-#ret <- meta_main(file.obj, NULL, op)
+  if (!op$DEBUG) {
+    ret <- try(meta_main(file.obj, NULL, op), silent=FALSE)
+  } else {
+    ret <- meta_main(file.obj, NULL, op)
+  }
   meta_rmDir(op)
   ret
 }
@@ -1338,6 +1341,90 @@ meta_getFileInfo <- function(f, normModelNames=1) {
 
 }
 
+meta_dupCohorts_indep <- function(cohorts, infolist, op) {
+
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_dupCohorts_indep\n")
+
+  N <- length(infolist)
+  if (N != length(cohorts)) stop("INTERNAL CODING ERROR 1")
+
+  indep <- op[[metaOp_cohorts.indep(), exact=TRUE]]
+  if (!length(indep)) return(infolist)
+
+  # Rename duplicated cohorts. This must be done before meta_loadFilesAndSetupData is called
+  tmp <- duplicated(cohorts)
+  m   <- sum(tmp)
+  if (!m) return(infolist)
+  
+  dups  <- unique(cohorts[tmp])
+  tmp   <- dups %in% indep
+  dups  <- dups[tmp]
+  ndups <- length(dups)
+  if (!ndups) return(infolist)
+  
+  for (dup in dups) {
+    msg  <- msg_meta_51(getQuotedVarStr(dup))
+    cat(msg)
+    tmp  <- cohorts %in% dup
+    ids  <- (1:N)[tmp]
+    nids <- length(ids)
+    for (i in 1:nids) {
+      id     <- ids[i]
+      obj    <- infolist[[id]]
+      cohort <- obj$cohort
+      if (cohort != dup) stop("INTERNAL CODING ERROR 2")      
+
+      # Give cohort new name
+      obj$cohort     <- paste0(cohort, ".", i)
+      obj$info       <- setInfoTableValue(obj$info, getInfoTableCohortName(), obj$cohort)
+      infolist[[id]] <- obj
+    }
+  }
+
+  if (DEBUG) cat("End: meta_dupCohorts_indep\n")
+  infolist
+}
+
+meta_dupCohorts_merge <- function(infolist, op) {
+
+  DEBUG <- op$DEBUG
+  if (DEBUG) cat("Begin: meta_dupCohorts_merge\n")
+
+  merge   <- op[[metaOp_cohorts.merge(), exact=TRUE]]
+  N       <- length(infolist)
+  cohorts <- rep("", N)
+  for (i in 1:N) cohorts[i] <- infolist[[i]]$cohort
+
+  tmp   <- duplicated(cohorts)
+  dups  <- unique(cohorts[tmp])
+  ndups <- length(dups) 
+  if (ndups) {
+    # See if all dup cohorts are specified in option above, if not then ERROR
+    tmp <- !(dups %in% merge)
+    err <- dups[tmp]
+    if (length(err)) {
+      msg <- msg_meta_53(getQuotedVarStr(err))
+      stop(msg)
+    }
+
+    # Print messages
+    for (dup in dups) {
+      msg  <- msg_meta_52(getQuotedVarStr(dup))
+      cat(msg)
+    }
+
+    # Merge files
+    tmp           <- meta_mergeCohortFiles(infolist, cohorts, op)
+    infolist      <- tmp$file.list
+    op$files.orig <- tmp$files.orig
+    if (length(infolist) < op[[metaOp_minNcohortName()]]) stop(msg_meta_2())
+  }
+
+  if (DEBUG) cat("End: meta_dupCohorts_merge\n")
+  list(infolist=infolist, op=op)
+}
+
 meta_initFileCheck <- function(filevec, op) {
 
   DEBUG    <- op$DEBUG
@@ -1348,7 +1435,6 @@ meta_initFileCheck <- function(filevec, op) {
   infolist   <- list()
   n          <- length(filevec)
   ok         <- rep(TRUE, n)
-  modnum     <- op[["modelNumber", exact=TRUE]]
   cohorts    <- NULL
   cvec       <- rep("", n)
   files.orig <- op[["files.orig", exact=TRUE]]
@@ -1360,72 +1446,33 @@ meta_initFileCheck <- function(filevec, op) {
       print(obj)
       wobj  <- runmodel.checkForError(obj, warnStr="ERROR", objStr=f, rem.obj=wobj)
       ok[i] <- FALSE
-    } else {
-      # See if file contains correct model. Not being done currently.
-      if (!is.null(modnum)) {
-        tmp <- modnum %in% tolower(obj$model.numbers)
-      } else {
-        tmp <- TRUE
-      }
-      if (!tmp) {
-        ok[i]      <- FALSE
-        class(obj) <- "try-error"
-        msg        <- "File does not contain the correct model"
-        wobj       <- runmodel.checkForError(obj, warnStr="ERROR", objStr=f, rem.obj=wobj, msg=msg)
-      } else {     
-        obj$file          <- f
-        len               <- length(infolist)
-        infolist[[len+1]] <- obj
-        cohorts           <- c(cohorts, obj$cohort)
-        cvec[i]           <- obj$cohort
-      }
+    } else { 
+      obj$file          <- f
+      len               <- length(infolist)
+      infolist[[len+1]] <- obj
+      cohorts           <- c(cohorts, obj$cohort)
+      cvec[i]           <- obj$cohort
     }
   }
   m <- sum(ok)
   if (m < op[[metaOp_minNcohortName()]]) stop(msg_meta_16()) 
-  files.orig <- files.orig[ok]
+  files.orig         <- files.orig[ok]
   op[["files.orig"]] <- files.orig
-  tmp <- duplicated(cohorts)
-  if (any(tmp)) {
-    # Perhaps add an option later to automatically rename duplicated cohort names
-    if (DEBUG) {
-      dups <- cohorts[tmp]
-      for (dup in dups) {
-        tmp <- cvec %in% dup
-        cat(paste0("Files corresponding to duplicated cohort '", dup, "':\n"))
-        print(filevec[tmp])
-      }
-    } 
-    # Check if option to merge cohort files is specified, if not throw an error
-    if (!op[[metaOp_mergeCohortFiles()]]) stop(msg_meta_17())
 
-    # If option was, set, merge cohort files
-    tmp           <- meta_mergeCohortFiles(infolist, cohorts, op)
-    infolist      <- tmp$file.list
-    op$files.orig <- tmp$files.orig
-    if (length(infolist) < op[[metaOp_minNcohortName()]]) stop(msg_meta_2())
+  # See if there are any duplicated cohorts and rename those corresponding 
+  #   to option cohorts.indep. Call before merge function.
+  infolist <- meta_dupCohorts_indep(cohorts, infolist, op) 
 
-    # Rename duplicated cohorts. This must be done before meta_loadFilesAndSetupData is called
-    #dups <- unique(cohorts[tmp])
-    #cnt  <- rep(2, length(dups))
-    #ids  <- (1:length(infolist))[tmp]
-    #for (id in ids) {
-    #  obj    <- infolist[[id]]
-    #  cohort <- obj$cohort
-    #  tmp    <- dups %in% cohort
-    #  if (sum(tmp) != 1) stop("INTERNAL CODING ERROR")
-    #  obj$cohort     <- paste0(cohort, ".", cnt[tmp])
-    #  cnt[tmp]       <- cnt[tmp] + 1
-    #  obj$info       <- setInfoTableValue(obj$info, getInfoTableCohortName(), obj$cohort)
-    #  infolist[[id]] <- obj
-    #}
-  }
+  # See if there are now any duplicated cohort names, and merge provided the
+  #  cohort names are specified in an option.
+  tmp        <- meta_dupCohorts_merge(infolist, op)
+  infolist   <- tmp$infolist
+  op         <- tmp$op
   op[[wrnm]] <- wobj
   
   if (DEBUG) cat("End: meta_initFileCheck\n")
 
   list(file.info.list=infolist, op=op)
-
 }
 
 meta_mergeCohortFiles <- function(flist, cohorts, op) {
