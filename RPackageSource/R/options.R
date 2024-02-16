@@ -56,14 +56,6 @@
 #' \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
 #'                             chemical class enrichment.
 #'                            The default is 0.05.}
-#' \item{\code{miss.metab}}{ Vector of numeric values that define missing values, or the
-#'                        string "minimum" that will set samples with the minimum metabolite
-#'                        value to NA provided there is more than one sample with the
-#'                        minimum value.
-#'                            The default is NULL.}
-#' \item{\code{miss.data}}{ Vector of values that define missing values for the non-metabolite
-#'                          variables.
-#'                            The default is NULL.}
 #' }
 #'
 #' @name options
@@ -298,12 +290,12 @@ getValidGlobalOps <- function(meta=0) {
   chemEnrich <- getRampCallChemEnrichOpName()
   cE.pval    <- getRampPvalOpName()
   allpair    <- getMaxNpairwiseOpName()
-  miss.m     <- getMissMetabOpName()
-  miss.d     <- getMissDataOpName()
+  #miss.m     <- getMissMetabOpName()
+  #miss.d     <- getMissDataOpName()
 
   ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
                    out.type, out.merge)
-  ops.charVec <- c(out.metabs, miss.m, miss.d)
+  ops.charVec <- c(out.metabs)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
                    add.ci, exp.parms, cE.pval, allpair, 
                    "DEBUG", "DONOTRUN")
@@ -326,8 +318,8 @@ getValidGlobalOps <- function(meta=0) {
   
   # Be careful with options that have NULL as the default value
   default <- addNamedValueToList(default, exp.parms, getExpParmsOpDefault())
-  default <- addNamedValueToList(default, miss.m,    getMissMetabOpDefault())
-  default <- addNamedValueToList(default, miss.d,    getMissDataOpDefault())
+  #default <- addNamedValueToList(default, miss.m,    getMissMetabOpDefault())
+  #default <- addNamedValueToList(default, miss.d,    getMissDataOpDefault())
   valid   <- names(default)
 
   list(ops.character=ops.char, ops.numeric=ops.num, ops.logical=ops.log,

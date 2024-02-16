@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.13"}
+getVersionNumber     <- function() {"2.9.0.21"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -90,11 +90,11 @@ getOutMergeOpDefault      <- function() {getOutMergeOpNone()}
 getOutMergeAllStr         <- function() {"all_models"}
 getMaxNpairwiseOpName     <- function() {"max.npairwise"}
 getMaxNpairwiseOpDefault  <- function() {1000}
-getMissMetabOpName        <- function() {"miss.metab"}
-getMissMetabOpDefault     <- function() {NULL}
-getMissMetabOpMin         <- function() {"minimum"}
-getMissDataOpName         <- function() {"miss.data"}
-getMissDataOpDefault      <- function() {NULL}
+#getMissMetabOpName        <- function() {"miss.metab"}
+#getMissMetabOpDefault     <- function() {NULL}
+#getMissMetabOpMin         <- function() {"minimum"}
+#getMissDataOpName         <- function() {"miss.data"}
+#getMissDataOpDefault      <- function() {NULL}
 
 getOutfileSpCharSep       <- function() {"_"}
 getOutfileCohortSep       <- function() {"__"}
@@ -371,5 +371,6 @@ dfToC_fileSep                  <- function() {"sep"}
 dfToC_where                    <- function() {"where"}
 dfToC_newRef                   <- function() {"new.ref.value"}
 
-cometsReqOutSheetNames         <- function() {c(getEffectsName(), getModelSummaryName(), getInfoTableDfName())}
+cometsReqOutSheetNames         <- function() {c(getEffectsName(), getModelSummaryName(),
+                                                getInfoTableDfName())}
 filelistSheetOp                <- function() {"sheet"}

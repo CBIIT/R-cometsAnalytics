@@ -50,8 +50,8 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=
   op        <- runModel.checkOptions(op, modeldata)
   op$cohort <- cohortLabel
 
-  # Take care of missing values 
-  modeldata <- runModel.applyMiss(modeldata, metabdata, op)
+  # Take care of missing values. Do not call.
+  #modeldata <- runModel.applyMiss(modeldata, metabdata, op)
 
   ret       <- runModel.start(modeldata, metabdata, op)
   ret       <- runModel.checkRetlist(ret, op) 
@@ -1511,8 +1511,8 @@ runModel.applyMiss <- function(modeldata, metabdata, op) {
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: runModel.applyMiss\n")
 
-  miss.metab <- op[[getMissMetabOpName(), exact=TRUE]]
-  miss.data  <- op[[getMissDataOpName(), exact=TRUE]]
+  miss.metab <- NULL #op[[getMissMetabOpName(), exact=TRUE]]
+  miss.data  <- NULL #op[[getMissDataOpName(), exact=TRUE]]
   if (!length(miss.metab) && !length(miss.data)) return(modeldata)
 
   x       <- modeldata$gdta
@@ -1534,8 +1534,9 @@ runModel.applyMiss <- function(modeldata, metabdata, op) {
   }
   if (nmetabs && length(miss.metab)) {
     # Determine if minimum values will be missing
-    minFlag <- tolower(getMissMetabOpMin()) %in% tolower(miss.metab) 
-    if (minFlag) miss.metab <- miss.metab[!(miss.metab %in% getMissMetabOpMin())]
+    #minFlag <- tolower(getMissMetabOpMin()) %in% tolower(miss.metab) 
+    minFlag <- 0 
+    #if (minFlag) miss.metab <- miss.metab[!(miss.metab %in% getMissMetabOpMin())]
 
     if (length(miss.metab)) {
       mat <- as.matrix(x[, metabs, drop=FALSE])
