@@ -11,7 +11,11 @@
 #'
 #' @return A data frame
 #'
-#' @details The set of all possible metbolite id types are:
+#' @details The \bold{RaMP} R package must be installed prior to calling
+#' this function. An attempt to load RaMP will be done through the 
+#' \code{\link[base]{requireNamespace}} function.
+#'  
+#' The set of all possible metbolite id types are:
 #' LIPIDMAPS, pubchem, hmdb, chemspider, chebi, CAS, wikidata, swisslipids, 
 #' kegg, lipidbank, plantfa, and kegg_glycan.
 #' The \bold{METABOLITES} sheet in the input Excel file will need to have at least
@@ -34,6 +38,7 @@
 
 chemClassEnrichment <- function(df, metabdata, db.version=NULL, pvalue.adj=0.05) {
 
+  if (!requireNamespace("RaMP", quietly = TRUE)) stop(msg_ramp_package())
   ramp_check_DataFrame(df)
   ramp_check_Metabdata(metabdata) 
   ramp_check_db.version(db.version)
@@ -54,9 +59,9 @@ ramp_chemClassEnrichment <- function(df, metabdata, op) {
   
   tmp <- op[["db.version", exact=TRUE]]
   if (!length(tmp) || !nchar(tmp)) {
-    rampDB <- RaMP()
+    rampDB <- RaMP::RaMP()
   } else {
-    rampDB <- RaMP(tmp)
+    rampDB <- RaMP::RaMP(tmp)
   }
 
   # Call main function

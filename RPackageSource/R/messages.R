@@ -302,4 +302,5 @@ msg_ramp_no_metab2      <- function()  "No metabolite names found"
 msg_ramp_idtypes        <- function(x) paste0("ERROR: the metab data must contain one of the id types ", x[1])
 msg_ramp_dbversion      <- function(x) paste0("ERROR: ", x[1], " must be a valid version number,",
                                               " see RaMP::listAvailableRaMPDbVersions()")
+msg_ramp_package        <- function() "ERROR: the RaMP R package was not found"
 

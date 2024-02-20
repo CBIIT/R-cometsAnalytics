@@ -20,7 +20,7 @@
 #' @importFrom survival coxph Surv clogit strata
 #' @importFrom stringr str_locate
 #' @importFrom utils sessionInfo untar unzip read.table
-#' @importFrom RaMP RaMP chemicalClassEnrichment
+#  @importFrom RaMP RaMP chemicalClassEnrichment
 #' @details
 #' \bold{Functions for analysis:} \cr
 #' \code{\link{runModel}} (correlation, glm, lm, coxph, or clogit) \cr
