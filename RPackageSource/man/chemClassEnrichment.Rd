@@ -24,6 +24,10 @@ A data frame
 Chemical Class Enrichment
 }
 \details{
+The \bold{RaMP} R package must be installed prior to calling
+this function. An attempt to load RaMP will be done through the 
+\code{\link[base]{requireNamespace}} function.
+ 
 The set of all possible metbolite id types are:
 LIPIDMAPS, pubchem, hmdb, chemspider, chebi, CAS, wikidata, swisslipids, 
 kegg, lipidbank, plantfa, and kegg_glycan.
