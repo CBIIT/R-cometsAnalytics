@@ -1396,3 +1396,18 @@ runModel.getInfoDF <- function(ret, modeldata, metabdata, op) {
   ret[[getInfoTableDfName()]] <- x
   ret
 }
+
+# Function to add adjusted p-values to runModel() results Effects
+#### runModel.result.df: returned result from runModel()
+#### adj: name of column to adjust p. Leave as empty if we do not need adjustment on p
+#### method: adjustment method, default is BH
+runModel.addAdjP <- function(runModel.result.df, adj.col="", method="BH") { 
+  ret <- NULL
+  ret <- runModel.result.df
+  if (nonEmptyDfHasCols(ret$Effects, adj.col)) { # nonEmptyDfHasCols from dataframe_code.R
+    pvec <- as.numeric(ret$Effects[, adj.col])
+    if (length(method)) pvec.adj <- p.adjust(pvec, method=method)
+    ret$Effects$adj.pvalue <- pvec.adj # add one column to store adj.pvalue
+  }
+  ret
+} # END: runModel.addAdjP
