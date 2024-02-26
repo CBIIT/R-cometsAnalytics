@@ -38,7 +38,7 @@
 
 chemClassEnrichment <- function(df, metabdata, db.version=NULL, pvalue.adj=0.05) {
 
-  if (!requireNamespace("RaMP", quietly = TRUE)) stop(msg_ramp_package())
+  ramp_checkForRampPackage()
   ramp_check_DataFrame(df)
   ramp_check_Metabdata(metabdata) 
   ramp_check_db.version(db.version)
@@ -47,6 +47,11 @@ chemClassEnrichment <- function(df, metabdata, db.version=NULL, pvalue.adj=0.05)
   op  <- list(db.version=db.version, pvalue.adj=pvalue.adj, DEBUG=0)
   ret <- ramp_chemClassEnrichment(df, metabdata, op)
   ret
+}
+
+ramp_checkForRampPackage <- function() {
+  if (!requireNamespace("RaMP", quietly = TRUE)) stop(msg_ramp_package())
+  NULL
 }
 
 ramp_chemClassEnrichment <- function(df, metabdata, op) {
@@ -128,12 +133,14 @@ ramp_getSigMetabIds <- function(df, metabdata, op) {
 
   DEBUG <- op$DEBUG
   ret   <- NULL
-  pv    <- getEffectsPvalueName()
+  pv    <- getEffectsPvalueAdjName()
   maxp  <- op[["pvalue.adj", exact=TRUE]]
   if (DEBUG) print(paste0("max adj p-value = ", maxp))
   if (!length(maxp)) stop("INTERNAL CODING ERROR 1")
-  df   <- subsetDfByPvalue(df, pv, maxp, adj=getRampPvalAdjMethod())
-  if (!length(df)) stop(msg_ramp_no_padj(maxp))
+  tmp  <- df[, pv, drop=TRUE] <= maxp
+  tmp[is.na(tmp)] <- FALSE
+  df <- df[tmp, , drop=FALSE]
+  if (!nrow(df)) stop(msg_ramp_no_padj(maxp))
   if (DEBUG) print(paste0(nrow(df), " rows left after applying p-value condition"))
 
   yv  <- getEffectsOutcomespecName()

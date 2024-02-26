@@ -157,9 +157,6 @@ runModel.checkRetlist <- function(ret, op) {
   # For confidence intervals
   ret <- runModel.addCI(ret, op) 
 
-  # For adjusted p-values
-  ret <- runModel.getAdjPvals(ret, op)
-
   ret
 
 } # END: runModel.checkRetlist
@@ -539,17 +536,25 @@ runModel.main <- function(modeldata, metabdata, op) {
   ret  <- runModel.setReturnDF(ret,  modeldata$varMap)
   ret2 <- runModel.setReturnDF(ret2, modeldata$varMap)
   
-  # Chemical enrichment using RaMP
-  retChem <- NULL
-  if (op[[getRampCallChemEnrichOpName()]]) {
-    retChem <- try(runModel.chemClassEnrichment(ret2, metabdata, op), silent=FALSE) 
-    rem.obj <- runmodel.checkForError(retChem, warnStr="ERROR", objStr="runModel.chemClassEnrichment", rem.obj=rem.obj) 
-  } 
-  if (length(rem.obj)) rem.obj <- runModel.setReturnDF(rem.obj, modeldata$varMap)
-
+  # Create return list
   retlist          <- list()
   retlist[[ms.nm]] <- ret
   retlist[[ef.nm]] <- ret2
+  rm(ret, ret2, tmp, rows)
+  gc()
+
+  # Adjusted p-values, call before chemical enrichment
+  retlist <- runModel.getAdjPvals(retlist, op) 
+
+  # Chemical enrichment using RaMP. Call after adjusted p-values are computed.
+  retChem <- NULL
+  if (op[[getRampCallChemEnrichOpName()]]) {
+    retChem <- try(runModel.chemClassEnrichment(retlist[[ef.nm]], metabdata, op), silent=FALSE) 
+    rem.obj <- runmodel.checkForError(retChem, warnStr="ERROR", objStr="runModel.chemClassEnrichment",
+                                      rem.obj=rem.obj) 
+  } 
+
+  if (length(rem.obj)) rem.obj <- runModel.setReturnDF(rem.obj, modeldata$varMap)
   retlist[[wr.nm]] <- rem.obj
   if (is.data.frame(retChem)) retlist[[getRampChemEnrichDfName()]] <- retChem
 

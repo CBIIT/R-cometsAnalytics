@@ -56,22 +56,6 @@ addColsToDF <- function(base.df, base.id, x.df, x.id, x.add, init=1, DEBUG=0) {
 
 }
 
-subsetDfByPvalue <- function(df, col, max.pval, adj="BH") {
-
-  ret <- NULL
-  if (nonEmptyDfHasCols(df, col)) {
-    pvec <- as.numeric(df[, col, drop=TRUE])
-    if (length(adj)) pvec <- p.adjust(pvec, method=adj)
-    tmp  <- pvec <= max.pval
-    tmp[is.na(tmp)] <- FALSE
-    ret <- df[tmp, , drop=FALSE]
-    if (!nrow(ret)) ret <- NULL
-  }
-  ret  
-
-}
-
-
 df.add.cols <- function(addToDf, x, x.cols, miss.num=NA, miss.char="") {
 
   tmp    <- !(x.cols %in% colnames(addToDf)) & (x.cols %in% colnames(x))

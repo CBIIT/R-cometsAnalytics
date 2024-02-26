@@ -68,6 +68,9 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
   # Check exposure reference 
   checkExposureRef(dta.vmap, dta.models)
 
+  # Check if RaMP is needed
+  checkForRamp(dta.op) 
+
   # rename subjid in dta.smetab sheet for merging later on
   cv             <- tolower(getVarMapCohortVarCol())
   refv           <- tolower(getVarMapVarRefCol())
@@ -82,6 +85,24 @@ checkIntegrity <- function (dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.models,
 
   ret
 
+}
+
+checkForRamp <- function(dta.op) {
+
+   opNameCol <- getOptionNameCol()
+   opValCol  <- getOptionValueCol()
+   nm        <- getRampCallChemEnrichOpName()
+   cols      <- c(opNameCol, opValCol)
+   if (nonEmptyDfHasCols(dta.op, cols, allcols=1, ignoreCase=0)) {
+     tmp <- dta.op[, opNameCol, drop=TRUE] %in% nm
+     if (any(tmp)) {
+       vec <- dta.op[tmp, opValCol, drop=TRUE]
+       tmp <- vec %in% c(1, "TRUE")
+       if (any(tmp)) ramp_checkForRampPackage()
+     }
+   }
+
+   NULL
 }
 
 checkExposureRef <- function(dta.vmap, dta.models) {
