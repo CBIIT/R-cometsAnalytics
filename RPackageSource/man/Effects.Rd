@@ -23,7 +23,7 @@ all the below names may not appear in the data frame.
 \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 \item{\code{outcomespec}}{ Outcome variable}
 \item{\code{pvalue}}{ The p-value of the test}
-\item{\code{pvalue.adj}}{ FDR adjusted p-values for exposure variables only}
+\item{\code{pvalue.adj}}{ Adjusted p-values for exposure variables only}
 \item{\code{run}}{ Run number that can be used to link with the
                    \code{\link{ModelSummary}} table}
 \item{\code{statistic}}{ The test statistic for \code{term}}
@@ -35,5 +35,7 @@ all the below names may not appear in the data frame.
 }
 \details{
 Missing values will appear if a model did not converge, produced an error,
-   or not run because of too many missing values in the outcome.
+   or not run because of too many missing values in the outcome. 
+   Adjusted p-values are only computed for models with a single outcome variable
+   or single exposure variable.
 }

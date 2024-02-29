@@ -45,7 +45,7 @@ all the below names may not appear in the data frame.
 \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
                           Note that this test may be a multi-df test if the
                           exposure is categorical.}
-\item{\code{wald.pvalue.adj}}{ FDR adjusted p-values of \code{wald.pvalue} for
+\item{\code{wald.pvalue.adj}}{ Adjusted p-values of \code{wald.pvalue} for
                                exposure variables only}
 \item{\code{exposure.covariances}}{ String of exposure reference level, dummy variable
              names and covariances 
@@ -60,5 +60,7 @@ all the below names may not appear in the data frame.
 }
 \details{
 Missing values will appear if a model did not converge, produced an error,
-   or not run because of too many missing values in the outcome.
+   or not run because of too many missing values in the outcome. 
+   Adjusted p-values are only computed for models with a single outcome variable
+   or single exposure variable.
 }
