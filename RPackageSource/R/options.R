@@ -51,6 +51,11 @@
 #' \item{\code{output.type}}{ "rda" or "xlsx" to define the type of output file(s) when \code{\link{runAllModels}} is called.\cr
 #'                            See \code{output.common.cols} and \code{output.merge}. \cr
 #'                            The default is "xlsx".}
+#' \item{\code{method.adjPvalue}}{ Method for adjusted p-values. It must be one of:
+#'    "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
+#'   Adjusted p-values are only computed for models with a single outcome variable or
+#'   a single exposure variable.
+#'                            The default is 'fdr'.}
 #' \item{\code{chemEnrich}}{ 0 or 1 to run a chemical class enrichment (0=no, 1=yes) using RaMP.
 #'                            The default is 0.}
 #' \item{\code{chemEnrich.adjPvalue}}{ The BH-adjusted p-value cutoff to select metabolites for 
@@ -290,11 +295,12 @@ getValidGlobalOps <- function(meta=0) {
   chemEnrich <- getRampCallChemEnrichOpName()
   cE.pval    <- getRampPvalOpName()
   allpair    <- getMaxNpairwiseOpName()
+  methadj    <- getOpMethodAdjPvalue()
   #miss.m     <- getMissMetabOpName()
   #miss.d     <- getMissDataOpName()
 
   ops.char    <- c("model", "check.cor.method", out.eff, out.modSum,
-                   out.type, out.merge)
+                   out.type, out.merge, methadj)
   ops.charVec <- c(out.metabs)
   ops.num     <- c("check.cor.cutoff", "check.nsubjects", "max.nstrata", 
                    add.ci, exp.parms, cE.pval, allpair, 
@@ -315,6 +321,7 @@ getValidGlobalOps <- function(meta=0) {
   default[[chemEnrich]] <- getRampCallChemEnrichOpDefault()
   default[[cE.pval]]    <- getRampPvalOpDefault()
   default[[allpair]]    <- getMaxNpairwiseOpDefault()
+  default[[methadj]]    <- getOpMethodAdjPvalueDefault()
   
   # Be careful with options that have NULL as the default value
   default <- addNamedValueToList(default, exp.parms, getExpParmsOpDefault())
@@ -345,7 +352,6 @@ checkGlobalOpsFromCharVecs <- function(opnames, opvalues, meta=0) {
   ops.l    <- tmp$ops.logical
   ops.cv   <- tmp$ops.charVec
   valid    <- names(def)
-
   n <- length(opnames)
   if (!n) return(def)
 
@@ -497,6 +503,16 @@ runModel.check.model <- function(obj) {
   obj
 
 } # END: runModel.check.model
+
+checkOp_method.adjPvalue <- function(obj) {
+
+  valid <- c("holm", "hochberg", "hommel", "bonferroni", 
+             "BH", "BY", "fdr", "none")
+  obj   <- check.string(obj, valid, getOpMethodAdjPvalue()) 
+  
+  obj
+
+}
 
 checkOp_output.Effects <- function(str, name=NULL) {
 

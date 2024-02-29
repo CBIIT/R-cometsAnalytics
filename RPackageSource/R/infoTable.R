@@ -56,6 +56,8 @@ infoTable_normNames <- function(infoTable) {
 updateInfoTableVecs <- function(nms, op, namevec, valuevec, namestr) {
 
   if (length(nms)) {
+    excvec <- c(metaOp_cohorts.merge(), metaOp_cohorts.indep(), metaOp_addCohortCols(),
+                metaOp_cohorts.include(), metaOp_cohorts.exclude())
     for (nm in nms) {
       tmp <- op[[nm, exact=TRUE]]
       len <- length(tmp)
@@ -64,9 +66,13 @@ updateInfoTableVecs <- function(nms, op, namevec, valuevec, namestr) {
       if ((len == 1) && (is.character(tmp) || is.numeric(tmp) || is.logical(tmp))) {
         namevec  <- c(namevec, paste0(namestr, nm))
         valuevec <- c(valuevec, as.character(tmp))
+      } else if (len && (nm %in% excvec)){
+        namevec  <- c(namevec, paste0(namestr, nm))
+        valuevec <- c(valuevec, paste(as.character(tmp), collapse=", "))
       }
     }
   }
+
   list(namevec=namevec, valuevec=valuevec)
 }
 

@@ -115,10 +115,11 @@ meta_check_op <- function(op, name="op") {
     vec <- intersect(merge, indep)
     if (length(vec)) stop(msg_metaop_6())
   }
-  op[[metaOp_cohorts.merge()]] <- merge
-  op[[metaOp_cohorts.indep()]] <- indep
-
+  op <- addNamedValueToList(op, metaOp_cohorts.merge(), merge)
+  op <- addNamedValueToList(op, metaOp_cohorts.indep(), indep)
+  
   #op <- default.list(op, valid, def)
+
   op
 }
 

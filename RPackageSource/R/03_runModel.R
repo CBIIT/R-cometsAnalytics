@@ -544,7 +544,13 @@ runModel.main <- function(modeldata, metabdata, op) {
   gc()
 
   # Adjusted p-values, call before chemical enrichment
-  retlist <- runModel.getAdjPvals(retlist, op) 
+  tmp     <- retlist
+  retlist <- try(runModel.getAdjPvals(retlist, op), silent=FALSE) 
+  rem.obj <- runmodel.checkForError(retlist, warnStr="ERROR", objStr="runModel.getAdjPvals",
+                                    rem.obj=rem.obj) 
+  if ("try-error" %in% class(retlist)) retlist <- tmp
+  rm(tmp)
+  gc()
 
   # Chemical enrichment using RaMP. Call after adjusted p-values are computed.
   retChem <- NULL
@@ -1575,75 +1581,58 @@ runModel.applyMiss <- function(modeldata, metabdata, op) {
   modeldata
 }
 
-runModeladjP.cont <- function(x, expv, termv, pv) {
-
-  adj  <- rep(NA, nrow(x))
-  vars <- NULL
-  evec <- x[, expv, drop=TRUE]
-  pvec <- x[, pv, drop=TRUE]
-  tmp0 <- evec == x[, termv, drop=TRUE]
-  tmp0[is.na(tmp0)] <- FALSE
-  if (any(tmp0)) vars <- unique(evec[tmp0])
-  nvars <- length(vars)
-  if (nvars) {
-    for (i in 1:nvars) {
-      tmp <- tmp0 & (evec == vars[i])
-      tmp[is.na(tmp)] <- FALSE
-      if (any(tmp)) adj[tmp] <- p.adjust(pvec[tmp], method="fdr")
-    }
-  }
-  adj
-}
-
-runModeladjP.cat <- function(x, expv, termv, pv) {
-
-  adj  <- rep(NA, nrow(x))
-  evec <- x[, expv, drop=TRUE]
-  tvec <- x[, termv, drop=TRUE]
-  pvec <- x[, pv, drop=TRUE]
-
-  # Do not consider cont exposures
-  tmp0 <- evec != tvec
-  tmp0[is.na(tmp0)] <- FALSE
-
-  # Get all exposure dummy variables
-  vars <- NULL
-  v1   <- paste0(evec, ".")
-  len  <- nchar(v1)
-  tmp1 <- tmp0 & (v1 == substr(tvec, 1, len)) 
-  tmp1[is.na(tmp1)] <- FALSE
-      
-  if (any(tmp1)) vars <- unique(tvec[tmp1])
-  nvars <- length(vars)
-  if (nvars) {
-    for (i in 1:nvars) {
-      tmp <- tmp1 & (tvec == vars[i])
-      tmp[is.na(tmp)] <- FALSE
-      if (any(tmp)) adj[tmp] <- p.adjust(pvec[tmp], method="fdr")
-    }
-  }
-  adj
-}
-
 runModel.getAdjPvals <- function(ret, op) {
+
+  # Called from runModel.main, so that it is the results within each stratum.
+  # Only compute adjusted p-values for a model that consists
+  #  of a single outcome or single exposure. Too complicated otherwise.
+
+  DEBUG     <- op$DEBUG
+  if (DEBUG) cat("Begin: runModel.getAdjPvals\n")
 
   ms.sheet  <- getModelSummaryName() # Sheet name
   eff.sheet <- getEffectsName()
   expv      <- getEffectsExposurespecName()
+  outv      <- getEffectsOutcomespecName()
   termv     <- getEffectsTermName()
   p         <- getEffectsPvalueName()   
   pa        <- getEffectsPvalueAdjName()    
   wp        <- getModelSummaryWaldPvalueName() 
   wpa       <- getModelSummaryWaldPvalueAdjName()  
+  method    <- op[[getOpMethodAdjPvalue(), exact=TRUE]]
+  corrFlag  <- op$pcorrFlag
+  if (DEBUG) cat(paste0("Adjusted p-value method is ", method, "\n"))
 
   # ModelSummary sheet
   x    <- ret[[ms.sheet, exact=TRUE]]
-  cols <- c(expv, termv, wp) 
+  cols <- c(expv, termv, outv) 
+  if (!corrFlag) cols <- c(cols, wp)
   tmp  <- nonEmptyDfHasCols(x, cols, allcols=1, ignoreCase=0)
-  if (tmp) {
-    # Get adj p-values for exposure vars with exposurespec == term
-    # On ModelsSummary sheet there is no need to worry about categorical exposures
-    adj             <- runModeladjP.cont(x, expv, termv, wp)
+  if (!tmp) return(ret)
+
+  # Determine if single outcome or single exposure
+  oneOut <- FALSE
+  oneExp <- FALSE
+  ovec   <- x[, outv, drop=TRUE]
+  evec   <- x[, expv, drop=TRUE]
+  tvec   <- x[, termv, drop=TRUE]
+  if (corrFlag) {
+    tmp0 <- rep(TRUE, nrow(x))
+  } else {
+    tmp0 <- evec == tvec
+    tmp0[is.na(tmp0)] <- FALSE
+  }
+  if (length(unique(ovec)) == 1) oneOut <- TRUE
+  uevec <- unique(evec[tmp0])
+  if (length(uevec) == 1) oneExp <- TRUE
+  if (!oneOut && !oneExp) return(ret)
+  if (!any(tmp0)) return(ret)
+
+  # On ModelsSummary sheet there is no need to worry about categorical exposures
+  if (!corrFlag) {
+    adj             <- rep(NA, nrow(x))
+    pvec            <- x[, wp, drop=TRUE]
+    adj[tmp0]       <- p.adjust(pvec[tmp0], method=method)
     ret[[ms.sheet]] <- df.add1ColAfterCol(x, adj, wpa, wp)
   }
 
@@ -1651,19 +1640,45 @@ runModel.getAdjPvals <- function(ret, op) {
   x    <- ret[[eff.sheet, exact=TRUE]]
   cols <- c(expv, termv, p) 
   tmp  <- nonEmptyDfHasCols(x, cols, allcols=1, ignoreCase=0)
-  if (tmp) {
-    # Get adj p-values for exposure vars with exposurespec == term, be careful
-    #   with categorical exposures. First get adj vec for cont exposures.
-    adj  <- runModeladjP.cont(x, expv, termv, p)
-    tmp0 <- is.na(adj)
+  if (!tmp) return(ret)
 
-    if (any(tmp0)) {
-      # Now for categorical exposures
-      adj2 <- runModeladjP.cat(x, expv, termv, p)
-      if (length(adj) != length(adj2)) stop("ERROR 2")
-      adj[tmp0] <- adj2[tmp0]
+  # Get adj p-values for exposure terms with exposurespec == term. (the exposure
+  #   could be categorical).
+  # If one outcome, then the metabs are the exposures with exposurespec = term.
+  adj     <- rep(NA, nrow(x))
+  pvec    <- x[, p, drop=TRUE]
+  if (oneOut) {
+    adj[tmp0] <- p.adjust(pvec[tmp0], method=method)
+  } else {
+    # One exposure, determine if continuous or categorical
+    evec   <- x[, expv, drop=TRUE]
+    tvec   <- x[, termv, drop=TRUE]
+    # Check if continuous
+    tmp    <- evec == tvec
+    tmp[is.na(tmp)] <- FALSE
+    if (!any(tmp)) {
+      # Must be categorical
+      v1  <- paste0(uevec, ".")
+      len <- nchar(v1)
+      tmp <- substr(tvec, 1, len) == v1 
+      tmp[is.na(tmp)] <- FALSE
     }
-    ret[[eff.sheet]] <- df.add1ColAfterCol(x, adj, pa, p)
+    if (!any(tmp)) {
+      if (DEBUG) cat("*** Could not determine if exposure is cont or categorical") 
+      return(ret)
+    }     
+    vars   <- unique(tvec[tmp])
+    if (DEBUG) print(vars)
+    nvars  <- length(vars)
+    if (!nvars) return(ret)    
+    for (v in vars) {
+      tmp             <- tvec == v
+      tmp[is.na(tmp)] <- FALSE
+      adj[tmp]        <- p.adjust(pvec[tmp], method=method)
+    }
   }
+  ret[[eff.sheet]] <- df.add1ColAfterCol(x, adj, pa, p)
+  
+  if (DEBUG) cat("End: runModel.getAdjPvals\n")
   ret
 }

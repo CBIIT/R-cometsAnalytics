@@ -1343,6 +1343,8 @@ meta_getFileInfo <- function(f, normModelNames=1) {
 
 meta_dupCohorts_indep <- function(cohorts, infolist, op) {
 
+  # cohorts is ordered with infolist
+
   DEBUG <- op$DEBUG
   if (DEBUG) cat("Begin: meta_dupCohorts_indep\n")
 

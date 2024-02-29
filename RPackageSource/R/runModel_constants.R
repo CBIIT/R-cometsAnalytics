@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.21"}
+getVersionNumber     <- function() {"2.9.0.25"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
@@ -90,6 +90,9 @@ getOutMergeOpDefault      <- function() {getOutMergeOpNone()}
 getOutMergeAllStr         <- function() {"all_models"}
 getMaxNpairwiseOpName     <- function() {"max.npairwise"}
 getMaxNpairwiseOpDefault  <- function() {1000}
+getOpMethodAdjPvalue        <- function() {"method.adjPvalue"}
+getOpMethodAdjPvalueDefault <- function() {"fdr"}
+
 #getMissMetabOpName        <- function() {"miss.metab"}
 #getMissMetabOpDefault     <- function() {NULL}
 #getMissMetabOpMin         <- function() {"minimum"}
@@ -250,9 +253,6 @@ getMetaTransFileCol               <- function() {"FILE"}
 getMetaTransOptionCol             <- function() {"OPTION"}
 getMetaTransValueCol              <- function() {"VALUE"}
 
-metaOp_methodName                 <- function() {"method"}
-metaOp_methodDefault              <- function() {"fixed"}
-metaOp_methodVals                 <- function() {c(metaOp_methodDefault(), "random")}
 metaOp_minNcohortName             <- function() {"min.n.cohort"}
 metaOp_minNcohortDefault          <- function() {2}
 metaOp_cohortMinSubs              <- function() {"min.nsub.cohort"}
@@ -264,8 +264,8 @@ metaOp_save.memDefault            <- function() {1}
 metaOp_cohorts.include            <- function() {"cohorts.include"}
 metaOp_cohorts.exclude            <- function() {"cohorts.exclude"}
 metaOp_strataToExcludeFromHetTest <- function() {"strata.exclude.het.test"}
-metaOp_check.consistency          <- function() {"check.consistency"}
-metaOp_check.consistencyDefault   <- function() {TRUE}
+#metaOp_check.consistency          <- function() {"check.consistency"}
+#metaOp_check.consistencyDefault   <- function() {TRUE}
 metaOp_oneModelCheck              <- function() {"oneModelCheck"}
 metaOp_oneModelCheckDefault       <- function() {TRUE}
 metaOp_dups.method                <- function() {"dups.method"}
@@ -284,8 +284,6 @@ metaOp_addCohortColsDefault       <- function() {c(getEffectsEstName(),
                                                    getEffectsExposurespecName())}
 metaOp_addCohortNames             <- function() {"add.cohort.names"}
 metaOp_addCohortNamesDefault      <- function() {TRUE}
-#metaOp_mergeCohortFiles           <- function() {"merge.cohort.files"}
-#metaOp_mergeCohortFilesDefault    <- function() {FALSE}
 metaOp_cohorts.merge              <- function() {"cohorts.merge"}
 metaOp_cohorts.mergeDefault       <- function() {NULL}
 metaOp_cohorts.indep              <- function() {"cohorts.indep"}

@@ -39,7 +39,7 @@
 #' \item{\code{wald.pvalue}}{ P-value from the Wald test of the exposure variable. 
 #'                           Note that this test may be a multi-df test if the
 #'                           exposure is categorical.}
-#' \item{\code{wald.pvalue.adj}}{ FDR adjusted p-values of \code{wald.pvalue} for
+#' \item{\code{wald.pvalue.adj}}{ Adjusted p-values of \code{wald.pvalue} for
 #'                                exposure variables only}
 #' \item{\code{exposure.covariances}}{ String of exposure reference level, dummy variable
 #'              names and covariances 
@@ -56,7 +56,9 @@
 #' @title ModelSummary table 
 #' @details Missing values will appear if a model did not converge, produced an error,
 #'    or not run because of too many missing values in the outcome. 
-#' 
+#'    Adjusted p-values are only computed for models with a single outcome variable
+#'    or single exposure variable.    
+#'
 NULL
 
 #' The Effects data frame contains the estimates
@@ -78,7 +80,7 @@ NULL
 #' \item{\code{model_number}}{ Model number used in \code{\link{runAllModels}}}
 #' \item{\code{outcomespec}}{ Outcome variable}
 #' \item{\code{pvalue}}{ The p-value of the test}
-#' \item{\code{pvalue.adj}}{ FDR adjusted p-values for exposure variables only}
+#' \item{\code{pvalue.adj}}{ Adjusted p-values for exposure variables only}
 #' \item{\code{run}}{ Run number that can be used to link with the
 #'                    \code{\link{ModelSummary}} table}
 #' \item{\code{statistic}}{ The test statistic for \code{term}}
@@ -92,6 +94,8 @@ NULL
 #' @title Effects table 
 #' @details Missing values will appear if a model did not converge, produced an error,
 #'    or not run because of too many missing values in the outcome. 
+#'    Adjusted p-values are only computed for models with a single outcome variable
+#'    or single exposure variable.    
 #' 
 NULL
 
