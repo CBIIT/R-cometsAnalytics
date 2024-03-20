@@ -120,9 +120,12 @@ getResListFromError <- function(obj, model) {
   
   if ("try-error" %in% class(obj)) {
     msg <- getErrorMsgFromTryError(obj, addToEnd=NULL)
+  } else if (isString(obj)) {
+    msg <- obj
   } else {
     msg <- "Unknown error"
   }
+  msg <- removeEOL(msg)
   c1  <- runModel.getWarningCol()
   c2  <- runModel.getObjectCol()
   c3  <- runModel.getMessageCol()

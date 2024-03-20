@@ -643,3 +643,19 @@ getSeqsFromList <- function(inlist) {
   mat
 
 } # END: getSeqsFromList
+
+removeEOL <- function(str) {
+
+  if (!isString(str)) return(str)
+  len <- nchar(str)
+  if (!len) return(str)
+  flag <- substr(str, len, len) == "\n"
+  if (flag) {
+    if (len > 1) {
+      str <- substr(str, 1, len-1)
+    } else {
+      str <- ""
+    }
+  } 
+  str
+}

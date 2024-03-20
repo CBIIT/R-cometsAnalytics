@@ -201,7 +201,7 @@ msg_meta_20             <- function() "ERROR in meta_extractAllFiles"
 msg_meta_21             <- function() "ERROR: all files are required to have a correct file extension, such as .xlsx, .rda, .zip, .tar, .tar.gz"
 msg_meta_22             <- function() "ERROR: no files found in the directories"
 msg_meta_23             <- function() "ERROR: all files must follow a valid naming convention, e.g. 'modelName__cohortName__date.xlsx'"
-msg_meta_24             <- function() "ERROR: specified model name(s) do not match do not match any of the results file names."
+msg_meta_24             <- function() "ERROR: specified model name(s) do not match any of the results file names."
 msg_meta_25             <- function() "ERROR: data contains no rows or no columns"
 msg_meta_26             <- function() paste("ERROR: set option ", dfToC_cohort(), " to specify the cohort name")
 msg_meta_27             <- function(x) paste0("ERROR: column ", x[1], " is missing. Set option ", 

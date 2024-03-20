@@ -76,15 +76,25 @@ runAllMeta_main <- function(filevec, out.dir, opfile) {
     finfo2 <- tmp[["file.info", exact=TRUE]]
     op2    <- tmp[["op", exact=TRUE]]
     fobj   <- tmp[["file.obj", exact=TRUE]]
-    #tmp    <- runMeta(fobj, op2)
-    tmp    <- try(runMeta(fobj, op2), silent=TRUE)
-    err    <- "try-error" %in% class(tmp)
-    if (err) {
-      msg <- getErrorMsgFromTryError(tmp, addToEnd=NULL)
-      msg <- msg_meta_40(c(model, msg))
+    if (!length(fobj)) {
+      msg <- msg_meta_44(getQuotedVarStr(model))
       cat(msg)
-      tmp <- getResListFromError(tmp, model)
+      tmp <- getResListFromError(msg, model)
+    } else {
+      if (DEBUG) { 
+        tmp <- runMeta(fobj, op2)
+      } else {
+        tmp <- try(runMeta(fobj, op2), silent=TRUE)
+      }
+      err <- "try-error" %in% class(tmp)
+      if (err) {
+        msg <- getErrorMsgFromTryError(tmp, addToEnd=NULL)
+        msg <- msg_meta_40(c(model, msg))
+        cat(msg)
+        tmp <- getResListFromError(tmp, model)
+      }
     }
+print(tmp)
     writeObjectToFile(tmp, label, model, op2, dir=out.dir)
   }
   # Delete temp folder
