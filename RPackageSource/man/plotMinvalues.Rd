@@ -2,15 +2,16 @@
 % Please edit documentation in R/plottingfunctions.R
 \name{plotMinvalues}
 \alias{plotMinvalues}
-\title{Plot the distribution of minimum values for each metabolite}
+\title{Plot the distribution of minimum or missing values for each metabolite}
 \usage{
 plotMinvalues(
   cometsdata,
-  title = "Distribution of the Number of Minimum Values",
-  xlabel = "Number of minimum values",
+  title = NULL,
+  xlabel = NULL,
   ylabel = "Frequency",
   xylabelsize = 12,
-  titlesize = 16
+  titlesize = 16,
+  missing = FALSE
 )
 }
 \arguments{
@@ -25,12 +26,14 @@ plotMinvalues(
 \item{xylabelsize}{size of x and y labels (default=8)}
 
 \item{titlesize}{size of title (default, 20)}
+
+\item{missing}{TRUE or FALSE to plot distribution of missing values (default=FALSE)}
 }
 \value{
 a distribution plot
 }
 \description{
-Plot the distribution of minimum values for each metabolite
+Plot the distribution of minimum or missing values for each metabolite
 }
 \examples{
 dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)

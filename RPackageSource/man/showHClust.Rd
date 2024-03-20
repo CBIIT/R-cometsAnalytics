@@ -37,7 +37,7 @@ exmetabdata <- readCOMETSinput(csvfile)
 modeldata <- getModelData(exmetabdata, modelspec="Interactive",
 exposures=c("age","bmi_grp"))
 corrmatrix <-runCorr(modeldata,exmetabdata,"DPP")
-showHClust(corrmatrix)
+#showHClust(corrmatrix)
 }
 \references{
 For colorscale reference: \code{\link[heatmaply]{RColorBrewer_colors}}
