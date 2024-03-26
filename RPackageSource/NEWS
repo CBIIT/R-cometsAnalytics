@@ -10,6 +10,7 @@ NEW FEATURES
     o The ModelSummary table now has a column called "exposure.covariances" containing exposure covariances for categorical exposures and non-correlation models.
     o The function plotMinvalues has been updated to also plot the distribution of missing values in metabolites.
     o A chemical enrichment analysis can be performed using the option "chemEnrich" or calling the  chemClassEnrichment function.
+    o A pathway enrichment analysis can be performed by calling the pathwayEnrichment function.
     o Adjusted p-values have been added to the Effects and ModelSummary tables, see option method.adjP:value.
     o The runModel() function now has a "writeTofile" argument.
     o The options "cohorts.indep" and "cohorts.merge" were added for meta-analyses.
