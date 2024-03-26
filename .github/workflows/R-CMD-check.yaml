@@ -50,24 +50,6 @@ jobs:
           #writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
 
-      - name: Install BiocFileCache
-        if: matrix.config.r == 'release'
-        run: |
-          remotes::install_cran("BiocManager")
-          BiocManager::install("BiocFileCache", version = remotes::bioc_version())
-        shell: Rscript {0}
-
-      - name: Install BiocFileCache devel
-        if: matrix.config.r == 'devel'
-        run: |
-          remotes::install_dev("BiocManager")
-          BiocManager::install("BiocFileCache", version = "devel")
-        shell: Rscript {0}
-        
-      - name: Install RaMP
-        run: |
-          Rscript -e 'remotes::install_github("ncats/RaMP-DB@sqlite")'
-
       - name: Cache R packages
         if: runner.os != 'Windows'
         uses: actions/cache@v2
