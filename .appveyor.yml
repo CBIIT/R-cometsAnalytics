@@ -38,8 +38,6 @@ environment:
     
 
 build_script:
-  - travis-tool.sh install_bioc  BiocFileCache
-  - travis-tool.sh install_github ncats/RaMP-DB@sqlite
   - travis-tool.sh install_deps
   - travis-tool.sh install_r htmltools httpuv evaluate
 
