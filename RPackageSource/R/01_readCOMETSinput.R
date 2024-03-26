@@ -305,7 +305,8 @@ readCOMETSinput <- function(file, mode="Batch") {
     msg <- msg_rci_21()
     cat(msg)
     if (mode == getMode_batch()) {
-      stop(msg)
+      #stop(msg)
+      warning(msg)
     } else {
       warning(msg)
     }

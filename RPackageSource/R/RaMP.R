@@ -6,7 +6,7 @@
 #' @param metabdata Return object from \code{\link{readCOMETSinput}}
 #' @param db.version The RaMP SQLite database version to use.
 #'                   The default is the most recent version.
-#' @param pvalue.adj The maximum BH-adjusted p-value for a metabolite
+#' @param pvalue.adj The maximum adjusted p-value for a metabolite
 #'                   to be included in the analysis.
 #'
 #' @return A data frame
@@ -243,3 +243,117 @@ ramp_setReturn <- function(obj) {
   ret
 
 }
+
+####################################################################################
+####################################################################################
+####################################################################################
+
+#---------------------------------------------------------
+#' Pathway Enrichment
+#'
+#' @param df The "Effects" data frame returned from function \code{\link{runModel}}
+#' @param metabdata Return object from \code{\link{readCOMETSinput}}
+#' @param db.version The RaMP SQLite database version to use.
+#'                   The default is the most recent version.
+#' @param pvalue.adj The maximum adjusted p-value for a metabolite
+#'                   to be included in the analysis.
+#' @param filter.p.type See argument \code{pval_type} in \code{RaMP::FilterFishersResults}.
+#' @param filter.p See argument \code{pval_cutoff} in \code{RaMP::FilterFishersResults}.
+#' @param perc_analyte_overlap See argument \code{perc_analyte_overlap} in
+#'                       \code{RaMP::findCluster}.
+#' @param min_pathway_tocluster See argument \code{min_pathway_tocluster} in
+#'                       \code{RaMP::findCluster}.
+#' @param perc_pathway_overlap See argument \code{perc_pathway_overlap} in
+#'                       \code{RaMP::findCluster}.
+#'
+#' @return A data frame
+#'
+#' @details The \bold{RaMP} R package must be installed prior to calling
+#' this function. An attempt to load RaMP will be done through the 
+#' \code{\link[base]{requireNamespace}} function.
+#'  
+#' The set of all possible metbolite id types are:
+#' LIPIDMAPS, pubchem, hmdb, chemspider, chebi, CAS, wikidata, swisslipids, 
+#' kegg, lipidbank, plantfa, and kegg_glycan.
+#' The \bold{METABOLITES} sheet in the input Excel file will need to have at least
+#' one of the above id types as a column (case-insensitive). If the \bold{METABOLITES} sheet
+#' contains more than one id type, then the metabolite ids passed into 
+#' \code{\link[RaMP]{chemicalClassEnrichment}} depends on the order of the id type
+#' columns. For example, if the \bold{METABOLITES} sheet contains columns HMDB (column F)
+#' and pubchem (column C), then the metbolite ids will taken from the pubchem column and
+#' any missing ids from the pubchem column will be assigned from the HMDB column.
+#'
+#' @examples
+#' dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
+#' csvfile <- file.path(dir, "cometsInputAge.xlsx")
+#' exmetabdata <- readCOMETSinput(csvfile)
+#' modeldata <- getModelData(exmetabdata,exposures="age", modelspec="Interactive",
+#' 	outcomes=c("lactose","lactate"))
+#' obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
+#' # ret <- pathwayEnrichment(obj$Effects, exmetabdata, pvalue.adj=1)
+#' @export
+
+pathwayEnrichment <- function(df, metabdata, db.version=NULL, pvalue.adj=0.05,
+                              filter.p=0.1, filter.p.type="fdr",
+                              perc_analyte_overlap=0.5,
+                              min_pathway_tocluster=2, perc_pathway_overlap=0.5) {
+
+  ramp_checkForRampPackage()
+  ramp_check_DataFrame(df)
+  ramp_check_Metabdata(metabdata) 
+  ramp_check_db.version(db.version)
+  ramp_check_pvalue.adj(pvalue.adj)
+  check.range(filter.p, "filter.p", 0, 1)
+  check.range(perc_analyte_overlap, "perc_analyte_overlap", 0, 1)
+  check.range(perc_pathway_overlap, "perc_pathway_overlap", 0, 1)
+  filter.p.type <- ramp_check_filter.p.type(filter.p.type) 
+  check.integer(min_pathway_tocluster, "min_pathway_tocluster", minvalue=1)
+  op  <- list(db.version=db.version, pvalue.adj=pvalue.adj, DEBUG=0,
+              filter.p=filter.p, filter.p.type=filter.p.type,
+              perc_analyte_overlap=perc_analyte_overlap,
+              min_pathway_tocluster=min_pathway_tocluster, 
+              perc_pathway_overlap=perc_pathway_overlap)
+
+  ret <- ramp_pathwayEnrichment(df, metabdata, op) 
+  
+  ret
+}
+
+ramp_check_filter.p.type <- function(x, nm="filter.p.type") {
+
+  if (!length(x)) x <- "fdr"
+  valid <- c("pval", "fdr", "holm")
+  check.string(x, valid, nm)
+  x
+}
+
+
+ramp_pathwayEnrichment <- function(df, metabdata, op) {
+
+  DEBUG <- op$DEBUG
+ 
+  # Get metabolites of interest
+  rampids <- ramp_getMetabsOfInterest(df, metabdata, op)
+  if (DEBUG) print(sort(rampids))
+  
+  tmp <- op[["db.version", exact=TRUE]]
+  if (!length(tmp) || !nchar(tmp)) {
+    rampDB <- RaMP::RaMP()
+  } else {
+    rampDB <- RaMP::RaMP(tmp)
+  }
+
+  # Call main functions
+  res      <- RaMP::runCombinedFisherTest(db=rampDB, analytes=rampids)
+  filt.res <- RaMP::FilterFishersResults(res, pval_type=op$filter.p.type, 
+                                         pval_cutoff=op$filter.p)
+  clusters <- RaMP::findCluster(db=rampDB, filt.res, 
+                                perc_analyte_overlap=op$perc_analyte_overlap,
+                                min_pathway_tocluster=op$min_pathway_tocluster, 
+                                perc_pathway_overlap=op$perc_pathway_overlap)
+  ret      <- clusters$fishresults
+  ret
+
+} # END: ramp_pathwayEnrichment
+
+

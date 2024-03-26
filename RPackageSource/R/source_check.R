@@ -114,6 +114,24 @@ check.string <- function(obj, valid, parm) {
 } # END: check.string
 
 ##########################################################################
+# integer
+##########################################################################
+
+check.integer <- function(x, nm, minvalue=0) {
+
+  if (length(x) != 1) stop(msg_arg_lenN(c(nm, 1)))
+  if (!is.numeric(x)) stop(msg_arg_notInt(nm))
+  if (x != floor(x)) stop(msg_arg_notInt(nm))
+  if (!is.finite(x)) stop(msg_arg_notInt(nm))
+  if (length(minvalue)) {
+    tmp <- x < minvalue
+    tmp[is.na(tmp)] <- TRUE
+    if (tmp) stop(msg_arg_objNotGEQ(c(nm, minvalue)))
+  }
+  NULL
+}
+
+##########################################################################
 # numeric
 ##########################################################################
 
