@@ -56,6 +56,7 @@ getTable1 <- function(modeldata, op) {
   sFlag <- length(sv)
   if (sFlag) {
     stratvec  <- runModel.getStratVec(modeldata$gdta, sv)
+    stratvec  <- unfactor(stratvec)
     stratlist <- unique(stratvec)
     nstrata   <- length(stratlist)
     if (nstrata > op$max.nstrata) sFlag <- 0
@@ -67,7 +68,7 @@ getTable1 <- function(modeldata, op) {
     sv        <- "SV"
   }
   sv2 <- paste0(sv, collapse=" ")
-  
+
   # Return column names 
   tmp      <- getTable1ColNames()
   sVar.v   <- tmp$sVar.v
@@ -93,6 +94,7 @@ getTable1 <- function(modeldata, op) {
     yeq0   <- data[, yv, drop=TRUE] %in% 0 
     yeq1   <- data[, yv, drop=TRUE] %in% 1
     #stratS <- table1_getStratStr(sv, strata)
+
     for (i in 1:tot) {
       var     <- allvars[i]
       mtype   <- allmtypes[i]
@@ -139,6 +141,7 @@ getTable1 <- function(modeldata, op) {
       }
     }
   }
+
   ret <- as.data.frame(ret[1:row, , drop=FALSE], stringsAsFactors=FALSE)
   for (v in numvars) ret[, v] <- as.numeric(ret[, v])
   rem <- NULL
