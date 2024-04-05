@@ -52,6 +52,12 @@ msg_rci_24              <- function(x) paste0("ERROR: categorical variable '", x
 msg_rci_25              <- function(x) paste0("Possible problem with the ", getVarMapVarDefCol(),
                                               " of the ", getVarMapSheetName(), 
                                               " for variable ", x[1], "\n")
+msg_rci_26              <- function(x) paste0("WARNING: the ", getMetabSheetName(), 
+                            " sheet contains ", x[1], " metabolites not found in the ",
+                            getSubMetabSheetName(),  " sheet", "\n")
+msg_rci_27              <- function(x) paste0("WARNING: the ", getSubMetabSheetName(), 
+                            " sheet contains ", x[1], " metabolites not found in the ",
+                            getMetabSheetName(), " sheet", "\n")
 
 
 msg_res_1               <- function(x) paste0("ERROR: the input Excel file is missing the ", x, " sheet.\n")

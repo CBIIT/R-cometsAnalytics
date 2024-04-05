@@ -370,7 +370,8 @@ infile.checkSheets <- function(dta.metab,dta.smetab, dta.sdata,dta.vmap,dta.mode
   # Get the metabolite variables that are included in the models
   metabs   <- infile.getModelVars(dta.models, dta.op, inc=dict2) 
   err      <- err + infile.checkMetabolitesSheet(dta.metab, metab.id)
-  err      <- err + infile.checkSubMetabSheet(dta.smetab, sub.id.new, sub.id, metabs=dict2) 
+  err      <- err + infile.checkSubMetabSheet(dta.smetab, sub.id.new, sub.id, 
+                                              dta.metab, metab.id, metabs=dict2) 
   err      <- err + infile.checkSubDataSheet(dta.sdata, sub.id, dta.vmap) 
   err      <- err + infile.checkModelsSheet(dta.models, allcols, dta.vmap, metabs, dta.op)
   err      <- err + infile.checkModelOptionsSheet(dta.op, dta.models)
@@ -718,7 +719,7 @@ infile.checkNumericVars <- function(x, vars, sheetName, maxN.error=5, vars.orig=
 
 } # END: infile.checkNumericVars
 
-infile.checkSubMetabSheet <- function(x, idvar, idvar.orig, metabs=NULL) {
+infile.checkSubMetabSheet <- function(x, idvar, idvar.orig, dta.metab, metab.id, metabs=NULL) {
 
   nm  <- getSubMetabSheetName()
   req <- idvar
@@ -744,6 +745,20 @@ infile.checkSubMetabSheet <- function(x, idvar, idvar.orig, metabs=NULL) {
   }
 
   # Check that the metabolites are in the Metabolites sheet
+  if (length(metabs) && nonEmptyDfHasCols(dta.metab, metab.id, allcols=1, ignoreCase=0)) {
+    tmp <- !(metabs %in% dta.metab[, metab.id, drop=TRUE])
+    if (any(tmp)) {
+      miss  <- metabs[tmp]
+      nmiss <- length(miss)
+      cat(msg_rci_27(nmiss))
+    }
+    tmp <- !(dta.metab[, metab.id, drop=TRUE] %in% metabs)
+    if (any(tmp)) {
+      miss  <- dta.metab[tmp, metab.id, drop=TRUE]
+      nmiss <- length(miss)
+      cat(msg_rci_26(nmiss))
+    }
+  }
 
   ret
  

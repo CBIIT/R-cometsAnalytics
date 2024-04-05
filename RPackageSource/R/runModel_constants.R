@@ -169,7 +169,8 @@ getOptionsSheetName      <- function() {"Model_Types"}
 getGlobalMissValName     <- function() {"MissingValues"}
 getGlobalOptionName      <- function() {c("ModelChecks", "ModelOutput", getGlobalMissValName())}
 getModelFunctionCol      <- function() {"function"}
-getReqSheetNames         <- function() {c(getMetabSheetName(), getSubMetabSheetName(), getSubDataSheetName(), getVarMapSheetName())} 
+getReqSheetNames         <- function() {c(getMetabSheetName(), getSubMetabSheetName(),
+                                          getSubDataSheetName(), getVarMapSheetName())} 
 getReqMetabSheetCols     <- function() {c("metabolite_name")}
 getVarMapVarRefCol       <- function() {"VARREFERENCE"}
 getVarMapCohortVarCol    <- function() {"COHORTVARIABLE"}
@@ -295,7 +296,7 @@ metaModelNameDefault           <- function() {"NA"}
 metaRetListResultsTable        <- function() {"Metaresults"}
 metaRetListDupsTable           <- function() {"Duplicates"}
 metaDupColName                 <- function() {"Duplicate"}
-getHarmMetabIdCol              <- function() {"metabolite_name"}
+#getHarmMetabIdCol              <- function() {"metabolite_name"}
 getMetaBetaCol                 <- function() {"meta.estimate"}
 getMetaBetaSeCol               <- function() {"meta.std.error"}
 getMetaPvalueCol               <- function() {"meta.pvalue"}

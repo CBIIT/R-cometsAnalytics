@@ -15,8 +15,10 @@
 #'
 #' \bold{Metabolites} \cr
 #' A table with the columns \code{METABID}, \code{METABOLITE_NAME}, and possibly other columns \cr
-#'  of information about the metabolites. The \code{METABID} column is used
-#'  for harmonizing the metabolite names across different cohorts when meta-analyses are performed. \cr
+#'  of information about the metabolites. The \code{METABID} column gives the column names of the 
+#'  metabolites in the \bold{SubjectMetabolites} sheet below. Other useful columns are for 
+#'  example, \code{HMDB}, \code{PUBCHEM}, etc that give corresponding metabolite ids
+#'  in that specific metabolite database. \cr
 
 #' \bold{SubjectMetabolites} \cr
 #' A table with the subject ids in the first column and metabolites as the other columns.
