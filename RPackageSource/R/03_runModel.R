@@ -35,6 +35,17 @@
 
 runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE) {
 
+  ret <- try(myrunModel(modeldata, metabdata, cohortLabel=cohortLabel, 
+                        op=op, writeTofile=writeTofile), silent=FALSE)
+  if (("try-error" %in% class(ret)) || !isValidReturnObj(ret)) { 
+    lab <- modeldata[["modlabel", exact=TRUE]]
+    ret <- getResListFromError(ret, lab)
+  }
+  ret
+}
+
+myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE) {
+
   ptm <- base::proc.time() # start processing time
 
   # Error checks
