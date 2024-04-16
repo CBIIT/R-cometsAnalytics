@@ -208,4 +208,3 @@ Temprosa M, Moore SC, Zanetti KA, et al. COMETS Analytics: An Online Tool for An
 
 Yu B, Zanetti KA, Temprosa et al.  The Consortium of Metabolomics Studies (COMETS): Metabolomics in 47 Prospective Cohort Studies. Am J Epidem. 2019 Jun 1;188(6):991-1012.
 
-
