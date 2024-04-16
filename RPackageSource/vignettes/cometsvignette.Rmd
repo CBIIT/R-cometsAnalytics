@@ -74,7 +74,7 @@ RcometsAnalytics::plotMinvalues(exmetabdata,titlesize=12)
 
 To plot the distribution of missing values:
 ```{r, eval=T}
-RcometsAnalytics::plotMinvalues(exmetabdata,titlesize=12,missing=TRUE)
+RcometsAnalytics::plotMinvalues(exmetabdata,titlesize=12)
 ```
 
 ### 2. Get Model Data

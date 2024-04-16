@@ -40,7 +40,9 @@ plotVar <- function(cometsdata,
    return(p)
 } 
 
-#' Plot the distribution of minimum or missing values for each metabolite
+#' Plot the distribution of minimum or missing values for each metabolite.
+#' Minimum or missing values are defined for reach metabolite as those with
+#' the minimum value across all samples.
 #'
 #' @param cometsdata output of readCOMETSinput function
 #' @param title main title for the plot (default is "Distribution of the Number of Minimum Values")
