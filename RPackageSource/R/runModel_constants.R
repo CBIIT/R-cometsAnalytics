@@ -1,7 +1,7 @@
 # Strings that are visible to the end user of RcometsAnalytics. This file makes it easy to
 #   change column names, options, etc.
 
-getVersionNumber     <- function() {"2.9.0.26"}
+getVersionNumber     <- function() {"3.0.0.0"}
 runmodel.getTimeAttr <- function() {"ptime"}
 class_runCorr        <- function() {"runCorr"}
 class_runModel       <- function() {"runModel"}
