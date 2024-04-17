@@ -40,9 +40,10 @@ plotVar <- function(cometsdata,
    return(p)
 } 
 
-#' Plot the distribution of minimum or missing values for each metabolite.
-#' Minimum or missing values are defined for reach metabolite as those with
+#' Plot the distribution of the number of samples with minimum values for each metabolite.
+#' Minimum values are defined for reach metabolite as those with
 #' the minimum value across all samples.
+#' Missing values (e.g. empty cells in the Excel input data) are ignored.
 #'
 #' @param cometsdata output of readCOMETSinput function
 #' @param title main title for the plot (default is "Distribution of the Number of Minimum Values")
@@ -61,7 +62,6 @@ plotVar <- function(cometsdata,
 #' plotMinvalues(exmetabdata)
 #'
 #' @export
-
 plotMinvalues <- function(cometsdata,
                     title = NULL,
                     xlabel = NULL,
@@ -85,48 +85,6 @@ plotMinvalues <- function(cometsdata,
             readCOMETSinput function")
    }
 
-   p <- plot_ly(
-     x=toplot,
-     type="histogram") %>%
-   layout(title=title,titlefont=list(size=titlesize),
-     xaxis = list(title=xlabel,titlefont=list(size=xylabelsize)),
-     yaxis = list(title=ylabel,titlefont=list(size=xylabelsize)),
-     bargap=0.3)
-   return(p)
-}
-
-# Plot the distribution of missing values for each metabolite
-#
-# @param cometsdata output of readCOMETSinput function
-# @param title main title for the plot (default is "Distribution of the Number of Missing Values")
-# @param xlabel x-axis label (default is "Number of missing values")
-# @param ylabel y-axis label (default is "Frequency")
-# @param titlesize size of title (default, 20)
-# @param xylabelsize size of x and y labels (default=8)
-#
-# @return a distribution plot
-#
-# @examples
-# dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
-# csvfile <- file.path(dir, "cometsInputAge.xlsx")
-# exmetabdata <- readCOMETSinput(csvfile)
-# plotMissvalues(exmetabdata)
-#
-# 
-
-plotMissvalues <- function(cometsdata,
-                    title = "Distribution of the Number of Missing Values",
-                    xlabel = "Number of missing values",
-                    ylabel = "Frequency",
-                    xylabelsize = 12,
-                    titlesize=16) {
-
-   if(is.null(cometsdata$metab$num.min)) {
-        stop("The input data is not in the correct format.  Make sure it is the output of the
-            readCOMETSinput function")
-   }
-
-   toplot <- as.character(cometsdata$metab$num.miss)
    p <- plot_ly(
      x=toplot,
      type="histogram") %>%
@@ -236,7 +194,6 @@ showModel <- function(obj, nlines=10) {
 #' showHeatmap(corrmatrix)
 #' }
 #' @export
-
 showHeatmap <- function (ccorrList, strata=NULL,
        rowsortby = "estimate",
        plothgt=700,
