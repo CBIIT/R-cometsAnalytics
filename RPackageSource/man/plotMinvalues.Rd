@@ -2,7 +2,10 @@
 % Please edit documentation in R/plottingfunctions.R
 \name{plotMinvalues}
 \alias{plotMinvalues}
-\title{Plot the distribution of minimum or missing values for each metabolite}
+\title{Plot the distribution of the number of samples with minimum values for each metabolite.
+Minimum values are defined for reach metabolite as those with
+the minimum value across all samples.
+Missing values (e.g. empty cells in the Excel input data) are ignored.}
 \usage{
 plotMinvalues(
   cometsdata,
@@ -33,7 +36,10 @@ plotMinvalues(
 a distribution plot
 }
 \description{
-Plot the distribution of minimum or missing values for each metabolite
+Plot the distribution of the number of samples with minimum values for each metabolite.
+Minimum values are defined for reach metabolite as those with
+the minimum value across all samples.
+Missing values (e.g. empty cells in the Excel input data) are ignored.
 }
 \examples{
 dir <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
