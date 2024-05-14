@@ -1,0 +1,158 @@
+---
+title: "Running meta-analyses with COMETS Analytics locally (using R package)"
+author: "Ewy Mathé, Ella Temprosa, Bill Wheeler"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+  pdf_document:
+    toc: yes
+vignette: |
+  %\VignetteIndexEntry{Running RcometsAnalytics locally} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+#### COMETS Analytics
+The COMETS Analytics R package now supports single cohort and meta-analyses for the COMETS consortium. This collaborative work is done via the COMETS Data Infrastructure interest group activities. For more information, see the COMETS [**website**](http://epi.grants.cancer.gov/comets/).
+
+This vignette demonstrates how to run a meta-analysis using R/Rstudio.  Example datasets are provided within the R package and are leveraged within this vignette.
+The first three steps are similar to steps found in [**this**](https://cbiit.github.io/R-cometsAnalytics/cometsvignette_v3.0.html) vignette for running single cohort analyses locally.
+
+#### Meta-analyses
+A meta-analysis is performed by combining the results from more than one cohort to increase the power of association tests. Each set of cohort results should be from the same underlying model, and each cohort should be independent from all other cohorts, that is, no overlapping subjects between any two cohorts. 
+This package will conduct both fixed-effects and random-effects meta-analyses based on the DerSimonian-Laird method.
+
+The main functions for performing meta-analyses in the COMETS Analytics R package are  *runMeta()* and *runAllMeta()*. Both functions require that the model output from each cohort has been generated using COMETS Analytics functions and saved to a file. The function *meta_calc()* is the core function that performs the meta-analysis calculations.
+
+Further documentation of the RcometsAnalytics R package can be found here
+  [**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf).
+
+#### Data Input Format
+The files input to the main meta-anlysis function *runMeta()* contain the output from the *runModel()* function.
+These files are Excel files with extension .xlsx or R object files with extension .rda. Each file contains the results from a single model run from one of the cohorts.  
+**We recommend that the latest version and same version of the R package is used for meta-analyses**.
+
+## Example Workflow with two cohorts
+Let "cohort_1" and "cohort_2" be the names of the two cohorts (they are named as such in the example datasets provided as part of the R package). For each cohort, we will run the same model using the *runModel()* function, save the model output, and then run a meta-analysis using the *runMeta()* function.
+
+#### 1. Load Data 
+For each cohort, load the cohort's data with the *readCOMETSinput()* function.
+
+```{r}
+# Retrieve the full paths of each input data
+dir   <- system.file("extdata", package="RcometsAnalytics", mustWork=TRUE)
+file1 <- file.path(dir, "cohort_1.xlsx")
+file2 <- file.path(dir, "cohort_2.xlsx")
+
+# Read in and process the input data
+data1 <- RcometsAnalytics::readCOMETSinput(file1)
+data2 <- RcometsAnalytics::readCOMETSinput(file2)
+```
+
+#### 2. Get Model Data
+
+To obtain the model the model data from multiple cohorts, the model must be the same for all cohorts. In this example, the model to be run has age as a continuous exposure variable, all metabolites as the outcome variables, and BMI as a categorical adjustment variable.
+
+```{r}
+modeldata1 <- RcometsAnalytics::getModelData(data1, modelspec="Interactive", 
+                          adjvars="bmi_grp", outcomes=NULL, exposures="age")
+modeldata2 <- RcometsAnalytics::getModelData(data2, modelspec="Interactive", 
+                          adjvars="bmi_grp", outcomes=NULL, exposures="age")
+```
+
+#### 3. Run Same model (Linear Regression) on Cohorts
+
+The *runModel()* function will first be called to obtain the results from each cohort for a linear regression analysis as defined in the previous section. Since the meta-analysis function *runMeta()* requires files for input, the results from *runModel()* will be saved to files.
+
+The output file names follow a specific naming convention as follows:
+<model name>__<cohort name>__<date>.ext, where ext is "xlsx" or "rda". 
+
+This format is designed to facilitate further automation of running meta-anlyses when using the *runAllMeta()* function as shown in section 5.
+
+In this example, we specify the model name as "AgeAdjustedForBMI" and the cohort names as "cohort_1" and "cohort_2".
+
+```{r}
+# Define names of files using convention described above
+outfile1  <- paste0(getwd(), "/COMETStest/", "AgeAdjustedForBMI__cohort_1__", Sys.Date(), ".xlsx")
+outfile2  <- paste0(getwd(), "/COMETStest/", "AgeAdjustedForBMI__cohort_2__", Sys.Date(), ".xlsx")
+
+# Run the individual models with appropriate naming of cohorts:
+results1  <- RcometsAnalytics::runModel(modeldata1, data1, "cohort_1", 
+             op=list(model="lm"))
+results2  <- RcometsAnalytics::runModel(modeldata2, data2, "cohort_2", 
+             op=list(model="lm"))
+
+# Write files locally using filenames defined above.
+output1       <- RcometsAnalytics::OutputListToExcel(outfile1, results1)
+output2       <- RcometsAnalytics::OutputListToExcel(outfile2, results2)
+```
+
+#### 4. Meta Analysis of Results
+
+At this point, we have 2 output files (AgeAdjustedForBMI__cohort_1__2024-05-13.xlsx and AgeAdjustedForBMI__cohort_2__2024-05-13.xlsx).  We can now run the meta-analysis with the *runMeta()* function, and then display the first two rows of the results. 
+
+In this example, a vector of file names is passed to the *runMeta()* function.  Notehowever that a vector of more than 2 file names can be passed in as long as all the outputs relate to the same model and different cohorts.  
+
+The ouput of the runMeta() function includes 3 sections:
+  - Metaresults: meta-analysis results (harmonized metabolite name, exposure, number of cohorts used, estimates and p-values, etc.)
+  - Errors_Warnings: warnings and errors associated with meta-analysis
+  - Info: meta-data related to the meta-anlysis run (e.g. date, R version, package version, model name, cohort names, input files, etc.)
+
+See the *runMeta()* function in the user 
+[**manual**](https://github.com/CBIIT/R-cometsAnalytics/blob/gh-pages/RcometsAnalytics-manual-v3.0.pdf)
+for complete documentation.
+
+```{r}
+mymeta <- RcometsAnalytics::runMeta(c(outfile1, outfile2))
+
+# There are 3 sections for the results files:
+names(mymeta)
+
+# View the first 3 rows of the results 
+head(mymeta$Metaresults, 3)
+```
+
+### Run meta-analyses in "super-batch" mode using runAllMeta()
+
+The *runAllMeta()* function allows users to run meta-analyses in super-batch mode: given a set of input folders with multiple cohort results available, the system will identify models run in multiple cohorts that can be meta-analyzed.
+
+The function takes three arguments:
+1. filesFolders: is a character vector of file names and/or folder names. 
+2. out.dir: output folder to write the results to
+3. opfile: optional file for meta-analysis options. 
+
+The result files "outfile1" and "outfile2" created in section 3 above will be used for this meta-analysis. Instead of passing in the file names, the folder name where these files reside (COMETStest folder in the working directory) will be passed in. The output from *runAllMeta()* will also be written to the working directory.
+
+
+```{r}
+data.dir <- paste0(getwd(),"/COMETStest")
+allmeta_results <- RcometsAnalytics::runAllMeta(data.dir, data.dir)
+```
+
+The output files names created by *runAllMeta()* will be of the form
+\<model name\>\_\_meta\_\_\<date\>.ext. 
+
+```{r}
+res.file <- paste0(getwd(), "/COMETStest/AgeAdjustedForBMI__meta__", Sys.Date(), ".xlsx")
+print(res.file)
+```
+
+We can now double check that the results from the previous meta-analysis (section 4 above) and the table of results we just generated are identical.  
+
+```{r}
+res <- as.data.frame(readxl::read_excel(res.file, "Metaresults"))
+all.equal(allmeta_results$Results, res.file)
+```
+
+We can now clean up the files
+
+```{r}
+file.remove(c(outfile1, outfile2, res.file))
+```
+
+```{r}
+sessionInfo()
+```
