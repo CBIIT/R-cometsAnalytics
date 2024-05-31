@@ -4,9 +4,9 @@
 #' @param cohortLabel cohort label (e.g. DPP, NCI, Shanghai)
 #' @param writeTofile TRUE/FALSE (whether or not to write results for each model into
 #' separate xlsx files). Files are written to current directory. Default is TRUE.
-#' 
+#'
 #' @return A list of return objects from \code{\link{runModel}} or \code{\link{runCorr}}.
-#'       The \code{ith} element in this list is the output from 
+#'       The \code{ith} element in this list is the output from
 #'        the \code{ith} model run.
 #'
 #' @examples
@@ -22,7 +22,7 @@ runAllModels <- function(readData, cohortLabel="", writeTofile=TRUE) {
 
   mymodels  <- readData$mods$model
   mrgStrs   <- rep("", length(mymodels))
-  op        <- runAllModels.getOptions(readData) 
+  op        <- runAllModels.getOptions(readData)
   writeEach <- op[[getOutMergeOpName()]] == getOutMergeOpNone()
   mergeFlag <- runAllModels.getMergeFlag(op) && writeTofile
   results   <- list()
@@ -37,18 +37,18 @@ runAllModels <- function(readData, cohortLabel="", writeTofile=TRUE) {
       if ("try-error" %in% class(mymod)) errFlag <- 1
     } else {
       myobj   <- mymod
-      errFlag <- 1 
+      errFlag <- 1
     }
-    if (mergeFlag) mrgStrs[j] <- runAllModels.getMergeStr(readData, mymod, j, op) 
+    if (mergeFlag) mrgStrs[j] <- runAllModels.getMergeStr(readData, mymod, j, op)
     if (errFlag) {
       msg <- getErrorMsgFromTryError(myobj, addToEnd=NULL)
       msg <- paste0("ERROR: model ", i, " failed with message ", msg, "\n")
       cat(msg)
     }
-    if (errFlag || !isValidReturnObj(myobj)) { 
+    if (errFlag || !isValidReturnObj(myobj)) {
       myobj   <- getResListFromError(myobj, i)
       errFlag <- 0
-    } 
+    }
     if (writeTofile && !errFlag && writeEach) {
       writeObjectToFile(myobj, cohortLabel, i, op)
     } else {
@@ -58,7 +58,7 @@ runAllModels <- function(readData, cohortLabel="", writeTofile=TRUE) {
   if (writeTofile && !writeEach) {
     mergeModelsAndOutput(results, mymodels, mrgStrs, cohortLabel, op)
   }
-
+  writeObjectToFile(readData$metab, "MetaboliteMappings", i, op)
   return(results)
 }
 
@@ -79,7 +79,7 @@ run1Model <- function(mymod, readData, cohortLabel="") {
 
 writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
 
-  out.type <- op[[getOutTypeOpName(), exact=TRUE]] 
+  out.type <- op[[getOutTypeOpName(), exact=TRUE]]
   rdaFlag  <- out.type == getOutTypeOpRda()
   fname    <- getOutFileName(cohortLabel, model, out.type)
   if (!is.null(dir)) fname <- paste0(dir, fname)
@@ -90,7 +90,7 @@ writeObjectToFile <- function(modelResults, cohortLabel, model, op, dir=NULL) {
   }
   NULL
 
-} # END:writeObjectToFile  
+} # END:writeObjectToFile
 
 getModelFuncFromData <- function(readData, model.index) {
 
@@ -98,7 +98,7 @@ getModelFuncFromData <- function(readData, model.index) {
   ret  <- try(getAllOptionsForModel(mods, readData, only.modelFunction=1), silent=FALSE)
   if ("try-error" %in% class(ret)) ret <- "_UNKNOWN_ERROR_"
 
-  ret 
+  ret
 
 } # END: getModelFuncFromData
 
@@ -117,7 +117,7 @@ isValidReturnObj <- function(obj) {
 getResListFromError <- function(obj, model) {
 
   cls <- class(obj)
-  
+
   if ("try-error" %in% class(obj)) {
     msg <- getErrorMsgFromTryError(obj, addToEnd=NULL)
   } else if (isString(obj)) {
@@ -141,7 +141,7 @@ getResListFromError <- function(obj, model) {
   class(ret) <- class_runModel()
   ret
 
-} # END: getResListFromError 
+} # END: getResListFromError
 
 # Function to get output file extension
 getOutExtension <- function(out.type) {
@@ -183,10 +183,10 @@ normOutFileStr <- function(str) {
   ret       <- gsub(searchStr, " ", str)
 
   # Compress multiple blanks
-  ret <- gsub("\\s+", " ", trimws(ret)) 
+  ret <- gsub("\\s+", " ", trimws(ret))
 
   # Replace blank with other char
-  ret <- gsub(" ", getOutfileSpCharSep(), ret) 
+  ret <- gsub(" ", getOutfileSpCharSep(), ret)
 
   ret
 }
@@ -200,9 +200,9 @@ combine2Lists <- function(l1, l2, op) {
     df1 <- l1[[nm,exact=TRUE]]
     df2 <- l2[[nm,exact=TRUE]]
     if (common) {
-      tmp  <- df.rbind.common(df1, df2, doNotRemoveCols=doNotRemoveCols) 
+      tmp  <- df.rbind.common(df1, df2, doNotRemoveCols=doNotRemoveCols)
     } else {
-      tmp  <- df.rbind.all(df1, df2) 
+      tmp  <- df.rbind.all(df1, df2)
     }
     ret[[nm]] <- tmp
   }
@@ -219,12 +219,12 @@ combineListAndDF <- function(lst, df, op) {
   x               <- lst[[ef.nm,exact=TRUE]]
 
   if (common) {
-    tmp  <- df.rbind.common(x, df, doNotRemoveCols=doNotRemoveCols) 
+    tmp  <- df.rbind.common(x, df, doNotRemoveCols=doNotRemoveCols)
   } else {
-    tmp  <- df.rbind.all(x, df) 
+    tmp  <- df.rbind.all(x, df)
   }
   ret[[ef.nm]] <- tmp
-  
+
   ret
 
 } # END: combineListAndDF
@@ -235,11 +235,11 @@ combine2DF <- function(df1, df2, op) {
   common          <- op[[getOutCommonColsOpName(), exact=TRUE]]
   doNotRemoveCols <- op$doNotRemoveCols
   if (common) {
-    ret  <- df.rbind.common(df1, df2, doNotRemoveCols=doNotRemoveCols) 
+    ret  <- df.rbind.common(df1, df2, doNotRemoveCols=doNotRemoveCols)
   } else {
-    ret  <- df.rbind.all(df1, df2) 
+    ret  <- df.rbind.all(df1, df2)
   }
-  
+
   ret
 
 } # END: combine2DF
@@ -278,7 +278,7 @@ combine2ModelObj <- function(obj1, obj2, op) {
     ret        <- combine2DF(obj1, obj2, op)
     class(ret) <- cls1
   }
-  ret 
+  ret
 
 } # END: combine2ModelObj
 
@@ -306,11 +306,11 @@ getAllModelFunctions <- function(reslist) {
   if (!is.list(reslist)) return(NULL)
   ret <- NULL
   for (i in 1:n) {
-    tmp <- getModelFunctionName(reslist[[i]]) 
+    tmp <- getModelFunctionName(reslist[[i]])
     if (length(tmp)) ret <- unique(c(ret, tmp))
   }
   ret
-  
+
 } # END: getAllModelFunctions
 
 updateModelDF <- function(df, model, modelNumber) {
@@ -324,7 +324,7 @@ updateModelDF <- function(df, model, modelNumber) {
   if (nrow(df)) {
     if (!(mv %in% cx)) df[, mv]   <- model
     if (!(mnv %in% cx)) df[, mnv] <- modelNumber
-  } 
+  }
   df
 
 } # END: updateModelDF
@@ -338,7 +338,7 @@ updateModelObj <- function(obj, model, modelNumber) {
   if (any(cls %in% class_runCorr())) {
     ret <- updateModelDF(ret, model, modelNumber)
   } else if (any(cls %in% class_runModel())) {
-    nms <- getAllRetSheetNames() 
+    nms <- getAllRetSheetNames()
     for (nm in nms) {
       tmp <- ret[[nm, exact=TRUE]]
       if (!is.null(tmp)) ret[[nm]] <- updateModelDF(tmp, model, modelNumber)
@@ -375,7 +375,7 @@ mergeByModelFunction <- function(reslist, modelStrings, modelFunctions, func, op
   }
   ret
 
-} # END: mergeByModelFunction 
+} # END: mergeByModelFunction
 
 mergeAllModels <- function(reslist, modelStrings, op) {
 
@@ -406,18 +406,18 @@ mergeModelsAndOutput <- function(reslist, modelStrings, mrgStrs, cohortLabel, op
 
   if (merge == getOutMergeOpAll()) {
     # Merge all results together
-    tmp <- mergeAllModels(reslist, modelStrings, op) 
+    tmp <- mergeAllModels(reslist, modelStrings, op)
     tmp <- runAllModels.orderObjVars(tmp)
     writeObjectToFile(tmp, cohortLabel, getOutMergeAllStr(), op)
   } else {
-    # Merge models by (function or modelspec) and output 
+    # Merge models by (function or modelspec) and output
     for (str in unique(mrgStrs)) {
       tmp <- mergeByModelFunction(reslist, modelStrings, mrgStrs, str, op)
       tmp <- runAllModels.orderObjVars(tmp)
       writeObjectToFile(tmp, cohortLabel, str, op)
     }
   }
- 
+
   NULL
 
 } # END: mergeModelsAndOutput
@@ -425,7 +425,7 @@ mergeModelsAndOutput <- function(reslist, modelStrings, mrgStrs, cohortLabel, op
 runAllModels.getOptions <- function(readData) {
 
   op      <- list()
-  valid   <- c(getOutTypeOpName(), getOutCommonColsOpName(), getOutMergeOpName()) 
+  valid   <- c(getOutTypeOpName(), getOutCommonColsOpName(), getOutMergeOpName())
   default <- list(getOutTypeOpDefault(), getOutCommonColsOpDefault(), getOutMergeOpNone())
   keep    <- c(getEffectsEstSeName(), runModel.getStrataColName(), runModel.getStrataNumColName())
   ret     <- list(doNotRemoveCols=keep)
@@ -436,7 +436,7 @@ runAllModels.getOptions <- function(readData) {
   if (!length(op)) op <- list()
   op      <- default.list(op, valid, default)
   for (nm in valid) ret[[nm]] <- op[[nm]]
-  
+
   # Turn off output.merge option
   ret[[getOutMergeOpName()]] <- getOutMergeOpNone()
 
@@ -478,7 +478,7 @@ runAllModels.orderDfVars <- function(x) {
   m2v <- getModelSummaryModelNumCol()
   s1v <- runModel.getStrataColName()
   s2v <- runModel.getStrataNumColName()
-  
+
   # Let the final columns be s1v, s2v, m2v, m1v
   vv  <- c(s1v, s2v, m2v, m1v)
   tmp <- vv %in% cx
@@ -502,7 +502,7 @@ runAllModels.orderObjVars <- function(obj) {
     sheets <- getAllRetSheetNames()
     for (sheet in sheets) {
       x <- obj[[sheet, exact=TRUE]]
-      x <- runAllModels.orderDfVars(x) 
+      x <- runAllModels.orderDfVars(x)
       if ((sheet == tsheet) && nonEmptyDf(x)) {
         cols <- getTable1ColNames()$cols
         x    <- orderVars(x, cols)
@@ -510,7 +510,7 @@ runAllModels.orderObjVars <- function(obj) {
       obj[[sheet]] <- x
     }
   } else if (class_runCorr() %in% cls) {
-    obj <- runAllModels.orderDfVars(obj) 
+    obj <- runAllModels.orderDfVars(obj)
   }
   obj
 
