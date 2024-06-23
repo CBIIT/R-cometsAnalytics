@@ -260,7 +260,7 @@ and individual output Excel files or correlation results will be written
  in the current directory by default. The function returns a list of objects.
 
 ```{r eval=F}
-allresults <- RcometsAnalytics::runAllModels(exmetabdata,writeTofile=TRUE)
+allresults <- RcometsAnalytics::runAllModels(exmetabdata, writeTofile=TRUE)
 ```
 
 

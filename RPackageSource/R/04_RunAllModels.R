@@ -58,7 +58,7 @@ runAllModels <- function(readData, cohortLabel="", writeTofile=TRUE) {
   if (writeTofile && !writeEach) {
     mergeModelsAndOutput(results, mymodels, mrgStrs, cohortLabel, op)
   }
-  writeObjectToFile(readData$metab, "MetaboliteMappings", NULL, op)
+  writeObjectToFile(readData$metab, "MetaboliteMappings", as.character(j + 1), op)
   return(results)
 }
 
@@ -157,7 +157,7 @@ getOutExtension <- function(out.type) {
 
 # Function to create output file name
 getOutFileName <- function(cohortLabel, model, out.type) {
-
+  if (cohortLabel == "") cohortLabel <- "Cohort"
   if (!length(cohortLabel)) cohortLabel <- "NA"
   cohortLabel <- trimws(cohortLabel)
   if (!nchar(cohortLabel)) cohortLabel <- "NA"
@@ -177,7 +177,6 @@ getOutFileName <- function(cohortLabel, model, out.type) {
 } # END: getOutFileName
 
 normOutFileStr <- function(str) {
-
   # Replace non-alphanumeric chars with a blank space
   searchStr <- "[^[:alnum:]._-]"
   ret       <- gsub(searchStr, " ", str)
