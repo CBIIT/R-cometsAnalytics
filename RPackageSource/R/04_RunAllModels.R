@@ -59,7 +59,7 @@ runAllModels <- function(readData, cohortLabel="", writeTofile=TRUE) {
     mergeModelsAndOutput(results, mymodels, mrgStrs, cohortLabel, op)
   }
 #  writeObjectToFile(readData$metab, "MetaboliteMappings", as.character(j + 1), op)
-   writeObjectToFile(readData$metab, "", "MetaboliteMappings", op)
+   writeObjectToFile(readData$metab, cohortLabel, "MetaboliteMappings", op)
   return(results)
 }
 
