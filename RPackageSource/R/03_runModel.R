@@ -68,7 +68,7 @@ myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofil
   ret       <- runModel.checkRetlist(ret, op) 
   ret       <- runModel.addMetabCols(ret, metabdata, op)
   ret       <- runModel.getTable1(ret, modeldata, op) 
-  ret       <- runModel.getInfoDF(ret, modeldata, metabdata, op) 
+  ret <- runModel.getInfoDF(ret, modeldata, metabdata, op)
   ret       <- runModel.dupMetabHarmIds(ret, metabdata, op)
 
   # Stop the clock
@@ -87,7 +87,7 @@ myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofil
 runModel.dupMetabHarmIds <- function(ret, metabdata, op) {
 
   ids <- metabdata[[dupMetabHarmIds(), exact=TRUE]]
-  if (!length(ids)) return(ret)
+  if (!length(na.omit(ids))) return(ret)
   idstr     <- paste0(ids, collapse=", ")
   nm        <- runModel.getWarningsListName()
   obj       <- ret[[nm, exact=TRUE]]
