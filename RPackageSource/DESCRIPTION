@@ -13,12 +13,12 @@ Description: This R package support all cohort-specific analyses of the COMETS
     reflects the number of major revision and 4th level for bug fixes.
 Depends: R (>= 3.5.0)
 Imports: readxl, rio, dplyr, plyr, plotly, tidyr, heatmaply, stringr,
-        data.table, caret, subselect, broom, psych, MASS, ppcor,
+        data.table, caret, broom, psych, MASS, ppcor,
         survival
 Suggests: Hmisc, knitr, testthat, rmarkdown, RaMP
 VignetteBuilder: knitr
 License: GPL-3
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 NeedsCompilation: no
 URL: http://comets-analytics.org/
 BugReports: https://github.com/CBIIT/nci-webtools-comets-analytics/issues
