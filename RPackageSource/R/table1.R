@@ -1,7 +1,6 @@
-runModel.getTable1 <- function(ret, modeldata, op) {
-
+runModel.getTable1 <- function(ret, modeldata, op, all_vars) {
   if (!is.list(ret)) return(ret)
-  tab1 <- try(getTable1(modeldata, op), silent=TRUE)
+  tab1 <- try(getTable1(modeldata, op, all_vars), silent=TRUE)
   if (!("try-error" %in% class(tab1))) {
     ret[[getTable1DfName()]] <- tab1
   }
@@ -25,11 +24,20 @@ getTable1ColNames <- function() {
        ov0=ov0, ov1=ov1)
 }
 
-getTable1 <- function(modeldata, op) {
-
+getTable1 <- function(modeldata, op, all_vars) {
   modeldata <- table1_getVars(modeldata)
-  vars      <- c("rcovs", "ccovs", "acovs", 
-                 "timecov", "groupcov", "wgtcov", "offcov")
+  if (all_vars) {
+    modeldata$all_vars <- modeldata$all_vars[!grepl("\\.\\.\\.", modeldata$all_vars)]
+    vars <- c(
+      "rcovs", "all_vars", "acovs",
+      "timecov", "groupcov", "wgtcov", "offcov"
+    )
+  } else {
+    vars <- c(
+      "rcovs", "ccovs", "acovs",
+      "timecov", "groupcov", "wgtcov", "offcov"
+    )
+  }
   nms       <- c("outcome", "exposure", "adjustment", 
                  "time", "group", "weight", "offset")
   yv        <- modeldata[["rcovs", exact=TRUE]]
@@ -89,14 +97,18 @@ getTable1 <- function(modeldata, op) {
   row <- 0
   for (strat in 1:nstrata) {
     strata <- stratlist[strat]
-    tmp    <- stratvec %in% strata
-    data   <- (modeldata$gdta)[tmp, , drop=FALSE] 
+    tmp <- stratvec %in% strata
+    if (all_vars) {
+      data <- modeldata$all_data[tmp, , drop = FALSE]
+    } else {
+      data <- (modeldata$gdta)[tmp, , drop=FALSE] 
+    }
     yeq0   <- data[, yv, drop=TRUE] %in% 0 
     yeq1   <- data[, yv, drop=TRUE] %in% 1
     #stratS <- table1_getStratStr(sv, strata)
 
     for (i in 1:tot) {
-      var     <- allvars[i]
+      var <- allvars[i]
       mtype   <- allmtypes[i]
       catvec  <- rep("", ncatCols)
       contvec <- rep(NA, ncontCols)

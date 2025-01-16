@@ -33,10 +33,10 @@
 #' obj <- runModel(modeldata,exmetabdata, cohortLabel="DPP")
 #' @export
 
-runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE) {
+runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE, all_vars=FALSE) {
 
   ret <- try(myrunModel(modeldata, metabdata, cohortLabel=cohortLabel, 
-                        op=op, writeTofile=writeTofile), silent=FALSE)
+                        op=op, writeTofile=writeTofile, all_vars=all_vars), silent=FALSE)
   if (("try-error" %in% class(ret)) || !isValidReturnObj(ret)) { 
     lab <- modeldata[["modlabel", exact=TRUE]]
     ret <- getResListFromError(ret, lab)
@@ -44,7 +44,7 @@ runModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=
   ret
 }
 
-myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE) {
+myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofile=FALSE, all_vars=FALSE) {
 
   ptm <- base::proc.time() # start processing time
 
@@ -66,8 +66,8 @@ myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofil
 
   ret       <- runModel.start(modeldata, metabdata, op)
   ret       <- runModel.checkRetlist(ret, op) 
-  ret       <- runModel.addMetabCols(ret, metabdata, op)
-  ret       <- runModel.getTable1(ret, modeldata, op) 
+  ret <- runModel.addMetabCols(ret, metabdata, op)
+  ret       <- runModel.getTable1(ret, modeldata, op, all_vars) 
   ret       <- runModel.getInfoDF(ret, modeldata, metabdata, op) 
   ret       <- runModel.dupMetabHarmIds(ret, metabdata, op)
 
