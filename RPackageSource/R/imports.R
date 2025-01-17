@@ -16,7 +16,6 @@
 #' @importFrom broom glance tidy
 #' @importFrom stats cor
 #' @importFrom MASS ginv
-#' @importFrom subselect trim.matrix
 #' @importFrom survival coxph Surv clogit strata
 #' @importFrom stringr str_locate
 #' @importFrom utils sessionInfo untar unzip read.table

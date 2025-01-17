@@ -87,7 +87,7 @@ myrunModel <- function(modeldata, metabdata, cohortLabel="", op=NULL, writeTofil
 runModel.dupMetabHarmIds <- function(ret, metabdata, op) {
 
   ids <- metabdata[[dupMetabHarmIds(), exact=TRUE]]
-  if (!length(ids)) return(ret)
+  if (!length(na.omit(ids))) return(ret)
   idstr     <- paste0(ids, collapse=", ")
   nm        <- runModel.getWarningsListName()
   obj       <- ret[[nm, exact=TRUE]]
