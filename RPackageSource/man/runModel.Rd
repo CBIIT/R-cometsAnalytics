@@ -9,7 +9,8 @@ runModel(
   metabdata,
   cohortLabel = "",
   op = NULL,
-  writeTofile = FALSE
+  writeTofile = FALSE,
+  all_vars = FALSE
 )
 }
 \arguments{
