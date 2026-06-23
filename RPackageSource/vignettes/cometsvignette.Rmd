@@ -131,7 +131,7 @@ This diplay requires at least 2 rows and 2 columns in the correlation matrix.
 
 ```{r, eval=T}
 exmodeldata<-RcometsAnalytics::getModelData(exmetabdata,modelspec = "Interactive",exposures = c("bmi_grp","age"))
-excorrdata  <- RcometsAnalytics::runModel(exmodeldata,exmetabdata,"DPP")
+excorrdata  <- RcometsAnalytics::runModel(exmodeldata,exmetabdata,"DPP", all_vars = FALSE)
 RcometsAnalytics::showHClust(excorrdata, showticklabels=FALSE)
 ```
 

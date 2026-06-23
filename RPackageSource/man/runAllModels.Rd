@@ -17,7 +17,7 @@ separate xlsx files). Files are written to current directory. Default is TRUE.}
 }
 \value{
 A list of return objects from \code{\link{runModel}} or \code{\link{runCorr}}.
-      The \code{ith} element in this list is the output from 
+      The \code{ith} element in this list is the output from
        the \code{ith} model run.
 }
 \description{

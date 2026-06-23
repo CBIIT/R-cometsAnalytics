@@ -64,7 +64,7 @@ getModelData <-  function(readData,
                           offvar       = NULL,
                           timevar      = NULL,
                           groupvar     = NULL,
-			  where        = NULL,
+                          where        = NULL,
                           exposurerefs = NULL) {
 
   rowvars   <- outcomes
@@ -283,6 +283,10 @@ getModelData <-  function(readData,
   if (!is.null(acovs)) covlist <- c(covlist, acovs)
   if (!is.null(scovs)) covlist <- c(covlist, scovs)
   covlist <- c(covlist, wgtcov, offcov, timecov, groupcov)
+  
+  # Store all variables before subsetting
+  all_vars <- colnames(readData$subjdata)
+  
   varMap  <- NULL
   if (length(wgtvar) || length(offvar)) {
     varMap        <- c(wgtvar, offvar)
@@ -360,7 +364,9 @@ getModelData <-  function(readData,
   allvsall        = allvsall,
   varMap          = varMap,
   options         = options,
-  exposurerefs    = exposurerefs
+  exposurerefs    = exposurerefs,
+  all_vars        = all_vars,
+  all_data        = readData$subjdata
   )
 
   ret[[runModel.getWarningsListName()]] <- rem.obj

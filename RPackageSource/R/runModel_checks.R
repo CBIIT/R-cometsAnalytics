@@ -110,7 +110,7 @@ runModel.checkDesignMatCols <- function(dmat, op, rem.obj=NULL, varMap=NULL,
   # check for ill conditioned square matrix for cor 
   if ((ncol(dmat) > 2) && (op$check.illCond)) {
     if (is.null(corMat)) corMat <- stats::cor(dmat[, -1, drop=FALSE], method=method)
-    rem <- subselect::trim.matrix(corMat)
+    rem <- trim.matrix(corMat)
     rem <- rem$names.discarded
     if (length(rem)) {
       rem.obj <- runModel.addRemVars(rem.obj, rem, varSet, "ill conditioned",

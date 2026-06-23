@@ -76,7 +76,7 @@
 #'             are removed by computing the correlation matrix 
 #'             \code{cor_matrix = cor(design_matrix, method=check.cor.method)}. \cr
 #'          4. If \code{check.illCond} is TRUE, then the function
-#'          \code{subselect::trim.matrix} is applied 
+#'          \code{trim.matrix} is applied 
 #'             to the correlation matrix to determine if additional
 #'             columns will be removed. \cr \cr
 #' If \code{check.design} is TRUE, then steps 2-4 are repeated each time an exposure
