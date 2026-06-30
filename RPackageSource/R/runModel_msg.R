@@ -31,6 +31,10 @@ runmodel.addWarning <- function(obj, newList) {
   if (is.null(obj)) {
     obj <- new
   } else {
+    if (!all(names(obj) %in% names(new))) {
+      obj[setdiff(names(new), names(obj))] <- NA
+      new[setdiff(names(obj), names(new))] <- NA
+    }
     obj <- rbind(obj, new)
   }
 
@@ -54,7 +58,7 @@ runModel.addRemVars <- function(obj, vars, type, reason, printWarning=1, varMap=
   obj       <- runmodel.addWarning(obj, tmp)
 
   if (printWarning) {
-    str <- paste(vars, collapse=", ", sep="") 
+    str <- paste(vars, collapse=", ", sep="")
     msg <- msg_mod_16(c(str, type, reason))
     warning(msg)
   }
@@ -90,7 +94,7 @@ getErrorMsgFromTryError <- function(obj, addToEnd=NULL) {
     msg <- attr(obj, "condition")
     ret <- msg[["message", exact=TRUE]]
   }
-  if (length(addToEnd) && length(ret)) ret <- paste0(ret, addToEnd) 
+  if (length(addToEnd) && length(ret)) ret <- paste0(ret, addToEnd)
 
   ret
 
@@ -115,7 +119,7 @@ runModel.getVarsRemoved <- function(rem.obj, type="adjvars") {
   str <- paste(type, ":", sep="")
   tmp <- grepl(str, rem.obj[, col], fixed=TRUE)
   if (any(tmp)) ret <- unique(rem.obj[tmp, runModel.getObjectCol(), drop=TRUE])
-  
+
   ret
 
 } # END: runModel.getVarsRemoved
