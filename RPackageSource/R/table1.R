@@ -38,7 +38,7 @@ getTable1 <- function(modeldata, op, all_vars) {
       "timecov", "groupcov", "wgtcov", "offcov"
     )
   }
-  nms       <- c("outcome", "exposure", "adjustment", 
+  nms       <- c("outcome", "exposure", "adjustment",
                  "time", "group", "weight", "offset")
   yv        <- modeldata[["rcovs", exact=TRUE]]
   sv        <- modeldata[["scovs", exact=TRUE]]
@@ -55,11 +55,11 @@ getTable1 <- function(modeldata, op, all_vars) {
     m     <- length(tmp)
     if (m) {
       allvars   <- c(allvars, tmp)
-      allmtypes <- c(allmtypes, rep(mtype, m))   
+      allmtypes <- c(allmtypes, rep(mtype, m))
     }
   }
   tot     <- length(allvars)
- 
+
   # Determine if stratified
   sFlag <- length(sv)
   if (sFlag) {
@@ -77,7 +77,7 @@ getTable1 <- function(modeldata, op, all_vars) {
   }
   sv2 <- paste0(sv, collapse=" ")
 
-  # Return column names 
+  # Return column names
   tmp      <- getTable1ColNames()
   sVar.v   <- tmp$sVar.v
   sNum.v   <- tmp$sNum.v
@@ -101,9 +101,9 @@ getTable1 <- function(modeldata, op, all_vars) {
     if (all_vars) {
       data <- modeldata$all_data[tmp, , drop = FALSE]
     } else {
-      data <- (modeldata$gdta)[tmp, , drop=FALSE] 
+      data <- (modeldata$gdta)[tmp, , drop=FALSE]
     }
-    yeq0   <- data[, yv, drop=TRUE] %in% 0 
+    yeq0   <- data[, yv, drop=TRUE] %in% 0
     yeq1   <- data[, yv, drop=TRUE] %in% 1
     #stratS <- table1_getStratStr(sv, strata)
 
@@ -113,6 +113,7 @@ getTable1 <- function(modeldata, op, all_vars) {
       catvec  <- rep("", ncatCols)
       contvec <- rep(NA, ncontCols)
       vec     <- data[, var, drop=TRUE]
+      if (isBinaryVar(data, var) & nrow(data) > 2) { vec <- as.factor(vec) }
       if ("numeric" %in% class(vec)) {
         type     <- "continuous"
         contFlag <- 1
@@ -123,20 +124,20 @@ getTable1 <- function(modeldata, op, all_vars) {
         ncatVar  <- ncatVar + 1
       }
       if (contFlag) {
-        contvec    <- table1_getContVec(vec)   
+        contvec    <- table1_getContVec(vec)
         tmp        <- is.finite(vec)
         N          <- sum(tmp)
-        N.unq      <- length(unique(vec[tmp])) 
+        N.unq      <- length(unique(vec[tmp]))
         N.0        <- sum(yeq0 & tmp)
         N.1        <- sum(yeq1 & tmp)
         row        <- row + 1
         tmp        <- c(sv2, strata, var, mtype, type, catvec, N, N.0, N.1, N.unq, contvec)
         ret[row, ] <- tmp
-        if (row == nrow(ret)) ret <- rbind(ret, ret) 
+        if (row == nrow(ret)) ret <- rbind(ret, ret)
       } else {
         # Loop over each category
         cats  <- sort(unique(vec))
-        ncats <- length(cats) 
+        ncats <- length(cats)
         for (j in 1:ncats) {
           cat        <- cats[j]
           tmp        <- vec %in% cat
@@ -148,7 +149,7 @@ getTable1 <- function(modeldata, op, all_vars) {
           tmp        <- c(sv2, strata, var, mtype, type, cat, N, N.0, N.1, N.unq, contvec)
           if (j > 1) tmp[3:5] <- ""
           ret[row, ] <- tmp
-          if (row == nrow(ret)) ret <- rbind(ret, ret) 
+          if (row == nrow(ret)) ret <- rbind(ret, ret)
         }
       }
     }
@@ -165,7 +166,7 @@ getTable1 <- function(modeldata, op, all_vars) {
     cx  <- colnames(ret)
     tmp <- !(cx %in% rem)
     cx  <- cx[tmp]
-    if (length(cx)) ret <- ret[, cx, drop=FALSE] 
+    if (length(cx)) ret <- ret[, cx, drop=FALSE]
   }
   ret
 }
@@ -177,7 +178,7 @@ table1_getStratStr <- function(sv, strat) {
   vec   <- trimws(unlist(strsplit(strat, " ", fixed=TRUE)))
   tmp   <- !(vec %in% c("", "NA", NA))
   vec   <- vec[tmp]
-  if (length(vec) != nsv) vec <- rep("", nsv) 
+  if (length(vec) != nsv) vec <- rep("", nsv)
   ret <- paste(sv, vec, sep="=")
   ret <- paste0(ret, collapse=", ")
   ret
@@ -211,7 +212,7 @@ table1_getVars <- function(modeldata) {
       tmp      <- !(obj %in% metabs)
       obj      <- obj[tmp]
       ret[[v]] <- obj
-    }  
+    }
   }
   ret
 }
@@ -222,7 +223,7 @@ isBinaryVar <- function(data, v, exclude.miss=1) {
   vec <- data[, v, drop=TRUE]
   if (exclude.miss) vec <- vec[is.finite(vec)]
   if (!length(ret)) return(FALSE)
-  if (all(vec %in% 0:1)) ret <- TRUE  
+  if (all(vec %in% 0:1)) ret <- TRUE
 
   ret
 }
